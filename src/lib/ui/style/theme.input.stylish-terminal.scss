@@ -1,0 +1,79 @@
+@use '$lib/ui/style/effects.scss' as *;
+@import '$lib/ui/style/tokens.color.css';
+// @use '$lib/ui/style/theme.form.stylish-terminal.scss' as *;
+
+@mixin input {
+    input-combo {
+        margin-block: 1px;
+        display: inline-block;
+        position: relative;
+
+        padding-left: var(--padding-1);
+
+        &::before {
+            position: absolute;
+            left: 0;
+            content: "";
+            inset-block: 0;            // top: 0; bottom: 0;
+            inset-inline-start: 0;     // left: 0;
+            width: 0;
+            border-left: var(--border-thick) solid var(--cl-primary);
+        }
+
+        &:has(input:required:invalid) {
+            & > label::after,
+            &::before {
+                --animation-glow-color: var(--cl-primary);
+                @include glow-text;
+            }
+        }
+    }
+
+    label {
+        // color: var(--cl-primary);
+
+        &::after {
+            content: ':';
+            color: var(--cl-primary);
+        }
+    }
+
+    input {
+        width: 16rem;
+
+        padding-inline: var(--_box-padding);
+        border-color: var(--cl-primary);
+        border: none;
+
+        & {
+            @include animate-padding();
+            --_animate-padding-delta: 0rem;
+            --_animate-padding-base: var(--_box-padding);
+            font-weight: 400;
+        }
+
+        &, &:focus, &:hover {
+            color: var(--cl-on-surface);
+
+            transition-property: font-weight, padding, box-shadow, border-color;
+            transition-duration: .2s;
+            transition-timing-function: ease-out;
+        }
+    
+        &:focus {
+            --_animate-padding-delta: .25rem;
+            
+            font-weight: 900;
+            border-color: var(--cl-primary-brighter);
+        }
+    
+        &::placeholder {
+            transition: opacity 0.2s ease-out;
+
+            font-style: italic;
+            font-weight: normal;
+            color: var(--cl-primary-dimmer);
+            opacity: 0.4;
+        }
+    }
+}

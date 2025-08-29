@@ -1,0 +1,20 @@
+@mixin ly-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@mixin ly-full-screen {
+    height: 100vh;
+    width: 100vw;
+}
+
+:global {
+    .ly-full-screen {
+        @include ly-full-screen;
+    }
+
+    .ly-center {
+        @include ly-center;
+    }
+}

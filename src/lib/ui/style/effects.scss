@@ -1,0 +1,48 @@
+@mixin animate-padding {
+	// --_animate-padding-delta: 0.25rem;
+	// --_animate-padding-base: var(--padding-1);
+	// transition: padding 0.2s ease-out;
+
+	padding-left: calc(var(--_animate-padding-base) + var(--_animate-padding-delta));
+	padding-right: calc(var(--_animate-padding-base) - var(--_animate-padding-delta));
+}
+
+.animate-padding {
+	@include animate-padding;
+}
+
+/* glow-text.scss */
+
+/* 1) Mixin (keeps CSS variables; tweak timing via params if you want) */
+@mixin glow-text() {
+	/* CSS custom properties (stay overrideable _in theme) */
+	--_animation-glow-color: var(--animation-glow-color, var(--accent, red));
+	--_animation-glow-color-highlight: hsl(from var(--_animation-glow-color) h s calc(l + 20));
+	--_animation-glow-color-rgb: from var(--_animation-glow-color) r g b;
+	--_animation-glow-color-highlight-rgb: from var(--_animation-glow-color-highlight) r g b;
+
+	animation: animation-glow-text 0.5s linear infinite alternate;
+}
+
+/* 2) Class that just includes the mixin */
+.glow-text {
+	@include glow-text();
+}
+
+/* 3) Keyframes (name must match $name). 
+   If you're inside a Svelte component's <style lang="scss">, wrap this in :global { ... } */
+@keyframes animation-glow-text {
+	0% {
+		filter: drop-shadow(0 0 2px rgb(var(--_animation-glow-color-rgb) / 0.7))
+			drop-shadow(0 0 2px rgb(var(--_animation-glow-color-rgb) / 0.6))
+			drop-shadow(0 0 4px rgb(var(--_animation-glow-color-rgb) / 0.5));
+		color: var(--_animation-glow-color);
+	}
+	100% {
+		filter: drop-shadow(0 0 2px rgb(var(--_animation-glow-color-rgb) / 0.9))
+			drop-shadow(0 0 2px rgb(var(--_animation-glow-color-rgb) / 0.8))
+			drop-shadow(0 0 4px rgb(var(--_animation-glow-color-rgb) / 0.7))
+			drop-shadow(0 0 10px rgb(var(--_animation-glow-color-rgb) / 0.7)) saturate(1.4);
+		color: var(--_animation-glow-color-highlight);
+	}
+}

@@ -1,0 +1,27 @@
+:root {
+    /* Palette */
+    --color-1: oklch(0.7072 0.16803 156.07);
+    /* --color-1: oklch(70.72% 0.16803 242.065); */
+    --color-1-values: from var(--color-1) l c h;
+    --color-2: oklch(98.112% 0.00938 286.056);
+    --color-3: oklch(0% 0 0);
+
+    --color-3-brighter: oklch(from var(--color-3) calc(l + 0.18) c h);
+
+    /* Semantic Palette */
+    --accent: var(--color-1);
+    --fg: var(--color-2);
+    --bg: var(--color-3);
+
+    /* Color System */
+    --cl-primary: var(--color-1);
+    --cl-on-primary: var(--color-2);
+    --cl-primary-dimmer: oklch(from var(--cl-primary) calc(l - 0.15) c h);
+    --cl-primary-brighter: oklch(from var(--cl-primary) calc(l + 0.15) c h);
+
+    --cl-surface: var(--color-3);
+    --cl-on-surface: var(--color-2);
+
+    --cl-background: var(--color-3);
+    --cl-on-background: var(--color-2);
+}

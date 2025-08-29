@@ -1,0 +1,10 @@
+:global {
+    :root {
+        --border-thin: 1px;
+        --border-thick: 2px;
+        --box-border: var(--border-thick);
+
+        --border-shadow-radius: 6px;
+        --border-shadow-radius-inset: 3px;
+    }
+}
