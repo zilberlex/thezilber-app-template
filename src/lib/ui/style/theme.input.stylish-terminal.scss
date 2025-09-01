@@ -1,11 +1,11 @@
 @use '$lib/ui/style/effects.scss' as *;
+@use '$lib/ui/style/utility.color.scss' as *;
 @import '$lib/ui/style/tokens.color.css';
-// @use '$lib/ui/style/theme.form.stylish-terminal.scss' as *;
 
 @mixin input {
     input-combo {
         margin-block: 1px;
-        display: inline-block;
+        display: inline-flex;
         position: relative;
 
         padding-left: var(--padding-1);
@@ -21,7 +21,7 @@
         }
 
         &:has(input:required:invalid) {
-            & > label::after,
+            & > label .suffix,
             &::before {
                 --animation-glow-color: var(--cl-primary);
                 @include glow-text;
@@ -30,19 +30,21 @@
     }
 
     label {
-        // color: var(--cl-primary);
-
-        &::after {
-            content: ':';
+        flex: 0 0 auto;
+        
+        & .suffix {
+            @include ul-txt-primary;
             color: var(--cl-primary);
         }
     }
 
     input {
-        width: 16rem;
+        flex: 1 1 auto; /* fill remaining space */
+	    min-width: 0;  
 
         padding-inline: var(--_box-padding);
         border-color: var(--cl-primary);
+
         border: none;
 
         & {
@@ -73,7 +75,11 @@
             font-style: italic;
             font-weight: normal;
             color: var(--cl-primary-dimmer);
-            opacity: 0.4;
+            transition: color 0.2s ease-out;
+        }
+
+        &:focus::placeholder {
+            color: var(--cl-primary-dimmest);
         }
     }
 }

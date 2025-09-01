@@ -1,0 +1,12 @@
+@mixin ul-highlight {
+    background-color: var(--color-2);
+    color: var(--color-1);
+}
+
+@mixin ul-txt-primary {
+    color: var(--cl-primary);
+
+    &::selection {
+        background-color: var(--cl-on-primary);
+    }
+}

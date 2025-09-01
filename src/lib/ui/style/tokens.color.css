@@ -6,6 +6,8 @@
     --color-2: oklch(98.112% 0.00938 286.056);
     --color-3: oklch(0% 0 0);
 
+    --color-1-dim: oklch(from var(--color-3) calc(l - 0.18) c h);
+    --color-1-dimmer: oklch(from var(--color-3) calc(l - 0.36) c h);
     --color-3-brighter: oklch(from var(--color-3) calc(l + 0.18) c h);
 
     /* Semantic Palette */
@@ -15,8 +17,14 @@
 
     /* Color System */
     --cl-primary: var(--color-1);
+
+    --cl-primary: var(--color-1);
+
     --cl-on-primary: var(--color-2);
-    --cl-primary-dimmer: oklch(from var(--cl-primary) calc(l - 0.15) c h);
+    --cl-primary-dim: oklch(from var(--cl-primary) calc(l - 0.15) c h);
+    --cl-primary-dimmer: oklch(from var(--cl-primary) calc(l - 0.4) c h);
+    --cl-primary-dimmest: oklch(from var(--cl-primary) calc(l - 0.5) c h);
+
     --cl-primary-brighter: oklch(from var(--cl-primary) calc(l + 0.15) c h);
 
     --cl-surface: var(--color-3);

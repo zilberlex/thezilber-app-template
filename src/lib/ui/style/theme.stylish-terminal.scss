@@ -1,5 +1,6 @@
 @use '$lib/ui/style/effects.scss' as *;
 @use '$lib/ui/style/theme.input.stylish-terminal.scss' as *;
+@use '$lib/ui/style/utility.color.scss' as *;
 @import '$lib/ui/style/tokens.color.css';
 @import '$lib/ui/style/tokens.typography.css';
 @import '$lib/ui/style/tokens.layout.css';
@@ -20,11 +21,6 @@
         &::selection {
             background-color: var(--cl-primary);
         }
-    }
-    
-    @mixin ul-highlight {
-        background-color: var(--color-2);
-        color: var(--color-1);
     }
     
     .ul-highlight {
@@ -50,12 +46,16 @@
     .box {
         @include box;
     }
+
+    .ul-txt-primary {
+        @include ul-txt-primary;
+    }
     
     @mixin box-highlight {
         opacity: 1;
         
-        --_box-shadow: 0px 0px var(--border-shadow-radius) var(--cl-primary-dimmer),
-                       inset 0px 0px var(--border-shadow-radius-inset) var(--cl-primary-dimmer);
+        --_box-shadow: 0px 0px var(--border-shadow-radius) var(--cl-primary-dim),
+                       inset 0px 0px var(--border-shadow-radius-inset) var(--cl-primary-dim);
     
         box-shadow: var(--_box-shadow);
     }
