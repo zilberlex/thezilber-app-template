@@ -1,6 +1,5 @@
 <script>
-	import { untrack } from "svelte";
-	import { AnimatingValue } from "./animating-number.svelte";
+	import { AnimatingValue } from "../../lib/ui/AnimatedComponents/AnimatedValue/animating-number.svelte";
 	import InputCombo from "./InputCombo.svelte";
 	import OutputCombo from "./OutputCombo.svelte";
 	import { countFractionDigits } from "$lib/engine/animation/math-utils";
@@ -10,13 +9,13 @@
 
     let sum = $derived(field1 + field2);
 
-    let animatedValue = new AnimatingValue();
+    let animatedValue = AnimatingValue.withBasicTween();
     $effect(() => {
         let fracDigits1 = countFractionDigits(field1);
         let fracDigits2 = countFractionDigits(field2);
         const maxFracDigits = Math.min(4, Math.max(fracDigits1, fracDigits2));
 
-        animatedValue.numberAfterDec = maxFracDigits;
+        animatedValue.digitsAfterDec = maxFracDigits;
         animatedValue.value = sum;
     });
     

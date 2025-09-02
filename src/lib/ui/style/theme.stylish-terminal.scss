@@ -6,6 +6,29 @@
 @import '$lib/ui/style/tokens.layout.css';
 @import '$lib/ui/style/tokens.misc.css';
 
+@mixin box-highlight {
+    opacity: 1;
+        
+    --_box-shadow: 0px 0px var(--border-shadow-radius) var(--cl-primary-dim),
+                    inset 0px 0px var(--border-shadow-radius-inset) var(--cl-primary-dim);
+
+    box-shadow: var(--_box-shadow);
+}
+
+@mixin box {
+    --_box-padding: var(--padding-1);
+    --_box-border: var(--box-border, var(--border-thick));
+
+    background-color: var(--cl-surface);
+    color: var(--cl-on-surface);
+
+    border: var(--_box-border) solid var(--cl-primary);
+    
+    padding: var(--padding-1);
+
+    transition: opacity 0.2s ease-out;
+}
+
 :global {
     body,
     input,
@@ -28,20 +51,6 @@
     }
 
     @include input;
-
-    @mixin box {
-        --_box-padding: var(--padding-1);
-        --_box-border: var(--box-border, var(--border-thick));
-
-        background-color: var(--cl-surface);
-        color: var(--cl-on-surface);
-    
-        border: var(--_box-border) solid var(--cl-primary);
-        
-        padding: var(--padding-1);
-    
-        transition: opacity 0.2s ease-out;
-    }
     
     .box {
         @include box;
@@ -49,15 +58,6 @@
 
     .ul-txt-primary {
         @include ul-txt-primary;
-    }
-    
-    @mixin box-highlight {
-        opacity: 1;
-        
-        --_box-shadow: 0px 0px var(--border-shadow-radius) var(--cl-primary-dim),
-                       inset 0px 0px var(--border-shadow-radius-inset) var(--cl-primary-dim);
-    
-        box-shadow: var(--_box-shadow);
     }
     
     .box-highlight {

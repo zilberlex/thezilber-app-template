@@ -1,20 +1,22 @@
-export type AnimationControl = {
-	start(): void;
+export type AnimationControl<T> = {
+	start(animationParams?: Partial<T>): void;
 	stop(): void;
 	pause(): void;
 	resume(): void;
+	currentAnimationParams: T;
 	readonly running: boolean;
 	readonly paused: boolean;
 	readonly animationRuntime: number;
 };
 
-export type AnimationCallback = (
+export type AnimationCallback<T> = (
 	dt: number,
 	elapsed: number,
-	ctl: AnimationControl
+	ctl: AnimationControl<T>,
+	animationParams: T
 ) => boolean; // false => stop; true/void => keep going
 
-export function createAnimationControl(cb: AnimationCallback): AnimationControl {
+export function createAnimationControl<T>(cb: AnimationCallback<T>, initialParams: T): AnimationControl<T> {
 	let rafId = 0;
 	let _running = false;
 	let _paused = false;
@@ -23,22 +25,34 @@ export function createAnimationControl(cb: AnimationCallback): AnimationControl 
 	let _pausedAt: number | null = null;
 	let _pausedTotal = 0;
 
+	let _animationParams: T = initialParams;
+
 	function hardStop() {
 		_running = false;
 		_paused = false;
+		console.log('stop total runtime', performance.now() - _startAt);
 		cancelAnimationFrame(rafId);
 	}
 
-	const ctl: AnimationControl = {
-		start() {
+	const ctl: AnimationControl<T> = {
+		start(animationParams?: Partial<T>) {
 			if (_running && !_paused) return;
 			_startAt = performance.now();
 			_running = true;
 			_paused = false;
+
+			if (animationParams) {
+				_animationParams = {
+					..._animationParams,
+					...animationParams
+				};
+			}
+
 			last = 0; // avoid giant first dt after a pause
 			rafId = requestAnimationFrame(loop);
 		},
 		stop() {
+			if (!_running) return;				
 			hardStop();
 		},
 		pause() {
@@ -63,7 +77,8 @@ export function createAnimationControl(cb: AnimationCallback): AnimationControl 
 			_pausedAt = performance.now(); 
 			return _paused; 
 		},
-		get animationRuntime() { return performance.now() - _startAt; }
+		get animationRuntime() { return performance.now() - _startAt; },
+		get currentAnimationParams() { return _animationParams; }
 	};
 
 	function loop(now: number) {
@@ -73,7 +88,7 @@ export function createAnimationControl(cb: AnimationCallback): AnimationControl 
 
 		const elapsed = now - _startAt - _pausedTotal;
 
-		const r = cb(dt, elapsed, ctl);
+		const r = cb(dt, elapsed, ctl, _animationParams);
 		if (r === false) {
 			hardStop(); // ensure running=false so start() can work again
 			return;
