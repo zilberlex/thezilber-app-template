@@ -1,5 +1,5 @@
 import type { AnimationControl } from "$lib/engine/animation/animation-control";
-import { tweenValue, type TBasedAnimationParams, type TweenAnimationParams } from "$lib/engine/animation/tweens";
+import { tweenValue, type TBasedAnimationParams, type TweenAnimationParams } from "$lib/engine/animation/animations/tweens";
 import type { ValueChangeAnimationInput } from "./animating-number.svelte";
 
 export function createValueTweenAnimation(changingValueAnimationInput: ValueChangeAnimationInput,

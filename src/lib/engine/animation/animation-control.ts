@@ -1,3 +1,5 @@
+import { safeCaf, safeRaf } from "./raf-safe";
+
 export type AnimationControl<T> = {
 	start(animationParams?: Partial<T>): void;
 	stop(): void;
@@ -24,6 +26,7 @@ export function createAnimationControl<T>(cb: AnimationCallback<T>, initialParam
 	let _startAt = 0;
 	let _pausedAt: number | null = null;
 	let _pausedTotal = 0;
+	let _animationRunTime = 0;
 
 	let _animationParams: T = initialParams;
 
@@ -31,13 +34,15 @@ export function createAnimationControl<T>(cb: AnimationCallback<T>, initialParam
 		_running = false;
 		_paused = false;
 		console.log('stop total runtime', performance.now() - _startAt);
-		cancelAnimationFrame(rafId);
+		safeCaf(rafId);
 	}
 
 	const ctl: AnimationControl<T> = {
 		start(animationParams?: Partial<T>) {
 			if (_running && !_paused) return;
-			_startAt = performance.now();
+			
+			_startAt = null;
+			_animationRunTime = 0;
 			_running = true;
 			_paused = false;
 
@@ -49,7 +54,7 @@ export function createAnimationControl<T>(cb: AnimationCallback<T>, initialParam
 			}
 
 			last = 0; // avoid giant first dt after a pause
-			rafId = requestAnimationFrame(loop);
+			rafId = safeRaf(loop);
 		},
 		stop() {
 			if (!_running) return;				
@@ -59,7 +64,7 @@ export function createAnimationControl<T>(cb: AnimationCallback<T>, initialParam
 			if (!_running || _paused) return;
 			console.log('pause');
 			_paused = true;
-			cancelAnimationFrame(rafId);
+			safeCaf(rafId);
 		},
 		resume() {
 			if (!_running || !_paused) return;
@@ -70,31 +75,33 @@ export function createAnimationControl<T>(cb: AnimationCallback<T>, initialParam
 				_pausedAt = null; 
 			}
 			last = 0;
-			rafId = requestAnimationFrame(loop);
+			rafId = safeRaf(loop);
 		},
 		get running() { return _running; },
 		get paused() {
 			_pausedAt = performance.now(); 
 			return _paused; 
 		},
-		get animationRuntime() { return performance.now() - _startAt; },
+		get animationRuntime() { return _animationRunTime; },
 		get currentAnimationParams() { return _animationParams; }
 	};
 
 	function loop(now: number) {
 		if (!_running || _paused) return;
+		_startAt ??= performance.now();
+
 		const dt = last ? now - last : 16.6667;
 		last = now;
 
-		const elapsed = now - _startAt - _pausedTotal;
+		_animationRunTime += dt - _pausedTotal;		
 
-		const r = cb(dt, elapsed, ctl, _animationParams);
+		const r = cb(dt, _animationRunTime, ctl, _animationParams);
 		if (r === false) {
 			hardStop(); // ensure running=false so start() can work again
 			return;
 		}
 		if (!_running || _paused) return; // in case cb paused/stopped
-		rafId = requestAnimationFrame(loop);
+		rafId = safeRaf(loop);
 	}
 
 	return ctl;

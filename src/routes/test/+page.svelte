@@ -3,13 +3,14 @@
 	import InputCombo from "./InputCombo.svelte";
 	import OutputCombo from "./OutputCombo.svelte";
 	import { countFractionDigits } from "$lib/engine/animation/math-utils";
+	import { createValueByDigitsAnimation } from "$lib/ui/AnimatedComponents/AnimatedValue/animating-value.smart-animation-digits.svelte";
 
     let field1 = $state(8);
     let field2 = $state(10);
 
     let sum = $derived(field1 + field2);
 
-    let animatedValue = AnimatingValue.withBasicTween();
+    let animatedValue = AnimatingValue.with(0, createValueByDigitsAnimation);
     $effect(() => {
         let fracDigits1 = countFractionDigits(field1);
         let fracDigits2 = countFractionDigits(field2);

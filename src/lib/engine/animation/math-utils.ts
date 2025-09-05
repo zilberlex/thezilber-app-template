@@ -1,5 +1,26 @@
+export type NumberRange = number[];
+export type RangeMaps = {fromRange: NumberRange, toRange: NumberRange}[];
+
 export function lerp(a: number, b: number, t: number) {
     return a * (1 - t) + b * t;
+}
+
+export function remap(fromRange: NumberRange, toRange: NumberRange, value: number): number {
+    const [f0, f1] = fromRange;
+	const [t0, t1] = toRange;
+
+	if (f1 === f0) return t0; // degenerate input range
+
+	const t = (value - f0) / (f1 - f0);
+	return t0 + t * (t1 - t0);
+}
+
+export function segmentedRemap(rangeMaps : RangeMaps, value: number): number {
+    const targetMap = rangeMaps.find(rm => value >= rm.fromRange[0] && value <= rm.fromRange[1]);
+    
+    if (!targetMap) throw new Error(`Value [${value}] not found in range maps. ${JSON.stringify(rangeMaps)}`);
+
+    return remap(targetMap.fromRange, targetMap.toRange, value);
 }
 
 export function floorTo(x: number, dp = 0): number {
@@ -28,4 +49,17 @@ export function countFractionDigits(x: number): number {
 	return exp >= 0
 		? Math.max(0, fracInCoeff - exp)
 		: fracInCoeff + (-exp);
+}
+
+export function indexOfMsdDiff(a: number, b: number): number {
+	if (a === b) return -1;
+	const sa = a.toString();
+	const sb = b.toString();
+	const n = Math.max(sa.length, sb.length);
+	const pa = sa.padStart(n, '0');
+	const pb = sb.padStart(n, '0');
+	for (let i = 0; i < n; i++) {
+		if (pa[i] !== pb[i]) return (n - 1) - i; // flip to LSD-based index
+	}
+	return -1;
 }

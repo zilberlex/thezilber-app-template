@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tweenValue } from "$lib/engine/animation/tweens";
+	import { tweenValue } from "$lib/engine/animation/animations/tweens";
 
     let element: HTMLElement;
 

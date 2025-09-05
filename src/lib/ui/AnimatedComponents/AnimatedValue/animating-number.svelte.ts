@@ -1,6 +1,6 @@
 import { type AnimationControl } from "$lib/engine/animation/animation-control";
 import { floorTo } from "$lib/engine/animation/math-utils";
-import { type TBasedAnimationParams, type TweenAnimationParams } from "$lib/engine/animation/tweens";
+import { type TBasedAnimationParams, type TweenAnimationParams } from "$lib/engine/animation/animations/tweens";
 import { untrack } from "svelte";
 import { createValueTweenAnimation } from "./animating-value.tween.svelte";
 
