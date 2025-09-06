@@ -6,7 +6,7 @@ import type { ValueChangeAnimationInput } from "./animating-number.svelte";
 
 // fix this receiving params from outside, this is garbage
 export function createValueByDigitsAnimation(changingValueAnimationInput: ValueChangeAnimationInput,
-                                             initialParams: TBasedAnimationParams = {duration: 500}
+                                             initialParams: TBasedAnimationParams = {duration: 1000}
                                          ): { ctl: AnimationControl<TweenAnimationParams>, 
                                               params: Partial<TweenAnimationParams>} {
     
