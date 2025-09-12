@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tweenValue } from "$lib/engine/animation/animations/tweens";
+	import Button from "$lib/ui/style/theme/Button.svelte";
 
     let element: HTMLElement;
 
@@ -25,15 +26,11 @@
     </div>
     
     <div>
-        <button class="box" onclick={() => tAnimation.start()}>
-            repeat
-        </button>
+        <Button onClick={() => tAnimation.start()}>Repeat</Button>
     </div>
 </div>
 
 <style lang="scss">
-    // @use '$lib/ui/style/theme.stylish-terminal.scss' as *;
-
     :root {
         --moving-box-width: 100px;
     }

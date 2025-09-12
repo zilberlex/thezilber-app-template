@@ -1,5 +1,6 @@
 @use '$lib/ui/style/effects.scss' as *;
-@use '$lib/ui/style/theme.input.stylish-terminal.scss' as *;
+@use '$lib/ui/style/theme/theme.input.scss' as *;
+@use '$lib/ui/style/theme/theme.button.scss' as *;
 @use '$lib/ui/style/utility.color.scss' as *;
 @import '$lib/ui/style/tokens.color.css';
 @import '$lib/ui/style/tokens.typography.css';
@@ -51,6 +52,7 @@
     }
 
     @include input;
+    @include button;
     
     .box {
         @include box;

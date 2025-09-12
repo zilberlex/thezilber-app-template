@@ -18,7 +18,7 @@
 
 <style lang="scss">
 	@use '$lib/ui/style/utility.layout.scss' as *;
-	@use '$lib/ui/style/theme.stylish-terminal.scss';
+	@use '$lib/ui/style/theme/theme.scss';
 	
 	.page-container {
         @extend .ly-full-screen;

@@ -18,12 +18,12 @@ export type AnimationCallback<T> = (
 	animationParams: T
 ) => boolean; // false => stop; true/void => keep going
 
-export function createAnimationControl<T>(cb: AnimationCallback<T>, initialParams: T): AnimationControl<T> {
+export function animationControl<T>(cb: AnimationCallback<T>, initialParams: T): AnimationControl<T> {
 	let rafId = 0;
 	let _running = false;
 	let _paused = false;
 	let last = 0;
-	let _startAt = 0;
+	let _startAt: number | null = null;
 	let _pausedAt: number | null = null;
 	let _pausedTotal = 0;
 	let _animationRunTime = 0;

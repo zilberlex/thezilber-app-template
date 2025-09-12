@@ -22,6 +22,7 @@ picture {
 button {
     outline: none;
     border: none;
+    caret-color: transparent;
 }
 
 input,
