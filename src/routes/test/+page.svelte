@@ -10,6 +10,7 @@
 
     let sum = $derived(field1 + field2);
 
+    // let animatedValue = AnimatingValue.with(0, createValueByDigitsAnimation);
     let animatedValue = AnimatingValue.with(0, createValueByDigitsAnimation);
     $effect(() => {
         let fracDigits1 = countFractionDigits(field1);

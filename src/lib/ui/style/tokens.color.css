@@ -1,7 +1,8 @@
 :root {
     /* Palette */
-    --color-1: oklch(0.7072 0.16803 156.07);
-    /* --color-1: oklch(70.72% 0.16803 242.065); */
+    /* --color-1: oklch(56.02% 0.13556 245.271); */
+    --color-1: oklch(70.72% 0.16803 242.065);
+    /* --color-1: oklch(70.64% 0.22938 140.424); */
     --color-1-values: from var(--color-1) l c h;
     --color-2: oklch(98.112% 0.00938 286.056);
     --color-3: oklch(0% 0 0);

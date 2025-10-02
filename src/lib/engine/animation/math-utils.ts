@@ -51,6 +51,13 @@ export function countFractionDigits(x: number): number {
 		: fracInCoeff + (-exp);
 }
 
+export function cmpDigitAtPos(a: number, b: number, pos: number) {
+    const aDigit = Math.floor(a / (10 ** pos));
+    const bDigit = Math.floor(b / (10 ** pos));
+
+    return aDigit - bDigit;
+}
+
 export function indexOfMsdDiff(a: number, b: number): number {
 	if (a === b) return -1;
 	const sa = a.toString();

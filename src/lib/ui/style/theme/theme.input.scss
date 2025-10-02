@@ -32,6 +32,11 @@
     label {
         flex: 0 0 auto;
         
+        & .prefix {
+            display: inline-block;
+            min-width: 3ch;
+        }
+
         & .suffix {
             @include ul-txt-primary;
             color: var(--cl-primary);

@@ -46,3 +46,13 @@
 		color: var(--_animation-glow-color-highlight);
 	}
 }
+
+
+@keyframes -global-animation-change-colors {
+	0% {
+		color: var(--ef_change-colors_col1);
+	}
+	100% {
+		color: var(--ef_change-colors_col2);
+	}
+}
