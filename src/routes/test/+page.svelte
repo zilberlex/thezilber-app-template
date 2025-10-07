@@ -3,15 +3,17 @@
 	import InputCombo from "./InputCombo.svelte";
 	import OutputCombo from "./OutputCombo.svelte";
 	import { countFractionDigits } from "$lib/engine/animation/math-utils";
-	import { createValueByDigitsAnimation } from "$lib/ui/AnimatedComponents/AnimatedValue/animating-value.smart-animation-digits.svelte";
+    import { createNumberByDigitsTween } from "$lib/engine/animation/animations/animate-number-by-digits";
+	import { createPaddingDisplay } from "$lib/ui/AnimatedComponents/AnimatedValue/animating-number-display";
 
     let field1 = $state(8);
     let field2 = $state(10);
 
     let sum = $derived(field1 + field2);
 
-    // let animatedValue = AnimatingValue.with(0, createValueByDigitsAnimation);
-    let animatedValue = AnimatingValue.with(0, createValueByDigitsAnimation);
+    // let animatedValue = AnimatingValue.withBasicTween(0, 1000);
+    let animatedValue = AnimatingValue.with(0, 1000, createNumberByDigitsTween);
+    // animatedValue.displayFunc = createPaddingDisplay();
     $effect(() => {
         let fracDigits1 = countFractionDigits(field1);
         let fracDigits2 = countFractionDigits(field2);
@@ -21,7 +23,8 @@
         animatedValue.value = sum;
     });
     
-    let output = $derived(animatedValue.displayValue);
+    let output = $derived(animatedValue.displayValueString);
+
 </script>
 
 <main class="mini-app box box-highlight">

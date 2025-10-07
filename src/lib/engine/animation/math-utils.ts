@@ -29,6 +29,13 @@ export function floorTo(x: number, dp = 0): number {
 	return Math.floor(x * f) / f;
 }
 
+export function cmpDigitAtPos(a: number, b: number, pos: number) {
+    const aDigit = Math.floor(a / (10 ** pos));
+    const bDigit = Math.floor(b / (10 ** pos));
+
+    return aDigit - bDigit;
+}
+
 // counts fraction digits for a Number (e.g., 1e-6 -> 6, 123.45 -> 2)
 export function countFractionDigits(x: number): number {
 	if (!Number.isFinite(x)) return 0;
@@ -51,13 +58,6 @@ export function countFractionDigits(x: number): number {
 		: fracInCoeff + (-exp);
 }
 
-export function cmpDigitAtPos(a: number, b: number, pos: number) {
-    const aDigit = Math.floor(a / (10 ** pos));
-    const bDigit = Math.floor(b / (10 ** pos));
-
-    return aDigit - bDigit;
-}
-
 export function indexOfMsdDiff(a: number, b: number): number {
 	if (a === b) return -1;
 	const sa = a.toString();
@@ -65,8 +65,10 @@ export function indexOfMsdDiff(a: number, b: number): number {
 	const n = Math.max(sa.length, sb.length);
 	const pa = sa.padStart(n, '0');
 	const pb = sb.padStart(n, '0');
+
 	for (let i = 0; i < n; i++) {
 		if (pa[i] !== pb[i]) return (n - 1) - i; // flip to LSD-based index
 	}
+	
 	return -1;
 }

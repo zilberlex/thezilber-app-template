@@ -1,75 +1,69 @@
-import { type AnimationControl } from "$lib/engine/animation/animation-control";
 import { floorTo } from "$lib/engine/animation/math-utils";
-import { type TBasedAnimationParams, type TweenAnimationParams } from "$lib/engine/animation/animations/tweens";
+import { createAnimationControlTween, type TBasedAnimationParams, type TweenAnimationParams } from "$lib/engine/animation/animations/tweens";
 import { untrack } from "svelte";
-import { createValueTweenAnimation } from "./animating-value.tween.svelte";
+import type { AnimationControl, AnimationTween, AnimationTweenFactory } from "$lib/engine/animation/animation.types";
+import { createLerpTween } from "$lib/engine/animation/animations/lerp-tween";
 
-export type ValueChangeAnimationInput = {
-    // Params for tween animation
-    oldValue: number;
-    newValue: number;
-    currentDisplayValue: number;
-
-    // Meta params for flexibility.
-    oldCtl: AnimationControl<TweenAnimationParams> | undefined;
-
-    // Callback for value updates within the AnimationControl Returned.
-    updateValue: (newValue: number) => void;
-}
-
-type CreateAnimationFn<T extends TBasedAnimationParams> =
-  (valueChange: ValueChangeAnimationInput) =>
-    { ctl: AnimationControl<T>; params: Partial<T> };
-
-export class AnimatingValue<T extends TBasedAnimationParams> {
+export class AnimatingValue {
 	oldValue: number = $state(0);
     value: number = $state(0);
 	displayValue: number = $state(0);
     digitsAfterDec: number = $state(0);
+    displayFunc: (currentValue: number, endValue: number) => string = (currentValue, endValue) => currentValue.toString();
+    displayValueString: string = $derived(this.displayFunc(this.displayValue, this.value));
+    duration: number;
+    animationTweenBuilder: AnimationTweenFactory;
 
-    createAnimationFunction: CreateAnimationFn<T>;
+    #currentAnimationControl: AnimationControl<TBasedAnimationParams> | undefined;
 
-    #currentAnimationControl: AnimationControl<T> | undefined;
-
-    private constructor(initialValue = 0, fn: CreateAnimationFn<T>) {
-		this.value = initialValue;
-		this.createAnimationFunction = fn;
+    private constructor(initialValue = 0, duration = 1000 , animationTweenFactory: AnimationTweenFactory) {
+        this.duration = duration;
+        this.value = initialValue;
+        this.animationTweenBuilder = animationTweenFactory;
 
         $effect(() => {
+            console.log('WOW effect triggered - value', this.value);
+            
             const newValue = this.value;
             untrack(() => {
-                this.animateDisplayValue(newValue);
-                this.oldValue = this.value           
+                this.triggerValueChange(newValue);
+                this.oldValue = this.value;
             });
         });
-	}
+    }
+
+    private triggerValueChange(newValue: number) {
+        // this.animateDisplayValue(newValue);
+        this.animateDisplayValueV2(newValue);
+    }
 
 	// Cast-free default for the common case:
-	static withBasicTween(initial = 0, initialParams: TBasedAnimationParams = {duration: 1000}) {
-		return new AnimatingValue<TweenAnimationParams>(
-			initial,
-			(vc) => createValueTweenAnimation(vc, initialParams)
+	static withBasicTween(initialValue = 0, animationDuration = 1000) {        
+        return new AnimatingValue(
+			initialValue, 
+            animationDuration,
+            createLerpTween
 		);
 	}
 
-	// Generic constructor when you provide your own factory:
-	static with<T extends TBasedAnimationParams>(initial = 0, fn: CreateAnimationFn<T>) {
-		return new AnimatingValue<T>(initial, fn);
-	}
+    static with(initialValue = 0, animationDuration = 1000, tweenFactory: (from: number, to: number) => AnimationTween) {
+        return new AnimatingValue(initialValue, animationDuration, tweenFactory);
+    }
 
-    public animateDisplayValue(newValue: number) {
+    public animateDisplayValueV2(newValue: number) {
         this.#currentAnimationControl?.stop();
         
-        const {ctl, params} = this.createAnimationFunction({
-                oldvalue: this.oldValue, 
-                newValue, 
-                currentDisplayValue: this.displayValue, 
-                oldCtl: this.#currentAnimationControl,
-                updateValue: (v) => this.displayValue = floorTo(v, this.digitsAfterDec)
-            });
+        const ctl = createAnimationControlTween(this.animationTweenBuilder(this.displayValue, newValue), 
+                                                (v: number) => this.displayValue = floorTo(v, this.digitsAfterDec), 
+                                                {duration: this.duration});
 
         this.#currentAnimationControl = ctl;
         
-        this.#currentAnimationControl.start(params);
+        this.#currentAnimationControl?.start();
+    }
+
+    public async rerunAnimationFrom(startingValue: number) {
+        this.displayValue = startingValue;
+        this.triggerValueChange(this.value);
     }
 }

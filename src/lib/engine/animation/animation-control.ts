@@ -1,22 +1,5 @@
+import type { AnimationCallback, AnimationControl } from "./animation.types";
 import { safeCaf, safeRaf } from "./raf-safe";
-
-export type AnimationControl<T> = {
-	start(animationParams?: Partial<T>): void;
-	stop(): void;
-	pause(): void;
-	resume(): void;
-	currentAnimationParams: T;
-	readonly running: boolean;
-	readonly paused: boolean;
-	readonly animationRuntime: number;
-};
-
-export type AnimationCallback<T> = (
-	dt: number,
-	elapsed: number,
-	ctl: AnimationControl<T>,
-	animationParams: T
-) => boolean; // false => stop; true/void => keep going
 
 export function animationControl<T>(cb: AnimationCallback<T>, initialParams: T): AnimationControl<T> {
 	let rafId = 0;
