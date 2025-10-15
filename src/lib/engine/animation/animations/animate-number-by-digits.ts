@@ -111,8 +111,6 @@ function countingByDigitsEffectAscCase(from: number, to: number) {
 	const indexOfDiffStart = indexOfMsdDiff(from, to);
 	const endPos = indexOfDiffStart;
 
-	console.log('WOW animateNumberByDigits - indexOfDiffStart', indexOfDiffStart);
-
 	// *** Maps counting to most significat digit ***
 	// ie 123 -> 345:
 	//   123 -> 130
@@ -148,15 +146,6 @@ function countingByDigitsEffectAscCase(from: number, to: number) {
 		ticksTotal += ticksCurrent;
 		step *= 10;
 	}
-
-	console.log(
-		'WOW animateNumberByDigits after most significant - ticksTotal',
-		ticksTotal,
-		'currentNum',
-		currentNum,
-		'ranges',
-		ranges
-	);
 
 	// *** Maps counting the rest of digits ***
 	// ie 123 -> 345:

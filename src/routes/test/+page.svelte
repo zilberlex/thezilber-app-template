@@ -1,7 +1,7 @@
 <script>
 	import { AnimatingValue } from "../../lib/ui/AnimatedComponents/AnimatedValue/animating-number.svelte";
-	import InputCombo from "./InputCombo.svelte";
-	import OutputCombo from "./OutputCombo.svelte";
+	import InputCombo from "$lib/ui/basic-components/InputCombo.svelte";
+	import OutputCombo from "$lib/ui/basic-components/OutputCombo.svelte";
 	import { countFractionDigits } from "$lib/engine/animation/math-utils";
     import { createNumberByDigitsTween } from "$lib/engine/animation/animations/animate-number-by-digits";
 	import { createPaddingDisplay } from "$lib/ui/AnimatedComponents/AnimatedValue/animating-number-display";
