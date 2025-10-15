@@ -1,6 +1,8 @@
 @use '$lib/ui/style/effects.scss' as *;
 @use '$lib/ui/style/theme/theme.input.scss' as *;
 @use '$lib/ui/style/theme/theme.button.scss' as *;
+@use '$lib/ui/style/theme/theme.lists.scss' as *;
+@use '$lib/ui/style/theme/theme.href.scss' as *;
 @use '$lib/ui/style/utility.color.scss' as *;
 @import '$lib/ui/style/tokens.color.css';
 @import '$lib/ui/style/tokens.typography.css';
@@ -30,7 +32,6 @@
     transition: opacity 0.2s ease-out;
 }
 
-:global {
     body,
     input,
     button {
@@ -53,6 +54,8 @@
 
     @include input;
     @include button;
+    @include lists;
+    @include href;
     
     .box {
         @include box;
@@ -71,4 +74,3 @@
         
         box-shadow: none;
     }
-}

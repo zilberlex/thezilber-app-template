@@ -1,0 +1,9 @@
+@mixin lists {
+    ul,
+    li {
+      &::marker {
+        color: var(--cl-primary);
+        color: var(--cl-on-surface);
+      }  
+    }
+}

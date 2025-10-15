@@ -3,6 +3,7 @@
 	import '@fontsource-variable/jetbrains-mono';
 	// Global import.
 	import '$lib/ui/style/reset.css';
+	import '$lib/ui/style/theme/theme.scss';
 
 	let { children } = $props();
 </script>
@@ -18,7 +19,7 @@
 
 <style lang="scss">
 	@use '$lib/ui/style/utility.layout.scss' as *;
-	@use '$lib/ui/style/theme/theme.scss';
+	@use '$lib/ui/style/theme/theme.scss' as *;
 	
 	.page-container {
         @extend .ly-full-screen;

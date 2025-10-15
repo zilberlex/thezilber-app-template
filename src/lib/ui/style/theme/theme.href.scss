@@ -1,0 +1,13 @@
+@use '../effects.scss' as *;
+
+@mixin href {
+    a[href] {
+        color: var(--cl-primary);
+        text-decoration-color: var(--cl-on-surface);
+
+        &:hover {
+            @include glow-text();
+            text-decoration-color: var(--cl-primary);
+        }
+    }
+}

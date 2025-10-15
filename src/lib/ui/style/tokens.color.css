@@ -8,15 +8,16 @@
     --color-3: oklch(0% 0 0);
     --color-4: red;
 
-    --color-1-dim: oklch(from var(--color-1) calc(l - 0.18) c h);
-    --color-1-dim-transparent: oklch(from var(--color-1) calc(l - 0.18) c h / 0);
-    --color-1-dimmer: oklch(from var(--color-1) calc(l - 0.36) c h);
-    --color-1-dimmer-transparent: oklch(from var(--color-1) calc(l - 0.36) c h / 0);
-    --color-1-dimmest: oklch(from var(--color-1) calc(l - 0.5) c h);
-    --color-1-dimmest-transparent: oklch(from var(--color-1) calc(l - 0.5) c h / 0);
+    --color-1-transparent: oklch(var(--color-1-values) / 0);
+
+    --color-1-dim: oklch(from var(--color-1) calc(l - 0.15) c h);
+    --color-1-dim-transparent: oklch(from var(--color-1-dim) l c h / 0);
+    --color-1-dimmer: oklch(from var(--color-1) calc(l - 0.25) c h);
+    --color-1-dimmer-transparent: oklch(from var(--color-1-dimmer) l c h / 0);
+    --color-1-dimmest: oklch(from var(--color-1) calc(l - 0.35) c h);
+    --color-1-dimmest-transparent: oklch(from var(--color-1-dimmest) l c h / 0);
     --color-1-bright: oklch(from var(--color-1) calc(l + 0.18) c h);
     --color-1-brightest: oklch(from var(--color-1) calc(l + 0.36) c h);
-    --color-1-transparent: oklch(var(--color-1-values) / 0);
     --color-1-bright-transparent: oklch(from var(--color-1-bright) l c h / 0);
     --color-1-brightest-transparent: oklch(from var(--color-1-brightest) l c h / 0);
 
@@ -40,9 +41,6 @@
     --cl-primary-dimmest-transparent: var(--color-1-dimmest-transparent);
 
     --cl-on-primary: var(--color-2);
-    --cl-primary-dim: oklch(from var(--cl-primary) calc(l - 0.15) c h);
-    --cl-primary-dimmer: oklch(from var(--cl-primary) calc(l - 0.4) c h);
-    --cl-primary-dimmest: oklch(from var(--cl-primary) calc(l - 0.5) c h);
 
     --cl-primary-brighter: oklch(from var(--cl-primary) calc(l + 0.15) c h);
 

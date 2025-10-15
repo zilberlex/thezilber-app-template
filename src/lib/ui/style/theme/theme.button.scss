@@ -86,7 +86,9 @@
                 }
             }
 
-            transform: translate(0, calc(-4px)) scale(1);
+            & {
+                transform: translate(0, calc(-4px)) scale(1);
+            }
 
             & span {
                 transform: translate(0, calc(0.5px)) scale(1);
@@ -99,7 +101,9 @@
                 transition: all 0s;
             }
 
-            transform: translate(0, 0) scale(1);
+            & {
+                transform: translate(0, 0) scale(1);
+            }
             
             & span {
                 // background-color: var(--accent-strong);
