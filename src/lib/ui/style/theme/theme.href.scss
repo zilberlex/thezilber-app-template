@@ -5,7 +5,9 @@
         color: var(--cl-primary);
         text-decoration-color: var(--cl-on-surface);
 
-        &:hover {
+        &:is(:hover, :focus-visible) {
+            outline: none;
+
             @include glow-text();
             text-decoration-color: var(--cl-primary);
         }

@@ -1,3 +1,42 @@
+@mixin rings {
+    --ring1: 0 0 0 1.5px var(--cl-background);
+    --ring2: 0 0 0 3px var(--cl-primary-dim);
+    --ring3: 0 0 0 4px var(--cl-background);
+    --ring4: 0 0 0 5px var(--cl-primary-dimmer);
+    --ring5: 0 0 0 6px var(--cl-background);
+    --ring6: 0 0 0 7px var(--cl-primary-dimmest);
+
+    --ring2-invis: 0 0 0 3px var(--cl-primary-dim-transparent);
+    --ring4-invis: 0 0 0 5px var(--cl-primary-dimmer-transparent);
+    --ring6-invis: 0 0 0 7px var(--cl-primary-dimmest-transparent);
+
+    animation: ring-stack 0.25s forwards linear;
+}
+
+@keyframes ring-stack {
+                    0%   { box-shadow: inset var(--ring1), 
+                                       inset var(--ring2-invis); }
+
+                    33%  { box-shadow:   inset var(--ring1), 
+                                         inset var(--ring2),
+                                         inset var(--ring3),
+                                         inset var(--ring4-invis);}
+                    
+                    66%  { box-shadow:   inset var(--ring1), 
+                                         inset var(--ring2),
+                                         inset var(--ring3),
+                                         inset var(--ring4),
+                                         inset var(--ring5),
+                                         inset var(--ring6-invis);}
+                    
+                    100%  { box-shadow:  inset var(--ring1), 
+                                         inset var(--ring2),
+                                         inset var(--ring3),
+                                         inset var(--ring4),
+                                         inset var(--ring5),
+                                         inset var(--ring6);}
+                }
+
 @mixin button {
 	button,
 	a.link-button {
@@ -36,17 +75,7 @@
             filter: drop-shadow(0px 0px 4px var(--color-1));
 
             &::after {
-                // --_break-color: var(--color-3);
-                --ring1: 0 0 0 1.5px var(--cl-background);
-                --ring2: 0 0 0 3px var(--cl-primary-dim);
-                --ring3: 0 0 0 4px var(--cl-background);
-                --ring4: 0 0 0 5px var(--cl-primary-dimmer);
-                --ring5: 0 0 0 6px var(--cl-background);
-                --ring6: 0 0 0 7px var(--cl-primary-dimmest);
-
-                --ring2-invis: 0 0 0 3px var(--cl-primary-dim-transparent);
-                --ring4-invis: 0 0 0 5px var(--cl-primary-dimmer-transparent);
-                --ring6-invis: 0 0 0 7px var(--cl-primary-dimmest-transparent);
+                @include rings();
 
                 position: absolute;
                 inset: 0;
@@ -57,33 +86,8 @@
                 z-index: -1;
 
                 box-shadow: none;
-                animation: ring-stack 0.25s forwards linear;
-
-                background: radial-gradient(120% 100%, #000 5%, var(--cl-primary-dimmest));
-
-                @keyframes ring-stack {
-                    0%   { box-shadow: inset var(--ring1), 
-                                       inset var(--ring2-invis); }
-
-                    33%  { box-shadow:   inset var(--ring1), 
-                                         inset var(--ring2),
-                                         inset var(--ring3),
-                                         inset var(--ring4-invis);}
-                    
-                    66%  { box-shadow:   inset var(--ring1), 
-                                         inset var(--ring2),
-                                         inset var(--ring3),
-                                         inset var(--ring4),
-                                         inset var(--ring5),
-                                         inset var(--ring6-invis);}
-                    
-                    100%  { box-shadow:  inset var(--ring1), 
-                                         inset var(--ring2),
-                                         inset var(--ring3),
-                                         inset var(--ring4),
-                                         inset var(--ring5),
-                                         inset var(--ring6);}
-                }
+                
+                background: radial-gradient(120% 100%, #000 5%, var(--cl-primary-dim));
             }
 
             & {
@@ -102,11 +106,16 @@
             }
 
             & {
-                transform: translate(0, 0) scale(1);
+                transform: translate(0, 0) scale(1);                
+                &::after {
+                    background: radial-gradient(120% 100%, #000 5%, var(--cl-primary));
+                    --ring2: 0 0 0 3px var(--cl-primary);
+                    --ring4: 0 0 0 5px var(--cl-primary-dim);
+                    --ring6: 0 0 0 7px var(--cl-primary-dimmer);
+                }
             }
             
             & span {
-                // background-color: var(--accent-strong);
                 transform: translate(0, 0) scale(1);
             }
         }

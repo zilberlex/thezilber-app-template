@@ -42,7 +42,8 @@
 
     --cl-on-primary: var(--color-2);
 
-    --cl-primary-brighter: oklch(from var(--cl-primary) calc(l + 0.15) c h);
+    --cl-primary-bright: var(--color-1-bright);
+    --cl-primary-brightest: var(--color-1-brightest);
 
     --cl-surface: var(--color-3);
     --cl-on-surface: var(--color-2);
