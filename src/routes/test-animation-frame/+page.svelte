@@ -4,12 +4,14 @@
 
     let element: HTMLElement;
 
-    let tAnimation = tweenValue((val) => element.style.left = val + "px",
-                                { from: 0, to: 0, duration: 1000} );
+    let tAnimation = tweenValue((val) => {
+        element.style.left = val + "px";     
+    }, { from: 0, to: 300, duration: 1000} );
     
     
     function startAnimation() {
-        tAnimation.start({from: 0, to: 300 });        
+        tAnimation.stop();
+        tAnimation.start();        
     }
 
     $effect(() => {
@@ -26,7 +28,7 @@
     </div>
     
     <div>
-        <Button onclick={() => tAnimation.start()}>Repeat</Button>
+        <Button onclick={() => startAnimation()}>Repeat</Button>
     </div>
 </div>
 
