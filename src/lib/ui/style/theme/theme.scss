@@ -1,76 +1,35 @@
 @use '$lib/ui/style/effects.scss' as *;
-@use '$lib/ui/style/theme/theme.input.scss' as *;
-@use '$lib/ui/style/theme/theme.button.scss' as *;
-@use '$lib/ui/style/theme/theme.lists.scss' as *;
-@use '$lib/ui/style/theme/theme.href.scss' as *;
 @use '$lib/ui/style/utility.color.scss' as *;
+@use '$lib/ui/style/theme/theme.button.scss' as tButton;
+@use '$lib/ui/style/theme/theme.box.scss' as tBox;
+@use '$lib/ui/style/theme/theme.input.scss' as tInput;
+@use '$lib/ui/style/theme/theme.lists.scss' as tLists;
+@use '$lib/ui/style/theme/theme.href.scss' as tHref;
+@use '$lib/ui/style/utility/utility.scss' with ($emit-default: true);
 @import '$lib/ui/style/tokens.color.css';
 @import '$lib/ui/style/tokens.typography.css';
 @import '$lib/ui/style/tokens.layout.css';
 @import '$lib/ui/style/tokens.misc.css';
 
-@mixin box-highlight {
-    opacity: 1;
-        
-    --_box-shadow: 0px 0px var(--border-shadow-radius) var(--cl-primary-dim),
-                    inset 0px 0px var(--border-shadow-radius-inset) var(--cl-primary-dim);
-
-    box-shadow: var(--_box-shadow);
+body,
+input {
+    font-family: var(--font-1);
+    font-size: var(--font-size-1);
 }
 
-@mixin box {
-    --_box-padding: var(--padding-1);
-    --_box-border: var(--box-border, var(--border-thick));
-
-    background-color: var(--cl-surface);
-    color: var(--cl-on-surface);
-
-    border: var(--_box-border) solid var(--cl-primary);
+body {    
+    background-color: var(--cl-background);
+    color: var(--cl-on-background);
     
-    padding: var(--padding-1);
-
-    transition: opacity 0.2s ease-out;
+    &::selection {
+        background-color: var(--cl-primary);
+    }
 }
 
-    body,
-    input,
-    button {
-        font-family: var(--font-1);
-        font-size: var(--font-size-1);
-    }
-    
-    body {    
-        background-color: var(--cl-background);
-        color: var(--cl-on-background);
-        
-        &::selection {
-            background-color: var(--cl-primary);
-        }
-    }
-    
-    .ul-highlight {
-        @include ul-highlight;
-    }
+.ul-highlight {
+    @include ul-highlight;
+}
 
-    @include input;
-    @include button;
-    @include lists;
-    @include href;
-    
-    .box {
-        @include box;
-    }
-
-    .ul-txt-primary {
-        @include ul-txt-primary;
-    }
-    
-    .box-highlight {
-        @include box-highlight;
-    }
-    
-    .box-dim {
-        opacity: 0.6;
-        
-        box-shadow: none;
-    }
+.ul-txt-primary {
+    @include ul-txt-primary;
+}

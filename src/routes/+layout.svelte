@@ -18,11 +18,10 @@
 </div>
 
 <style lang="scss">
-	@use '$lib/ui/style/utility.layout.scss' as *;
-	@use '$lib/ui/style/theme/theme.scss' as *;
+	@use '$lib/ui/style/utility/utility.scss' as *;
 	
 	.page-container {
-        @extend .ly-full-screen;
-        @include ly-center;
+        @include ly-full-screen();
+        @include ly-center();
     }
 </style>

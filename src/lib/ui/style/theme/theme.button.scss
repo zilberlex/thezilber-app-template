@@ -1,3 +1,5 @@
+@import '$lib/ui/style/tokens.misc.css';
+
 @mixin rings {
     --ring1: 0 0 0 1.5px var(--cl-background);
     --ring2: 0 0 0 3px var(--cl-primary-dim);
@@ -37,7 +39,6 @@
                                          inset var(--ring6);}
                 }
 
-@mixin button {
 	button,
 	a.link-button {
         position: relative;
@@ -45,6 +46,7 @@
 
         --_hover-offset: -4px;
 
+        color: var(--cl-on-primary);
         background-color: var(--cl-background);
 
         z-index: 0;
@@ -87,7 +89,7 @@
 
                 box-shadow: none;
                 
-                background: radial-gradient(120% 100%, #000 5%, var(--cl-primary-dim));
+                background: radial-gradient(120% 100%, #000 0%, var(--cl-primary-dim) 125%);
             }
 
             & {
@@ -106,9 +108,10 @@
             }
 
             & {
-                transform: translate(0, 0) scale(1);                
+                transform: translate(0, 0) scale(1);
+
                 &::after {
-                    background: radial-gradient(120% 100%, #000 5%, var(--cl-primary));
+                    background: radial-gradient(120% 100%, #000 0%, var(--cl-primary) 115%);
                     --ring2: 0 0 0 3px var(--cl-primary);
                     --ring4: 0 0 0 5px var(--cl-primary-dim);
                     --ring6: 0 0 0 7px var(--cl-primary-dimmer);
@@ -120,4 +123,3 @@
             }
         }
 	}
-}

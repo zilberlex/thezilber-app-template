@@ -1,8 +1,6 @@
-@mixin lists {
-    ul,
-    li {
-      &::marker {
+ul,
+li {
+    &::marker {
         color: var(--cl-primary);
-      }  
     }
 }
