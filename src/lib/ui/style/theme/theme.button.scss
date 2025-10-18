@@ -1,125 +1,151 @@
 @import '$lib/ui/style/tokens.misc.css';
 
 @mixin rings {
-    --ring1: 0 0 0 1.5px var(--cl-background);
-    --ring2: 0 0 0 3px var(--cl-primary-dim);
-    --ring3: 0 0 0 4px var(--cl-background);
-    --ring4: 0 0 0 5px var(--cl-primary-dimmer);
-    --ring5: 0 0 0 6px var(--cl-background);
-    --ring6: 0 0 0 7px var(--cl-primary-dimmest);
+	--ring1: 0 0 0 1.5px var(--cl-background);
+	--ring2: 0 0 0 3px var(--cl-primary-dim);
+	--ring3: 0 0 0 4px var(--cl-background);
+	--ring4: 0 0 0 5px var(--cl-primary-dimmer);
+	--ring5: 0 0 0 6px var(--cl-background);
+	--ring6: 0 0 0 7px var(--cl-primary-dimmest);
 
-    --ring2-invis: 0 0 0 3px var(--cl-primary-dim-transparent);
-    --ring4-invis: 0 0 0 5px var(--cl-primary-dimmer-transparent);
-    --ring6-invis: 0 0 0 7px var(--cl-primary-dimmest-transparent);
+	--ring2-invis: 0 0 0 3px var(--cl-primary-dim-transparent);
+	--ring4-invis: 0 0 0 5px var(--cl-primary-dimmer-transparent);
+	--ring6-invis: 0 0 0 7px var(--cl-primary-dimmest-transparent);
 
-    animation: ring-stack 0.25s forwards linear;
+    --rings-end-bg: radial-gradient(120% 100%, #000 0%, var(--cl-primary-dim) 125%);
+
+	animation: ring-stack 0.25s forwards linear;
 }
 
 @keyframes ring-stack {
-                    0%   { box-shadow: inset var(--ring1), 
-                                       inset var(--ring2-invis); }
+	0% {
+		box-shadow:
+			inset var(--ring1),
+			inset var(--ring2-invis);
+	}
 
-                    33%  { box-shadow:   inset var(--ring1), 
-                                         inset var(--ring2),
-                                         inset var(--ring3),
-                                         inset var(--ring4-invis);}
-                    
-                    66%  { box-shadow:   inset var(--ring1), 
-                                         inset var(--ring2),
-                                         inset var(--ring3),
-                                         inset var(--ring4),
-                                         inset var(--ring5),
-                                         inset var(--ring6-invis);}
-                    
-                    100%  { box-shadow:  inset var(--ring1), 
-                                         inset var(--ring2),
-                                         inset var(--ring3),
-                                         inset var(--ring4),
-                                         inset var(--ring5),
-                                         inset var(--ring6);}
-                }
+	25% {
+		box-shadow:
+			inset var(--ring1),
+			inset var(--ring2),
+			inset var(--ring3),
+			inset var(--ring4-invis);
+	}
 
-	button,
-	a.link-button {
-        position: relative;
-        isolation: isolate;
+	50% {
+		box-shadow:
+			inset var(--ring1),
+			inset var(--ring2),
+			inset var(--ring3),
+			inset var(--ring4),
+			inset var(--ring5),
+			inset var(--ring6-invis);
+	}
 
-        --_hover-offset: -4px;
+	75% {
+		box-shadow:
+			inset var(--ring1),
+			inset var(--ring2),
+			inset var(--ring3),
+			inset var(--ring4),
+			inset var(--ring5),
+			inset var(--ring6);
+	}
 
-        color: var(--cl-on-primary);
-        background-color: var(--cl-background);
+	100% {
+		box-shadow:
+			inset var(--ring1),
+			inset var(--ring2),
+			inset var(--ring3),
+			inset var(--ring4),
+			inset var(--ring5),
+			inset var(--ring6);
+        
+            background: var(--rings-end-bg);
+	}
+}
 
-        z-index: 0;
+button,
+a.link-button {
+	position: relative;
+	isolation: isolate;
 
-		border: var(--border-thick) solid var(--cl-primary);
-        border-radius: var(--border-radius);
-        padding: var(--space-2) var(--space-3);
+	--_hover-offset: -4px;
 
-        filter: drop-shadow(0px 0px 4px var(--color-1-transparent));
+	color: var(--cl-on-primary);
+	background-color: var(--cl-background);
 
-        line-height: var(--sp-line-height);
+	z-index: 0;
 
-        &,
-        &::before,
-        &::after,
-        & span {
-            transition: all, 0.25s linear;
-        }
+	border: var(--border-thick) solid var(--cl-primary);
+	border-radius: var(--border-radius);
+	padding: var(--space-2) var(--space-3);
 
-		span {			
-			display: inline-block;
-            background-color: transparent;
-            padding-inline: 2px;
+	filter: drop-shadow(0px 0px 4px var(--color-1-transparent));
+
+	line-height: var(--sp-line-height);
+
+	&,
+	&::before,
+	&::after,
+	& span {
+		transition:
+			all,
+			0.25s linear;
+	}
+
+	span {
+		display: inline-block;
+		background-color: transparent;
+		padding-inline: 2px;
+	}
+
+	&:is(:focus-visible, :hover) {
+		border-color: var(--color-1-brightest);
+		filter: drop-shadow(0px 0px 4px var(--color-1));
+
+		&::after {
+			@include rings();
+
+			position: absolute;
+			inset: 0;
+			content: '';
+
+			border-radius: inherit;
+
+			z-index: -1;
+
+			box-shadow: none;
 		}
 
-		&:is(:focus-visible, :hover) {
-            border-color: var(--color-1-brightest);
-            filter: drop-shadow(0px 0px 4px var(--color-1));
+		& {
+			transform: translate(0, calc(-4px)) scale(1);
+		}
 
-            &::after {
-                @include rings();
-
-                position: absolute;
-                inset: 0;
-                content: "";
-
-                border-radius: inherit;
-
-                z-index: -1;
-
-                box-shadow: none;
-                
-                background: radial-gradient(120% 100%, #000 0%, var(--cl-primary-dim) 125%);
-            }
-
-            & {
-                transform: translate(0, calc(-4px)) scale(1);
-            }
-
-            & span {
-                transform: translate(0, calc(0.5px)) scale(1);
-            }
-        }
-
-        &:active {
-            &,
-            & * {
-                transition: all 0s;
-            }
-
-            & {
-                transform: translate(0, 0) scale(1);
-
-                &::after {
-                    background: radial-gradient(120% 100%, #000 0%, var(--cl-primary) 115%);
-                    --ring2: 0 0 0 3px var(--cl-primary);
-                    --ring4: 0 0 0 5px var(--cl-primary-dim);
-                    --ring6: 0 0 0 7px var(--cl-primary-dimmer);
-                }
-            }
-            
-            & span {
-                transform: translate(0, 0) scale(1);
-            }
-        }
+		& span {
+			transform: translate(0, calc(0.5px)) scale(1);
+		}
 	}
+
+	&:active {
+		&,
+		& * {
+			transition: all 0s;
+		}
+
+		& {
+			transform: translate(0, 0) scale(1);
+
+			&::after {
+                --rings-end-bg: radial-gradient(120% 100%, #000 -2.5%, var(--cl-primary-dim) 125%);
+				--ring2: 0 0 0 3px var(--cl-primary);
+				--ring4: 0 0 0 5px var(--cl-primary-dim);
+				--ring6: 0 0 0 7px var(--cl-primary-dimmer);
+			}
+		}
+
+		& span {
+			transform: translate(0, 0) scale(1);
+		}
+	}
+}
