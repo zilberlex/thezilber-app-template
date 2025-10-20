@@ -11,6 +11,9 @@ importers:
       '@fontsource-variable/jetbrains-mono':
         specifier: ^5.2.6
         version: 5.2.6
+      '@fontsource/audiowide':
+        specifier: ^5.2.7
+        version: 5.2.7
       sass:
         specifier: ^1.91.0
         version: 1.91.0
@@ -271,6 +274,9 @@ packages:
 
   '@fontsource-variable/jetbrains-mono@5.2.6':
     resolution: {integrity: sha512-1pvtyK6H1paBOixbtZ9xfQgArVQ4SJMW3WSGZPOd5PiW3yg0t8umwKnjDMzW2ofb7qSdiXnsnIaHPT36vEOdlg==}
+
+  '@fontsource/audiowide@5.2.7':
+    resolution: {integrity: sha512-ude+jAqXaEkV4vfKAYyfub694LSy/OKkYyUHumYrEP3ZgSSP6TomITFLUC8x6Fhc2salL7nuju3xT6aWOHECPg==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -1389,6 +1395,8 @@ snapshots:
       levn: 0.4.1
 
   '@fontsource-variable/jetbrains-mono@5.2.6': {}
+
+  '@fontsource/audiowide@5.2.7': {}
 
   '@humanfs/core@0.19.1': {}
 

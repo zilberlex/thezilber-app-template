@@ -22,5 +22,5 @@
     --space-lg: var(--space-4);
     --space-xl: var(--space-5);
 
-    --space: var(----space-3);
+    --padding-hz: var(--space-2);
 }
