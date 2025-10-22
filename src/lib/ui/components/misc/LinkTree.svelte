@@ -10,7 +10,7 @@
 
 <style>
     ul {
-        font-size: var(--font-size-2);
+        font-size: var(--font-size-3);
     
         list-style-type: none;
     }
