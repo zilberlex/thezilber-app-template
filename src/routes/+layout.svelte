@@ -57,10 +57,6 @@
 			display: inline-block;
 		}
 
-		.left {
-			align-self: left;
-		}
-
 		.center {
 			align-self: center;
 			transform: translateY(-50%);
