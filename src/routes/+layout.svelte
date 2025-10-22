@@ -65,7 +65,7 @@
 
 			@media (width <= 750px) {
 				transform: none;
-				margin-top: var(--space-3);
+				margin-top: var(--space-5);
 			}
 		}
 	}

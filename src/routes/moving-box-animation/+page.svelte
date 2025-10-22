@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { tweenValue } from "$lib/engine/animation/animations/tweens";
-    	import Button from "$lib/ui/style/theme/Button.svelte";
+    import Button from "$lib/ui/style/theme/Button.svelte";
 
     let element: HTMLElement;
 
     let tAnimation = tweenValue((val) => {
         element.style.left = val + "px";     
-    }, { from: 0, to: 300, duration: 1000} );
+    }, { from: 0, to: 200, duration: 1000} );
     
     
     function startAnimation() {
@@ -49,7 +49,7 @@
         box-sizing: content-box;
         padding: 0;
 
-        width: calc(var(--moving-box-width) + 300px);
+        width: calc(var(--moving-box-width) + 200px);
         height: calc(var(--moving-box-width));
 
         position: relative;
