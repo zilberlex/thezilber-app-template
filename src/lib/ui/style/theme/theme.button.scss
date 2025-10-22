@@ -12,7 +12,7 @@
 	--ring4-invis: 0 0 0 5px var(--cl-primary-dimmer-transparent);
 	--ring6-invis: 0 0 0 7px var(--cl-primary-dimmest-transparent);
 
-    --rings-end-bg: radial-gradient(120% 100%, #000 0%, var(--cl-primary-dim) 125%);
+    --rings-end-bg: radial-gradient(120% 100%, #000 0%, var(--cl-primary-dimmer) 175%);
 
 	animation: ring-stack 0.25s forwards linear;
 }
@@ -61,7 +61,7 @@
 			inset var(--ring5),
 			inset var(--ring6);
         
-            background: var(--rings-end-bg);
+		background: var(--rings-end-bg);
 	}
 }
 
@@ -137,7 +137,7 @@ a.link-button {
 			transform: translate(0, 0) scale(1);
 
 			&::after {
-                --rings-end-bg: radial-gradient(120% 100%, #000 -2.5%, var(--cl-primary-dim) 125%);
+                --rings-end-bg: radial-gradient(120% 100%, #000 -2.5%, var(--cl-primary-dim) 155%);
 				--ring2: 0 0 0 3px var(--cl-primary);
 				--ring4: 0 0 0 5px var(--cl-primary-dim);
 				--ring6: 0 0 0 7px var(--cl-primary-dimmer);

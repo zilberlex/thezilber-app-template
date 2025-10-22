@@ -11,5 +11,7 @@
 <style>
     ul {
         font-size: var(--font-size-2);
+    
+        list-style-type: none;
     }
 </style>

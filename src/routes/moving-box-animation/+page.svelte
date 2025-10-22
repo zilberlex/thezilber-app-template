@@ -20,7 +20,7 @@
 </script>
 
 
-<div class="container ly-full-screen">
+<div class="container">
     <div class="box-container box">
         <div class="moving-box" bind:this={element}>
             Box

@@ -7,13 +7,38 @@ $emit-default: false !default;
 }
 
 @mixin ly-full-screen {
-    height: 100vh;
+    height: 100dvh;
     width: 100%;
 }
 
 @mixin ly-fill-container {
     min-height: 100%;
     min-width: 100%;
+}
+
+@mixin hz-cover {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    inline-size: 100%;
+    box-sizing: border-box;
+
+    & > .left {
+        box-sizing: border-box;
+        justify-self: start;
+    }
+
+    & > .center {
+        box-sizing: border-box;
+
+        justify-self: center;
+    }
+
+    & > .right {
+        box-sizing: border-box;
+
+        justify-self: right;
+		}
 }
 
 @if $emit-default {

@@ -27,19 +27,19 @@
 
 </script>
 
-<main class="mini-app box box-highlight">
+<div class="mini-app box box-highlight">
     <div class="input-area">
             <InputCombo type="number" bind:value={field1} id="field1" placeholder="input1">X</InputCombo>
             <InputCombo type="number" bind:value={field2} id="field2" placeholder="input2">Y</InputCombo>
     </div>
 
     <OutputCombo id="output" value={output}>Output</OutputCombo>
-</main>
+</div>
 
 <style lang="scss">
     .mini-app {
         width: min(600px, 80%);
-        height: min(400px, 60%);
+        height: min(400px, 60vh);
 
         position: relative;
 
