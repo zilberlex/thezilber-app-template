@@ -1,11 +1,12 @@
 <script lang="ts">
-  import HomeButton from './home-button.svelte';
+  import HomeButton from './HomeButton.svelte';
 
 	import '@fontsource-variable/jetbrains-mono';
 	import '@fontsource/audiowide';
 	// Global import.
 	import '$lib/ui/style/reset.css';
 	import '$lib/ui/style/theme/theme.scss';
+	import HotKeysInitialization from '$lib/engine/keyboard-navigation/svelte-components/HotKeysInitialization.svelte';
 
 	let { children } = $props();
 
@@ -16,6 +17,7 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 </svelte:head>
 
+<HotKeysInitialization />
 <div class="app-container">
 	<header class="header">
 		<div>

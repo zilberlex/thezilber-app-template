@@ -1,0 +1,1 @@
+export const FOCUS_HOTKEY_COOLDOWN_MS = 20;
