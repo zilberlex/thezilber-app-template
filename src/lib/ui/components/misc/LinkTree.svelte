@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
+
 	const { urls } = $props();
 </script>
 
 <ul>
 	{#each urls as url}
-		<li><a href={url}>{url}</a></li>
+		<li><a href={resolve(url)}>{url}</a></li>
 	{/each}
 </ul>
 

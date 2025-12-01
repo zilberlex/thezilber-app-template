@@ -5,10 +5,11 @@
 	import '$lib/ui/style/reset.css';
 	import '$lib/ui/style/theme/theme.scss';
 	import { createFocusHotKeyAction } from '$lib/engine/hotkeys/hotkey-actions';
+	import { resolve } from '$app/paths';
 </script>
 
 <div class="home-button-container">
-	<a href="/" class="home-button left" use:createFocusHotKeyAction={'h'}>Home</a>
+	<a href={resolve('/')} class="home-button left" use:createFocusHotKeyAction={'h'}>Home</a>
 </div>
 
 <style lang="scss">
