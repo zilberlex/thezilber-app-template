@@ -17,7 +17,7 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 	scopeContainer: HTMLElement;
 	navigatiableNodes: HTMLElement[];
 
-	#focusNodeDispatcher = new DispatcherImpl<NodeFocusEvent>(); 
+	#focusNodeDispatcher = new DispatcherImpl<NodeFocusEvent>();
 
 	#abortController: AbortController;
 
@@ -46,7 +46,9 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 		});
 
 		this.navigatiableNodes.forEach((node) => {
-			node.addEventListener('pointerenter', this.#onFocusElement_SetCurrentNode_SmartHandler, { signal });
+			node.addEventListener('pointerenter', this.#onFocusElement_SetCurrentNode_SmartHandler, {
+				signal
+			});
 		});
 	}
 
@@ -91,7 +93,7 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 
 		return {
 			unregister: () => this.#focusNodeDispatcher.unregister(handler)
-		}
+		};
 	}
 
 	#initializeFocusableElements(focusableElements: HTMLElement[]) {
@@ -123,11 +125,7 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 
 		let nodeNavId = parseInt(navid);
 		if (nodeNavId != 0 && !nodeNavId) {
-			console.warn(
-				'ARROW SCOPE FOCUS_CHANGE: failed to parse navigation id on node.',
-				navid,
-				node
-			);
+			console.warn('ARROW SCOPE FOCUS_CHANGE: failed to parse navigation id on node.', navid, node);
 			return;
 		}
 
@@ -137,8 +135,11 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 		this.#currentNodeIndex = nodeNavId;
 	};
 
-	#onFocusElement_SetCurrentNode_SmartHandler = createSmartHandler(this.#onFocusElement_SetCurrentNode, {
-		debounceDelay: 50,
-		cooldownDelay: 200
-	});
+	#onFocusElement_SetCurrentNode_SmartHandler = createSmartHandler(
+		this.#onFocusElement_SetCurrentNode,
+		{
+			debounceDelay: 50,
+			cooldownDelay: 200
+		}
+	);
 }

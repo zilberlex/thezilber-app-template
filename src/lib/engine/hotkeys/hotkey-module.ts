@@ -1,4 +1,4 @@
-import { OneToManyDictionary } from "$lib/engine/patterns/one-to-many-dictionary";
+import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
 
 type EventHandler<E extends Event> = (event: E) => void;
 
@@ -18,9 +18,7 @@ class HotkeysModule {
 		key = key.toLowerCase();
 
 		if (!this.#wasInitialized) {
-			throw new Error(
-				`${HotkeysModule.name} Need to initialize Class before assigning hotkeys`
-			);
+			throw new Error(`${HotkeysModule.name} Need to initialize Class before assigning hotkeys`);
 		}
 
 		this.#hotKeysToHandlers.add(key, handler);

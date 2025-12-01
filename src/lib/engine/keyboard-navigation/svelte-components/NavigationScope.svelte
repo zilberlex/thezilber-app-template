@@ -30,11 +30,7 @@
 			console.debug('NavigationScope - NavigaitonManager Context', navigationManager);
 
 			navigationKeys = navigationKeys ?? NavigationKeysConfigSets.Horizontal;
-			scope = new NavigationScopeInfraImpl(
-				thisElement,
-				navigationKeys,
-				scopeName
-			);
+			scope = new NavigationScopeInfraImpl(thisElement, navigationKeys, scopeName);
 
 			navigationManager?.registerScope(scope);
 

@@ -17,7 +17,7 @@ export function tweenValue(
 
 	const lerpTween = createLerpTween(from, to);
 
-    return createAnimationControlTween(lerpTween, valCb, initialParams);
+	return createAnimationControlTween(lerpTween, valCb, initialParams);
 }
 
 export function animateNumberByDigits(
@@ -28,7 +28,7 @@ export function animateNumberByDigits(
 
 	const animatedNumberTween = createNumberByDigitsTween(from, to);
 
-    return createAnimationControlTween(animatedNumberTween, valCb, initialParams);
+	return createAnimationControlTween(animatedNumberTween, valCb, initialParams);
 }
 
 export function createAnimationControlTween<T extends TBasedAnimationParams>(

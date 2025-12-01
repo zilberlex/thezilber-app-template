@@ -21,10 +21,11 @@
 	});
 
 	$effect(() => {
-		const navManagerNavigationHotkeyHandlerDestroy =
-			navigationManager.registerNavigationHandler((obj) => {
+		const navManagerNavigationHotkeyHandlerDestroy = navigationManager.registerNavigationHandler(
+			(obj) => {
 				signalNavigationHotkeyEvent(obj.initiatingKey, obj.targetNode);
-			});
+			}
+		);
 
 		return () => {
 			navManagerNavigationHotkeyHandlerDestroy();

@@ -3,7 +3,11 @@ import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
 import { keyBoardFocusNavigatedNode } from '$lib/engine/keyboard-navigation/navigation-utils';
 import { DispatcherImpl, type Dispatcher } from '$lib/engine/patterns/observer';
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
-import { NavigationKeyConsts, type NavigationKeysConfig, type ScopeInfra } from '../../my-packages/az-keyboard-navigation/types';
+import {
+	NavigationKeyConsts,
+	type NavigationKeysConfig,
+	type ScopeInfra
+} from '../../my-packages/az-keyboard-navigation/types';
 
 interface NavigationEvent {
 	targetNode: HTMLElement;
@@ -47,7 +51,7 @@ export class NavigationManager {
 		this.addNavigationKeys(scope, scope.navigationKeys);
 
 		const i = this.#getScopeIndex(scope);
-		this.#destTargets[i] = scope.registerOnFocus(() => this.#currentScopeIndex = i)
+		this.#destTargets[i] = scope.registerOnFocus(() => (this.#currentScopeIndex = i));
 	}
 
 	unregisterScope(scope: ScopeInfra) {
@@ -58,15 +62,17 @@ export class NavigationManager {
 
 		const i = this.#getScopeIndex(scope);
 		if (i != -1) {
-			const {unregister} = this.#destTargets.splice(this.#getScopeIndex(scope), 1)[0]; 
+			const { unregister } = this.#destTargets.splice(this.#getScopeIndex(scope), 1)[0];
 			unregister();
 			if (this.#currentScopeIndex >= i) {
 				this.#currentScopeIndex--;
 				this.#currentScopeIndex = Math.max(this.#currentScopeIndex, 0);
-			} 
-		}
-		else
-			console.warn('NavigationManager - unregisterScope - scope not found in destTargets. scopeName:', scope.scopeName);
+			}
+		} else
+			console.warn(
+				'NavigationManager - unregisterScope - scope not found in destTargets. scopeName:',
+				scope.scopeName
+			);
 	}
 
 	#getScopeIndex(scope: ScopeInfra): number {

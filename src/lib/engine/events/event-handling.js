@@ -3,12 +3,7 @@
  * @param {{debounceDelay?: number, cooldownDelay?: number, context?: string, shouldPreventDefault?: boolean}} options
  */
 export function createSmartHandler(handler, options = {}) {
-	const {
-		debounceDelay = 0,
-		cooldownDelay = 1500,
-		context,
-		shouldPreventDefault = true
-	} = options;
+	const { debounceDelay = 0, cooldownDelay = 1500, context, shouldPreventDefault = true } = options;
 
 	if (context)
 		console.debug(

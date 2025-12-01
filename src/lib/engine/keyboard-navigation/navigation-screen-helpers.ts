@@ -1,7 +1,5 @@
 import { appState } from '$lib/engine/state/application-state.svelte';
-import {
-	isElementInViewDebugContext as isElementInViewDebugContext,
-} from '$lib/app/state/debugging-context.svelte';
+import { isElementInViewDebugContext as isElementInViewDebugContext } from '$lib/app/state/debugging-context.svelte';
 
 export type OutOfBoundsObjectType = {
 	topOutOfBounds: number;

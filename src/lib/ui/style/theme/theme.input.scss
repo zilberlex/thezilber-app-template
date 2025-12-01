@@ -3,91 +3,93 @@
 @import '$lib/ui/style/tokens.color.css';
 
 /* Remove the spinners in Firefox */
-input[type=number] {
-    appearance: textfield;
+input[type='number'] {
+	appearance: textfield;
 }
 
 input-combo {
-    margin-block: 1px;
-    display: inline-flex;
-    position: relative;
+	margin-block: 1px;
+	display: inline-flex;
+	position: relative;
 
-    padding-left: var(--padding-1);
+	padding-left: var(--padding-1);
 
-    &::before {
-        position: absolute;
-        left: 0;
-        content: "";
-        inset-block: 0;            // top: 0; bottom: 0;
-        inset-inline-start: 0;     // left: 0;
-        width: 0;
-        border-left: var(--border-thick) solid var(--cl-primary);
-    }
+	&::before {
+		position: absolute;
+		left: 0;
+		content: '';
+		inset-block: 0; // top: 0; bottom: 0;
+		inset-inline-start: 0; // left: 0;
+		width: 0;
+		border-left: var(--border-thick) solid var(--cl-primary);
+	}
 
-    &:has(input:required:invalid) {
-        & > label .suffix,
-        &::before {
-            --animation-glow-color: var(--cl-primary);
-            @include glow-text;
-        }
-    }
+	&:has(input:required:invalid) {
+		& > label .suffix,
+		&::before {
+			--animation-glow-color: var(--cl-primary);
+			@include glow-text;
+		}
+	}
 }
 
 label {
-    flex: 0 0 auto;
-    
-    & .prefix {
-        display: inline-block;
-        min-width: 3ch;
-    }
+	flex: 0 0 auto;
 
-    & .suffix {
-        @include ul-txt-primary;
-        color: var(--cl-primary);
-    }
+	& .prefix {
+		display: inline-block;
+		min-width: 3ch;
+	}
+
+	& .suffix {
+		@include ul-txt-primary;
+		color: var(--cl-primary);
+	}
 }
 
 input {
-    flex: 1 1 auto; /* fill remaining space */
-    min-width: 0;  
+	flex: 1 1 auto; /* fill remaining space */
+	min-width: 0;
 
-    padding-inline: var(--_box-padding);
-    border-color: var(--cl-primary);
+	padding-inline: var(--_box-padding);
+	border-color: var(--cl-primary);
 
-    border: none;
+	border: none;
 
-    & {
-        @include animate-padding();
-        --_animate-padding-delta: 0rem;
-        --_animate-padding-base: var(--_box-padding);
-        font-weight: 400;
-    }
+	& {
+		@include animate-padding();
+		--_animate-padding-delta: 0rem;
+		--_animate-padding-base: var(--_box-padding);
+		font-weight: 400;
+	}
 
-    &, &:focus, &:hover {
-        color: var(--cl-on-surface);
+	&,
+	&:focus,
+	&:hover {
+		color: var(--cl-on-surface);
 
-        transition-property: font-weight, padding, box-shadow, border-color;
-        transition-duration: .2s;
-        transition-timing-function: ease-out;
-    }
+		transition-property: font-weight, padding, box-shadow, border-color;
+		transition-duration: 0.2s;
+		transition-timing-function: ease-out;
+	}
 
-    &:focus {
-        --_animate-padding-delta: .25rem;
-        
-        font-weight: 900;
-        border-color: var(--cl-primary-bright);
-    }
+	&:focus {
+		--_animate-padding-delta: 0.25rem;
 
-    &::placeholder {
-        transition: opacity 0.2s ease-out;
+		font-weight: 900;
+		border-color: var(--cl-primary-bright);
+	}
 
-        font-style: italic;
-        font-weight: normal;
-        color: var(--cl-primary-dimmer);
-        transition: color 0.2s ease-out;
-    }
+	&::placeholder {
+		transition: opacity 0.2s ease-out;
 
-    &:focus::placeholder {
-        color: var(--cl-primary-dimmest);
-    }
+		font-style: italic;
+		font-weight: normal;
+		color: var(--cl-primary-dimmer);
+		transition: color 0.2s ease-out;
+	}
+
+	&:focus::placeholder {
+		color: var(--cl-primary-dimmest);
+	}
 }

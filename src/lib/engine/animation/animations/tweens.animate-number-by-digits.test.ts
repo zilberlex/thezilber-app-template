@@ -1,4 +1,4 @@
-import { __test__ } from "./animate-number-by-digits";
+import { __test__ } from './animate-number-by-digits';
 
 // Testing
 //
@@ -7,7 +7,6 @@ import { __test__ } from "./animate-number-by-digits";
 // let [from, to] = [-255, -242];
 // let [from, to] = [242,253];
 // let [from, to] = [1225, 1225];
-
 
 let [from, to] = [0, 9999];
 // let [from, to] = [990, 1012];

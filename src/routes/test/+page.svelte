@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { getRoutes } from "$lib/scripts/get-routes";
-	import LinkTree from "$lib/ui/components/misc/LinkTree.svelte";
+	import { getRoutes } from '$lib/scripts/get-routes';
+	import LinkTree from '$lib/ui/components/misc/LinkTree.svelte';
 
-    const m = getRoutes();
+	const m = getRoutes();
 </script>
 
-<LinkTree urls={m}/>
+<LinkTree urls={m} />

@@ -6,7 +6,9 @@
 @use '$lib/ui/style/theme/theme.lists.scss' as tLists;
 @use '$lib/ui/style/theme/theme.href.scss' as tHref;
 @use '$lib/ui/style/theme/theme.headlines.scss' as headline;
-@use '$lib/ui/style/utility/utility.scss' with ($emit-default: true);
+@use '$lib/ui/style/utility/utility.scss' with (
+	$emit-default: true
+);
 @import '$lib/ui/style/tokens.color.css';
 @import '$lib/ui/style/tokens.typography.css';
 @import '$lib/ui/style/tokens.layout.css';
@@ -14,23 +16,23 @@
 
 body,
 input {
-    font-family: var(--font-1);
-    font-size: var(--font-size-1);
+	font-family: var(--font-1);
+	font-size: var(--font-size-1);
 }
 
-body {    
-    background-color: var(--cl-background);
-    color: var(--cl-on-background);
-    
-    &::selection {
-        background-color: var(--cl-primary);
-    }
+body {
+	background-color: var(--cl-background);
+	color: var(--cl-on-background);
+
+	&::selection {
+		background-color: var(--cl-primary);
+	}
 }
 
 .ul-highlight {
-    @include ul-highlight;
+	@include ul-highlight;
 }
 
 .ul-txt-primary {
-    @include ul-txt-primary;
+	@include ul-txt-primary;
 }

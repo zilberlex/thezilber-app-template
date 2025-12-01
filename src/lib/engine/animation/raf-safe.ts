@@ -21,11 +21,7 @@ const fallbackRaf: Raf = (cb) => {
 const fallbackCaf: Caf = (h) => clearTimeout(h as ReturnType<typeof setTimeout>);
 
 export const safeRaf: Raf =
-	typeof g.requestAnimationFrame === 'function'
-		? g.requestAnimationFrame
-		: fallbackRaf;
+	typeof g.requestAnimationFrame === 'function' ? g.requestAnimationFrame : fallbackRaf;
 
 export const safeCaf: Caf =
-	typeof g.cancelAnimationFrame === 'function'
-		? g.cancelAnimationFrame
-		: fallbackCaf;
+	typeof g.cancelAnimationFrame === 'function' ? g.cancelAnimationFrame : fallbackCaf;
