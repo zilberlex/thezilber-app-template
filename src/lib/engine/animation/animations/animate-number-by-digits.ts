@@ -179,4 +179,3 @@ function countingByDigitsEffectAscCase(from: number, to: number) {
 
 	return ranges;
 }
-

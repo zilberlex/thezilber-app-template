@@ -1,0 +1,13 @@
+@use '../effects.scss' as *;
+
+a[href] {
+	color: var(--cl-primary);
+	text-decoration-color: var(--cl-on-surface);
+
+	&:is(:hover, :focus-visible) {
+		outline: none;
+
+		@include glow-text();
+		text-decoration-color: var(--cl-primary);
+	}
+}

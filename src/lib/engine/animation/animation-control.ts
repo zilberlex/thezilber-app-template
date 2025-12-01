@@ -1,7 +1,10 @@
-import type { AnimationCallback, AnimationControl } from "./animation.types";
-import { safeCaf, safeRaf } from "./raf-safe";
+import type { AnimationCallback, AnimationControl } from './animation.types';
+import { safeCaf, safeRaf } from './raf-safe';
 
-export function animationControl<T>(cb: AnimationCallback<T>, initialParams: T): AnimationControl<T> {
+export function animationControl<T>(
+	cb: AnimationCallback<T>,
+	initialParams: T
+): AnimationControl<T> {
 	let rafId = 0;
 	let _running = false;
 	let _paused = false;
@@ -23,7 +26,7 @@ export function animationControl<T>(cb: AnimationCallback<T>, initialParams: T):
 	const ctl: AnimationControl<T> = {
 		start(animationParams?: Partial<T>) {
 			if (_running && !_paused) return;
-			
+
 			_startAt = null;
 			_animationRunTime = 0;
 			_running = true;
@@ -40,7 +43,7 @@ export function animationControl<T>(cb: AnimationCallback<T>, initialParams: T):
 			rafId = safeRaf(loop);
 		},
 		stop() {
-			if (!_running) return;				
+			if (!_running) return;
 			hardStop();
 		},
 		pause() {
@@ -54,19 +57,25 @@ export function animationControl<T>(cb: AnimationCallback<T>, initialParams: T):
 			console.log('resume');
 			_paused = false;
 			if (_pausedAt != null) {
-				 _pausedTotal += performance.now() - _pausedAt;
-				_pausedAt = null; 
+				_pausedTotal += performance.now() - _pausedAt;
+				_pausedAt = null;
 			}
 			last = 0;
 			rafId = safeRaf(loop);
 		},
-		get running() { return _running; },
-		get paused() {
-			_pausedAt = performance.now(); 
-			return _paused; 
+		get running() {
+			return _running;
 		},
-		get animationRuntime() { return _animationRunTime; },
-		get currentAnimationParams() { return _animationParams; }
+		get paused() {
+			_pausedAt = performance.now();
+			return _paused;
+		},
+		get animationRuntime() {
+			return _animationRunTime;
+		},
+		get currentAnimationParams() {
+			return _animationParams;
+		}
 	};
 
 	function loop(now: number) {
@@ -76,7 +85,7 @@ export function animationControl<T>(cb: AnimationCallback<T>, initialParams: T):
 		const dt = last ? now - last : 16.6667;
 		last = now;
 
-		_animationRunTime += dt - _pausedTotal;		
+		_animationRunTime += dt - _pausedTotal;
 
 		const r = cb(dt, _animationRunTime, ctl, _animationParams);
 		if (r === false) {

@@ -1,110 +1,151 @@
-@mixin button {
-	button,
-	a.link-button {
-        position: relative;
-        isolation: isolate;
+@import '$lib/ui/style/tokens.misc.css';
 
-        --_hover-offset: -4px;
+@mixin rings {
+	--ring1: 0 0 0 1.5px var(--cl-background);
+	--ring2: 0 0 0 3px var(--cl-primary-dim);
+	--ring3: 0 0 0 4px var(--cl-background);
+	--ring4: 0 0 0 5px var(--cl-primary-dimmer);
+	--ring5: 0 0 0 6px var(--cl-background);
+	--ring6: 0 0 0 7px var(--cl-primary-dimmest);
 
-        background-color: var(--cl-background);
+	--ring2-invis: 0 0 0 3px var(--cl-primary-dim-transparent);
+	--ring4-invis: 0 0 0 5px var(--cl-primary-dimmer-transparent);
+	--ring6-invis: 0 0 0 7px var(--cl-primary-dimmest-transparent);
 
-        z-index: 0;
+	--rings-end-bg: radial-gradient(120% 100%, #000 0%, var(--cl-primary-dimmer) 175%);
 
-		border: var(--border-thick) solid var(--cl-primary);
-        border-radius: var(--border-radius);
-        padding: var(--space-2) var(--space-3);
+	animation: ring-stack 0.25s forwards linear;
+}
 
-        filter: drop-shadow(0px 0px 4px var(--color-1-transparent));
+@keyframes ring-stack {
+	0% {
+		box-shadow:
+			inset var(--ring1),
+			inset var(--ring2-invis);
+	}
 
-        line-height: var(--sp-line-height);
+	25% {
+		box-shadow:
+			inset var(--ring1),
+			inset var(--ring2),
+			inset var(--ring3),
+			inset var(--ring4-invis);
+	}
 
-        &,
-        &::before,
-        &::after,
-        & span {
-            transition: all, 0.25s linear;
-        }
+	50% {
+		box-shadow:
+			inset var(--ring1),
+			inset var(--ring2),
+			inset var(--ring3),
+			inset var(--ring4),
+			inset var(--ring5),
+			inset var(--ring6-invis);
+	}
 
-		span {			
-			display: inline-block;
-            background-color: transparent;
-            padding-inline: 2px;
+	75% {
+		box-shadow:
+			inset var(--ring1),
+			inset var(--ring2),
+			inset var(--ring3),
+			inset var(--ring4),
+			inset var(--ring5),
+			inset var(--ring6);
+	}
+
+	100% {
+		box-shadow:
+			inset var(--ring1),
+			inset var(--ring2),
+			inset var(--ring3),
+			inset var(--ring4),
+			inset var(--ring5),
+			inset var(--ring6);
+
+		background: var(--rings-end-bg);
+	}
+}
+
+button,
+a.link-button {
+	position: relative;
+	isolation: isolate;
+
+	--_hover-offset: -4px;
+
+	color: var(--cl-on-primary);
+	background-color: var(--cl-background);
+
+	z-index: 0;
+
+	border: var(--border-thick) solid var(--cl-primary);
+	border-radius: var(--border-radius);
+	padding: var(--space-2) var(--space-3);
+
+	filter: drop-shadow(0px 0px 4px var(--color-1-transparent));
+
+	line-height: var(--sp-line-height);
+
+	&,
+	&::before,
+	&::after,
+	& span {
+		transition:
+			all,
+			0.25s linear;
+	}
+
+	span {
+		display: inline-block;
+		background-color: transparent;
+		padding-inline: 2px;
+	}
+
+	&:is(:focus-visible, :hover) {
+		border-color: var(--color-1-brightest);
+		filter: drop-shadow(0px 0px 4px var(--color-1));
+
+		&::after {
+			@include rings();
+
+			position: absolute;
+			inset: 0;
+			content: '';
+
+			border-radius: inherit;
+
+			z-index: -1;
+
+			box-shadow: none;
 		}
 
-		&:is(:focus-visible, :hover) {
-            border-color: var(--color-1-brightest);
-            filter: drop-shadow(0px 0px 4px var(--color-1));
+		& {
+			transform: translate(0, calc(-4px)) scale(1);
+		}
 
-            &::after {
-                // --_break-color: var(--color-3);
-                --ring1: 0 0 0 1.5px var(--cl-background);
-                --ring2: 0 0 0 3px var(--cl-primary-dim);
-                --ring3: 0 0 0 4px var(--cl-background);
-                --ring4: 0 0 0 5px var(--cl-primary-dimmer);
-                --ring5: 0 0 0 6px var(--cl-background);
-                --ring6: 0 0 0 7px var(--cl-primary-dimmest);
+		& span {
+			transform: translate(0, calc(0.5px)) scale(1);
+		}
+	}
 
-                --ring2-invis: 0 0 0 3px var(--cl-primary-dim-transparent);
-                --ring4-invis: 0 0 0 5px var(--cl-primary-dimmer-transparent);
-                --ring6-invis: 0 0 0 7px var(--cl-primary-dimmest-transparent);
+	&:active {
+		&,
+		& * {
+			transition: all 0s;
+		}
 
-                position: absolute;
-                inset: 0;
-                content: "";
+		& {
+			transform: translate(0, 0) scale(1);
 
-                border-radius: inherit;
+			&::after {
+				--rings-end-bg: radial-gradient(120% 100%, #000 -2.5%, var(--cl-primary-dim) 155%);
+				--ring2: 0 0 0 3px var(--cl-primary);
+				--ring4: 0 0 0 5px var(--cl-primary-dim);
+				--ring6: 0 0 0 7px var(--cl-primary-dimmer);
+			}
+		}
 
-                z-index: -1;
-
-                box-shadow: none;
-                animation: ring-stack 0.25s forwards linear;
-
-                background: radial-gradient(120% 100%, #000 5%, var(--cl-primary-dimmest));
-
-                @keyframes ring-stack {
-                    0%   { box-shadow: inset var(--ring1), 
-                                       inset var(--ring2-invis); }
-
-                    33%  { box-shadow:   inset var(--ring1), 
-                                         inset var(--ring2),
-                                         inset var(--ring3),
-                                         inset var(--ring4-invis);}
-                    
-                    66%  { box-shadow:   inset var(--ring1), 
-                                         inset var(--ring2),
-                                         inset var(--ring3),
-                                         inset var(--ring4),
-                                         inset var(--ring5),
-                                         inset var(--ring6-invis);}
-                    
-                    100%  { box-shadow:  inset var(--ring1), 
-                                         inset var(--ring2),
-                                         inset var(--ring3),
-                                         inset var(--ring4),
-                                         inset var(--ring5),
-                                         inset var(--ring6);}
-                }
-            }
-
-            transform: translate(0, calc(-4px)) scale(1);
-
-            & span {
-                transform: translate(0, calc(0.5px)) scale(1);
-            }
-        }
-
-        &:active {
-            &,
-            & * {
-                transition: all 0s;
-            }
-
-            transform: translate(0, 0) scale(1);
-            
-            & span {
-                // background-color: var(--accent-strong);
-                transform: translate(0, 0) scale(1);
-            }
-        }
+		& span {
+			transform: translate(0, 0) scale(1);
+		}
 	}
 }

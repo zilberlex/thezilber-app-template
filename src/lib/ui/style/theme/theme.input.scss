@@ -2,89 +2,94 @@
 @use '$lib/ui/style/utility.color.scss' as *;
 @import '$lib/ui/style/tokens.color.css';
 
-@mixin input {
-    input-combo {
-        margin-block: 1px;
-        display: inline-flex;
-        position: relative;
+/* Remove the spinners in Firefox */
+input[type='number'] {
+	appearance: textfield;
+}
 
-        padding-left: var(--padding-1);
+input-combo {
+	margin-block: 1px;
+	display: inline-flex;
+	position: relative;
 
-        &::before {
-            position: absolute;
-            left: 0;
-            content: "";
-            inset-block: 0;            // top: 0; bottom: 0;
-            inset-inline-start: 0;     // left: 0;
-            width: 0;
-            border-left: var(--border-thick) solid var(--cl-primary);
-        }
+	padding-left: var(--padding-1);
 
-        &:has(input:required:invalid) {
-            & > label .suffix,
-            &::before {
-                --animation-glow-color: var(--cl-primary);
-                @include glow-text;
-            }
-        }
-    }
+	&::before {
+		position: absolute;
+		left: 0;
+		content: '';
+		inset-block: 0; // top: 0; bottom: 0;
+		inset-inline-start: 0; // left: 0;
+		width: 0;
+		border-left: var(--border-thick) solid var(--cl-primary);
+	}
 
-    label {
-        flex: 0 0 auto;
-        
-        & .prefix {
-            display: inline-block;
-            min-width: 3ch;
-        }
+	&:has(input:required:invalid) {
+		& > label .suffix,
+		&::before {
+			--animation-glow-color: var(--cl-primary);
+			@include glow-text;
+		}
+	}
+}
 
-        & .suffix {
-            @include ul-txt-primary;
-            color: var(--cl-primary);
-        }
-    }
+label {
+	flex: 0 0 auto;
 
-    input {
-        flex: 1 1 auto; /* fill remaining space */
-	    min-width: 0;  
+	& .prefix {
+		display: inline-block;
+		min-width: 3ch;
+	}
 
-        padding-inline: var(--_box-padding);
-        border-color: var(--cl-primary);
+	& .suffix {
+		@include ul-txt-primary;
+		color: var(--cl-primary);
+	}
+}
 
-        border: none;
+input {
+	flex: 1 1 auto; /* fill remaining space */
+	min-width: 0;
 
-        & {
-            @include animate-padding();
-            --_animate-padding-delta: 0rem;
-            --_animate-padding-base: var(--_box-padding);
-            font-weight: 400;
-        }
+	padding-inline: var(--_box-padding);
+	border-color: var(--cl-primary);
 
-        &, &:focus, &:hover {
-            color: var(--cl-on-surface);
+	border: none;
 
-            transition-property: font-weight, padding, box-shadow, border-color;
-            transition-duration: .2s;
-            transition-timing-function: ease-out;
-        }
-    
-        &:focus {
-            --_animate-padding-delta: .25rem;
-            
-            font-weight: 900;
-            border-color: var(--cl-primary-brighter);
-        }
-    
-        &::placeholder {
-            transition: opacity 0.2s ease-out;
+	& {
+		@include animate-padding();
+		--_animate-padding-delta: 0rem;
+		--_animate-padding-base: var(--_box-padding);
+		font-weight: 400;
+	}
 
-            font-style: italic;
-            font-weight: normal;
-            color: var(--cl-primary-dimmer);
-            transition: color 0.2s ease-out;
-        }
+	&,
+	&:focus,
+	&:hover {
+		color: var(--cl-on-surface);
 
-        &:focus::placeholder {
-            color: var(--cl-primary-dimmest);
-        }
-    }
+		transition-property: font-weight, padding, box-shadow, border-color;
+		transition-duration: 0.2s;
+		transition-timing-function: ease-out;
+	}
+
+	&:focus {
+		--_animate-padding-delta: 0.25rem;
+
+		font-weight: 900;
+		border-color: var(--cl-primary-bright);
+	}
+
+	&::placeholder {
+		transition: opacity 0.2s ease-out;
+
+		font-style: italic;
+		font-weight: normal;
+		color: var(--cl-primary-dimmer);
+		transition: color 0.2s ease-out;
+	}
+
+	&:focus::placeholder {
+		color: var(--cl-primary-dimmest);
+	}
 }

@@ -1,5 +1,17 @@
 :root {
-    --font-1: "JetBrains Mono Variable";
+	--font-1: 'JetBrains Mono Variable', monospace;
+	--font-2: 'Audiowide', monospace;
 
-    --font-size-1: 0.875rem;
+	--font-size-1: 0.875rem;
+	--font-size-2: 1rem;
+	--font-size-3: 1.2rem;
+	--font-size-4: 2rem;
+
+	--font-size-sm: var(--font-size-1);
+	--font-size: var(--font-size-2);
+	--font-size-lg: var(--font-size-3);
+	--font-size-xl: var(--font-size-4);
+
+	--font-body: var(--font-1);
+	--font-accent: var(--font-2);
 }

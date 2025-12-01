@@ -1,54 +1,53 @@
 :root {
-    /* Palette */
-    /* --color-1: oklch(56.02% 0.13556 245.271); */
-    --color-1: oklch(70.72% 0.16803 242.065);
-    /* --color-1: oklch(70.64% 0.22938 140.424); */
-    --color-1-values: from var(--color-1) l c h;
-    --color-2: oklch(98.112% 0.00938 286.056);
-    --color-3: oklch(0% 0 0);
-    --color-4: red;
+	/* Palette */
+	/* --color-1: oklch(56.02% 0.13556 245.271); */
+	--color-1: oklch(70.72% 0.16803 242.065);
+	/* --color-1: oklch(70.64% 0.22938 140.424); */
+	--color-1-values: from var(--color-1) l c h;
+	--color-2: oklch(98.112% 0.00938 286.056);
+	--color-3: oklch(0% 0 0);
+	--color-4: red;
 
-    --color-1-dim: oklch(from var(--color-1) calc(l - 0.18) c h);
-    --color-1-dim-transparent: oklch(from var(--color-1) calc(l - 0.18) c h / 0);
-    --color-1-dimmer: oklch(from var(--color-1) calc(l - 0.36) c h);
-    --color-1-dimmer-transparent: oklch(from var(--color-1) calc(l - 0.36) c h / 0);
-    --color-1-dimmest: oklch(from var(--color-1) calc(l - 0.5) c h);
-    --color-1-dimmest-transparent: oklch(from var(--color-1) calc(l - 0.5) c h / 0);
-    --color-1-bright: oklch(from var(--color-1) calc(l + 0.18) c h);
-    --color-1-brightest: oklch(from var(--color-1) calc(l + 0.36) c h);
-    --color-1-transparent: oklch(var(--color-1-values) / 0);
-    --color-1-bright-transparent: oklch(from var(--color-1-bright) l c h / 0);
-    --color-1-brightest-transparent: oklch(from var(--color-1-brightest) l c h / 0);
+	--color-1-transparent: oklch(var(--color-1-values) / 0);
 
-    --color-3-brighter: oklch(from var(--color-3) calc(l + 0.18) c h);
+	--color-1-dim: oklch(from var(--color-1) calc(l - 0.15) c h);
+	--color-1-dim-transparent: oklch(from var(--color-1-dim) l c h / 0);
+	--color-1-dimmer: oklch(from var(--color-1) calc(l - 0.25) c h);
+	--color-1-dimmer-transparent: oklch(from var(--color-1-dimmer) l c h / 0);
+	--color-1-dimmest: oklch(from var(--color-1) calc(l - 0.35) c h);
+	--color-1-dimmest-transparent: oklch(from var(--color-1-dimmest) l c h / 0);
+	--color-1-bright: oklch(from var(--color-1) calc(l + 0.18) c h);
+	--color-1-brightest: oklch(from var(--color-1) calc(l + 0.36) c h);
+	--color-1-bright-transparent: oklch(from var(--color-1-bright) l c h / 0);
+	--color-1-brightest-transparent: oklch(from var(--color-1-brightest) l c h / 0);
 
-    /* Semantic Palette */
-    --accent: var(--color-1);
-    --fg: var(--color-2);
-    --bg: var(--color-3);
-    --accent-strong: var(--color-4);
+	--color-3-brighter: oklch(from var(--color-3) calc(l + 0.18) c h);
 
-    /* Color System */
-    --cl-primary: var(--color-1);
-    --cl-primary-dim: var(--color-1-dim);
-    --cl-primary-dimmer: var(--color-1-dimmer);
-    --cl-primary-dimmest: var(--color-1-dimmest);
-    
-    --cl-primary-transparent: var(--color-1-transparent);
-    --cl-primary-dim-transparent: var(--color-1-dim-transparent);
-    --cl-primary-dimmer-transparent: var(--color-1-dimmer-transparent);
-    --cl-primary-dimmest-transparent: var(--color-1-dimmest-transparent);
+	/* Semantic Palette */
+	--accent: var(--color-1);
+	--fg: var(--color-2);
+	--bg: var(--color-3);
+	--accent-strong: var(--color-4);
 
-    --cl-on-primary: var(--color-2);
-    --cl-primary-dim: oklch(from var(--cl-primary) calc(l - 0.15) c h);
-    --cl-primary-dimmer: oklch(from var(--cl-primary) calc(l - 0.4) c h);
-    --cl-primary-dimmest: oklch(from var(--cl-primary) calc(l - 0.5) c h);
+	/* Color System */
+	--cl-primary: var(--color-1);
+	--cl-primary-dim: var(--color-1-dim);
+	--cl-primary-dimmer: var(--color-1-dimmer);
+	--cl-primary-dimmest: var(--color-1-dimmest);
 
-    --cl-primary-brighter: oklch(from var(--cl-primary) calc(l + 0.15) c h);
+	--cl-primary-transparent: var(--color-1-transparent);
+	--cl-primary-dim-transparent: var(--color-1-dim-transparent);
+	--cl-primary-dimmer-transparent: var(--color-1-dimmer-transparent);
+	--cl-primary-dimmest-transparent: var(--color-1-dimmest-transparent);
 
-    --cl-surface: var(--color-3);
-    --cl-on-surface: var(--color-2);
+	--cl-on-primary: var(--color-2);
 
-    --cl-background: var(--color-3);
-    --cl-on-background: var(--color-2);
+	--cl-primary-bright: var(--color-1-bright);
+	--cl-primary-brightest: var(--color-1-brightest);
+
+	--cl-surface: var(--color-3);
+	--cl-on-surface: var(--color-2);
+
+	--cl-background: var(--color-3);
+	--cl-on-background: var(--color-2);
 }

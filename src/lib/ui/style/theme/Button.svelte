@@ -1,7 +1,7 @@
 <script>
-    const { children, ...restProps } = $props();
+	const { children, ...restProps } = $props();
 </script>
 
 <button {...restProps}>
-    <span>{@render children()}</span>
+	<span>{@render children()}</span>
 </button>

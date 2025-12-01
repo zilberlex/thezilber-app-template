@@ -1,0 +1,5 @@
+$emit-default: false !default;
+
+@forward '$lib/ui/style/utility/utility.layout.scss' with (
+	$emit-default: $emit-default
+);

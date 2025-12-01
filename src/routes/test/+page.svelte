@@ -1,60 +1,8 @@
-<script>
-	import { AnimatingValue } from "../../lib/ui/AnimatedComponents/AnimatedValue/animating-number.svelte";
-	import InputCombo from "$lib/ui/basic-components/InputCombo.svelte";
-	import OutputCombo from "$lib/ui/basic-components/OutputCombo.svelte";
-	import { countFractionDigits } from "$lib/engine/animation/math-utils";
-    import { createNumberByDigitsTween } from "$lib/engine/animation/animations/animate-number-by-digits";
-	import { createPaddingDisplay } from "$lib/ui/AnimatedComponents/AnimatedValue/animating-number-display";
+<script lang="ts">
+	import { getRoutes } from '$lib/scripts/get-routes';
+	import LinkTree from '$lib/ui/components/misc/LinkTree.svelte';
 
-    let field1 = $state(8);
-    let field2 = $state(10);
-
-    let sum = $derived(field1 + field2);
-
-    // let animatedValue = AnimatingValue.withBasicTween(0, 1000);
-    let animatedValue = AnimatingValue.with(0, 1000, createNumberByDigitsTween);
-    // animatedValue.displayFunc = createPaddingDisplay();
-    $effect(() => {
-        let fracDigits1 = countFractionDigits(field1);
-        let fracDigits2 = countFractionDigits(field2);
-        const maxFracDigits = Math.min(4, Math.max(fracDigits1, fracDigits2));
-
-        animatedValue.digitsAfterDec = maxFracDigits;
-        animatedValue.value = sum;
-    });
-    
-    let output = $derived(animatedValue.displayValueString);
-
+	const m = getRoutes();
 </script>
 
-<main class="mini-app box box-highlight">
-    <div class="input-area">
-            <InputCombo type="number" bind:value={field1} id="field1" placeholder="input1">X</InputCombo>
-            <InputCombo type="number" bind:value={field2} id="field2" placeholder="input2">Y</InputCombo>
-    </div>
-
-    <OutputCombo id="output" value={output}>Output</OutputCombo>
-</main>
-
-<style lang="scss">
-    .mini-app {
-        width: min(600px, 80%);
-        height: min(400px, 60%);
-
-        position: relative;
-
-        .input-area {
-            display: flex;
-            flex-direction: column;
-        }
-    }
-
-    :global(output-combo) {
-        position: absolute;
-        inset-inline: var(--padding-2);
-        bottom: var(--padding-1);
-
-        display: inline-block;
-        font-weight: bold;
-    }
-</style>
+<LinkTree urls={m} />
