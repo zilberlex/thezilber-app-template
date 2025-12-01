@@ -1,17 +1,18 @@
 <script lang="ts">
-    const { urls } = $props();
+	const { urls } = $props();
 </script>
 
 <ul>
-    {#each urls as url}
-        <li><a href={url}>{url}</a></li>
-    {/each}
+	{#each urls as url}
+		<li><a href={url}>{url}</a></li>
+	{/each}
 </ul>
 
 <style>
-    ul {
-        font-size: var(--font-size-3);
-    
-        list-style-type: none;
-    }
+	ul {
+		font-size: var(--font-size-3);
+
+		list-style-type: none;
+	}
 </style>
+

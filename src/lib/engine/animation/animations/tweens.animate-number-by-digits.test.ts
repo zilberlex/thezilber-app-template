@@ -9,8 +9,8 @@ import { __test__ } from "./animate-number-by-digits";
 // let [from, to] = [1225, 1225];
 
 
-// let [from, to] = [0, 999];
-let [from, to] = [990, 1012];
+let [from, to] = [0, 9999];
+// let [from, to] = [990, 1012];
 
 let ranges = __test__.makeMapRangesTicksBased(from, to);
 console.log('for', from, '-', to);

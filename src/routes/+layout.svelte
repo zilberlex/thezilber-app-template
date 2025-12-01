@@ -1,5 +1,5 @@
 <script lang="ts">
-  import HomeButton from './HomeButton.svelte';
+	import HomeButton from './HomeButton.svelte';
 
 	import '@fontsource-variable/jetbrains-mono';
 	import '@fontsource/audiowide';
@@ -42,6 +42,7 @@
 
 		display: flex;
 		flex-direction: column;
+		overflow-y: visible;
 	}
 
 	.page-container {
