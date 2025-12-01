@@ -42,7 +42,6 @@
 
 		display: flex;
 		flex-direction: column;
-		overflow-y: visible;
 	}
 
 	.page-container {
