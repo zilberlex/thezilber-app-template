@@ -19,7 +19,6 @@ export function animationControl<T>(
 	function hardStop() {
 		_running = false;
 		_paused = false;
-		console.log('stop total runtime', performance.now() - _startAt);
 		safeCaf(rafId);
 	}
 

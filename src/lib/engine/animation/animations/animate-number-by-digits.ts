@@ -1,6 +1,8 @@
 import type { AnimationTween } from '../animation.types';
 import { cmpDigitAtPos, indexOfMsdDiff, segmentedRemap, type RangeMaps } from '../math-utils';
 
+export const __test__ = { makeMapRangesTicksBased };
+
 export function createNumberByDigitsTween(from: number, to: number): AnimationTween {
 	[from, to] = [Math.floor(from), Math.floor(to)];
 
@@ -16,8 +18,6 @@ export function createNumberByDigitsTween(from: number, to: number): AnimationTw
 
 	return animatedNumberTween;
 }
-
-export const __test__ = { makeMapRangesTicksBased };
 
 function makeMapRangesTicksBased(from: number, to: number): RangeMaps {
 	let cases = [{ from: from, to: to }];

@@ -1,6 +1,5 @@
 import { animationControl } from '../animation-control';
 import type { AnimationControl } from '../animation.types';
-import { lerp } from '../math-utils';
 import { createNumberByDigitsTween } from './animate-number-by-digits';
 import { createLerpTween } from './lerp-tween';
 
