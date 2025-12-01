@@ -1,4 +1,5 @@
-import { createSmartHandler } from '../../events/eventHandling';
+import { createSmartHandler } from '../events/event-handling';
+import { shouldIgnoreNavigation } from '../keyboard-navigation/navigation-utils';
 import { signalClickHotkeyEvent } from './bl-hotkeys-event-signals';
 import { GO_KEYS } from './hotkey-groups';
 
@@ -7,7 +8,7 @@ import { GO_KEYS } from './hotkey-groups';
  * @returns {function(KeyboardEvent)}
  */
 export function createOnGoClickHandler(onActionEventHandler) {
-	let smartClickHandling = createKeyabordNavigationEvent(onActionEventHandler);
+	let smartClickHandling = createKeyabordNavigationEventHandler(onActionEventHandler);
 
 	/** @param {KeyboardEvent} event */
 	return async function (event) {
@@ -23,11 +24,14 @@ export function createOnGoClickHandler(onActionEventHandler) {
  * @param {function(KeyboardEvent): void} handler
  * @returns {function(KeyboardEvent): void}
  */
-export function createKeyabordNavigationEvent(handler) {
-	return createSmartHandler(handler, { cooldownDelay: 20 });
+export function createKeyabordNavigationEventHandler(handler) {
+	return createSmartHandler(handler, {
+		cooldownDelay: 20,
+		shouldExecuteFunction: (event) => !shouldIgnoreNavigation(event)
+	});
 }
 
 /** @param {KeyboardEvent} event */
-function isKeyboardGoEvent(event) {
+export function isKeyboardGoEvent(event) {
 	return GO_KEYS.includes(event.key.toLowerCase());
 }

@@ -1,12 +1,15 @@
-import { FOCUS_HOTKEY_COOLDOWN_MS } from '$lib/engine/configuration/constants';
 import { createSmartHandler } from '$lib/engine/events/event-handling';
-import {
-	signalClickHotkeyEvent,
-	signalFocusHotkeyEvent
-} from '$lib/engine/hotkeys/bl-hotkeys-event-signals';
-import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
-import { keyBoardFocusNavigatedNode } from '$lib/engine/keyboard-navigation/navigation-utils';
 import type { Attachment } from 'svelte/attachments';
+import { hotKeysModule } from './hotkey-module';
+import { keyBoardFocusNavigatedNode } from '../keyboard-navigation/navigation-utils';
+import { signalClickHotkeyEvent, signalFocusHotkeyEvent } from './bl-hotkeys-event-signals';
+import type {
+	KeyboardEventKeyType,
+	KeyCheckFn
+} from '$lib/general-components/hotkeys/key-identification';
+import { engineHotkeysConfig } from './hotkey-module-config';
+
+const HOTKEY_COOLDOWN_MS = engineHotkeysConfig.buttonRapidFireCooldownMs;
 
 export function createFocusHotKeyAction(node: HTMLElement, hotKey: string) {
 	// graceful handling of no hotkey.
@@ -31,7 +34,7 @@ export function createFocusHandler(node: HTMLElement, key: string) {
 				signalFocusHotkeyEvent(key, node);
 			}
 		},
-		{ cooldownDelay: FOCUS_HOTKEY_COOLDOWN_MS, context: `focus node: [${node.toString()}]` }
+		{ cooldownDelay: HOTKEY_COOLDOWN_MS, context: `focus node: [${node.toString()}]` }
 	);
 }
 
@@ -41,8 +44,46 @@ export function createClickHandler(node: HTMLElement, initiatingKey: string) {
 			node.click();
 			signalClickHotkeyEvent(initiatingKey, node);
 		},
-		{ cooldownDelay: FOCUS_HOTKEY_COOLDOWN_MS, context: `click node: [${node.toString()}]` }
+		{ cooldownDelay: HOTKEY_COOLDOWN_MS, context: `click node: [${node.toString()}]` }
 	);
+}
+
+export function createOnKeyDownHandler(
+	node: Element,
+	keys: KeyboardEventKeyType,
+	handler: (e: KeyboardEvent) => void
+) {
+	return createSmartHandler(
+		(event: KeyboardEvent) => {
+			handler(event);
+		},
+		{
+			cooldownDelay: HOTKEY_COOLDOWN_MS,
+			context: `OnKeyDown handler node: [${node.toString()}]`,
+			shouldExecuteFunction: createOnKeyDownHandler_CreateShouldExcuteFunction(keys)
+		}
+	);
+}
+
+function createOnKeyDownHandler_CreateShouldExcuteFunction(keys: KeyboardEventKeyType) {
+	return (event: KeyboardEvent) => {
+		let keysArray: (string | KeyCheckFn)[];
+		if (!Array.isArray(keys)) {
+			keysArray = [keys];
+		} else {
+			keysArray = keys;
+		}
+
+		const eventKey = event.key;
+
+		return keysArray.some((keyCheck) => {
+			if (typeof keyCheck === 'function') {
+				return keyCheck(event);
+			}
+
+			return eventKey === keyCheck;
+		});
+	};
 }
 
 export function createHotKeyForButtonClick(hotKey: string): Attachment {
