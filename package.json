@@ -7,7 +7,7 @@
     "dev": "vite dev",
     "dev:host": "vite dev --host",
     "build": "vite build",
-    "build:docs": "pnpm build && pnpm sync-docs",
+    "build:docs": "BASE_PATH='/thezilber-app-template' pnpm build && pnpm sync-docs",
     "preview": "vite preview",
     "preview:host": "vite preview --host",
     "prepare": "svelte-kit sync || echo ''",

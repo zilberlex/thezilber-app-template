@@ -1,6 +1,8 @@
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import adapter from '@sveltejs/adapter-static';
 
+const dev = process.argv.includes('dev');
+
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
   // Consult https://svelte.dev/docs/kit/integrations
@@ -19,7 +21,7 @@ const config = {
       strict: true
     }),
     paths: {
-      base: '/svelte-transition-composition'
+      base: dev ? '' : process.env.BASE_PATH ?? ''
     }
   }
 };
