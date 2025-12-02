@@ -1,9 +1,15 @@
 /**
  * @param {function} handler
- * @param {{debounceDelay?: number, cooldownDelay?: number, context?: string, shouldPreventDefault?: boolean}} options
+ * @param {{debounceDelay?: number, cooldownDelay?: number, context?: string, shouldPreventDefault?: boolean, shouldExecuteFunction?: (event: Event) => boolean}} options
  */
 export function createSmartHandler(handler, options = {}) {
-	const { debounceDelay = 0, cooldownDelay = 1500, context, shouldPreventDefault = true } = options;
+	const {
+		debounceDelay = 0,
+		cooldownDelay = 1500,
+		context,
+		shouldPreventDefault = true,
+		shouldExecuteFunction = () => true
+	} = options;
 
 	if (context)
 		console.debug(
@@ -17,7 +23,8 @@ export function createSmartHandler(handler, options = {}) {
 		handler,
 		debounceDelay,
 		cooldownDelay,
-		shouldPreventDefault
+		shouldPreventDefault,
+		shouldExecuteFunction
 	);
 
 	// Improving readabilty
@@ -59,7 +66,13 @@ export function requestAnimationFrameThrottle(callback) {
 /**
  * @param {function} handler
  */
-function _createSmartHandlerInternal(handler, debounceDelay, cooldownDelay, shouldPreventDefault) {
+function _createSmartHandlerInternal(
+	handler,
+	debounceDelay,
+	cooldownDelay,
+	shouldPreventDefault,
+	shouldExecuteFunction
+) {
 	/**
 	 * @type {number | undefined}
 	 */
@@ -68,6 +81,8 @@ function _createSmartHandlerInternal(handler, debounceDelay, cooldownDelay, shou
 	let isProcessing = false;
 
 	let ret = async function (/** @type {Event} */ event) {
+		if (!shouldExecuteFunction(event)) return;
+
 		if (debounceTimeoutId) {
 			window.clearTimeout(debounceTimeoutId);
 		}
@@ -78,16 +93,16 @@ function _createSmartHandlerInternal(handler, debounceDelay, cooldownDelay, shou
 
 		debounceTimeoutId = window.setTimeout(async () => {
 			if (cooldown || isProcessing) {
-				console.debug(
-					'handler',
-					handler.name,
-					'cd',
-					cooldown,
-					'processing',
-					isProcessing,
-					'handler:',
-					handler.toString()
-				);
+				// console.debug(
+				//   'handler',
+				//   handler.name,
+				//   'cd',
+				//   cooldown,
+				//   'processing',
+				//   isProcessing,
+				//   'handler:',
+				//   handler.toString()
+				// );
 				return;
 			}
 
