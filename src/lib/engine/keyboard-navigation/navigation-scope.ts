@@ -5,7 +5,7 @@ import type {
 	NextNodeInfo,
 	ScopeInfra as NavigationScopeInfra,
 	NodeFocusEvent
-} from '../../my-packages/az-keyboard-navigation/types';
+} from './types';
 import { getFocusableElementsByNode } from './navigation-utils';
 
 const NAVIGATION_ID_ATTRIBUTE = 'navigation-id';

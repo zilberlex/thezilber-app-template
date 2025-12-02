@@ -35,6 +35,21 @@ export enum NavigationKeyConsts {
 	ArrowDown = 'ArrowDown'
 }
 
+export const ArrowKeysArray: string[] = [
+	NavigationKeyConsts.ArrowDown,
+	NavigationKeyConsts.ArrowUp,
+	NavigationKeyConsts.ArrowLeft,
+	NavigationKeyConsts.ArrowRight
+];
+
+export const NodesWhichDontNavigateWithArrowKeys = ['input', 'select', 'summary'];
+
+export type NavType = {
+	direction: 'hor-prev' | 'hor-next' | 'ver-prev' | 'ver-next' | undefined;
+	strength: 'soft' | 'hard';
+	isArrow: boolean;
+};
+
 export interface NavigationKeysConfig {
 	prevKeys: string[];
 	nextKeys: string[];

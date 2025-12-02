@@ -1,13 +1,12 @@
-import { createKeyabordNavigationEvent } from '$lib/engine/hotkeys/bl-events';
+import { createKeyabordNavigationEventHandler } from '$lib/engine/hotkeys/bl-events';
 import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
-import { keyBoardFocusNavigatedNode } from '$lib/engine/keyboard-navigation/navigation-utils';
+import {
+	shouldIgnoreNavigation,
+	keyBoardFocusNavigatedNode
+} from '$lib/engine/keyboard-navigation/navigation-utils';
 import { DispatcherImpl, type Dispatcher } from '$lib/engine/patterns/observer';
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
-import {
-	NavigationKeyConsts,
-	type NavigationKeysConfig,
-	type ScopeInfra
-} from '../../my-packages/az-keyboard-navigation/types';
+import { NavigationKeyConsts, type NavigationKeysConfig, type ScopeInfra } from './types';
 
 interface NavigationEvent {
 	targetNode: HTMLElement;
@@ -97,7 +96,7 @@ export class NavigationManager {
 		this.#destTargets.forEach((dest) => dest.unregister());
 	}
 
-	#onNavigationKey = createKeyabordNavigationEvent((keyboardEvent: KeyboardEvent) => {
+	#onNavigationKey = createKeyabordNavigationEventHandler((keyboardEvent: KeyboardEvent) => {
 		if (this.#scopes.length == 0) {
 			console.warn('NavigationManager no scopes present. Ignoring key');
 			return;
