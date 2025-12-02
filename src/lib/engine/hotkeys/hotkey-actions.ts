@@ -3,10 +3,7 @@ import type { Attachment } from 'svelte/attachments';
 import { hotKeysModule } from './hotkey-module';
 import { keyBoardFocusNavigatedNode } from '../keyboard-navigation/navigation-utils';
 import { signalClickHotkeyEvent, signalFocusHotkeyEvent } from './bl-hotkeys-event-signals';
-import type {
-	KeyboardEventKeyType,
-	KeyCheckFn
-} from '$lib/general-components/hotkeys/key-identification';
+import type { KeyboardEventKeyType, KeyCheckFn } from '$lib/engine/hotkeys/key-identification';
 import { engineHotkeysConfig } from './hotkey-module-config';
 
 const HOTKEY_COOLDOWN_MS = engineHotkeysConfig.buttonRapidFireCooldownMs;
