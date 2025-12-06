@@ -1,9 +1,10 @@
-<script>
+<script lang="ts">
 	import { AnimatingValue } from '../../lib/ui/AnimatedComponents/AnimatedValue/animating-number.svelte';
-	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
-	import OutputCombo from '$lib/ui/basic-components/OutputCombo.svelte';
 	import { countFractionDigits } from '$lib/engine/animation/math-utils';
 	import { createNumberByDigitsTween } from '$lib/engine/animation/animations/animate-number-by-digits';
+	import type { DynamicFormSchema } from '$lib/app/dynamic-form/dynamic-form-types';
+	import DynamicForm from '$lib/app/dynamic-form/DynamicForm.svelte';
+	import AnimatedNumberOutput from './AnimatedNumberOutput.svelte';
 
 	let field1 = $state(8);
 	let field2 = $state(10);
@@ -24,41 +25,19 @@
 		animatedValue.value = sum;
 	});
 
-	let output = $derived(animatedValue.displayValueString);
+	let schema: DynamicFormSchema = [
+		{ name: 'X', type: 'number' },
+		{ name: 'Y', type: 'number' }
+	];
 </script>
 
 <div class="mini-app">
-	<div class="counter-area box box-highlight">
-		<div class="input-area">
-			<InputCombo type="number" bind:value={field1} id="field1" placeholder="input1">X</InputCombo>
-			<InputCombo type="number" bind:value={field2} id="field2" placeholder="input2">Y</InputCombo>
-		</div>
-
-		<OutputCombo id="output" value={output}>Output</OutputCombo>
-	</div>
+	<DynamicForm {schema} outputFunc={(x, y) => x + y} OutputComponent={AnimatedNumberOutput} />
 </div>
 
 <style lang="scss">
 	.mini-app {
 		width: min(600px, 80%);
 		position: relative;
-	}
-
-	.counter-area {
-		height: min(400px, 60vh);
-
-		.input-area {
-			display: flex;
-			flex-direction: column;
-		}
-	}
-
-	:global(output-combo) {
-		position: absolute;
-		inset-inline: var(--padding-2);
-		bottom: var(--padding-1);
-
-		display: inline-block;
-		font-weight: bold;
 	}
 </style>
