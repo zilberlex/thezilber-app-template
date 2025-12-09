@@ -1,38 +1,67 @@
 <script lang="ts">
-	import { AnimatingValue } from '../../lib/ui/AnimatedComponents/AnimatedValue/animating-number.svelte';
-	import { countFractionDigits } from '$lib/engine/animation/math-utils';
-	import { createNumberByDigitsTween } from '$lib/engine/animation/animations/animate-number-by-digits';
 	import type { DynamicFormSchema } from '$lib/app/dynamic-form/dynamic-form-types';
 	import DynamicForm from '$lib/app/dynamic-form/DynamicForm.svelte';
-	import AnimatedNumberOutput from './AnimatedNumberOutput.svelte';
+	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
+	import { tokenize, type Token } from './custom-tokenizer';
 
-	let field1 = $state(8);
-	let field2 = $state(10);
+	let commandStr = $state('');
 
-	let sum = $derived(field1 + field2);
+	let tokens = $derived(tokenize(commandStr));
+	let dynamicFormSchema = $derived(extractSchema(tokens));
 
-	// let animatedValue = AnimatingValue.withBasicTween(0, 1000);
-	let animatedValueByDigits = AnimatingValue.with(0, 1000, createNumberByDigitsTween);
-	let animatedValueNaive = AnimatingValue.withBasicTween(0, 1000);
-	let animatedValue = $state(animatedValueByDigits);
+	type ParamSchema = {
+		name: string;
+		type: 'string';
+	};
 
-	$effect(() => {
-		let fracDigits1 = countFractionDigits(field1);
-		let fracDigits2 = countFractionDigits(field2);
-		const maxFracDigits = Math.min(4, Math.max(fracDigits1, fracDigits2));
+	function extractSchema(tokens: Token[]): DynamicFormSchema {
+		const result: ParamSchema[] = [];
 
-		animatedValue.digitsAfterDec = maxFracDigits;
-		animatedValue.value = sum;
-	});
+		for (const t of tokens) {
+			if (t.kind === 'param') {
+				result.push({
+					name: t.name,
+					type: 'string'
+				});
+			}
+		}
 
-	let schema: DynamicFormSchema = [
-		{ name: 'X', type: 'number' },
-		{ name: 'Y', type: 'number' }
-	];
+		return result;
+	}
+
+	function constructCommandFromFields(
+		tokens: Token[],
+		schema: DynamicFormSchema,
+		fields: string[]
+	): string {
+		let parts: string[] = [];
+
+		let i = 0;
+		tokens.forEach((token) => {
+			if (token.kind === 'text') {
+				parts.push(token.value);
+			} else {
+				// parts.push(fields.length > i ? fields[i++] : '');
+				const field = fields[i];
+				parts.push(field ? field : `[FILL:${schema[i].name}]`);
+				i++;
+			}
+		});
+
+		return parts.join('');
+	}
 </script>
 
 <div class="mini-app">
-	<DynamicForm {schema} outputFunc={(x, y) => x + y} OutputComponent={AnimatedNumberOutput} />
+	<InputCombo
+		placeholder={'Enter Command here, use squirly braces for {field}'}
+		bind:value={commandStr}>Command String</InputCombo
+	>
+	<DynamicForm
+		schema={dynamicFormSchema}
+		outputFunc={(...fields) => constructCommandFromFields(tokens, dynamicFormSchema, fields)}
+		displayCopy={true}
+	/>
 </div>
 
 <style lang="scss">

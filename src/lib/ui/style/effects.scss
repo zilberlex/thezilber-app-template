@@ -1,6 +1,6 @@
 @mixin animate-padding {
 	// --_animate-padding-delta: 0.25rem;
-	// --_animate-padding-base: var(--padding-1);
+	--_animate-padding-base: var(--padding-1);
 	// transition: padding 0.2s ease-out;
 
 	padding-left: calc(var(--_animate-padding-base) + var(--_animate-padding-delta));

@@ -2,13 +2,18 @@
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
 	import OutputCombo from '$lib/ui/basic-components/OutputCombo.svelte';
 	import type { Component } from 'svelte';
-	import type { DynamicFormFieldType, DynamicFormSchema } from './dynamic-form-types';
+	import type { AnyNonVoid, DynamicFormFieldType, DynamicFormSchema } from './dynamic-form-types';
+	import CopyButtonSimple from '$lib/ui/components/CopyButtonSimple.svelte';
 
-	const {
+	let {
 		schema,
 		outputFunc,
 		OutputComponent
-	}: { schema: DynamicFormSchema; outputFunc: () => any; OutputComponent?: Component } = $props();
+	}: {
+		schema: DynamicFormSchema;
+		outputFunc: (...args: any[]) => AnyNonVoid;
+		OutputComponent?: Component;
+	} = $props();
 
 	const defaultValue = (type: DynamicFormFieldType) => {
 		switch (type) {
@@ -23,19 +28,24 @@
 		}
 	};
 
-	let fields = $state(
-		schema.map((f) => ({
-			...f
-		}))
-	);
+	type Field = DynamicFormFieldType & { value?: any };
 
-	let fieldValues = $derived(fields.map((f) => f.value ?? defaultValue(f.type)));
+	let fields: Field[] = $state([]);
+
+	$effect(() => {
+		fields =
+			schema?.map((f) => ({
+				...f
+			})) ?? [];
+	});
+
+	let fieldValues = $derived(fields?.map((f) => f.value ?? defaultValue(f.type)));
 
 	let output = $derived.by(() => {
 		if (!fields) return '';
-		const params = fieldValues;
+		const rest = fieldValues;
 
-		return outputFunc(...params);
+		return outputFunc(...rest);
 	});
 </script>
 
@@ -51,11 +61,18 @@
 		{/each}
 	</div>
 
-	{#if OutputComponent}
-		<OutputComponent {fieldValues} {outputFunc} />
-	{:else}
-		<OutputCombo id="output" value={output}>Output</OutputCombo>
-	{/if}
+	<div class="output-container">
+		{#if OutputComponent}
+			<OutputComponent {fieldValues} {outputFunc} />
+		{:else}
+			<div class="overlay-wrapper">
+				<div class="copy-button">
+					<CopyButtonSimple textToCopy={output} />
+				</div>
+				<OutputCombo id="output" value={output}>Output</OutputCombo>
+			</div>
+		{/if}
+	</div>
 </div>
 
 <style>
@@ -68,12 +85,25 @@
 		}
 	}
 
-	:global(output-combo) {
+	.output-container {
 		position: absolute;
 		inset-inline: var(--padding-2);
 		bottom: var(--padding-1);
 
-		display: inline-block;
 		font-weight: bold;
+	}
+
+	:global(output-combo) {
+		display: inline-block;
+	}
+
+	.overlay-wrapper {
+		position: relative;
+	}
+
+	.copy-button {
+		position: absolute;
+		display: inline-block;
+		right: var(--padding-2);
 	}
 </style>

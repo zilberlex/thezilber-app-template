@@ -1,8 +1,8 @@
 <script lang="ts">
 	import CopyIconSvg from '$lib/assets/icons/CopyIconSvg.svelte';
-	import type { Command } from '../patterns/command/command';
-	import { createChangeElementTextContentTemporaryCommand } from '../patterns/command/command-impl/change-element-content-command';
-	import Button from './Button.svelte';
+	import type { Command } from '$lib/engine/patterns/command/command';
+	import { createChangeElementTextContentTemporaryCommand } from '$lib/engine/patterns/command/command-impl/change-element-content-command';
+	import Button from '$lib/ui/basic-components/Button.svelte';
 
 	const {
 		nodeToCopy,

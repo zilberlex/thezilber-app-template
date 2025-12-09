@@ -5,6 +5,7 @@ import { keyBoardFocusNavigatedNode } from '../keyboard-navigation/navigation-ut
 import { signalClickHotkeyEvent, signalFocusHotkeyEvent } from './bl-hotkeys-event-signals';
 import type { KeyboardEventKeyType, KeyCheckFn } from '$lib/engine/hotkeys/key-identification';
 import { engineHotkeysConfig } from './hotkey-module-config';
+import { shouldIgnoreHotKey } from './bl-events';
 
 const HOTKEY_COOLDOWN_MS = engineHotkeysConfig.buttonRapidFireCooldownMs;
 
@@ -31,7 +32,11 @@ export function createFocusHandler(node: HTMLElement, key: string) {
 				signalFocusHotkeyEvent(key, node);
 			}
 		},
-		{ cooldownDelay: HOTKEY_COOLDOWN_MS, context: `focus node: [${node.toString()}]` }
+		{
+			cooldownDelay: HOTKEY_COOLDOWN_MS,
+			context: `focus node: [${node.toString()}]`,
+			shouldExecuteFunction: (e) => !shouldIgnoreHotKey(e)
+		}
 	);
 }
 

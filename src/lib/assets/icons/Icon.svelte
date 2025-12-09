@@ -1,12 +1,15 @@
+<script lang="ts">
+	let { children } = $props();
+</script>
+
 <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-	<rect x="8" y="8" width="14" height="14" rx="0"></rect>
-	<rect x="2" y="2" width="14" height="14" rx="0"></rect>
+	{@render children()}
 </svg>
 
 <style>
 	.icon {
-		--icon-stroke: var(--primary-color);
-		--icon-bg: var(--background-color);
+		--icon-stroke: var(--cl-primary);
+		--icon-bg: var(--cl-bg);
 
 		display: inline-block;
 		background-color: var(--icon-bg);

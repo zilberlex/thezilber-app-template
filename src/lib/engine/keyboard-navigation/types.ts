@@ -1,4 +1,5 @@
 import type { DispatchHandler } from '$lib/engine/patterns/observer';
+import { NavigationKeyConsts } from '../hotkeys/types';
 
 export function createNavigationKeys(nextKeys: string[], prevKeys: string[]): NavigationKeysConfig {
 	return {
@@ -27,28 +28,6 @@ export interface ScopeInfra {
 	destroy(): void;
 	registerOnFocus(handler: DispatchHandler<NodeFocusEvent>): { unregister: () => void };
 }
-
-export enum NavigationKeyConsts {
-	ArrowLeft = 'ArrowLeft',
-	ArrowRight = 'ArrowRight',
-	ArrowUp = 'ArrowUp',
-	ArrowDown = 'ArrowDown'
-}
-
-export const ArrowKeysArray: string[] = [
-	NavigationKeyConsts.ArrowDown,
-	NavigationKeyConsts.ArrowUp,
-	NavigationKeyConsts.ArrowLeft,
-	NavigationKeyConsts.ArrowRight
-];
-
-export const NodesWhichDontNavigateWithArrowKeys = ['input', 'select', 'summary'];
-
-export type NavType = {
-	direction: 'hor-prev' | 'hor-next' | 'ver-prev' | 'ver-next' | undefined;
-	strength: 'soft' | 'hard';
-	isArrow: boolean;
-};
 
 export interface NavigationKeysConfig {
 	prevKeys: string[];

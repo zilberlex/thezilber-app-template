@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 
 	type InputComboProps = {
-		id: string;
+		id?: string;
 		placeholder?: string;
 		value?: any;
 		type?: string;

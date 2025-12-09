@@ -7,6 +7,7 @@
 	color: var(--cl-primary);
 
 	&::selection {
-		background-color: var(--cl-on-primary);
+		background-color: var(--cl-primary);
+    color: var(--cl-on-surface);
 	}
 }
