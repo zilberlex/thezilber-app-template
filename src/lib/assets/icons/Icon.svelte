@@ -8,10 +8,12 @@
 
 <style>
 	.icon {
+		display: block;
+		line-height: 1;
+
 		--icon-stroke: var(--cl-primary);
 		--icon-bg: var(--cl-bg);
 
-		display: inline-block;
 		background-color: var(--icon-bg);
 		fill: var(--icon-bg);
 
