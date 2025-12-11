@@ -1,8 +1,20 @@
-export type DynamicFormSchema = DynamicFormFieldSchema[];
-export type DynamicFormFieldType = 'string' | 'number' | 'boolean' | 'date';
+export type AnyNonVoid = Exclude<any, void>;
+
 export type DynamicFormFieldSchema = {
-	name: string;
-	type: FieldType;
+	type: 'string' | 'number' | 'boolean' | 'date' | 'object' | 'array';
+	required?: boolean;
+	default?: unknown;
 };
 
-export type AnyNonVoid = Exclude<any, void>;
+export type DynamicFormSchema = {
+	[field: string]: DynamicFormFieldSchema;
+};
+
+export type DynamicFormField = {
+	value?: unknown;
+	schema: DynamicFormFieldSchema;
+};
+
+export type DynamicForm = {
+	[field: string]: DynamicFormField;
+};

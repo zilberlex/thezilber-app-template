@@ -9,42 +9,37 @@
 	let tokens = $derived(tokenize(commandStr));
 	let dynamicFormSchema = $derived(extractSchema(tokens));
 
-	type ParamSchema = {
-		name: string;
-		type: 'string';
-	};
-
 	function extractSchema(tokens: Token[]): DynamicFormSchema {
-		const result: ParamSchema[] = [];
+		const result: DynamicFormSchema = {};
 
 		for (const t of tokens) {
 			if (t.kind === 'param') {
-				result.push({
-					name: t.name,
+				result[t.name] = {
 					type: 'string'
-				});
+				};
 			}
 		}
 
 		return result;
 	}
 
-	function constructCommandFromFields(
+	function constructTextCommandFromFields(
 		tokens: Token[],
 		schema: DynamicFormSchema,
 		fields: string[]
 	): string {
+		let schemaEntries = Object.entries(schema);
 		let parts: string[] = [];
 
-		let i = 0;
+		let formSchemIndex = 0;
 		tokens.forEach((token) => {
 			if (token.kind === 'text') {
 				parts.push(token.value);
 			} else {
 				// parts.push(fields.length > i ? fields[i++] : '');
-				const field = fields[i];
-				parts.push(field ? field : `[FILL:${schema[i].name}]`);
-				i++;
+				const field = fields[formSchemIndex];
+				parts.push(field ? field : `[FILL:${schemaEntries[formSchemIndex][0]}]`);
+				formSchemIndex++;
 			}
 		});
 
@@ -58,9 +53,8 @@
 		bind:value={commandStr}>Command String</InputCombo
 	>
 	<DynamicForm
-		schema={dynamicFormSchema}
-		outputFunc={(...fields) => constructCommandFromFields(tokens, dynamicFormSchema, fields)}
-		displayCopy={true}
+		formInput={dynamicFormSchema}
+		outputFunc={(...fields) => constructTextCommandFromFields(tokens, dynamicFormSchema, fields)}
 	/>
 </div>
 

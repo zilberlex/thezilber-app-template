@@ -14,12 +14,8 @@
 </IconButton>
 
 <style>
-	:global(button) {
+	:global(.icon-button) {
 		border: none;
 		padding: 0;
-
-		:global(& .icon) {
-			--icon-stroke: red;
-		}
 	}
 </style>
