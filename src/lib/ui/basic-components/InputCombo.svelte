@@ -7,6 +7,7 @@
 		value?: any;
 		type?: string;
 		minLableWidth?: number;
+		disabled: boolean;
 		children?: Snippet;
 	};
 
@@ -16,6 +17,7 @@
 		type,
 		minLableWidth = 0,
 		value = $bindable(),
+		disabled = false,
 		children
 	}: InputComboProps = $props();
 </script>
@@ -26,5 +28,5 @@
 			class="suffix">:</span
 		></label
 	>
-	<input bind:value {type} name={id} {id} {placeholder} required />
+	<input {disabled} bind:value {type} name={id} {id} {placeholder} required />
 </input-combo>

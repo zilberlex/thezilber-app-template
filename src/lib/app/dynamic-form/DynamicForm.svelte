@@ -10,40 +10,43 @@
 		DynamicFormField,
 		DynamicFormSchema
 	} from './dynamic-form-types';
-	import { track } from '$lib/engine/svelte-helpers/track';
+	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import { resolveFieldValue } from './dynamic-form';
 
-	let { formInput, outputFunc, OutputComponent } = $props<{
-		formInput: DynamicFormSchema | DynamicForm;
+	let {
+		formSchema,
+		outputFunc,
+		OutputComponent,
+		form = $bindable({})
+	} = $props<{
+		formSchema: DynamicFormSchema;
 		outputFunc: (...args: any[]) => AnyNonVoid;
 		OutputComponent?: Component;
+		form: DynamicForm | undefined;
 	}>();
-
-	let form = $state<DynamicForm>(resolveIncomingForm({}, formInput));
-
-	$effect(() => {
-		track(formInput);
-		untrack(() => {
-			form = resolveIncomingForm(form, formInput);
-		});
-	});
 
 	// 🔹 entries derived directly from state
 	let formIterable = $derived.by(() => Object.entries(form));
 
-	let fieldValues = $derived.by(() => formIterable.map(([, f]) => resolveFieldValue(f)));
+	let fieldValues = $derived.by(() =>
+		formIterable.map(([, f]) => resolveFieldValue(f as DynamicFormField))
+	);
 
 	let output = $derived.by(() => {
 		const values = fieldValues;
 		return outputFunc(...values);
 	});
 
-	function resolveIncomingForm(
-		prev: DynamicForm,
-		input: DynamicForm | DynamicFormSchema
-	): DynamicForm {
-		const incomingForm = isForm(input) ? input : formFromSchema(input);
-		return mergeForms(prev, incomingForm);
+	$effect(() => {
+		track(formSchema);
+		untrack(() => {
+			form = resolveSchemaChange(form, formSchema);
+		});
+	});
+
+	function resolveSchemaChange(prevForm: DynamicForm, newSchema: DynamicFormSchema): DynamicForm {
+		const incomingForm = formFromSchema(newSchema);
+		return mergeForms(prevForm, incomingForm);
 	}
 
 	function formFromSchema(schema: DynamicFormSchema): DynamicForm {
@@ -75,17 +78,9 @@
 
 		return newForm;
 	}
-
-	function isForm(input: DynamicForm | DynamicFormSchema): input is DynamicForm {
-		const values = Object.values(input);
-		if (values.length === 0) return false;
-
-		const first = values[0];
-		return typeof first === 'object' && first !== null && 'schema' in first;
-	}
 </script>
 
-<div class="counter-area box box-highlight">
+<div class="dynamic-form box box-highlight">
 	<div class="input-area">
 		{#each formIterable as [fieldName, dynamicFormField] (fieldName)}
 			<InputCombo
@@ -113,7 +108,11 @@
 </div>
 
 <style>
-	.counter-area {
+	.dynamic-form {
+		display: flex;
+		flex-direction: column;
+
+		justify-content: space-between;
 		height: min(400px, 60vh);
 
 		.input-area {
@@ -123,9 +122,8 @@
 	}
 
 	.output-container {
-		position: absolute;
-		inset-inline: var(--padding-2);
-		bottom: var(--padding-1);
+		width: 100%;
+		position: relative;
 		font-weight: bold;
 	}
 

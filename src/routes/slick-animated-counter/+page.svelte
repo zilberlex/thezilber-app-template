@@ -11,7 +11,7 @@
 
 <div class="mini-app">
 	<DynamicForm
-		formInput={schema}
+		formSchema={schema}
 		outputFunc={(x, y) => x + y}
 		OutputComponent={AnimatedNumberOutput}
 	/>

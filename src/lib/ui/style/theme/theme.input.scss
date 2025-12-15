@@ -25,6 +25,12 @@ input-combo {
 		border-left: var(--border-thick) solid var(--cl-primary);
 	}
 
+  & input {
+    &[disabled] {
+      filter: grayscale(0.8);
+    }
+  }
+
 	&:has(input:required:invalid) {
 		& > label .suffix,
 		&::before {
