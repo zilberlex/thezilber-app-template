@@ -88,7 +88,7 @@ function _createSmartHandlerInternal(
 		}
 
 		if (shouldPreventDefault) {
-			event.preventDefault();
+			event?.preventDefault();
 		}
 
 		debounceTimeoutId = window.setTimeout(async () => {

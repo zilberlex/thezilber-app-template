@@ -70,7 +70,7 @@ a.link-button {
 	position: relative;
 	isolation: isolate;
 
-	--_hover-offset: -4px;
+  --_hover-offset: -4px;
 
 	color: var(--cl-on-primary);
 	background-color: var(--cl-background);
@@ -127,7 +127,8 @@ a.link-button {
 		}
 	}
 
-	&:active {
+	&:active,
+  &.btn-pressed {
 		&,
 		& * {
 			transition: all 0s;
@@ -148,4 +149,11 @@ a.link-button {
 			transform: translate(0, 0) scale(1);
 		}
 	}
+
+  &.btn-pressed {
+    color: red;
+    
+    border-color: var(--cl-primary-brightest);
+		filter: drop-shadow(0px 0px 12px var(--cl-primary));
+  }
 }

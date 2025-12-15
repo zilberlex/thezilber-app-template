@@ -9,5 +9,5 @@ export type EngineHotkeysConfig = {
 export const engineHotkeysConfig: EngineHotkeysConfig = {
 	mode: 'KEY_DOWN',
 	buttonRapidFireCooldownMs: 20,
-	buttonClickPressedCssDurationMs: 200
+	buttonClickPressedCssDurationMs: 50
 };

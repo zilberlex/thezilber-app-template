@@ -1,7 +1,12 @@
 import { createSmartHandler } from '../events/event-handling';
-import { shouldIgnoreNavigation } from '../keyboard-navigation/navigation-utils';
 import { signalClickHotkeyEvent } from './bl-hotkeys-event-signals';
 import { GO_KEYS } from './hotkey-groups';
+import {
+	ArrowKeysArray,
+	NavigationKeyConsts,
+	NodesWhichTakePriorityOverSoftHotKeys,
+	type NavType
+} from './types.d';
 
 /**
  * @param {function(KeyboardEvent): void} onActionEventHandler
@@ -27,11 +32,45 @@ export function createOnGoClickHandler(onActionEventHandler) {
 export function createKeyabordNavigationEventHandler(handler) {
 	return createSmartHandler(handler, {
 		cooldownDelay: 20,
-		shouldExecuteFunction: (event) => !shouldIgnoreNavigation(event)
+		shouldExecuteFunction: (event) => !shouldIgnoreHotKey(event)
 	});
 }
 
 /** @param {KeyboardEvent} event */
 export function isKeyboardGoEvent(event) {
 	return GO_KEYS.includes(event.key.toLowerCase());
+}
+
+export function shouldIgnoreHotKey(event: KeyboardEvent) {
+	let element = event.target as HTMLElement;
+	let navType = GetNavType(event);
+	return (
+		navType.strength === 'soft' &&
+		NodesWhichTakePriorityOverSoftHotKeys.includes(element.tagName.toLowerCase())
+	);
+}
+
+export function GetNavType(event: KeyboardEvent): NavType {
+	const key = event.key;
+
+	const direction =
+		key === NavigationKeyConsts.ArrowLeft
+			? 'hor-prev'
+			: key === NavigationKeyConsts.ArrowRight
+				? 'hor-next'
+				: key === NavigationKeyConsts.ArrowUp
+					? 'ver-prev'
+					: key === NavigationKeyConsts.ArrowDown
+						? 'ver-next'
+						: undefined;
+
+	const strength = event.altKey ? 'hard' : 'soft';
+
+	const isArrow = ArrowKeysArray.includes(key);
+
+	return {
+		direction,
+		strength,
+		isArrow
+	};
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tweenValue } from '$lib/engine/animation/animations/tweens';
-	import Button from '$lib/ui/style/theme/Button.svelte';
+	import Button from '$lib/ui/basic-components/Button.svelte';
 
 	let element: HTMLElement;
 

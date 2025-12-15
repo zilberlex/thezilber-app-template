@@ -10,6 +10,7 @@ input[type='number'] {
 input-combo {
 	margin-block: 1px;
 	display: inline-flex;
+  width: 100%;
 	position: relative;
 
 	padding-left: var(--padding-1);
@@ -23,6 +24,12 @@ input-combo {
 		width: 0;
 		border-left: var(--border-thick) solid var(--cl-primary);
 	}
+
+  & input {
+    &[disabled] {
+      filter: grayscale(0.8);
+    }
+  }
 
 	&:has(input:required:invalid) {
 		& > label .suffix,
@@ -48,6 +55,8 @@ label {
 }
 
 input {
+  @include ul-txt-primary;
+
 	flex: 1 1 auto; /* fill remaining space */
 	min-width: 0;
 
@@ -59,15 +68,12 @@ input {
 	& {
 		@include animate-padding();
 		--_animate-padding-delta: 0rem;
-		--_animate-padding-base: var(--_box-padding);
 		font-weight: 400;
 	}
 
 	&,
 	&:focus,
 	&:hover {
-		color: var(--cl-on-surface);
-
 		transition-property: font-weight, padding, box-shadow, border-color;
 		transition-duration: 0.2s;
 		transition-timing-function: ease-out;

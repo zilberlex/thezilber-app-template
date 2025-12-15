@@ -35,8 +35,6 @@ export class AnimatingValue {
 		this.animationTweenBuilder = animationTweenFactory;
 
 		$effect(() => {
-			console.log('WOW effect triggered - value', this.value);
-
 			const newValue = this.value;
 			untrack(() => {
 				this.triggerValueChange(newValue);

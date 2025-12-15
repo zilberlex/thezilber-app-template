@@ -1,11 +1,16 @@
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
 
 type EventHandler<E extends Event> = (event: E) => void;
+type HotKeyModifiers = ('ctrlKey' | 'shiftKey' | 'altKey')[];
+type HotKeyOptions<E extends Event> = {
+	handler: EventHandler<E>;
+	modifiers?: HotKeyModifiers;
+};
 
 class HotkeysModule {
 	#wasInitialized = false;
 
-	#hotKeysToHandlers = new OneToManyDictionary<string, EventHandler<KeyboardEvent>>(true);
+	#hotKeysToHandlers = new OneToManyDictionary<string, HotKeyOptions<KeyboardEvent>>(true);
 
 	#onKeydownBound: (event: KeyboardEvent) => void = this.#onKeydown.bind(this);
 
@@ -13,7 +18,7 @@ class HotkeysModule {
 		keys.forEach((key) => this.assignHotKey(key, handler));
 	}
 
-	assignHotKey(key: string, handler: EventHandler<KeyboardEvent>) {
+	assignHotKey(key: string, handler: EventHandler<KeyboardEvent>, modifiers?: HotKeyModifiers) {
 		console.debug('HotkeysModule assigning key:', key, 'to handler:', handler.toString());
 		key = key.toLowerCase();
 
@@ -21,11 +26,11 @@ class HotkeysModule {
 			throw new Error(`${HotkeysModule.name} Need to initialize Class before assigning hotkeys`);
 		}
 
-		this.#hotKeysToHandlers.add(key, handler);
+		this.#hotKeysToHandlers.add(key, { handler, modifiers });
 	}
 
 	removeHotKey(key: string, handler: EventHandler<KeyboardEvent>) {
-		this.#hotKeysToHandlers.remove(key, handler);
+		this.#hotKeysToHandlers.remove(key, { handler });
 	}
 
 	removeHotKeys(keys: string[], handler: EventHandler<KeyboardEvent>) {
@@ -37,16 +42,16 @@ class HotkeysModule {
 
 		let hotKeyedHandlers = this.#hotKeysToHandlers;
 
-		let handlers = hotKeyedHandlers.get(eventKey);
+		let hotKeyInfo = hotKeyedHandlers.get(eventKey);
 
 		console.debug(
 			'HotkeysModule - reachedKeydownEvent key:',
 			eventKey,
 			'relevantHandlers',
-			handlers?.length
+			hotKeyInfo?.length
 		);
 
-		handlers?.forEach((handler) => handler(event));
+		hotKeyInfo?.forEach((info) => info.handler(event));
 	}
 
 	init() {

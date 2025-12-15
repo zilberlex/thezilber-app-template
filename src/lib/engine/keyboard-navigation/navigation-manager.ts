@@ -1,12 +1,10 @@
 import { createKeyabordNavigationEventHandler } from '$lib/engine/hotkeys/bl-events';
 import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
-import {
-	shouldIgnoreNavigation,
-	keyBoardFocusNavigatedNode
-} from '$lib/engine/keyboard-navigation/navigation-utils';
-import { DispatcherImpl, type Dispatcher } from '$lib/engine/patterns/observer';
+import { keyBoardFocusNavigatedNode } from '$lib/engine/keyboard-navigation/navigation-utils';
+import { DispatcherImpl } from '$lib/engine/patterns/observer';
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
-import { NavigationKeyConsts, type NavigationKeysConfig, type ScopeInfra } from './types';
+import { NavigationKeyConsts } from '$lib/engine/hotkeys/types';
+import { type NavigationKeysConfig, type ScopeInfra } from './types';
 
 interface NavigationEvent {
 	targetNode: HTMLElement;
