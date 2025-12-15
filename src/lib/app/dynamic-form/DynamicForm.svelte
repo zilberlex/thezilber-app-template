@@ -11,7 +11,7 @@
 		DynamicFormSchema
 	} from './dynamic-form-types';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
-	import { resolveFieldValue } from './dynamic-form';
+	import { formFromSchema, mergeForms, resolveFieldValue } from './dynamic-form';
 
 	let {
 		formSchema,
@@ -22,11 +22,11 @@
 		formSchema: DynamicFormSchema;
 		outputFunc: (...args: any[]) => AnyNonVoid;
 		OutputComponent?: Component;
-		form: DynamicForm | undefined;
+		form: DynamicForm;
 	}>();
 
 	// 🔹 entries derived directly from state
-	let formIterable = $derived.by(() => Object.entries(form));
+	let formIterable: [string, DynamicFormField][] = $derived.by(() => Object.entries(form));
 
 	let fieldValues = $derived.by(() =>
 		formIterable.map(([, f]) => resolveFieldValue(f as DynamicFormField))
@@ -47,36 +47,6 @@
 	function resolveSchemaChange(prevForm: DynamicForm, newSchema: DynamicFormSchema): DynamicForm {
 		const incomingForm = formFromSchema(newSchema);
 		return mergeForms(prevForm, incomingForm);
-	}
-
-	function formFromSchema(schema: DynamicFormSchema): DynamicForm {
-		const next: DynamicForm = {};
-
-		for (const [fieldName, fieldSchema] of Object.entries(schema)) {
-			next[fieldName] = {
-				schema: fieldSchema
-			};
-		}
-
-		return next;
-	}
-
-	function mergeForms(currentForm: DynamicForm, incoming: DynamicForm): DynamicForm {
-		const newForm: DynamicForm = {};
-
-		for (const [fieldName, incomingField] of Object.entries(incoming)) {
-			const prevField = currentForm[fieldName];
-			const mergedField: DynamicFormField = { schema: incomingField.schema };
-
-			const prevVal = prevField?.value;
-			const incomingVal = incomingField.value;
-
-			mergedField.value = incomingVal !== undefined ? incomingVal : prevVal;
-
-			newForm[fieldName] = mergedField;
-		}
-
-		return newForm;
 	}
 </script>
 

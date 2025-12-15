@@ -8,7 +8,6 @@
 	import { loadState, saveState } from '$lib/engine/storage/local/local-storage-repository';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import { createSmartHandler } from '$lib/engine/events/event-handling';
-	import { createHotKeyForButtonClick } from '$lib/engine/hotkeys/hotkey-actions';
 
 	const PersistanceStateKey = 'DynamicForm';
 

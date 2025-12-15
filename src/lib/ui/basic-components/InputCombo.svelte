@@ -7,7 +7,7 @@
 		value?: any;
 		type?: string;
 		minLableWidth?: number;
-		disabled: boolean;
+		disabled?: boolean;
 		children?: Snippet;
 	};
 
