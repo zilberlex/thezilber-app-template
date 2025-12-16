@@ -6,36 +6,61 @@ import { signalClickHotkeyEvent, signalFocusHotkeyEvent } from './bl-hotkeys-eve
 import type { KeyboardEventKeyType, KeyCheckFn } from '$lib/engine/hotkeys/key-identification';
 import { engineHotkeysConfig } from './hotkey-module-config';
 import { shouldIgnoreHotKey } from './bl-events';
+import type { HotKeyModifier } from './types';
+import { HotKey } from './hotkey-class';
 
 const HOTKEY_COOLDOWN_MS = engineHotkeysConfig.buttonRapidFireCooldownMs;
 
-export function createFocusHotKeyAction(node: HTMLElement, hotKey: string) {
-	// graceful handling of no hotkey.
-	if (!hotKey) return;
+export function createFocusHotKeyAttachment(
+	key: string,
+	...modifiers: HotKeyModifier[]
+): Attachment {
+	const hotKey = new HotKey(key, ...modifiers);
 
-	let focusHandler = createFocusHandler(node, hotKey);
+	return (node) => {
+		const nodeElement = node as HTMLElement;
+		if (!nodeElement) throw new Error(`Expected node to be HTML Element. Node: ${node}`);
 
-	hotKeysModule.assignHotKey(hotKey, focusHandler);
+		let focusHandler = createFocusHandler(nodeElement, hotKey);
+		hotKeysModule.assignHotKey(hotKey, focusHandler);
 
-	return {
-		destroy: () => {
+		return () => {
 			hotKeysModule.removeHotKey(hotKey, focusHandler);
-		}
+		};
 	};
 }
 
-export function createFocusHandler(node: HTMLElement, key: string) {
+export function createClickHotKeyAttachment(
+	key: string,
+	...modifiers: HotKeyModifier[]
+): Attachment {
+	const hotKey = new HotKey(key, ...modifiers);
+
+	return (node) => {
+		const nodeElement = node as HTMLElement;
+		if (!nodeElement) throw new Error(`Expected node to be HTML Element. Node: ${node}`);
+
+		let clickHandler = createClickHandler(nodeElement, hotKey.key);
+		hotKeysModule.assignHotKey(hotKey, clickHandler);
+
+		return () => {
+			hotKeysModule.removeHotKey(hotKey, clickHandler);
+		};
+	};
+}
+
+export function createFocusHandler(node: HTMLElement, key: HotKey) {
 	return createSmartHandler(
 		(event: Event) => {
 			if (event.target !== node) {
 				keyBoardFocusNavigatedNode(node);
-				signalFocusHotkeyEvent(key, node);
+				signalFocusHotkeyEvent(key.key, node);
 			}
 		},
 		{
 			cooldownDelay: HOTKEY_COOLDOWN_MS,
 			context: `focus node: [${node.toString()}]`,
-			shouldExecuteFunction: (e) => !shouldIgnoreHotKey(e)
+			shouldExecuteFunction: (e) => !shouldIgnoreHotKey(e as KeyboardEvent)
 		}
 	);
 }
@@ -68,7 +93,8 @@ export function createOnKeyDownHandler(
 }
 
 function createOnKeyDownHandler_CreateShouldExcuteFunction(keys: KeyboardEventKeyType) {
-	return (event: KeyboardEvent) => {
+	return (event: Event) => {
+		const keyboardEvent = event as KeyboardEvent;
 		let keysArray: (string | KeyCheckFn)[];
 		if (!Array.isArray(keys)) {
 			keysArray = [keys];
@@ -76,29 +102,14 @@ function createOnKeyDownHandler_CreateShouldExcuteFunction(keys: KeyboardEventKe
 			keysArray = keys;
 		}
 
-		const eventKey = event.key;
+		const eventKey = keyboardEvent.key;
 
 		return keysArray.some((keyCheck) => {
 			if (typeof keyCheck === 'function') {
-				return keyCheck(event);
+				return keyCheck(keyboardEvent);
 			}
 
 			return eventKey === keyCheck;
 		});
-	};
-}
-
-export function createHotKeyForButtonClick(hotKey: string): Attachment {
-	return (node) => {
-		const nodeElement = node as HTMLElement;
-
-		if (!nodeElement) throw new Error(`Expected node to be HTML Element. Node: ${node}`);
-
-		let clickHandler = createClickHandler(nodeElement, hotKey);
-		hotKeysModule.assignHotKey(hotKey, clickHandler);
-
-		return () => {
-			hotKeysModule.removeHotKey(hotKey, clickHandler);
-		};
 	};
 }

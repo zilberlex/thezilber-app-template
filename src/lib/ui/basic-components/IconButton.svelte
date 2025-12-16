@@ -52,7 +52,8 @@
 			transition: inherit;
 		}
 
-		&:is(:hover, :focus-visible) {
+		&:is(:hover, :focus-visible),
+		&.btn-pressed {
 			background-color: var(--cl-primary-dimmest);
 
 			& :global(.icon) {
@@ -61,7 +62,7 @@
 		}
 
 		&:active,
-		:global(&.btn-pressed) {
+		:global(&.btn-start-work) {
 			transition: none;
 			background-color: var(--cl-on-surface);
 

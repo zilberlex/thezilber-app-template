@@ -1,15 +1,16 @@
 <script lang="ts">
 	import '@fontsource-variable/jetbrains-mono';
 	import '@fontsource/audiowide';
-	// Global import.
 	import '$lib/ui/style/reset.css';
 	import '$lib/ui/style/theme/theme.scss';
-	import { createFocusHotKeyAction } from '$lib/engine/hotkeys/hotkey-actions';
+	import { createFocusHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { resolve } from '$app/paths';
 </script>
 
 <div class="home-button-container">
-	<a href={resolve('/')} class="home-button left" use:createFocusHotKeyAction={'h'}>Home</a>
+	<a href={resolve('/')} class="home-button left" {@attach createFocusHotKeyAttachment('h', 'alt')}
+		>Home</a
+	>
 </div>
 
 <style lang="scss">

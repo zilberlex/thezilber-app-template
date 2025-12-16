@@ -100,7 +100,7 @@ a.link-button {
 		padding-inline: 2px;
 	}
 
-	&:is(:focus-visible, :hover) {
+	&:is(:focus-visible, :hover), &.btn-pressed {
 		border-color: var(--color-1-brightest);
 		filter: drop-shadow(0px 0px 4px var(--color-1));
 
@@ -126,23 +126,20 @@ a.link-button {
 			transform: translate(0, calc(0.5px)) scale(1);
 		}
 	}
-
+  
 	&:active,
-  &.btn-pressed {
+  &.btn-start-work {
 		&,
 		& * {
 			transition: all 0s;
 		}
+  }
+
+	&:active,
+  &.btn-pressed {
 
 		& {
 			transform: translate(0, 0) scale(1);
-
-			&::after {
-				--rings-end-bg: radial-gradient(120% 100%, #000 -2.5%, var(--cl-primary-dim) 155%);
-				--ring2: 0 0 0 3px var(--cl-primary);
-				--ring4: 0 0 0 5px var(--cl-primary-dim);
-				--ring6: 0 0 0 7px var(--cl-primary-dimmer);
-			}
 		}
 
 		& span {
@@ -151,8 +148,6 @@ a.link-button {
 	}
 
   &.btn-pressed {
-    color: red;
-    
     border-color: var(--cl-primary-brightest);
 		filter: drop-shadow(0px 0px 12px var(--cl-primary));
   }

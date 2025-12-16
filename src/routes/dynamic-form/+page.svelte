@@ -8,6 +8,7 @@
 	import { loadState, saveState } from '$lib/engine/storage/local/local-storage-repository';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import { createSmartHandler } from '$lib/engine/events/event-handling';
+	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 
 	const PersistanceStateKey = 'DynamicForm';
 
@@ -114,7 +115,11 @@
 		outputFunc={(...fields) => constructTextCommandFromFields(tokens, formSchema, fields)}
 		bind:form
 	/>
-	<Button class="button-save" onclick={saveDynamicFormState}>Save</Button>
+	<Button
+		class="button-save"
+		onclick={saveDynamicFormState}
+		{@attach createClickHotKeyAttachment('s', 'alt')}>Save</Button
+	>
 </div>
 
 <style lang="scss">

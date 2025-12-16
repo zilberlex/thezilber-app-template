@@ -12,6 +12,7 @@
 	} from './dynamic-form-types';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import { formFromSchema, mergeForms, resolveFieldValue } from './dynamic-form';
+	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 
 	let {
 		formSchema,
@@ -69,7 +70,7 @@
 		{:else}
 			<div class="overlay-wrapper">
 				<div class="copy-button">
-					<CopyButtonSimple textToCopy={output} />
+					<CopyButtonSimple textToCopy={output} {@attach createClickHotKeyAttachment('c', 'alt')} />
 				</div>
 				<OutputCombo id="output" value={output}>Output</OutputCombo>
 			</div>

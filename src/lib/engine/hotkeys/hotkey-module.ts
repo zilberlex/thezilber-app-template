@@ -1,57 +1,50 @@
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
+import { HotKey } from './hotkey-class';
 
 type EventHandler<E extends Event> = (event: E) => void;
-type HotKeyModifiers = ('ctrlKey' | 'shiftKey' | 'altKey')[];
-type HotKeyOptions<E extends Event> = {
-	handler: EventHandler<E>;
-	modifiers?: HotKeyModifiers;
-};
 
 class HotkeysModule {
 	#wasInitialized = false;
 
-	#hotKeysToHandlers = new OneToManyDictionary<string, HotKeyOptions<KeyboardEvent>>(true);
+	#hotKeysToHandlers = new OneToManyDictionary<HotKey, EventHandler<KeyboardEvent>>(true);
 
 	#onKeydownBound: (event: KeyboardEvent) => void = this.#onKeydown.bind(this);
 
-	assignHotKeys(keys: string[], handler: EventHandler<KeyboardEvent>) {
-		keys.forEach((key) => this.assignHotKey(key, handler));
-	}
-
-	assignHotKey(key: string, handler: EventHandler<KeyboardEvent>, modifiers?: HotKeyModifiers) {
+	assignHotKey(key: HotKey, handler: EventHandler<KeyboardEvent>) {
 		console.debug('HotkeysModule assigning key:', key, 'to handler:', handler.toString());
-		key = key.toLowerCase();
 
 		if (!this.#wasInitialized) {
 			throw new Error(`${HotkeysModule.name} Need to initialize Class before assigning hotkeys`);
 		}
 
-		this.#hotKeysToHandlers.add(key, { handler, modifiers });
+		this.#hotKeysToHandlers.add(key, handler);
 	}
 
-	removeHotKey(key: string, handler: EventHandler<KeyboardEvent>) {
-		this.#hotKeysToHandlers.remove(key, { handler });
+	removeHotKey(key: HotKey, handler: EventHandler<KeyboardEvent>) {
+		this.#hotKeysToHandlers.remove(key, handler);
 	}
 
-	removeHotKeys(keys: string[], handler: EventHandler<KeyboardEvent>) {
+	assignHotKeys(keys: HotKey[], handler: EventHandler<KeyboardEvent>) {
+		keys.forEach((key) => this.assignHotKey(key, handler));
+	}
+
+	removeHotKeys(keys: HotKey[], handler: EventHandler<KeyboardEvent>) {
 		keys.forEach((key) => this.removeHotKey(key, handler));
 	}
 
 	#onKeydown(event: KeyboardEvent) {
-		let eventKey = event.key.toLowerCase();
-
 		let hotKeyedHandlers = this.#hotKeysToHandlers;
-
-		let hotKeyInfo = hotKeyedHandlers.get(eventKey);
+		let eventKey = HotKey.fromEvent(event);
+		let handlers = hotKeyedHandlers.get(eventKey);
 
 		console.debug(
 			'HotkeysModule - reachedKeydownEvent key:',
-			eventKey,
+			eventKey.toKey(),
 			'relevantHandlers',
-			hotKeyInfo?.length
+			handlers?.length
 		);
 
-		hotKeyInfo?.forEach((info) => info.handler(event));
+		handlers?.forEach((handler) => handler(event));
 	}
 
 	init() {
