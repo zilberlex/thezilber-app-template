@@ -1,9 +1,11 @@
-export class OneToManyDictionary<TKey, TValue> {
-	#map: Map<TKey, TValue[]>;
+import { isKeyLike, type KeyLike, type PrimitiveKey } from './key';
+
+export class OneToManyDictionary<TKey extends KeyLike | PrimitiveKey, TValue> {
+	#map: Map<TKey | string, TValue[]>;
 	#deduplicate: boolean;
 
 	constructor(deduplicate = false) {
-		this.#map = new Map<TKey, TValue[]>();
+		this.#map = new Map<TKey | string, TValue[]>();
 		this.#deduplicate = deduplicate;
 	}
 
@@ -12,7 +14,8 @@ export class OneToManyDictionary<TKey, TValue> {
 	}
 
 	addValues(key: TKey, values: TValue[]) {
-		let currentValues = this.#map.get(key);
+		const normlizedKey = this.normalizeKey(key);
+		let currentValues = this.#map.get(normlizedKey);
 		if (currentValues) {
 			currentValues = currentValues.concat(values);
 		} else {
@@ -20,14 +23,15 @@ export class OneToManyDictionary<TKey, TValue> {
 		}
 
 		if (this.#deduplicate) {
-			this.#map.set(key, [...new Set(currentValues)]);
+			this.#map.set(normlizedKey, [...new Set(currentValues)]);
 		} else {
-			this.#map.set(key, currentValues);
+			this.#map.set(normlizedKey, currentValues);
 		}
 	}
 
 	removeValues(key: TKey, values: TValue[]) {
-		let currentValues = this.#map.get(key);
+		const normlizedKey = this.normalizeKey(key);
+		let currentValues = this.#map.get(normlizedKey);
 		if (currentValues) {
 			values.forEach((value) => {
 				let valueIndex = currentValues.indexOf(value);
@@ -37,7 +41,7 @@ export class OneToManyDictionary<TKey, TValue> {
 			});
 
 			if (currentValues.length == 0) {
-				this.#map.delete(key);
+				this.#map.delete(normlizedKey);
 			}
 		}
 	}
@@ -47,10 +51,13 @@ export class OneToManyDictionary<TKey, TValue> {
 	}
 
 	get(key: TKey): TValue[] {
-		return this.#map.get(key) ?? [];
+		return this.#map.get(this.normalizeKey(key)) ?? [];
 	}
 
 	has(key: TKey): boolean {
-		return this.#map.has(key);
+		return this.#map.has(this.normalizeKey(key));
+	}
+	private normalizeKey(key: TKey): string | TKey {
+		return isKeyLike(key) ? key.toKey() : key;
 	}
 }

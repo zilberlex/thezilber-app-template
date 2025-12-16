@@ -1,5 +1,5 @@
 <script lang="ts">
-	import CopyIconSvg from '$lib/assets/icons/CopyIconSvg.svelte';
+	import CopyIcon from '$lib/assets/icons/CopyIcon.svelte';
 	import type { Command } from '$lib/engine/patterns/command/command';
 	import { createChangeElementTextContentTemporaryCommand } from '$lib/engine/patterns/command/command-impl/change-element-content-command';
 	import Button from '$lib/ui/basic-components/Button.svelte';
@@ -8,7 +8,8 @@
 		nodeToCopy,
 		buttonText = 'Copy',
 		tempTextAtCopy = 'Copied to Clipboard...',
-		durationOfTempTextMs = 1000
+		durationOfTempTextMs = 1000,
+		...rest
 	} = $props();
 
 	let thisNode = $state() as Element;
@@ -29,8 +30,8 @@
 	}
 </script>
 
-<Button class="copy-code-button" onclick={copyCode} bind:thisNode>
-	<CopyIconSvg />
+<Button class="copy-code-button" onclick={copyCode} bind:thisNode {...rest}>
+	<CopyIcon />
 	{buttonText}
 </Button>
 
