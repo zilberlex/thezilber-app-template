@@ -3,10 +3,9 @@
 
 	import '@fontsource-variable/jetbrains-mono';
 	import '@fontsource/audiowide';
-	// Global import.
 	import '$lib/ui/style/reset.css';
 	import '$lib/ui/style/theme/theme.scss';
-	import HotKeysInitialization from '$lib/engine/keyboard-navigation/svelte-components/HotKeysInitialization.svelte';
+	import AppInit from '$lib/app/AppInit.svelte';
 
 	let { children } = $props();
 
@@ -16,8 +15,7 @@
 <svelte:head>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 </svelte:head>
-
-<HotKeysInitialization />
+<AppInit />
 <div class="app-container">
 	<header class="header">
 		<div>

@@ -70,7 +70,10 @@
 		{:else}
 			<div class="overlay-wrapper">
 				<div class="copy-button">
-					<CopyButtonSimple textToCopy={output} {@attach createClickHotKeyAttachment('c', 'alt')} />
+					<CopyButtonSimple
+						textToCopy={output}
+						{@attach createClickHotKeyAttachment('Copy', 'c', 'alt')}
+					/>
 				</div>
 				<OutputCombo id="output" value={output}>Output</OutputCombo>
 			</div>

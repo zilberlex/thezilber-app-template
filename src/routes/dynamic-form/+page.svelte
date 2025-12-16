@@ -118,7 +118,7 @@
 	<Button
 		class="button-save"
 		onclick={saveDynamicFormState}
-		{@attach createClickHotKeyAttachment('s', 'alt')}>Save</Button
+		{@attach createClickHotKeyAttachment('Save', 's', 'alt')}>Save</Button
 	>
 </div>
 

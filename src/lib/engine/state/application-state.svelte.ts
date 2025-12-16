@@ -1,3 +1,5 @@
+import { tooltipState, type TooltipState } from '../tooltip/tooltip-state.svelte';
+
 export interface AppState {
 	isAppLoaded: boolean;
 	isWindowFocused: boolean;
@@ -7,6 +9,7 @@ export interface AppState {
 	isMobile: boolean | undefined;
 	currentFocusedNode: Element | undefined;
 	inJsEnabled: boolean;
+	tooltipState: TooltipState;
 }
 
 export const appState: AppState = $state({
@@ -17,5 +20,6 @@ export const appState: AppState = $state({
 	userAgent: undefined,
 	isMobile: undefined,
 	currentFocusedNode: undefined,
-	inJsEnabled: false
+	inJsEnabled: false,
+	tooltipState: tooltipState
 });

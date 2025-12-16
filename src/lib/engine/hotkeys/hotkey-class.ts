@@ -40,6 +40,26 @@ export class HotKey implements KeyLike {
 		return this.toKey() === other.toKey();
 	}
 
+	toString(): string {
+		let parts = [];
+
+		if (this.#flags[MODIFIER_INDEX['ctrl|option']]) {
+			parts.push('Ctrl');
+		}
+
+		if (this.#flags[MODIFIER_INDEX['shift']]) {
+			parts.push('Shift');
+		}
+
+		if (this.#flags[MODIFIER_INDEX['alt']]) {
+			parts.push('Alt');
+		}
+
+		parts.push(this.key.toUpperCase());
+
+		return parts.join('+');
+	}
+
 	static fromEvent(event: KeyboardEvent): HotKey {
 		const mods: HotKeyModifier[] = [];
 		if (event.ctrlKey || event.metaKey) mods.push('ctrl|option');

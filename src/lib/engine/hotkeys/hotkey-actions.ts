@@ -8,10 +8,12 @@ import { engineHotkeysConfig } from './hotkey-module-config';
 import { shouldIgnoreHotKey } from './bl-events';
 import type { HotKeyModifier } from './types';
 import { HotKey } from './hotkey-class';
+import { HotkeyTooltipAttribute } from '../tooltip/tooltip-consts';
 
 const HOTKEY_COOLDOWN_MS = engineHotkeysConfig.buttonRapidFireCooldownMs;
 
 export function createFocusHotKeyAttachment(
+	hotKeyTooltipText: string = '',
 	key: string,
 	...modifiers: HotKeyModifier[]
 ): Attachment {
@@ -24,6 +26,8 @@ export function createFocusHotKeyAttachment(
 		let focusHandler = createFocusHandler(nodeElement, hotKey);
 		hotKeysModule.assignHotKey(hotKey, focusHandler);
 
+		assignHotKeyTooltip(node, hotKey, hotKeyTooltipText);
+
 		return () => {
 			hotKeysModule.removeHotKey(hotKey, focusHandler);
 		};
@@ -31,6 +35,7 @@ export function createFocusHotKeyAttachment(
 }
 
 export function createClickHotKeyAttachment(
+	hotKeyTooltipText: string = '',
 	key: string,
 	...modifiers: HotKeyModifier[]
 ): Attachment {
@@ -42,6 +47,8 @@ export function createClickHotKeyAttachment(
 
 		let clickHandler = createClickHandler(nodeElement, hotKey.key);
 		hotKeysModule.assignHotKey(hotKey, clickHandler);
+
+		assignHotKeyTooltip(node, hotKey, hotKeyTooltipText);
 
 		return () => {
 			hotKeysModule.removeHotKey(hotKey, clickHandler);
@@ -112,4 +119,8 @@ function createOnKeyDownHandler_CreateShouldExcuteFunction(keys: KeyboardEventKe
 			return eventKey === keyCheck;
 		});
 	};
+}
+
+function assignHotKeyTooltip(node: Element, key: HotKey, tooltipText: string) {
+	node.setAttribute(HotkeyTooltipAttribute, `${tooltipText} (${key.toString()})`);
 }
