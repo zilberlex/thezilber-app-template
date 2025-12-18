@@ -1,1 +1,0 @@
-import"./DsnmJJEf.js";import"./BisyQdmr.js";import{a2 as r,a5 as a}from"./Cob-Jj1k.js";import{i as p}from"./DQSOICdL.js";import{g as s,L as i}from"./DcAi_dZE.js";function m(e,t){r(t,!1);const o=s();p(),i(e,{get urls(){return o}}),a()}const _=Object.freeze(Object.defineProperty({__proto__:null,default:m},Symbol.toStringTag,{value:"Module"}));export{m as _,_ as a};
