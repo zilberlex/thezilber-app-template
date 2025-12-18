@@ -53,8 +53,12 @@
 
 <div class="dynamic-form box box-highlight">
 	<div class="input-area">
-		{#each formIterable as [fieldName, dynamicFormField] (fieldName)}
+		{#each formIterable as [fieldName, dynamicFormField], index (fieldName)}
 			<InputCombo
+				hotkey={{
+					hotkey: (index + 1).toString(),
+					tooltip: `Modify |${fieldName}|`
+				}}
 				type={dynamicFormField.schema.type}
 				placeholder={resolveFieldValue(dynamicFormField).toString()}
 				bind:value={dynamicFormField.value}
@@ -103,6 +107,7 @@
 
 	:global(output-combo) {
 		display: inline-block;
+		padding-inline-end: calc(2 * var(--padding-2) + var(--icon-width));
 	}
 
 	.overlay-wrapper {

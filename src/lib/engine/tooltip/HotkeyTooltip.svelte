@@ -8,11 +8,7 @@
 
 	function makePretty(text: string) {
 		const highlighCssClass = 'ul-txt-primary';
-
-		const output = text.replace(
-			/\(([^)]+)\)/g,
-			`<span class="${highlighCssClass}">(</span ><em>$1</em><span class="${highlighCssClass}">)</span>`
-		);
+		const output = text.replace(/[()*|]/g, `<span class="${highlighCssClass}">$&</span>`);
 
 		return output;
 	}

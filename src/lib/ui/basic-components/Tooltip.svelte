@@ -1,15 +1,23 @@
 <script lang="ts">
-	import { cubicIn, cubicOut, expoIn, expoOut } from 'svelte/easing';
-	import { fade } from 'svelte/transition';
+	import { quadInOut } from 'svelte/easing';
+	import { slide } from 'svelte/transition';
 
 	let { children, thisElement = $bindable(), ...rest } = $props();
 </script>
 
-<div
-	bind:this={thisElement}
-	class="app-tooltip"
-	transition:fade={{ duration: 400, easing: expoOut }}
-	{...rest}
->
-	{@render children()}
+<div class="tooltip-wrapper" transition:slide={{ axis: 'x', duration: 300, easing: quadInOut }}>
+	<div bind:this={thisElement} class="app-tooltip" {...rest}>
+		{@render children()}
+	</div>
 </div>
+
+<style>
+	/* .tooltip-wrapper fixes issues with slide transition content autofitting */
+	.tooltip-wrapper {
+		border: var(--base-border-thin);
+
+		.app-tooltip {
+			border: none;
+		}
+	}
+</style>

@@ -4,6 +4,9 @@ export function keyBoardFocusNavigatedNode(node: HTMLElement) {
 	navigationStateManager.setKeyboardNavigationMode();
 	node.focus({ preventScroll: true });
 	node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+	const textElement = node as HTMLInputElement | HTMLTextAreaElement | null;
+	if (textElement) textElement.select();
 }
 
 export function getFocusableElementsByNode(node: HTMLElement): HTMLElement[] {

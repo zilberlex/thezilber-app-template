@@ -1,5 +1,11 @@
 <script lang="ts">
+	import { createFocusHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import type { Snippet } from 'svelte';
+
+	type HotKeyParams = {
+		hotkey: string;
+		tooltip: string;
+	};
 
 	type InputComboProps = {
 		id?: string;
@@ -8,6 +14,7 @@
 		type?: string;
 		minLableWidth?: number;
 		disabled?: boolean;
+		hotkey?: HotKeyParams;
 		children?: Snippet;
 	};
 
@@ -18,7 +25,9 @@
 		minLableWidth = 0,
 		value = $bindable(),
 		disabled = false,
-		children
+		hotkey,
+		children,
+		...rest
 	}: InputComboProps = $props();
 </script>
 
@@ -28,5 +37,14 @@
 			class="suffix">:</span
 		></label
 	>
-	<input {disabled} bind:value {type} name={id} {id} {placeholder} required />
+	<input
+		{disabled}
+		bind:value
+		{type}
+		name={id}
+		{id}
+		{placeholder}
+		required
+		{@attach hotkey ? createFocusHotKeyAttachment(hotkey.tooltip, hotkey.hotkey, 'alt') : () => {}}
+	/>
 </input-combo>
