@@ -53,8 +53,12 @@
 
 <div class="dynamic-form box box-highlight">
 	<div class="input-area">
-		{#each formIterable as [fieldName, dynamicFormField] (fieldName)}
+		{#each formIterable as [fieldName, dynamicFormField], index (fieldName)}
 			<InputCombo
+				hotkey={{
+					hotkey: (index + 1).toString(),
+					tooltip: `Modify |${fieldName}|`
+				}}
 				type={dynamicFormField.schema.type}
 				placeholder={resolveFieldValue(dynamicFormField).toString()}
 				bind:value={dynamicFormField.value}
@@ -70,7 +74,10 @@
 		{:else}
 			<div class="overlay-wrapper">
 				<div class="copy-button">
-					<CopyButtonSimple textToCopy={output} {@attach createClickHotKeyAttachment('c', 'alt')} />
+					<CopyButtonSimple
+						textToCopy={output}
+						{@attach createClickHotKeyAttachment('Copy', 'c', 'alt')}
+					/>
 				</div>
 				<OutputCombo id="output" value={output}>Output</OutputCombo>
 			</div>
@@ -100,6 +107,7 @@
 
 	:global(output-combo) {
 		display: inline-block;
+		padding-inline-end: calc(2 * var(--padding-2) + var(--icon-width));
 	}
 
 	.overlay-wrapper {

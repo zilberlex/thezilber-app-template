@@ -107,6 +107,7 @@
 <div class="save-indicator" class:show={isSaving}>Saving...</div>
 <div class="mini-app">
 	<InputCombo
+		hotkey={{ hotkey: '0', tooltip: 'Modify Command' }}
 		placeholder={'Enter Command here, use squirly braces for {field}'}
 		bind:value={commandStr}>Command String</InputCombo
 	>
@@ -118,7 +119,7 @@
 	<Button
 		class="button-save"
 		onclick={saveDynamicFormState}
-		{@attach createClickHotKeyAttachment('s', 'alt')}>Save</Button
+		{@attach createClickHotKeyAttachment('Save', 's', 'alt')}>Save</Button
 	>
 </div>
 

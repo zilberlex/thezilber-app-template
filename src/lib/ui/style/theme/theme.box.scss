@@ -9,15 +9,15 @@
 }
 
 @mixin box {
-	--_box-padding: var(--padding-1);
-	--_box-border: var(--box-border, var(--border-thick));
+	--box-padding: var(--padding-1);
+	--box-border: var(--base-border-thick);
 
 	background-color: var(--cl-surface);
 	color: var(--cl-on-surface);
 
-	border: var(--_box-border) solid var(--cl-primary);
+	border: var(--box-border);
 
-	padding: var(--padding-1);
+	padding: var(--box-padding);
 
 	transition: opacity 0.2s ease-out;
 }

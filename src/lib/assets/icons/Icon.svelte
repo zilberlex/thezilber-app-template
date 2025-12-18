@@ -9,9 +9,6 @@
 <style>
 	.icon {
 		box-sizing: border-box;
-		--height: 1em;
-		--width: 1em;
-
 		display: block;
 		line-height: 1;
 
@@ -22,8 +19,8 @@
 		fill: var(--icon-bg);
 
 		stroke: var(--icon-stroke);
-		height: var(--height);
-		width: var(--width);
+		height: var(--icon-height);
+		width: var(--icon-width);
 
 		stroke-width: 2;
 	}

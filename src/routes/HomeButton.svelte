@@ -8,8 +8,10 @@
 </script>
 
 <div class="home-button-container">
-	<a href={resolve('/')} class="home-button left" {@attach createFocusHotKeyAttachment('h', 'alt')}
-		>Home</a
+	<a
+		href={resolve('/')}
+		class="home-button left"
+		{@attach createFocusHotKeyAttachment('Home ', 'h', 'alt')}>Home</a
 	>
 </div>
 

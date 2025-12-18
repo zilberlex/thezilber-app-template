@@ -2,10 +2,12 @@
 	--border-thin: 1px;
 	--border-thick: 2px;
 	--border-radius: 4px;
-	--box-border: var(--border-thick);
 
 	--border-shadow-radius: 6px;
 	--border-shadow-radius-inset: 3px;
+
+	--base-border-thin: var(--border-thin) solid var(--cl-primary);
+	--base-border-thick: var(--border-thick) solid var(--cl-primary);
 
 	--sp-line-height: 1.4;
 
@@ -22,5 +24,10 @@
 	--space-lg: var(--space-4);
 	--space-xl: var(--space-5);
 
-	--padding-hz: var(--space-2);
+	--base-padding-hz: var(--space-2);
+
+	--base-padding: var(--space-1) var(--space-2);
+
+	--icon-height: 1em;
+	--icon-width: 1em;
 }

@@ -60,9 +60,9 @@ input {
 	flex: 1 1 auto; /* fill remaining space */
 	min-width: 0;
 
-	padding-inline: var(--_box-padding);
 	border-color: var(--cl-primary);
 
+  padding-inline: var(--base-padding-hz);
 	border: none;
 
 	& {
