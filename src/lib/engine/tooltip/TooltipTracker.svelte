@@ -7,21 +7,21 @@
 		tooltipState.text = text;
 	}
 
-	function onPointerOver(e: PointerEvent) {
-		const el = (e.target as Element)?.closest?.(`[${HotkeyTooltipAttribute}]`);
+	function onPointerOver(event: PointerEvent) {
+		const node = (event.target as Element)?.closest?.(`[${HotkeyTooltipAttribute}]`);
 
-		if (!el) return;
+		if (!node) return;
 
-		const text = el.getAttribute(HotkeyTooltipAttribute);
+		const text = node.getAttribute(HotkeyTooltipAttribute);
 
 		const current = tooltipState.target;
-		if (el === current) return;
+		if (node === current) return;
 
-		setTooltip(el, text);
+		setTooltip(node, text);
 	}
 
-	function onPointerOut(e: PointerEvent) {
-		const to = e.relatedTarget as Element | null;
+	function onPointerOut(event: PointerEvent) {
+		const to = event.relatedTarget as Element | null;
 
 		// If we moved into another tooltip-bearing element, let pointerover handle it.
 		if (to?.closest?.(HotkeyTooltipAttribute)) return;

@@ -9,7 +9,7 @@
 }
 
 @mixin box {
-	--_box-padding: var(--padding-1);
+	--box-padding: var(--padding-1);
 	--box-border: var(--base-border-thick);
 
 	background-color: var(--cl-surface);
@@ -17,7 +17,7 @@
 
 	border: var(--box-border);
 
-	padding: var(--padding-1);
+	padding: var(--box-padding);
 
 	transition: opacity 0.2s ease-out;
 }

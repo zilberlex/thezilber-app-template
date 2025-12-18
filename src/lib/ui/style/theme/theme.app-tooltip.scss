@@ -1,8 +1,8 @@
 	@mixin app-tooltip {
-		border: var(--base-border-thin);
-		padding: var(--base-padding);
-		background-color: var(--cl-surface);
-		color: var(--cl-on-surface);
+    border: var(--base-border-thin);
+    padding: var(--base-padding);
+    background-color: var(--cl-surface);
+    color: var(--cl-on-surface);
 
     width: max-content;
 	}
