@@ -6,6 +6,8 @@
 	import '$lib/ui/style/reset.css';
 	import '$lib/ui/style/theme/theme.scss';
 	import AppInit from '$lib/app/AppInit.svelte';
+	import ForegroundHoverLayer from '$lib/ui/components/ForegroundHoverLayer.svelte';
+	import MouseTracker from '$lib/ui/components/MouseTracker.svelte';
 
 	let { children } = $props();
 
@@ -15,7 +17,9 @@
 <svelte:head>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 </svelte:head>
+
 <AppInit />
+
 <div class="app-container">
 	<header class="header">
 		<div>
