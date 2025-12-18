@@ -57,7 +57,7 @@ label {
 input {
   @include ul-txt-primary;
 
-	flex: 1 1 auto; /* fill remaining space */
+	flex: 1 1 auto; 
 	min-width: 0;
 
 	border-color: var(--cl-primary);

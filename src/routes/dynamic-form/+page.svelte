@@ -25,9 +25,11 @@
 
 	onMount(() => {
 		let dynamicFormState = loadDynamicFormState();
-		if (dynamicFormState) {
+		if (dynamicFormState?.commandStr) {
 			commandStr = dynamicFormState.commandStr;
 			form = dynamicFormState.formData;
+		} else {
+			({ commandStr, formData: form } = loadExampleForm());
 		}
 	});
 
@@ -102,6 +104,22 @@
 		cooldownDelay: 0,
 		debounceDelay: 2000
 	});
+
+	function loadExampleForm(): DynamicFormPageState {
+		const commandStr = 'cp -r {src} {dest}';
+		const formData = {
+			src: {
+				value: './origin/',
+				schema: { type: 'string' }
+			},
+			dest: {
+				value: './bkp/origin/',
+				schema: { type: 'string' }
+			}
+		};
+
+		return { commandStr, formData };
+	}
 </script>
 
 <div class="save-indicator" class:show={isSaving}>Saving...</div>
