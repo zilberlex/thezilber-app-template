@@ -6,12 +6,13 @@
 	import '$lib/ui/style/reset.css';
 	import '$lib/ui/style/theme/theme.scss';
 	import AppInit from '$lib/app/AppInit.svelte';
-	import ForegroundHoverLayer from '$lib/ui/components/ForegroundHoverLayer.svelte';
-	import MouseTracker from '$lib/ui/components/MouseTracker.svelte';
+	import { appState } from '$lib/engine/state/application-state.svelte';
+	import { onNavigate } from '$app/navigation';
 
 	let { children } = $props();
-
-	const title = 'Application List';
+	onNavigate(() => {
+		appState.pageContext.title = '';
+	});
 </script>
 
 <svelte:head>
@@ -25,7 +26,6 @@
 		<div>
 			<HomeButton />
 		</div>
-		<h1 class="title center">{title}:</h1>
 	</header>
 	<main class="page-container">
 		{@render children?.()}
@@ -49,30 +49,5 @@
 	.page-container {
 		flex: 1 1 auto;
 		@include ly-center();
-	}
-
-	.header {
-		line-height: 1;
-
-		display: flex;
-		flex-direction: column;
-
-		& > * {
-			display: inline-block;
-		}
-
-		.center {
-			align-self: center;
-			transform: translateY(-50%);
-
-			@media (width <= 750px) {
-				transform: none;
-				margin-top: var(--space-5);
-			}
-		}
-	}
-
-	.title {
-		text-decoration: var(--cl-primary) underline;
 	}
 </style>

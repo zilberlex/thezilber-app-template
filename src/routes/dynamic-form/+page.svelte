@@ -9,8 +9,11 @@
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import { createSmartHandler } from '$lib/engine/events/event-handling';
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
+	import { appState } from '$lib/engine/state/application-state.svelte';
 
 	const PersistanceStateKey = 'DynamicForm';
+
+	appState.pageContext.title = 'Dynamic Form';
 
 	let commandStr = $state('');
 	let isSaving = $state(false);

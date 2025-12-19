@@ -1,4 +1,5 @@
 import { tooltipState, type TooltipState } from '../tooltip/tooltip-state.svelte';
+import { pageContext, type PageContext } from './page-context.svelte';
 
 export interface AppState {
 	isAppLoaded: boolean;
@@ -6,10 +7,11 @@ export interface AppState {
 	debugConsole: boolean;
 	debug: boolean;
 	userAgent: string | undefined;
-	isMobile: boolean | undefined;
+	userAgentType: 'desktop' | 'mobile' | undefined;
 	currentFocusedNode: Element | undefined;
 	inJsEnabled: boolean;
 	tooltipState: TooltipState;
+	pageContext: PageContext;
 }
 
 export const appState: AppState = $state({
@@ -18,8 +20,10 @@ export const appState: AppState = $state({
 	debugConsole: false,
 	debug: false,
 	userAgent: undefined,
+	userAgentType: undefined,
 	isMobile: undefined,
 	currentFocusedNode: undefined,
 	inJsEnabled: false,
-	tooltipState: tooltipState
+	tooltipState: tooltipState,
+	pageContext: pageContext
 });
