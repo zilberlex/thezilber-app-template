@@ -1,0 +1,1 @@
+import{ax as e}from"./dn7Xk9dZ.js";const t=e({target:null,text:null}),o=e({title:""}),a=e({isWindowFocused:!0,isAppLoaded:!1,debugConsole:!1,debug:!1,userAgent:void 0,userAgentType:void 0,isMobile:void 0,currentFocusedNode:void 0,inJsEnabled:!1,tooltipState:t,pageContext:o});export{a,t};
