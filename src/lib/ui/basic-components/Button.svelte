@@ -6,10 +6,10 @@
 	import { mergeProps } from 'svelte-toolbelt';
 
 	let {
-		children,
+		children = undefined,
 		thisNode = $bindable(),
 		onkeydown: userOnKeydown = () => {},
-		onclick: userOnClick,
+		onclick: userOnClick = () => {},
 		...rest
 	} = $props();
 
@@ -26,5 +26,5 @@
 </script>
 
 <button {...mergedProps} bind:this={thisNode}>
-	{@render children()}
+	{@render children?.()}
 </button>

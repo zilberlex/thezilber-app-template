@@ -9,13 +9,14 @@
 }
 
 @mixin box {
+  --_box-color: var(--box-color, var(--cl-primary));
 	--box-padding: var(--padding-1);
 	--box-border: var(--base-border-thick);
 
 	background-color: var(--cl-surface);
 	color: var(--cl-on-surface);
 
-	border: var(--box-border);
+	border: var(--border-thick) solid var(--_box-color);
 
 	padding: var(--box-padding);
 

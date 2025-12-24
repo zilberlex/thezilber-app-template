@@ -1,5 +1,5 @@
 import type { DispatchHandler } from '$lib/engine/patterns/observer';
-import { NavigationKeyConsts } from '../hotkeys/types';
+import { NavigationKeyConsts } from '$lib/engine/hotkeys/consts';
 
 export function createNavigationKeys(nextKeys: string[], prevKeys: string[]): NavigationKeysConfig {
 	return {

@@ -8,6 +8,7 @@
 	import AppInit from '$lib/app/AppInit.svelte';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onNavigate } from '$app/navigation';
+	import AppNavigationManager from '$lib/engine/keyboard-navigation/svelte-components/AppNavigationManager.svelte';
 
 	let { children } = $props();
 	onNavigate(() => {
@@ -21,16 +22,18 @@
 
 <AppInit />
 
-<div class="app-container">
-	<header class="header">
-		<div>
-			<HomeButton />
-		</div>
-	</header>
-	<main class="page-container">
-		{@render children?.()}
-	</main>
-</div>
+<AppNavigationManager>
+	<div class="app-container">
+		<header class="header">
+			<div>
+				<HomeButton />
+			</div>
+		</header>
+		<main class="page-container">
+			{@render children?.()}
+		</main>
+	</div>
+</AppNavigationManager>
 
 <style lang="scss">
 	@use '$lib/ui/style/utility/utility.scss' as *;
