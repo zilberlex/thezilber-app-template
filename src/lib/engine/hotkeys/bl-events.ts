@@ -6,7 +6,7 @@ import {
 	NavigationKeyConsts,
 	NodesWhichTakePriorityOverSoftHotKeys,
 	type NavType
-} from './types.d';
+} from './consts';
 
 /**
  * @param {function(KeyboardEvent): void} onActionEventHandler

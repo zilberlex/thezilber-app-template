@@ -3,8 +3,9 @@ import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
 import { keyBoardFocusNavigatedNode } from '$lib/engine/keyboard-navigation/navigation-utils';
 import { DispatcherImpl } from '$lib/engine/patterns/observer';
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
-import { NavigationKeyConsts } from '$lib/engine/hotkeys/types';
+import { NavigationKeyConsts } from '$lib/engine/hotkeys/consts';
 import { type NavigationKeysConfig, type ScopeInfra } from './types';
+import { HotKey } from '../hotkeys/hotkey-class';
 
 interface NavigationEvent {
 	targetNode: HTMLElement;
@@ -85,7 +86,7 @@ export class NavigationManager {
 			this.#allNavigationKeys.remove(key, source);
 
 			if (!this.#allNavigationKeys.has(key)) {
-				hotKeysModule.removeHotKeys(flatNavigationKeys, this.#onNavigationKey);
+				hotKeysModule.removeHotKey(new HotKey(key), this.#onNavigationKey);
 			}
 		});
 	}
@@ -95,6 +96,8 @@ export class NavigationManager {
 	}
 
 	#onNavigationKey = createKeyabordNavigationEventHandler((keyboardEvent: KeyboardEvent) => {
+		console.log('WOOW');
+
 		if (this.#scopes.length == 0) {
 			console.warn('NavigationManager no scopes present. Ignoring key');
 			return;
@@ -110,8 +113,10 @@ export class NavigationManager {
 			key,
 			'currentScope',
 			this.#currentScope,
-			'nextNodeInfo:',
-			nextNodeInfo
+			'nextNodeInfo nextNode:',
+			nextNodeInfo.nextNode,
+			'nextNodeInfo escapeBackupNode:',
+			nextNodeInfo.escapeBackupNode
 		);
 
 		if (nextNodeInfo.nextNode)
@@ -148,7 +153,10 @@ export class NavigationManager {
 
 		console.log(`NavigationManager - adding NavigationKeys`, flatNavigationKeys);
 
-		hotKeysModule.assignHotKeys(flatNavigationKeys, this.#onNavigationKey);
+		hotKeysModule.assignHotKeys(
+			flatNavigationKeys.map((x) => new HotKey(x)),
+			this.#onNavigationKey
+		);
 		flatNavigationKeys.forEach((key) => this.#allNavigationKeys.add(key, source));
 	}
 

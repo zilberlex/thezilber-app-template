@@ -7,6 +7,7 @@
 	--color-2: oklch(98.112% 0.00938 286.056);
 	--color-3: oklch(0% 0 0);
 	--color-4: red;
+	--color-5: oklch(0.8775 0.1495 195.24);
 
 	--color-1-transparent: oklch(var(--color-1-values) / 0);
 

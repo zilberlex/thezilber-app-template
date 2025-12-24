@@ -41,6 +41,16 @@ $emit-default: false !default;
 	}
 }
 
+@mixin flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+@mixin flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
 @if $emit-default {
 	.ly-full-screen {
 		@include ly-full-screen;
@@ -49,4 +59,12 @@ $emit-default: false !default;
 	.ly-center {
 		@include ly-center;
 	}
+
+  .flex-row {
+    @include flex-row;
+  }
+
+.flex-col {
+  @include flex-col;
+}
 }

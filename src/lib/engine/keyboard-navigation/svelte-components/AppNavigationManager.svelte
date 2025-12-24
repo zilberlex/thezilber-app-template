@@ -9,7 +9,6 @@
 		children?: any;
 	}
 
-	// TODO AZ Add navigation keys.
 	let { navigationKeyConfig, children }: Props = $props();
 
 	let navigationManager: NavigationManager = new NavigationManager(navigationKeyConfig);
