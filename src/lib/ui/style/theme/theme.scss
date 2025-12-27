@@ -1,4 +1,4 @@
-@use '$lib/ui/style/effects.scss' as *;
+@use '$lib/ui/style/effects.scss' as * with ($emit-default: true);
 @use '$lib/ui/style/utility.color.scss' as *;
 @use '$lib/ui/style/theme/theme.button.scss' as tButton;
 @use '$lib/ui/style/theme/theme.box.scss' as tBox;

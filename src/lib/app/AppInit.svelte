@@ -9,6 +9,7 @@
 	import ForegroundHoverLayer from '$lib/ui/components/ForegroundHoverLayer.svelte';
 	import MouseTracker from '$lib/ui/components/MouseTracker.svelte';
 	import DebugConsole from './DebugConsole.svelte';
+	import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
 
 	onMount(() => {
 		if (browser) {
@@ -16,6 +17,8 @@
 			appState.userAgentType = getAgentType(appState.userAgent);
 
 			window.appState = appState;
+
+			appState.deviceId = getDeviceId();
 		}
 	});
 
@@ -31,7 +34,7 @@
 			<HotkeyTooltip />
 		</MouseTracker>
 	{/if}
-	{#if appState.debugConsole}
+	{#if appState.debug.debugConsole}
 		<DebugConsole />
 	{/if}
 </ForegroundHoverLayer>

@@ -7,7 +7,8 @@ a[href] {
 	&:is(:hover, :focus-visible) {
 		outline: none;
 
-		@include glow-text();
+
+		@include pulse-text(var(--cl-primary), var(--cl-on-surface), 1.0s);
 		text-decoration-color: var(--cl-primary);
 	}
 }

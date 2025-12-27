@@ -4,7 +4,15 @@
 </script>
 
 <div class="debug-console">
-	<ObjectViewer object={appState} class="app-state-viewer box" />
+	<ObjectViewer objectName="App State" object={appState} class="app-state-viewer box" />
+	{#if appState.debug.viewObject}
+		<ObjectViewer
+			objectName="Debug Object View"
+			object={appState.debug.viewObject}
+			recursive={true}
+			class="app-state-viewer box"
+		/>
+	{/if}
 </div>
 
 <style>

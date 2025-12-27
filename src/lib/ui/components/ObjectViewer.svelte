@@ -3,20 +3,30 @@
 	import ObjectViewer from './ObjectViewer.svelte';
 
 	type Props = {
+		objectName?: string;
 		object: Object;
 		recursive?: boolean;
 	} & HTMLAttributes<HTMLDivElement>;
 
-	let { object, recursive = false, ...rest }: Props = $props();
+	let { objectName, object, recursive = false, ...rest }: Props = $props();
 
-	let objIterable = $derived.by(() => Object.entries(object));
+	function isObject(val: any) {
+		return val === Object(val);
+	}
+
+	let objIterable = $derived.by(() =>
+		isObject(object) ? Object.entries(object) : [[typeof object, object]]
+	);
 </script>
 
 <div {...rest}>
+	{#if objectName}
+		<strong>{objectName}:</strong>
+	{/if}
 	{#each objIterable as [key, value]}
 		<div class="item">
 			<span class="key">{key}</span>:
-			{#if recursive && typeof value === 'object'}
+			{#if recursive && typeof value === 'object' && value}
 				<div>
 					{'{'}<br /><ObjectViewer object={value} {recursive} />{'}'}<br />
 				</div>
@@ -45,5 +55,9 @@
 
 	.value {
 		font-style: italic;
+	}
+
+	strong {
+		text-decoration: underline var(--cl-primary);
 	}
 </style>

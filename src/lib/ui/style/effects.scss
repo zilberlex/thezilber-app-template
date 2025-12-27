@@ -1,3 +1,5 @@
+$emit-default: false !default;
+
 @mixin animate-padding {
 	// --_animate-padding-delta: 0.25rem;
 	--_animate-padding-base: var(--padding-1);
@@ -6,12 +8,6 @@
 	padding-left: calc(var(--_animate-padding-base) + var(--_animate-padding-delta));
 	padding-right: calc(var(--_animate-padding-base) - var(--_animate-padding-delta));
 }
-
-.animate-padding {
-	@include animate-padding;
-}
-
-/* glow-text.scss */
 
 /* 1) Mixin (keeps CSS variables; tweak timing via params if you want) */
 @mixin glow-text() {
@@ -24,13 +20,30 @@
 	animation: animation-glow-text 0.5s linear infinite alternate;
 }
 
-/* 2) Class that just includes the mixin */
+
+@mixin pulse-text($from-color, $to-color, $duration: null) {
+  --ef_change-colors_col1: #{$from-color};
+  --ef_change-colors_col2: #{$to-color};
+
+  --_ef_change-colors_col1: var(--ef_change-colors_col1, var(--cl-primary));
+  --_ef_change-colors_col2: var(--ef_change-colors_col2, var(--cl-on-surface));
+  --_ef_change-colors_duration: var(--ef_change-colors_duration, 0.5s);
+
+	@if $duration != null { --_ef_change-colors_duration: #{$duration}; }
+
+	animation: animation-change-colors var(--_ef_change-colors_duration) linear infinite alternate;
+}
+
+
+@if $emit-default {
+.animate-padding {
+	@include animate-padding;
+}
+
 .glow-text {
 	@include glow-text();
 }
 
-/* 3) Keyframes (name must match $name). 
-   If you're inside a Svelte component's <style lang="scss">, wrap this in :global { ... } */
 @keyframes animation-glow-text {
 	0% {
 		filter: drop-shadow(0 0 2px rgb(var(--_animation-glow-color-rgb) / 0.7))
@@ -49,9 +62,11 @@
 
 @keyframes animation-change-colors {
 	0% {
-		color: var(--ef_change-colors_col1);
+		color: var(--_ef_change-colors_col1);
 	}
 	100% {
-		color: var(--ef_change-colors_col2);
+		color: var(--_ef_change-colors_col2);
 	}
+}
+
 }

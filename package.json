@@ -47,6 +47,7 @@
 		"@floating-ui/dom": "^1.7.4",
 		"@fontsource-variable/jetbrains-mono": "^5.2.6",
 		"@fontsource/audiowide": "^5.2.7",
+		"runed": "^0.37.1",
 		"sass": "^1.91.0",
 		"svelte-toolbelt": "^0.10.6"
 	}
