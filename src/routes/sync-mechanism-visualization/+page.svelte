@@ -49,8 +49,8 @@
 	function modify(device: DeviceId, obj: SyncableData<Data>) {
 		obj.data.title = 'Version ' + modCounter.toString();
 		obj.vc[device]++;
-		obj.updatedAt = currentTime;
-		obj.updatedBy = device;
+		obj.modifiedAt = currentTime;
+		obj.modifiedBy = device;
 
 		currentTime += 10;
 		modCounter++;

@@ -62,7 +62,7 @@ function resolveConcurrentConflictLww<T>(
 	dataLocal: SyncableData<T>,
 	dataIncoming: SyncableData<T>
 ) {
-	let newest = dataLocal.updatedAt > dataIncoming.updatedAt ? dataLocal : dataIncoming;
+	let newest = dataLocal.modifiedAt > dataIncoming.modifiedAt ? dataLocal : dataIncoming;
 	let ret = newest;
 
 	return ret;

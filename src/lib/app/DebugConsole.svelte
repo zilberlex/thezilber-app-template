@@ -24,4 +24,8 @@
 	:global(.app-state-viewer) {
 		max-width: 400px;
 	}
+
+	:global(.btn) {
+		pointer-events: auto;
+	}
 </style>

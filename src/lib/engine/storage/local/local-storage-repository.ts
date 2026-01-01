@@ -1,4 +1,4 @@
-export function saveState(key: string, object: unknown) {
+export function saveLocalStorage(key: string, object: unknown) {
 	try {
 		const jsonStr = JSON.stringify(object);
 		window.localStorage.setItem(key, jsonStr);
@@ -7,7 +7,7 @@ export function saveState(key: string, object: unknown) {
 	}
 }
 
-export function loadState(key: string) {
+export function loadLocalStorage(key: string) {
 	let item = window.localStorage.getItem(key);
 
 	return item ? JSON.parse(item) : item;

@@ -5,9 +5,9 @@ type SyncableData<T> = {
 	id: string;
 	vc: VectorClock;
 
-	updatedAt: number;
-	updatedBy: string;
-	deleted?: boolean;
+	modifiedAt: number;
+	modifiedBy: string;
+	isDeleted?: boolean;
 
 	data: T;
 };

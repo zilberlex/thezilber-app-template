@@ -1,15 +1,19 @@
-import { loadState, saveState } from './local-storage-repository';
+import { loadLocalStorage, saveLocalStorage } from './local-storage-repository';
 
 const DeviceIdStorageKey = 'DeviceId';
 
+let cachedDeviceId: string | undefined = undefined;
 export function getDeviceId() {
-	let deviceId = loadState(DeviceIdStorageKey);
+	if (cachedDeviceId) return cachedDeviceId;
+
+	let deviceId = loadLocalStorage(DeviceIdStorageKey);
 
 	if (!deviceId) {
-		saveState(DeviceIdStorageKey, crypto.randomUUID());
-		deviceId = loadState(DeviceIdStorageKey);
+		saveLocalStorage(DeviceIdStorageKey, crypto.randomUUID());
+		deviceId = loadLocalStorage(DeviceIdStorageKey);
 		if (!deviceId) throw Error('Failure to Initialize DeviceId');
 	}
 
+	cachedDeviceId = deviceId;
 	return deviceId;
 }

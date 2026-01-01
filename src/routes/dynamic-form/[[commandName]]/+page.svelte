@@ -1,8 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/ui/basic-components/Button.svelte';
-	import { page } from '$app/state';
-	import { onMount, untrack } from 'svelte';
-	import { loadState, saveState } from '$lib/engine/storage/local/local-storage-repository';
+	import { page, updated } from '$app/state';
+	import { untrack } from 'svelte';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import { createSmartHandler } from '$lib/engine/events/event-handling';
 	import {
@@ -13,88 +12,120 @@
 
 	import CommandBuilder from './CommandBuilder.svelte';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
+	import type { Page } from '@sveltejs/kit';
+	import { createSyncableData, stampSyncableData } from '$lib/engine/storage/data/data';
+	import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
+	import { loadCbState, saveCbState } from './command-builder-state-store';
+	import type { Initializable } from '$lib/engine/types/utility-types';
 
-	let { data } = $props();
+	let justInitialized = true;
+	let gCommandName = $state('DraftCommand');
+	appState.pageContext.title = 'Command Builder';
 
-	const DynamicFormStorageKey = 'DynamicForm';
+	let isPermanentCommandPage = $state(false);
+	let gSaveMessage = $derived(
+		isPermanentCommandPage ? `Saving Command ${gCommandName}...` : `Saving Draft...`
+	);
 
-	appState.pageContext.title = 'Dynamic Form';
-
-	// Permanent Command
-	let commandNameId = $state(data.commandName);
-	let isPermanentPost = $derived(false);
 	let isSaving = $state(false);
-
-	let commandBuilderState: CommandBuilderState = $state({
-		commandStr: '',
-		formData: {}
-	});
+	let gCbData: Initializable<CommandBuilderData> = $state({
+		isInitialized: false,
+		data: {
+			commandStr: '',
+			formData: {}
+		}
+	} as Initializable<CommandBuilderData>);
 
 	function getPathWithoutParams(page: Page) {
 		return page.route.id ? page.url.pathname.replace(/\/[^/]+$/, '') : page.url.pathname;
 	}
 
 	$effect(() => {
-		pageLoad(page);
-	});
+		track(page);
 
-	function pageLoad(page: Page) {
-		let storedCommandName = page.params.commandName;
-
-		// StoredState
-		if (storedCommandName) {
-			let storedCommand = getDynamicFormCommandByName(storedCommandName);
-
-			if (!storedCommand) {
-				const redirectPath = getPathWithoutParams(page);
-				console.warn(`CommandName [${storedCommandName}] not found. Rerouting [${redirectPath}]`);
-
-				goto(redirectPath, { replaceState: true });
-			} else {
-				commandBuilderState = storedCommand;
-			}
-		} else {
-			// Load Temporary Command
-			let dynamicFormTemporaryState = loadDynamicFormTemporaryState();
-			if (dynamicFormTemporaryState?.commandStr) {
-				commandBuilderState = dynamicFormTemporaryState;
-			} else {
-				// Load Example
-				({ commandStr: commandBuilderState.commandStr, formData: commandBuilderState.formData } =
-					loadExampleForm());
-			}
-		}
-	}
-
-	$effect(() => {
-		track(commandBuilderState);
-		untrack(() => {
-			saveDynamicFormStateAutoHandler(null);
+		untrack(async () => {
+			await loadPageState(page);
+			console.log('loaded page state', $state.snapshot(gCbData));
 		});
 	});
 
-	function loadDynamicFormTemporaryState(): DynamicFormPageState | undefined {
-		return loadState(DynamicFormStorageKey);
+	$effect(() => {
+		track(gCbData.data);
+		untrack(async () => {
+			if (justInitialized) {
+				if (gCbData.isInitialized) {
+					justInitialized = false;
+				}
+				return;
+			}
+
+			stampSyncableData(getDeviceId(), gCbData);
+			console.log('Saving data', $state.snapshot(gCbData));
+			saveCommandBuilderDataAutoHandler(null);
+		});
+	});
+
+	async function loadPageState(page: Page) {
+		let paramsCommandName = page.params.commandName;
+		let loadedState: CommandBuilderData | undefined;
+
+		if (paramsCommandName) {
+			// PermanentCommandPage
+			gCommandName = paramsCommandName;
+			isPermanentCommandPage = true;
+			let storedCommand = await loadCbState({
+				kind: 'permanent',
+				commandName: gCommandName
+			});
+
+			if (!storedCommand) {
+				const redirectPath = getPathWithoutParams(page);
+				console.warn(`CommandName [${paramsCommandName}] not found. Rerouting [${redirectPath}]`);
+
+				goto(redirectPath, { replaceState: true });
+			} else {
+				loadedState = storedCommand;
+			}
+		} else {
+			// Load Temporary Command
+			loadedState = await loadCbState({
+				kind: 'draft'
+			});
+
+			if (!loadedState?.data?.commandStr) {
+				const exampleForm = getExampleCommand() as PermanentCommandBuilderState;
+				exampleForm.commandName = gCommandName;
+				loadedState = createSyncableData(getDeviceId(), exampleForm);
+			}
+		}
+
+		if (!loadedState) throw new Error('Failed to Initialize Data');
+
+		gCbData = {
+			...loadedState,
+			isInitialized: true
+		};
 	}
 
-	function saveDynamicForCommandBuilderState() {
-		let dynamicFormState: CommandBuilderState = $state.snapshot(commandBuilderState);
+	function saveCommandBuilderData() {
+		if (isPermanentCommandPage) {
+			saveCbState({ kind: 'permanent', data: gCbData });
+		} else {
+			saveCbState({ kind: 'draft', data: gCbData });
+		}
 
 		isSaving = true;
 		setTimeout(() => {
 			isSaving = false;
 		}, 1000);
-
-		saveState(DynamicFormStorageKey, dynamicFormState);
 	}
 
-	let saveDynamicFormStateAutoHandler = createSmartHandler(saveDynamicForCommandBuilderState, {
+	let saveCommandBuilderDataAutoHandler = createSmartHandler(saveCommandBuilderData, {
 		cooldownDelay: 0,
 		debounceDelay: 2000
 	});
 
-	function loadExampleForm(): CommandBuilderState {
+	function getExampleCommand(): CommandBuilderState {
 		const commandStr = 'cp -r {src} {dest}';
 		const formData = {
 			src: {
@@ -109,26 +140,22 @@
 
 		return { commandStr, formData };
 	}
-
-	function getDynamicFormCommandByName(commandNameId: {}) {
-		return undefined;
-	}
 </script>
 
-<div class="save-indicator" class:show={isSaving}>Saving...</div>
+<div class="save-indicator" class:show={isSaving}>{gSaveMessage}</div>
 
 <div class="mini-app">
-	{#if isPermanentPost}
+	{#if isPermanentCommandPage}
 		<input
-			bind:value={commandNameId}
+			bind:value={gCbData.data.commandName}
 			class="input-title"
 			{@attach createFocusHotKeyAttachment('Modify Title', 'i', 'alt')}
 		/>
 	{/if}
-	<CommandBuilder bind:commandBuilderState />
+	<CommandBuilder bind:commandBuilderState={gCbData.data} />
 	<Button
 		class="button-save"
-		onclick={saveDynamicForCommandBuilderState}
+		onclick={saveCommandBuilderData}
 		{@attach createClickHotKeyAttachment('Save', 's', 'alt')}>Save</Button
 	>
 </div>

@@ -53,7 +53,7 @@
 
 <InputCombo
 	hotkey={{ hotkey: '0', tooltip: 'Modify Command' }}
-	placeholder={'Enter Command here, use squirly braces for {field}'}
+	placeholder={'Enter Command here, use curly brackets for {field}'}
 	bind:value={commandBuilderState.commandStr}>Command String</InputCombo
 >
 <DynamicForm
