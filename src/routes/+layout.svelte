@@ -23,7 +23,7 @@
 <AppInit />
 
 <AppNavigationManager>
-	<div class="app-container">
+	<div bind:this={appState.appRoot} class="app-container">
 		<header class="header">
 			<div>
 				<HomeButton />

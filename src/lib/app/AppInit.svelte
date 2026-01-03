@@ -10,6 +10,7 @@
 	import MouseTracker from '$lib/ui/components/MouseTracker.svelte';
 	import DebugConsole from './DebugConsole.svelte';
 	import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
+	import DialogAnchor from '$lib/ui/components/dialog/DialogAnchor.svelte';
 
 	onMount(() => {
 		if (browser) {
@@ -21,8 +22,6 @@
 			appState.deviceId = getDeviceId();
 		}
 	});
-
-	$effect(() => {});
 </script>
 
 <HotKeysInitialization />
@@ -37,4 +36,5 @@
 	{#if appState.debug.debugConsole}
 		<DebugConsole />
 	{/if}
+	<DialogAnchor />
 </ForegroundHoverLayer>

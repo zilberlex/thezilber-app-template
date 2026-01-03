@@ -41,7 +41,7 @@ function btnClickCssFlow(btn: HTMLButtonElement, triggerType: TriggerType = 'KEY
 	let btnCommands = allBtnCommands.get(btn);
 
 	if (!btnCommands) {
-		console.log('Creating New CssCommands For Button', btn);
+		console.debug('Creating New CssCommands For Button', btn);
 		btnCommands = [];
 		let startWorkClassCommand = createAddTempCssClassCommand(
 			btn,

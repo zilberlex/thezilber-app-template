@@ -13,6 +13,7 @@ export interface AppState {
 	pageContext: PageContext;
 	deviceId: string | undefined;
 	debug: DebugState;
+	appRoot: HTMLElement | undefined;
 }
 
 export const appState: AppState = $state({
@@ -20,11 +21,11 @@ export const appState: AppState = $state({
 	isAppLoaded: false,
 	userAgent: undefined,
 	userAgentType: undefined,
-	isMobile: undefined,
 	currentFocusedNode: undefined,
 	inJsEnabled: false,
 	tooltipState: tooltipState,
 	pageContext: pageContext,
 	deviceId: undefined,
-	debug: debugState
+	debug: debugState,
+	appRoot: undefined
 });
