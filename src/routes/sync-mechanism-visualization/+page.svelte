@@ -114,7 +114,7 @@
 	.object-compare {
 		display: flex;
 		flex-direction: row;
-		gap: var(--space-md);
+		gap: var(--space-6);
 		align-items: stretch;
 		justify-content: space-evenly;
 

@@ -107,7 +107,7 @@
 
 	:global(output-combo) {
 		display: inline-block;
-		padding-inline-end: calc(2 * var(--padding-2) + var(--icon-width));
+		padding-inline-end: calc(2 * var(--space-3) + var(--icon-width));
 	}
 
 	.overlay-wrapper {
@@ -117,6 +117,6 @@
 	.copy-button {
 		position: absolute;
 		display: inline-block;
-		right: var(--padding-2);
+		right: var(--space-3);
 	}
 </style>

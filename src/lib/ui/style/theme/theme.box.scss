@@ -10,7 +10,7 @@
 
 @mixin box {
   --_box-color: var(--box-color, var(--cl-primary));
-	--box-padding: var(--padding-1);
+	--box-padding: var(--space-2);
 	--box-border: var(--base-border-thick);
 
 	background-color: var(--cl-surface);
