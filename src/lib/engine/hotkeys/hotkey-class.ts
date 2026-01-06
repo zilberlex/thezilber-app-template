@@ -1,10 +1,10 @@
 import type { KeyLike } from '../patterns/key';
 import type { HotKeyModifier } from './types';
 
-const MODIFIER_INDEX: Record<HotKeyModifier, number> = {
+export const MODIFIER_INDEX: Record<HotKeyModifier, number> = {
 	'ctrl|option': 0,
-	shift: 1,
-	alt: 2
+	alt: 1,
+	shift: 2
 } as const;
 
 export class HotKey implements KeyLike {
@@ -24,11 +24,11 @@ export class HotKey implements KeyLike {
 	get ctrlOrOption() {
 		return this.#flags[MODIFIER_INDEX['ctrl|option']];
 	}
-	get shift() {
-		return this.#flags[MODIFIER_INDEX['shift']];
-	}
 	get alt() {
 		return this.#flags[MODIFIER_INDEX['alt']];
+	}
+	get shift() {
+		return this.#flags[MODIFIER_INDEX['shift']];
 	}
 
 	toKey(): string {
@@ -47,12 +47,12 @@ export class HotKey implements KeyLike {
 			parts.push('Ctrl');
 		}
 
-		if (this.#flags[MODIFIER_INDEX['shift']]) {
-			parts.push('Shift');
-		}
-
 		if (this.#flags[MODIFIER_INDEX['alt']]) {
 			parts.push('Alt');
+		}
+
+		if (this.#flags[MODIFIER_INDEX['shift']]) {
+			parts.push('Shift');
 		}
 
 		parts.push(this.key.toUpperCase());
@@ -63,8 +63,8 @@ export class HotKey implements KeyLike {
 	static fromEvent(event: KeyboardEvent): HotKey {
 		const mods: HotKeyModifier[] = [];
 		if (event.ctrlKey || event.metaKey) mods.push('ctrl|option');
-		if (event.shiftKey) mods.push('shift');
 		if (event.altKey) mods.push('alt');
+		if (event.shiftKey) mods.push('shift');
 
 		return new HotKey(event.key, ...mods);
 	}

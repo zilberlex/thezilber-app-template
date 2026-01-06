@@ -38,7 +38,7 @@
 
 	let isPermanentCommandPage = $state(false);
 	let gSaveMessage = $derived(
-		isPermanentCommandPage ? `Saving Command ${gCbData?.data.commandName}...` : `Saving Draft...`
+		isPermanentCommandPage ? `Saving Command [${gCbData?.data.commandName}]...` : `Saving Draft...`
 	);
 
 	let isSaveDialogOpen = $state(false);

@@ -4,9 +4,9 @@ import { GO_KEYS } from './hotkey-groups';
 import {
 	ArrowKeysArray,
 	NavigationKeyConsts,
-	NodesWhichTakePriorityOverSoftHotKeys,
-	type NavType
+	NodesWhichTakePriorityOverSoftHotKeys
 } from './consts';
+import type { NavType } from './types';
 
 /**
  * @param {function(KeyboardEvent): void} onActionEventHandler

@@ -1,4 +1,5 @@
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
+import { appState } from '../state/application-state.svelte';
 import { HotKey } from './hotkey-class';
 
 type EventHandler<E extends Event> = (event: E) => void;
@@ -38,6 +39,7 @@ class HotkeysModule {
 		keys.forEach((key) => this.removeHotKey(key, handler));
 	}
 
+	count = 0;
 	#onKeydown(event: KeyboardEvent) {
 		let hotKeyedHandlers = this.#hotKeysHandlers;
 
@@ -47,6 +49,21 @@ class HotkeysModule {
 
 		let eventKey = HotKey.fromEvent(event);
 		let handlers = hotKeyedHandlers.get(eventKey);
+
+		if (eventKey.key === 's') {
+			appState.debug.viewObject = {
+				handlers,
+				key: eventKey.toString(),
+				count: ++this.count
+			};
+		} else if (eventKey.key === '9') {
+			this.count = 0;
+			appState.debug.viewObject = {
+				handlers,
+				key: eventKey.toString(),
+				count: this.count
+			};
+		}
 
 		if (eventKey.key.toLowerCase() === 'escape') {
 			console.log('phase', event.eventPhase, 'handlers', handlers);
