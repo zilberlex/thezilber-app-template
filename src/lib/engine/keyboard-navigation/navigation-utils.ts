@@ -1,12 +1,19 @@
 import { navigationStateManager } from '$lib/engine/state/navigation-state';
+import { safeInstanceOf } from '../types/type-utils';
+import type { FocusableElement } from './types';
 
-export function keyBoardFocusNavigatedNode(node: HTMLElement) {
-	navigationStateManager.setKeyboardNavigationMode();
+export function engineFocus(node: FocusableElement) {
 	node.focus({ preventScroll: true });
 	node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-	const textElement = node as HTMLInputElement | HTMLTextAreaElement | null;
-	if (textElement) textElement.select();
+	const textElement = safeInstanceOf(node, HTMLInputElement, HTMLTextAreaElement);
+	textElement?.select();
+}
+
+export function keyBoardFocusNavigatedNode(node: FocusableElement) {
+	navigationStateManager.setKeyboardNavigationMode();
+
+	engineFocus(node);
 }
 
 export function getFocusableElementsByNode(node: HTMLElement): HTMLElement[] {

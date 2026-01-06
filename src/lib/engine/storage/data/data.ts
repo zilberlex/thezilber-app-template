@@ -1,6 +1,7 @@
+import { generateId } from '$lib/engine/crypto/crypto-utils';
+
 export function createSyncableData<T>(deviceId: string, data: T): SyncableData<T> {
 	return {
-		id: crypto.randomUUID(),
 		vc: { [deviceId]: 0 },
 		modifiedAt: timestamp(),
 		modifiedBy: deviceId,

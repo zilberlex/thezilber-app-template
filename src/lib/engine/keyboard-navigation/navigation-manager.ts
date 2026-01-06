@@ -96,8 +96,6 @@ export class NavigationManager {
 	}
 
 	#onNavigationKey = createKeyabordNavigationEventHandler((keyboardEvent: KeyboardEvent) => {
-		console.log('WOOW');
-
 		if (this.#scopes.length == 0) {
 			console.warn('NavigationManager no scopes present. Ignoring key');
 			return;

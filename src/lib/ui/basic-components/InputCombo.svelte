@@ -31,7 +31,7 @@
 	}: InputComboProps = $props();
 </script>
 
-<input-combo>
+<input-combo {...rest}>
 	<label for={id}
 		><span class="prefix" style="min-width: {minLableWidth}">{@render children?.()}</span><span
 			class="suffix">:</span

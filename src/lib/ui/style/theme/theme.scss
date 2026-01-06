@@ -10,6 +10,7 @@
 @use '$lib/ui/style/utility/utility.scss' with (
 	$emit-default: true
 );
+@use '$lib/ui/style/theme/theme.caret.scss';
 @import '$lib/ui/style/tokens.color.css';
 @import '$lib/ui/style/tokens.typography.css';
 @import '$lib/ui/style/tokens.misc.css';

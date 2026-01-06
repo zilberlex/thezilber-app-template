@@ -2,35 +2,35 @@ import {
 	loadLocalStorage,
 	saveLocalStorage
 } from '$lib/engine/storage/local/local-storage-repository';
-import { saveCommandDb, updateCommandDb } from './command-builder-db';
+import { loadCommandByName, saveCommandDb, updateCommandDb } from './command-builder-db';
 
 type CommandBuilderLoadRequest = { kind: 'permanent'; commandName: string } | { kind: 'draft' };
 
 const CommandBuilderDraftStateStorageKey = 'DynamicForm';
 
 type CommandBuilderSaveRequest =
-	| { kind: 'permanent'; data: CommandBuilderData }
-	| { kind: 'draft'; data: CommandBuilderData };
+	| { kind: 'permanent'; saveData: CommandBuilderData }
+	| { kind: 'draft'; saveData: CommandBuilderData };
 
-export function saveCbState(saveRequest: CommandBuilderSaveRequest) {
+export async function saveCbState(saveRequest: CommandBuilderSaveRequest) {
 	if (saveRequest.kind === 'permanent') {
-		saveCommandDb(saveRequest.data);
+		await saveCommandDb(saveRequest.saveData);
 	} else {
-		saveLocalStorage(CommandBuilderDraftStateStorageKey, saveRequest.data);
+		saveLocalStorage(CommandBuilderDraftStateStorageKey, saveRequest.saveData);
 	}
 }
 
-export function updateCbState(saveRequest: CommandBuilderSaveRequest) {
+export async function updateCbState(saveRequest: CommandBuilderSaveRequest) {
 	if (saveRequest.kind === 'permanent') {
-		updateCommandDb(saveRequest.data);
+		await updateCommandDb(saveRequest.saveData);
 	} else {
-		saveLocalStorage(CommandBuilderDraftStateStorageKey, saveRequest.data);
+		saveLocalStorage(CommandBuilderDraftStateStorageKey, saveRequest.saveData);
 	}
 }
 
 export async function loadCbState(loadRequest: CommandBuilderLoadRequest) {
 	if (loadRequest.kind === 'permanent') {
-		return loadLocalStorage(CommandBuilderDraftStateStorageKey) as CommandBuilderData;
+		return await loadCommandByName(loadRequest.commandName);
 	} else {
 		return loadLocalStorage(CommandBuilderDraftStateStorageKey) as CommandBuilderData;
 	}

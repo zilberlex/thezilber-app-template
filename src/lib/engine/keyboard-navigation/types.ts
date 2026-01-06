@@ -34,6 +34,8 @@ export interface NavigationKeysConfig {
 	nextKeys: string[];
 }
 
+export type FocusableElement = HTMLElement | SVGElement;
+
 export const NavigationKeysConfigSets = {
 	Horizontal: {
 		prevKeys: [NavigationKeyConsts.ArrowLeft],

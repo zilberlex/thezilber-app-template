@@ -11,6 +11,6 @@
 		position: fixed;
 		inset: 0;
 		pointer-events: none;
-		z-index: 1;
+		z-index: 9999;
 	}
 </style>

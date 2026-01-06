@@ -1,14 +1,14 @@
 :root {
-	--ef-focus-ring-expand-size-start: 0;
-	--ef-focus-ring-expand-size-end: 5px;
+	--ef-focus-ring-out-size-start: 0;
+	--ef-focus-ring-out-size-end: 5px;
 
-	--ef-focus-ring-focus-size-start: 10px;
-	--ef-focus-ring-focus-size-end: 0px;
+	--ef-focus-ring-in-size-start: 10px;
+	--ef-focus-ring-in-size-end: 0px;
 }
 
-@keyframes focus-ring-expand {
+@keyframes focus-ring-out {
 	0% {
-		padding: var(--ef-focus-ring-expand-size-start);
+		padding: var(--ef-focus-ring-out-size-start);
 		border-radius: 0px;
 		box-shadow: 0 0 0 2px oklch(from var(--cl-primary-brightest) l c h / 0);
 		border-radius: 5px;
@@ -19,15 +19,15 @@
 	}
 
 	100% {
-		padding: var(--ef-focus-ring-expand-size-end);
+		padding: var(--ef-focus-ring-out-size-end);
 		box-shadow: 0 0 0px 2px oklch(from var(--cl-primary-brightest) l c h / 0);
 		border-radius: 5px;
 	}
 }
 
-@keyframes focus-ring-focus {
+@keyframes focus-ring-in {
 	0% {
-		padding: var(--ef-focus-ring-focus-size-start);
+		padding: var(--ef-focus-ring-in-size-start);
 		border-radius: 0px;
 		box-shadow: 0 0 0 2px oklch(from var(--cl-primary-brightest) l c h / 0);
 		border-radius: 5px;
@@ -36,16 +36,16 @@
 		box-shadow: 0 0 0 2px oklch(from var(--cl-primary-brightest) l c h / 1);
 	}
 	100% {
-		padding: var(--ef-focus-ring-focus-size-end);
+		padding: var(--ef-focus-ring-in-size-end);
 		box-shadow: 0 0 0px 2px oklch(from var(--cl-primary-brightest) l c h / 0);
 		border-radius: 5px;
 	}
 }
 
-.ef-focus-ring-focus {
-	animation: focus-ring-focus 500ms ease-out 0ms 1 forwards;
+.ef-focus-ring-in {
+	animation: focus-ring-in 500ms ease-out 0ms 1 forwards;
 }
 
-.ef-focus-ring-expand {
-	animation: focus-ring-expand 500ms ease-out 0ms 1 forwards;
+.ef-focus-ring-out {
+	animation: focus-ring-out 500ms ease-out 0ms 1 forwards;
 }

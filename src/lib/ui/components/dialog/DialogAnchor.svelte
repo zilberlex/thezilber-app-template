@@ -2,31 +2,36 @@
 	import { fade } from 'svelte/transition';
 	import { activeDialogController, activeDialogState } from './dialog-context.svelte';
 	import { onDestroy, onMount, tick, untrack } from 'svelte';
-	import { getFocusableElementsByNode } from '$lib/engine/keyboard-navigation/navigation-utils';
+	import {
+		engineFocus,
+		getFocusableElementsByNode
+	} from '$lib/engine/keyboard-navigation/navigation-utils';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onNavigate } from '$app/navigation';
 	import { createSmartHandler } from '$lib/engine/events/event-handling';
 	import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
 	import { HotKey } from '$lib/engine/hotkeys/hotkey-class';
+	import type { FocusableElement } from '$lib/engine/keyboard-navigation/types';
+	import { safeInstanceOf } from '$lib/engine/types/type-utils';
 
 	let dialogBoxNode: HTMLElement | null = $state(null);
 	let appRoot = $derived(appState.appRoot);
 
-	let lastFocusedElement: HTMLElement | SVGElement | null = null;
+	let lastFocusedElement: FocusableElement | null = null;
 
 	let focusOpenDialogJobCounter = 0;
 
 	onDestroy(() => {
 		cleanupComponent();
+		hotKeysModule.removeHotKey(new HotKey('Escape'), closeDialogHandler);
 	});
 
 	onNavigate(() => {
 		cleanupComponent();
-		hotKeysModule.removeHotKey(new HotKey('Escape'), closeDialogHandler);
 	});
 
 	onMount(() => {
-		hotKeysModule.assignHotKey(new HotKey('Escape'), closeDialogHandler);
+		hotKeysModule.assignHotKey(new HotKey('Escape'), closeDialogHandler, true);
 	});
 
 	const closeDialogHandler = createSmartHandler(
@@ -48,7 +53,7 @@
 		}
 
 		if (lastFocusedElement && document.contains(lastFocusedElement))
-			lastFocusedElement?.focus({ preventScroll: true });
+			engineFocus(lastFocusedElement);
 	}
 
 	$effect(() => {
@@ -57,10 +62,7 @@
 		if (activeDialogState.isOpen) {
 			const thisJob = ++focusOpenDialogJobCounter;
 			const activeElement = document.activeElement;
-			lastFocusedElement =
-				activeElement instanceof HTMLElement || activeElement instanceof SVGElement
-					? activeElement
-					: null;
+			lastFocusedElement = safeInstanceOf(activeElement);
 			appRoot.inert = true;
 
 			tick().then(() => {
@@ -75,7 +77,8 @@
 						if (focableNodes.length > 0) {
 							focusTarget = focableNodes[0];
 						}
-						focusTarget.focus();
+
+						engineFocus(focusTarget);
 					}
 				});
 			});
@@ -105,7 +108,6 @@
 		inset: 0;
 		backdrop-filter: blur(2px) grayscale(0.5);
 		background-color: rgb(0 0 0 / 0.5);
-		z-index: 10;
 		pointer-events: auto;
 
 		display: flex;
@@ -116,8 +118,6 @@
 	.dialog-box {
 		outline: none;
 
-		&:focus-within {
-			animation: focus-ring-focus 500ms ease-out 0ms 1 forwards;
-		}
+		animation: focus-ring-in 500ms ease-out 0ms 1 forwards;
 	}
 </style>

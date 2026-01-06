@@ -6,22 +6,28 @@ type EventHandler<E extends Event> = (event: E) => void;
 class HotkeysModule {
 	#wasInitialized = false;
 
-	#hotKeysToHandlers = new OneToManyDictionary<HotKey, EventHandler<KeyboardEvent>>(true);
+	#hotKeysHandlers = new OneToManyDictionary<HotKey, EventHandler<KeyboardEvent>>(true);
+	#hotKeysCaptureHandlers = new OneToManyDictionary<HotKey, EventHandler<KeyboardEvent>>(true);
 
 	#onKeydownBound: (event: KeyboardEvent) => void = this.#onKeydown.bind(this);
 
-	assignHotKey(key: HotKey, handler: EventHandler<KeyboardEvent>) {
+	assignHotKey(key: HotKey, handler: EventHandler<KeyboardEvent>, isCaptrue = false) {
 		console.debug('HotkeysModule assigning key:', key, 'to handler:', handler.toString());
 
 		if (!this.#wasInitialized) {
 			throw new Error(`${HotkeysModule.name} Need to initialize Class before assigning hotkeys`);
 		}
 
-		this.#hotKeysToHandlers.add(key, handler);
+		if (isCaptrue) {
+			this.#hotKeysCaptureHandlers.add(key, handler);
+		} else {
+			this.#hotKeysHandlers.add(key, handler);
+		}
 	}
 
 	removeHotKey(key: HotKey, handler: EventHandler<KeyboardEvent>) {
-		this.#hotKeysToHandlers.remove(key, handler);
+		this.#hotKeysHandlers.remove(key, handler);
+		this.#hotKeysCaptureHandlers.remove(key, handler);
 	}
 
 	assignHotKeys(keys: HotKey[], handler: EventHandler<KeyboardEvent>) {
@@ -33,9 +39,18 @@ class HotkeysModule {
 	}
 
 	#onKeydown(event: KeyboardEvent) {
-		let hotKeyedHandlers = this.#hotKeysToHandlers;
+		let hotKeyedHandlers = this.#hotKeysHandlers;
+
+		if (event.eventPhase === Event.CAPTURING_PHASE) {
+			hotKeyedHandlers = this.#hotKeysCaptureHandlers;
+		}
+
 		let eventKey = HotKey.fromEvent(event);
 		let handlers = hotKeyedHandlers.get(eventKey);
+
+		if (eventKey.key.toLowerCase() === 'escape') {
+			console.log('phase', event.eventPhase, 'handlers', handlers);
+		}
 
 		console.debug(
 			'HotkeysModule - reachedKeydownEvent key:',
@@ -53,13 +68,15 @@ class HotkeysModule {
 		}
 
 		document.addEventListener('keydown', this.#onKeydownBound);
+		document.addEventListener('keydown', this.#onKeydownBound, { capture: true });
 		this.#wasInitialized = true;
 	}
 
 	destroy() {
 		document.removeEventListener('keydown', this.#onKeydownBound);
+		document.removeEventListener('keydown', this.#onKeydownBound, { capture: true });
 
-		this.#hotKeysToHandlers = new OneToManyDictionary();
+		this.#hotKeysHandlers = new OneToManyDictionary();
 		this.#wasInitialized = false;
 	}
 }
