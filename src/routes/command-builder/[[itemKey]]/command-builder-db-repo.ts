@@ -12,17 +12,31 @@ const commandBuilderDb = new Dexie('CommandBuilderDb') as Dexie & {
 	commands: EntityTable<CommandBuilderDataDb, 'id'>;
 };
 
-commandBuilderDb.version(1).stores({
-	commands: 'id, &data.commandNameKey, modifiedAt'
+commandBuilderDb.version(2).stores({
+	commands: 'id, &data.commandNameKey, meta.modifiedAt'
 });
+
+function informativeStructuredClone<T>(item: T): T {
+	try {
+		return structuredClone(item);
+	} catch (e: any) {
+		const info = findCloneFailurePath(item) ?? 'Could not locate failing field';
+		throw new Error(`structuredClone failed. ${info}. original error: ${e?.message ?? e}`);
+	}
+}
 
 export async function saveCommandDb(command: CommandBuilderRecord) {
 	try {
 		let dbCommand = toDbCommand(command);
 		dbCommand.id = generateId();
-		console.log('[OLD] saveCommandDb', command);
 
-		await commandBuilderDb.commands.add(dbCommand);
+		console.log('[NEW] saveCommandDb', command);
+
+		let cloned = informativeStructuredClone(dbCommand);
+
+		await commandBuilderDb.commands.add(cloned);
+
+		return toPublicCommand(dbCommand);
 	} catch (error) {
 		console.error('saveCommand failed.', error);
 		throw error;
@@ -80,4 +94,48 @@ function toPublicCommand(dbCommand: CommandBuilderDataDb): CommandBuilderRecord 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { commandNameKey, ...rest } = dbCommand.data;
 	return { ...dbCommand, data: rest };
+}
+
+function findCloneFailurePath(
+	value: any,
+	path = 'root',
+	seen = new WeakSet<object>()
+): string | null {
+	if (value === null || typeof value !== 'object') return null;
+
+	if (seen.has(value)) return `Circular reference at ${path}`;
+	seen.add(value);
+
+	for (const key of Reflect.ownKeys(value)) {
+		const desc = Object.getOwnPropertyDescriptor(value, key);
+		if (!desc) continue;
+
+		if (typeof desc.get === 'function' || typeof desc.set === 'function') {
+			return `Accessor property at ${path}.${String(key)}`;
+		}
+
+		const child = (value as any)[key];
+
+		if (typeof child === 'function') {
+			return `Function at ${path}.${String(key)}`;
+		}
+
+		if (child && typeof child === 'object') {
+			try {
+				structuredClone(child);
+			} catch (e: any) {
+				// IMPORTANT: keep digging to find the real leaf
+				const deeper = findCloneFailurePath(child, `${path}.${String(key)}`, seen);
+				if (deeper) return deeper;
+
+				const ctor = child?.constructor?.name ?? 'unknown';
+				return `Unclonable object at ${path}.${String(key)} (ctor=${ctor}): ${e?.message ?? e}`;
+			}
+		}
+
+		const deeper = findCloneFailurePath(child, `${path}.${String(key)}`, seen);
+		if (deeper) return deeper;
+	}
+
+	return null;
 }

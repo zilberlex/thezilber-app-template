@@ -13,7 +13,7 @@
 		title: string;
 	};
 
-	let object1: SyncableData<Data> = $state({
+	let object1: AppRecord<Data> = $state({
 		id: '645e88b9-596e-4d0b-bab2-d03c5d38dc39',
 		data: {
 			title: 'Version1'
@@ -27,7 +27,7 @@
 		testingInfo: 'object1'
 	});
 
-	let object2: SyncableData<Data> = $state({
+	let object2: AppRecord<Data> = $state({
 		id: '645e88b9-596e-4d0b-bab2-d03c5d38dc39',
 		data: {
 			title: 'Version2'
@@ -42,11 +42,11 @@
 		testingInfo: 'object2'
 	});
 
-	let synced: SyncableData<Data> | undefined = $state();
+	let synced: AppRecord<Data> | undefined = $state();
 
 	let modCounter = 100;
 	let currentTime = 30;
-	function modify(device: DeviceId, obj: SyncableData<Data>) {
+	function modify(device: DeviceId, obj: AppRecord<Data>) {
 		obj.data.title = 'Version ' + modCounter.toString();
 		obj.vc[device]++;
 		obj.modifiedAt = currentTime;

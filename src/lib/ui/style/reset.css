@@ -43,6 +43,10 @@ select {
 	color: inherit;
 }
 
+a {
+	color: inherit;
+}
+
 input {
 	outline: 0;
 

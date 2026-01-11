@@ -9,8 +9,8 @@ type CommandBuilderLoadRequest = { kind: 'permanent'; commandName: string } | { 
 const CommandBuilderDraftStateStorageKey = 'DynamicForm';
 
 type CommandBuilderSaveRequest =
-	| { kind: 'permanent'; saveData: CommandBuilderData }
-	| { kind: 'draft'; saveData: CommandBuilderData };
+	| { kind: 'permanent'; saveData: CommandBuilderRecord }
+	| { kind: 'draft'; saveData: CommandBuilderRecord };
 
 export async function saveCbState(saveRequest: CommandBuilderSaveRequest) {
 	if (saveRequest.kind === 'permanent') {
@@ -32,6 +32,6 @@ export async function loadCbState(loadRequest: CommandBuilderLoadRequest) {
 	if (loadRequest.kind === 'permanent') {
 		return await loadCommandByName(loadRequest.commandName);
 	} else {
-		return loadLocalStorage(CommandBuilderDraftStateStorageKey) as CommandBuilderData;
+		return loadLocalStorage(CommandBuilderDraftStateStorageKey) as CommandBuilderRecord;
 	}
 }

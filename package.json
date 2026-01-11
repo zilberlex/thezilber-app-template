@@ -33,7 +33,7 @@
 		"shx": "^0.4.0",
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",
-		"typescript": "^5.0.0",
+		"typescript": "^5.9.3",
 		"typescript-eslint": "^8.20.0",
 		"vite": "^7.0.4"
 	},

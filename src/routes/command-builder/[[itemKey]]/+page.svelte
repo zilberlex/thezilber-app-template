@@ -1,9 +1,8 @@
 <script lang="ts">
 	import Button from '$lib/ui/basic-components/Button.svelte';
-	import { page, updated } from '$app/state';
-	import { onDestroy, onMount, tick, untrack } from 'svelte';
+	import { page } from '$app/state';
+	import { onDestroy, untrack } from 'svelte';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
-	import { createSmartHandler } from '$lib/engine/events/event-handling';
 	import {
 		createClickHotKeyAttachment,
 		createFocusHotKeyAttachment
@@ -13,61 +12,26 @@
 	import CommandBuilder from './CommandBuilder.svelte';
 	import { goto } from '$app/navigation';
 	import { type Page } from '@sveltejs/kit';
-	import { saveCbState, updateCbState } from './command-builder-state-store';
-	import type { Initializable } from '$lib/engine/types/utility-types';
 	import Dialog from '$lib/ui/components/dialog/Dialog.svelte';
 	import { browser } from '$app/environment';
 	import OneLineForm from './OneLineForm.svelte';
 	import { temporaryMessageState } from '$lib/engine/application/temp-messages/temporary-message-state.svelte';
-
 	import type { PageData } from './$types';
-	import { AutoSaver } from './AutoSaver.svelte';
 
-	let { data: pageLoadData }: { data: PageData } = $props();
+	let { data: cbAppContext }: { data: PageData } = $props();
 
-	const identity = $derived(pageLoadData.routeKey);
-
-	type AppData = CommandBuilderRecord;
-
+	const recordManager = $derived(cbAppContext.recordManager);
 	appState.pageContext.title = 'Command Builder';
 
-	let gCbData: Initializable<AppData> = $state({
-		isInitialized: false,
-		data: {
-			commandStr: '',
-			formData: {}
-		}
-	} as Initializable<AppData>);
-	let isPermanentCommandPage = $derived(pageLoadData.pageMode === 'permanent');
-
-	const saveCommandBuilderDataCaptured: (data: AppData) => Promise<any> = $derived.by(() => {
-		track(isPermanentCommandPage);
-
-		return untrack(() => {
-			return async (data: AppData) => saveCommandBuilderData(data, isPermanentCommandPage);
-		});
-	});
-
-	let autoSaver: AutoSaver<AppData> | undefined;
 	let isSaveDialogOpen = $state(false);
 
-	$effect(() => {
-		console.log('Loading Data For Command id', identity);
-		identity;
-
-		untrack(() => {
-			gCbData = structuredClone(pageLoadData.cbData) as Initializable<AppData>;
-			gCbData.isInitialized = true;
-			autoSaver?.destroy();
-			autoSaver = new AutoSaver(gCbData as AppData, async (data: AppData) =>
-				saveCommandBuilderData(data, isPermanentCommandPage)
-			);
-		});
-	});
+	let commandBuilderData = $derived(recordManager.recordData);
+	let editMode = $derived(cbAppContext.editMode);
+	let isPermanentCommandPage = $derived(editMode === 'permanent');
 
 	onDestroy(async () => {
 		if (browser) {
-			await autoSaver?.saveData(gCbData);
+			await recordManager?.save();
 		}
 	});
 
@@ -75,44 +39,41 @@
 		return page.route.id ? page.route.id.replace(/\/[^/]+$/, '') : page.url.pathname;
 	}
 
-	function saveCommandBuilderData(data: AppData, isPermanentCommandPage: boolean) {
-		let saveData = $state.snapshot(data);
-		console.log('Saving data', $state.snapshot(saveData));
+	$effect(() => {
+		console.log('Setting Message working state:', recordManager.workingSate);
+		track(recordManager.workingSate);
 
-		if (isPermanentCommandPage) {
-			updateCbState({ kind: 'permanent', saveData: saveData });
-		} else {
-			updateCbState({ kind: 'draft', saveData: saveData });
-		}
+		// TODO AZ Figure out why causes this loop and forcing me untrack
+		untrack(() => {
+			if (recordManager.workingSate === 'saving')
+				temporaryMessageState.message =
+					editMode === 'permanent'
+						? `Saving Command [${commandBuilderData.commandName}]...`
+						: `Saving Draft...`;
+		});
+	});
 
-		temporaryMessageState.message = isPermanentCommandPage
-			? `Saving Command [${gCbData?.data.commandName}]...`
-			: `Saving Draft...`;
-	}
-
-	// TODO AZ:
-	// 1. goto back when fail.
-	// 2. do error handling and error message (temporary message)
-	//3. fix url thing when gotoing
 	async function saveNewCommand(commandName: string) {
-		let newCommand = $state.snapshot(gCbData);
-		newCommand.data.commandName = commandName;
-		let savePromise = saveCbState({ kind: 'permanent', saveData: newCommand });
+		let newCommand = $state.snapshot(commandBuilderData);
 
-		let basePath = getPathWithoutParams(page);
-		await goto(`${basePath}/${newCommand.data.commandName}`);
-		savePromise.catch((e) => {
-			history.back();
+		newCommand.commandName = commandName;
+
+		try {
+			await recordManager.saveAs(commandName);
+			let basePath = getPathWithoutParams(page);
+			console.log('recordManager new Data', $state.snapshot(recordManager.recordData));
+			await goto(`${basePath}/${commandName}`);
+		} catch (e) {
 			temporaryMessageState.setMessageWithTimout(
 				`Failed to save command [${commandName}] error message: ${e.message}`,
 				15000
 			);
-		});
+		}
 	}
 
 	function defaultSaveButtonBehavior() {
-		if (isPermanentCommandPage) {
-			autoSaver?.saveData(gCbData);
+		if (editMode === 'permanent') {
+			recordManager?.save();
 		} else {
 			openSaveAsPopup();
 		}
@@ -123,19 +84,19 @@
 	}
 
 	$effect(() => {
-		appState.debug.viewObject = gCbData;
+		appState.debug.viewObject = commandBuilderData;
 	});
 </script>
 
 <div class="mini-app">
 	{#if isPermanentCommandPage}
 		<input
-			bind:value={gCbData.data.commandName}
+			bind:value={commandBuilderData.commandName}
 			class="input-title"
 			{@attach createFocusHotKeyAttachment('Modify Title', 'i', 'alt')}
 		/>
 	{/if}
-	<CommandBuilder bind:commandBuilderState={gCbData.data} />
+	<CommandBuilder bind:commandBuilderState={commandBuilderData} />
 
 	<Button
 		class="button-save"

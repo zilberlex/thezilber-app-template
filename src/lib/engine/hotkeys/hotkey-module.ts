@@ -50,21 +50,6 @@ class HotkeysModule {
 		let eventKey = HotKey.fromEvent(event);
 		let handlers = hotKeyedHandlers.get(eventKey);
 
-		if (eventKey.key === 's') {
-			appState.debug.viewObject = {
-				handlers,
-				key: eventKey.toString(),
-				count: ++this.count
-			};
-		} else if (eventKey.key === '9') {
-			this.count = 0;
-			appState.debug.viewObject = {
-				handlers,
-				key: eventKey.toString(),
-				count: this.count
-			};
-		}
-
 		if (eventKey.key.toLowerCase() === 'escape') {
 			console.log('phase', event.eventPhase, 'handlers', handlers);
 		}

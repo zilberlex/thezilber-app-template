@@ -1,26 +1,27 @@
-export function syncData<T>(localData: SyncableData<T>, incomingData: SyncableData<T>) {
+// TODO AZ move to work with Record
+export function syncData<T>(localData: AppRecord<T>, incomingData: AppRecord<T>) {
 	return returnSyncedDataLww(localData, incomingData);
 }
 
 function returnSyncedDataLww<T>(
-	localData: SyncableData<T>,
-	incomingData: SyncableData<T>
-): SyncableData<T> {
-	if (localData.id !== incomingData.id)
+	localRecord: AppRecord<T>,
+	incomingRecord: AppRecord<T>
+): AppRecord<T> {
+	if (localRecord.id !== incomingRecord.id)
 		throw new Error(
-			`Expected Data To have the same id localData: ${localData.id}, incomingData: ${incomingData.id}`
+			`Expected Data To have the same id localData: ${localRecord.id}, incomingData: ${incomingRecord.id}`
 		);
 
-	const vc1 = localData.vc;
-	const vc2 = incomingData.vc;
+	const vc1 = localRecord.meta.vc;
+	const vc2 = incomingRecord.meta.vc;
 
 	const vcComparisonResult = compareVcs(vc1, vc2);
 
-	let ret = localData;
-	if (vcComparisonResult === 'incoming-dominates') ret = incomingData;
+	let ret = localRecord;
+	if (vcComparisonResult === 'incoming-dominates') ret = incomingRecord;
 
-	ret = resolveConcurrentConflictLww(localData, incomingData);
-	ret.vc = mergeClocksAfterDataSync(localData.vc, incomingData.vc);
+	ret = resolveConcurrentConflictLww(localRecord, incomingRecord);
+	ret.meta.vc = mergeClocksAfterDataSync(localRecord.meta.vc, incomingRecord.meta.vc);
 
 	return ret;
 }
@@ -58,11 +59,9 @@ function mergeClocksAfterDataSync(vc1: VectorClock, vc2: VectorClock): VectorClo
 	return finalVc;
 }
 
-function resolveConcurrentConflictLww<T>(
-	dataLocal: SyncableData<T>,
-	dataIncoming: SyncableData<T>
-) {
-	let newest = dataLocal.modifiedAt > dataIncoming.modifiedAt ? dataLocal : dataIncoming;
+function resolveConcurrentConflictLww<T>(localRecord: AppRecord<T>, incomindRecord: AppRecord<T>) {
+	let newest =
+		localRecord.meta.modifiedAt > incomindRecord.meta.modifiedAt ? localRecord : incomindRecord;
 	let ret = newest;
 
 	return ret;

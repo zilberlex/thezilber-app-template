@@ -1,5 +1,3 @@
-import { generateId } from '$lib/engine/crypto/crypto-utils';
-
 export function createSyncableData<T>(deviceId: string, data: T): SyncableData<T> {
 	return {
 		vc: { [deviceId]: 0 },
@@ -23,6 +21,28 @@ export function stampSyncableData(deviceId: string, permasState: SyncableData<un
 
 export function timestamp(): number {
 	return Date.now();
+}
+
+export function createAppRecord<T>(deviceId: string, data: T): AppRecord<T> {
+	return {
+		meta: createMetadata(deviceId),
+		data
+	};
+}
+
+export function stampAppRecord(deviceId: string, meta: AppRecordMetadata) {
+	meta.modifiedAt = timestamp();
+	meta.modifiedBy = deviceId;
+	stampeVectorClock(deviceId, meta.vc);
+}
+
+function createMetadata(deviceId: string): AppRecordMetadata {
+	return {
+		vc: { [deviceId]: 0 },
+		modifiedAt: timestamp(),
+		modifiedBy: deviceId,
+		isDeleted: false
+	};
 }
 
 function stampeVectorClock(deviceId: string, vc: VectorClock) {

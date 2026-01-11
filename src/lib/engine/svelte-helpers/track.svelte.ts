@@ -1,3 +1,3 @@
-export function track(...params) {
+export function track(...params: unknown[]) {
 	$state.snapshot(params);
 }
