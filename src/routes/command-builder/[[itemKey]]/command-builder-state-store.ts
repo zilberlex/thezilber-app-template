@@ -8,6 +8,9 @@ import { loadCommandByName, saveCommandDb, updateCommandDb } from './command-bui
 
 const CommandBuilderDraftStateStorageKey = 'DynamicForm';
 
+async function sleep(msec) {
+	return new Promise((resolve) => setTimeout(resolve, msec));
+}
 export class CommandBuilderStore implements RecordStore<PermanentCommandBuilderState> {
 	#isPermanent: boolean;
 	constructor(editMode: EditMode) {
@@ -35,6 +38,7 @@ export class CommandBuilderStore implements RecordStore<PermanentCommandBuilderS
 	}
 
 	async load(recordKey: string): Promise<AppRecord<PermanentCommandBuilderState> | undefined> {
+		await sleep(3000);
 		let ret;
 		if (this.#isPermanent) {
 			ret = await loadCommandByName(recordKey);

@@ -1,26 +1,59 @@
 <script lang="ts">
-	import { temporaryMessageState } from '$lib/engine/application/temp-messages/temporary-message-state.svelte';
-	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
-	import Button from '$lib/ui/basic-components/Button.svelte';
-	import { AutoResetValue } from '$lib/ui/reactive-classes/autoResetValue.svelte';
+	import { track } from '$lib/engine/svelte-helpers/track.svelte';
+	import AppUI from './AppUI.svelte';
+	import type { AppModel, LoadResult } from './app-types';
 
-	let autoResetVal = new AutoResetValue('cool', 2000);
+	const { data } = $props<{ data: LoadResult }>();
+
+	let error = $state<unknown>(null);
+
+	let state = $state({
+		status: 'loading',
+		model: data.initialModel
+	});
+
 	$effect(() => {
-		console.log('changed', autoResetVal.value);
+		let cancelled = false;
+
+		state.status = 'loading';
+		state.model = data.initialModel;
+		error = null;
+
+		data.modelPromise
+			.then((loaded) => {
+				if (cancelled) return;
+				state.model = loaded;
+				state.status = 'ready';
+			})
+			.catch((e) => {
+				if (cancelled) return;
+				error = e;
+				state.status = 'error';
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	});
+
+	$effect(() => {
+		track(state);
+		console.log('state', state);
 	});
 </script>
 
-<div class=".flex-col">
-	<div>
-		isShowing: {temporaryMessageState.isShowing}
-	</div>
-	<div>
-		Value: {temporaryMessageState.message}
-	</div>
-	<Button
-		onclick={() => (temporaryMessageState.message = 'Boom')}
-		{@attach createClickHotKeyAttachment('Boom', 'b', 'alt')}
-	>
-		Make Value Boom
-	</Button>
-</div>
+<AppUI model={state.model} status={state.status} />
+
+{#if state.status === 'error'}
+	<div class="err">Failed: {String(error)}</div>
+{/if}
+
+<style>
+	.err {
+		margin-top: 10px;
+		color: #ff6b6b;
+		font:
+			14px/1.4 system-ui,
+			sans-serif;
+	}
+</style>

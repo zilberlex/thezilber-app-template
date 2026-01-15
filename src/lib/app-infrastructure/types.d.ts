@@ -1,11 +1,19 @@
+import type { RecordManager } from "./record-manager.svelte";
+
  type EditMode = 'permanent' | 'draft';
 
- interface RecordManager<T> {}
+ type CollectionAppRuntime<T> = {
+   recordManager: RecordManager<T>;
+ }
 
 type CollectionAppContext = {
 	editMode: EditMode;
 	itemKey?: string;
-};
+}
+
+ type CollectionAppEnvironment<T> = CollectionAppContext &{
+  runtime: CollectionAppRuntime<T>;
+ }
 
 interface RecordStore<TData> {
 	async update(record: AppRecord<TData>);

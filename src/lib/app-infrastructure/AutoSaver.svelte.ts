@@ -15,7 +15,7 @@ const defaultOptions: AutoSaverOptions = {
 };
 
 export class AutoSaver<T extends AppRecord<any>> {
-	#autoSaveHandler: (e: Event) => Promise<any>;
+	#autoSaveHandler: () => Promise<any>;
 	#options: AutoSaverOptions;
 
 	#autoSaveArmed: boolean = false;

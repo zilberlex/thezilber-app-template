@@ -16,16 +16,21 @@
 	import { browser } from '$app/environment';
 	import OneLineForm from './OneLineForm.svelte';
 	import { temporaryMessageState } from '$lib/engine/application/temp-messages/temporary-message-state.svelte';
-	import type { PageData } from './$types';
+	import type { CollectionAppEnvironment } from '$lib/app-infrastructure/types';
+	import type { RecordManager } from '$lib/app-infrastructure/record-manager.svelte';
 
-	let { data: cbAppContext }: { data: PageData } = $props();
+	let { data: cbAppContext }: { data: CollectionAppEnvironment<PermanentCommandBuilderState> } =
+		$props();
 
-	const recordManager = $derived(cbAppContext.recordManager);
+	let recordManager: RecordManager<PermanentCommandBuilderState> =
+		cbAppContext.runtime.recordManager;
+
 	appState.pageContext.title = 'Command Builder';
 
 	let isSaveDialogOpen = $state(false);
 
-	let commandBuilderData = $derived(recordManager.recordData);
+	let commandBuilderData = recordManager.recordData;
+
 	let editMode = $derived(cbAppContext.editMode);
 	let isPermanentCommandPage = $derived(editMode === 'permanent');
 
@@ -39,23 +44,46 @@
 		return page.route.id ? page.route.id.replace(/\/[^/]+$/, '') : page.url.pathname;
 	}
 
+	// TODO
 	$effect(() => {
-		console.log('Setting Message working state:', recordManager.workingSate);
-		track(recordManager.workingSate);
+		cbAppContext.runtime; // Shallow Tracking on purpose
+	});
+
+	$effect(() => {
+		if (!recordManager) return;
+		const recordManagerSafe = recordManager;
+
+		console.log('Setting Message working state:', recordManager.dataState);
+		track(recordManager.dataState);
 
 		// TODO AZ Figure out why causes this loop and forcing me untrack
+		// untrack(() => {
+		// 	if (recordManagerSafe.dataState === 'saving')
+		// 		temporaryMessageState.message =
+		// 			editMode === 'permanent'
+		// 				? `Saving Command [${recordManager.recordData}]...`
+		// 				: `Saving Draft...`;
+		// });
+
 		untrack(() => {
-			if (recordManager.workingSate === 'saving')
+			if (recordManagerSafe.dataState === 'saving')
 				temporaryMessageState.message =
 					editMode === 'permanent'
-						? `Saving Command [${commandBuilderData.commandName}]...`
+						? `Saving Command [${commandBuilderData?.commandName}]...`
 						: `Saving Draft...`;
 		});
 	});
 
 	async function saveNewCommand(commandName: string) {
-		let newCommand = $state.snapshot(commandBuilderData);
+		if (!recordManager.dataReady) {
+			console.warn(
+				'recordManager data not ready when trying to saveAs. dataState:',
+				recordManager.dataState
+			);
+			return;
+		}
 
+		let newCommand = $state.snapshot(commandBuilderData);
 		newCommand.commandName = commandName;
 
 		try {
@@ -84,19 +112,26 @@
 	}
 
 	$effect(() => {
+		// appState.debug.viewObject = recordManager.recordData;
 		appState.debug.viewObject = commandBuilderData;
 	});
 </script>
 
 <div class="mini-app">
 	{#if isPermanentCommandPage}
+		<!-- <input -->
+		<!-- 	bind:value={recordManager.recordData} -->
+		<!-- 	class="input-title" -->
+		<!-- 	{@attach createFocusHotKeyAttachment('Modify Title', 'i', 'alt')} -->
+		<!-- /> -->
 		<input
 			bind:value={commandBuilderData.commandName}
 			class="input-title"
 			{@attach createFocusHotKeyAttachment('Modify Title', 'i', 'alt')}
 		/>
 	{/if}
-	<CommandBuilder bind:commandBuilderState={commandBuilderData} />
+	<CommandBuilder commandBuilderState={recordManager.recordData} />
+	<!-- <CommandBuilder bind:commandBuilderState={commandBuilderData} /> -->
 
 	<Button
 		class="button-save"
