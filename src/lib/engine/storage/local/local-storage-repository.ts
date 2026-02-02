@@ -12,3 +12,7 @@ export function loadLocalStorage(key: string) {
 
 	return item ? JSON.parse(item) : item;
 }
+
+export function removeLocalStorage(key: string) {
+	window.localStorage.removeItem(key);
+}

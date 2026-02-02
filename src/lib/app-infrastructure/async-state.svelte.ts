@@ -1,28 +1,37 @@
 import { extract, type MaybeGetter } from 'runed';
 
 export class AsyncState<T extends AnyRecord> {
-	dataState = $state<'loading' | 'ready'>('loading');
+	dataState = $state<AppDataState>('loading');
 	value: T;
 
 	#loadId = 0;
 	#destroyed = false;
 
-	constructor(promise: Promise<T>, placeholder: MaybeGetter<T>) {
+	constructor(placeholder: MaybeGetter<T>, promise?: Promise<T | undefined>) {
 		this.value = $state(extract(placeholder));
-		this.load(promise);
+
+		if (promise) {
+			this.load(promise);
+		} else {
+			this.dataState = 'ready';
+		}
 	}
 
-	load(p: Promise<T>) {
+	async load(promise: Promise<T | undefined>) {
 		const id = ++this.#loadId;
 		this.dataState = 'loading';
 
-		p.then((incoming) => {
-			if (this.#destroyed) return;
-			if (id !== this.#loadId) return;
+		let incoming = await promise;
 
-			deepAssign(this.value, incoming);
-			this.dataState = 'ready';
-		});
+		if (!incoming) {
+			this.dataState = 'record-not-found';
+		}
+
+		if (this.#destroyed) return;
+		if (id !== this.#loadId) return;
+
+		deepAssign(this.value, incoming);
+		this.dataState = 'ready';
 	}
 
 	destroy() {

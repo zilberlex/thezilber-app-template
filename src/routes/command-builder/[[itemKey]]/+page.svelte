@@ -16,7 +16,6 @@
 	import { browser } from '$app/environment';
 	import OneLineForm from './OneLineForm.svelte';
 	import { temporaryMessageState } from '$lib/engine/application/temp-messages/temporary-message-state.svelte';
-	import type { CollectionAppEnvironment } from '$lib/app-infrastructure/types';
 	import type { RecordManager } from '$lib/app-infrastructure/record-manager.svelte';
 
 	let { data: cbAppContext }: { data: CollectionAppEnvironment<PermanentCommandBuilderState> } =
@@ -28,8 +27,6 @@
 	appState.pageContext.title = 'Command Builder';
 
 	let isSaveDialogOpen = $state(false);
-
-	let commandBuilderData = recordManager.recordData;
 
 	let editMode = $derived(cbAppContext.editMode);
 	let isPermanentCommandPage = $derived(editMode === 'permanent');
@@ -44,11 +41,6 @@
 		return page.route.id ? page.route.id.replace(/\/[^/]+$/, '') : page.url.pathname;
 	}
 
-	// TODO
-	$effect(() => {
-		cbAppContext.runtime; // Shallow Tracking on purpose
-	});
-
 	$effect(() => {
 		if (!recordManager) return;
 		const recordManagerSafe = recordManager;
@@ -57,19 +49,11 @@
 		track(recordManager.dataState);
 
 		// TODO AZ Figure out why causes this loop and forcing me untrack
-		// untrack(() => {
-		// 	if (recordManagerSafe.dataState === 'saving')
-		// 		temporaryMessageState.message =
-		// 			editMode === 'permanent'
-		// 				? `Saving Command [${recordManager.recordData}]...`
-		// 				: `Saving Draft...`;
-		// });
-
 		untrack(() => {
 			if (recordManagerSafe.dataState === 'saving')
 				temporaryMessageState.message =
 					editMode === 'permanent'
-						? `Saving Command [${commandBuilderData?.commandName}]...`
+						? `Saving Command [${recordManager.recordData?.commandName}]...`
 						: `Saving Draft...`;
 		});
 	});
@@ -83,7 +67,7 @@
 			return;
 		}
 
-		let newCommand = $state.snapshot(commandBuilderData);
+		let newCommand = $state.snapshot(recordManager.recordData);
 		newCommand.commandName = commandName;
 
 		try {
@@ -112,26 +96,19 @@
 	}
 
 	$effect(() => {
-		// appState.debug.viewObject = recordManager.recordData;
-		appState.debug.viewObject = commandBuilderData;
+		appState.debug.viewObject = recordManager.recordData;
 	});
 </script>
 
 <div class="mini-app">
 	{#if isPermanentCommandPage}
-		<!-- <input -->
-		<!-- 	bind:value={recordManager.recordData} -->
-		<!-- 	class="input-title" -->
-		<!-- 	{@attach createFocusHotKeyAttachment('Modify Title', 'i', 'alt')} -->
-		<!-- /> -->
 		<input
-			bind:value={commandBuilderData.commandName}
+			bind:value={recordManager.recordData.commandName}
 			class="input-title"
 			{@attach createFocusHotKeyAttachment('Modify Title', 'i', 'alt')}
 		/>
 	{/if}
-	<CommandBuilder commandBuilderState={recordManager.recordData} />
-	<!-- <CommandBuilder bind:commandBuilderState={commandBuilderData} /> -->
+	<CommandBuilder bind:commandBuilderState={recordManager.recordData} />
 
 	<Button
 		class="button-save"

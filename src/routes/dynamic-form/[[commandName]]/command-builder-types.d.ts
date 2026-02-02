@@ -7,4 +7,4 @@ type PermanentCommandBuilderState = CommandBuilderState & {
 	commandName: string;
 };
 
-type CommandBuilderRecord = AppRecord<PermanentCommandBuilderState>;
+// type CommandBuilderRecord = AppRecord<PermanentCommandBuilderState>;

@@ -1,17 +1,10 @@
 export const ssr = false;
 
-import { CommandBuilderStore } from './command-builder-state-store';
+import { CommandBuilderRepo } from './command-builder-state-store';
 import { RecordManager } from '$lib/app-infrastructure/record-manager.svelte';
 import type { PageLoad, PageLoadEvent } from './$types';
-import { createAppRecord } from '$lib/engine/storage/data/data';
+import { createDbAppRecord } from '$lib/engine/storage/data/data';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
-import type {
-	CollectionAppContext,
-	CollectionAppEnvironment,
-	CollectionAppRuntime,
-	RecordStore
-} from '$lib/app-infrastructure/types';
-import { AsyncState } from '$lib/app-infrastructure/async-state.svelte';
 
 type AppData = PermanentCommandBuilderState;
 
@@ -46,31 +39,24 @@ function createPlaceholderCommand(): AppData {
 }
 
 function createPlaceholderRecord(): AppRecord<AppData> {
-	return createAppRecord(getDeviceId(), createPlaceholderCommand());
+	return createDbAppRecord(getDeviceId(), createPlaceholderCommand());
+}
+
+function createExampleRecord(): AppRecord<AppData> {
+	return createDbAppRecord(getDeviceId(), getExampleCommand());
 }
 
 function loadAppRuntime(appContext: CollectionAppContext): CollectionAppRuntime<AppData> {
-	let store: RecordStore<AppData> = new CommandBuilderStore(appContext.editMode);
+	let store: RecordStore<AppData> = new CommandBuilderRepo(appContext.editMode);
 
-	let routeRecordPromise = store.load(appContext.itemKey).then((record) => {
-		let ret: AppRecord<AppData>;
-		if (!record) {
-			if (appContext.editMode === 'permanent') {
-				throw Error('implement reroute');
-			} else {
-				ret = createAppRecord(getDeviceId(), getExampleCommand());
-			}
+	const recordManager = RecordManager.create(store, createPlaceholderRecord());
+	if (appContext.editMode === 'draft') {
+		if (appContext.editMode === 'draft') {
+			recordManager.loadOrDefault(appContext.itemKey, createExampleRecord());
 		} else {
-			ret = record;
+			recordManager.load(appContext.itemKey);
 		}
-
-		return ret;
-	});
-
-	let recordManager = RecordManager.create(
-		new AsyncState(routeRecordPromise, createPlaceholderRecord()),
-		store
-	);
+	}
 
 	return { recordManager };
 }

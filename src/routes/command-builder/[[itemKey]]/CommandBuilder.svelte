@@ -4,7 +4,8 @@
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
 	import { tokenize, type Token } from './custom-tokenizer';
 
-	let { commandBuilderState }: { commandBuilderState: CommandBuilderState } = $props();
+	let { commandBuilderState = $bindable() }: { commandBuilderState: CommandBuilderState } =
+		$props();
 
 	let tokens = $derived(tokenize(commandBuilderState.commandStr));
 	let formSchema = $derived.by(() => {

@@ -9,10 +9,25 @@ type AppRecordMetadata = {
 	isDeleted?: boolean;
 };
 
-type AppRecord<T> = {
-	id?: string;
+interface AppRecord<T> {
+	recordId: string;
 	meta: AppRecordMetadata;
 	data: T;
+	get key(): string;
+	set key(value: string);
+}
+
+interface DbAppRecord<T> {
+	recordId: string;
+	meta: AppRecordMetadata;
+	data: T;
+}
+
+type AppRecordAdapter<T> = {
+	constructRecord(data: T): AppRecord<T>;
+	constructDbRecord(data: T): DbAppRecord<T>;
+	fromDb: (dbRecord: DbAppRecord<T>) => AppRecord<T>;
+	toDb: (AppRecord: AppRecord<T>) => DbAppRecord<T>;
 };
 
 type SyncableData<T> = {

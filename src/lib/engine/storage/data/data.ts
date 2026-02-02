@@ -1,3 +1,5 @@
+import { generateId } from '$lib/engine/crypto/crypto-utils';
+
 export function createSyncableData<T>(deviceId: string, data: T): SyncableData<T> {
 	return {
 		vc: { [deviceId]: 0 },
@@ -23,9 +25,10 @@ export function timestamp(): number {
 	return Date.now();
 }
 
-export function createAppRecord<T>(deviceId: string, data: T): AppRecord<T> {
+export function createDbAppRecord<T>(deviceId: string, data: T): DbAppRecord<T> {
 	return {
-		meta: createMetadata(deviceId),
+		recordId: generateId(),
+		meta: createAppRecordMetadata(deviceId),
 		data
 	};
 }
@@ -36,7 +39,7 @@ export function stampAppRecord(deviceId: string, meta: AppRecordMetadata) {
 	stampeVectorClock(deviceId, meta.vc);
 }
 
-function createMetadata(deviceId: string): AppRecordMetadata {
+export function createAppRecordMetadata(deviceId: string): AppRecordMetadata {
 	return {
 		vc: { [deviceId]: 0 },
 		modifiedAt: timestamp(),

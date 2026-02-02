@@ -1,19 +1,13 @@
 import { generateId } from '$lib/engine/crypto/crypto-utils';
 import Dexie, { type EntityTable } from 'dexie';
+import type { CommandBuilderDbRecord } from './command-builder-types';
 
-type PermanentCommandBuilderStateDb = PermanentCommandBuilderState & {
-	commandNameKey: string; // normalized lookup key
-};
-
-type CommandBuilderDataDb = AppRecord<PermanentCommandBuilderStateDb>;
-
-// command-builder-db.ts
 const commandBuilderDb = new Dexie('CommandBuilderDb') as Dexie & {
-	commands: EntityTable<CommandBuilderDataDb, 'id'>;
+	commands: EntityTable<CommandBuilderDbRecord, 'recordId'>;
 };
 
 commandBuilderDb.version(2).stores({
-	commands: 'id, &data.commandNameKey, meta.modifiedAt'
+	commands: 'recordId, &data.commandName, meta.modifiedAt'
 });
 
 function informativeStructuredClone<T>(item: T): T {
@@ -25,42 +19,43 @@ function informativeStructuredClone<T>(item: T): T {
 	}
 }
 
-export async function saveCommandDb(command: CommandBuilderRecord) {
+export async function saveCommandDb(command: CommandBuilderDbRecord) {
 	try {
-		let dbCommand = toDbCommand(command);
-		dbCommand.id = generateId();
+		command.recordId = generateId();
 
 		console.log('[NEW] saveCommandDb', command);
 
-		let cloned = informativeStructuredClone(dbCommand);
+		let cloned = informativeStructuredClone(command);
 
 		await commandBuilderDb.commands.add(cloned);
 
-		return toPublicCommand(dbCommand);
+		return command;
 	} catch (error) {
 		console.error('saveCommand failed.', error);
 		throw error;
 	}
 }
 
-export async function updateCommandDb(command: CommandBuilderRecord) {
+export async function updateCommandDb(dbCommand: CommandBuilderDbRecord) {
 	try {
-		let dbCommand = toDbCommand(command);
 		await commandBuilderDb.commands.put(dbCommand);
 	} catch (error) {
 		console.error('updateCommand failed.', error);
 	}
 }
 
+export async function deleteCommandById(redordId: string) {
+	await commandBuilderDb.commands.delete(redordId);
+}
+
 export async function loadCommandByName(commandName: string) {
 	try {
-		let commandNameKey = normalizeStringKey(commandName);
 		const dbCommand = await commandBuilderDb.commands
-			.where('data.commandNameKey')
-			.equals(commandNameKey)
+			.where('data.commandName')
+			.equals(commandName)
 			.first();
 
-		return dbCommand ? toPublicCommand(dbCommand) : undefined;
+		return dbCommand ? dbCommand : undefined;
 	} catch (error) {
 		console.error(
 			'loadCommandByName failed. commandName requested',
@@ -70,30 +65,6 @@ export async function loadCommandByName(commandName: string) {
 		);
 		return undefined;
 	}
-}
-
-// TODO AZ use standard methods
-function normalizeStringKey(commandName: string): any {
-	return commandName.toLowerCase();
-}
-
-function toDbCommand(command: CommandBuilderRecord): CommandBuilderDataDb {
-	// don’t mutate input (avoids annoying UI bugs)
-	return {
-		...command,
-		data: {
-			...command.data,
-			commandNameKey: normalizeStringKey(command.data.commandName)
-		}
-	};
-}
-
-function toPublicCommand(dbCommand: CommandBuilderDataDb): CommandBuilderRecord {
-	// strip internal field so it can’t leak into UI types
-	// (runtime remove; TS remove happens via return type)
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const { commandNameKey, ...rest } = dbCommand.data;
-	return { ...dbCommand, data: rest };
 }
 
 function findCloneFailurePath(

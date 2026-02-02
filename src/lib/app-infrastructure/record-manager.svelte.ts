@@ -2,32 +2,28 @@ import { stampAppRecord } from '$lib/engine/storage/data/data';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
 import { untrack } from 'svelte';
 import { AutoSaver } from './AutoSaver.svelte';
-import type { RecordStore } from './types';
-import { type AsyncState } from './async-state.svelte';
+import { AsyncState } from './async-state.svelte';
+import type { MaybeGetter } from 'svelte-toolbelt';
 
-type RecordManagerDataState = 'saving' | 'ready' | 'loading';
-
-export class RecordManager<T> implements RecordManager<T> {
+export class RecordManager<T> {
 	// ===== static singleton handling =====
 	private static current: RecordManager<any> | undefined;
 
 	static create<T>(
-		asyncRecordState: AsyncState<AppRecord<T>>,
-		recordStore: RecordStore<T>
+		recordStore: RecordStore<T>,
+		placeholderData: MaybeGetter<AppRecord<T>>
 	): RecordManager<T> {
 		// destroy previous instance
 		RecordManager.current?.destroy();
 
-		const instance = new RecordManager(asyncRecordState, recordStore);
+		const instance = new RecordManager(recordStore, placeholderData);
 		RecordManager.current = instance;
 
 		return instance;
 	}
 
 	// Instance
-	recordData: T;
-
-	dataState: RecordManagerDataState;
+	dataState: AppDataState;
 	dataReady: boolean;
 
 	#asyncRecord: AsyncState<AppRecord<T>>;
@@ -35,46 +31,41 @@ export class RecordManager<T> implements RecordManager<T> {
 	#recordStore: RecordStore<T>;
 	#autoSaver: AutoSaver<AppRecord<T>> | undefined;
 
-	#effectRootDestroy: () => void;
-
-	private constructor(asyncRecord: AsyncState<AppRecord<T>>, recordStore: RecordStore<T>) {
+	private constructor(recordStore: RecordStore<T>, placeHolderData: MaybeGetter<AppRecord<T>>) {
 		this.#recordStore = recordStore;
-		this.#asyncRecord = asyncRecord;
 
-		this.#record = asyncRecord.value;
-		this.recordData = this.#record.data;
+		this.#asyncRecord = new AsyncState(placeHolderData);
 
-		this.dataState = $state('loading');
+		this.#record = this.#asyncRecord.value;
+
+		this.dataState = $derived(this.#asyncRecord.dataState);
 		this.dataReady = $derived(this.dataState !== 'loading');
 
 		this.#resetAutoSaver();
+	}
 
-		// Tracking Loading of record
-		this.#effectRootDestroy = $effect.root(() => {
-			let dataState = this.#asyncRecord.dataState; // Intentional shallow tracking
-
-			untrack(() => {
-				if (dataState === 'ready') {
-					this.dataState = 'ready';
-				}
-			});
-		});
+	get recordData() {
+		return this.#record.data;
 	}
 
 	#saveInstances = 0;
 	async save() {
 		const record = this.#record;
-		stampAppRecord(getDeviceId(), record.meta);
-
-		const recordSnapshot = snapshotData(record);
 
 		this.#saveInstances++;
 		this.dataState = 'saving';
 
-		await this.#recordStore.update(recordSnapshot as AppRecord<T>);
+		try {
+			console.log('recordSnapshot: ', $state.snapshot(record));
 
-		this.#saveInstances--;
-		if (this.#saveInstances === 0) this.dataState = 'ready';
+			stampAppRecord(getDeviceId(), record.meta);
+			const recordSnapshot = snapshotData(record);
+
+			await this.#recordStore.update(recordSnapshot as AppRecord<T>);
+		} finally {
+			this.#saveInstances--;
+			if (this.#saveInstances === 0) this.dataState = 'ready';
+		}
 	}
 
 	async saveAs(recordKey: string): Promise<void> {
@@ -84,7 +75,19 @@ export class RecordManager<T> implements RecordManager<T> {
 		this.#asyncRecord.load(newRecordPromise);
 	}
 
-	load(newRecordPromise: Promise<AppRecord<T>>) {
+	load(recordKey: string) {
+		this.#loadInternal(recordKey);
+	}
+
+	loadOrDefault(recordKey: string, defaultItem: AppRecord<T>) {
+		this.#loadInternal(recordKey, defaultItem);
+	}
+
+	#loadInternal(recordKey: string, defaultItem?: AppRecord<T>) {
+		let newRecordPromise = this.#recordStore.load(recordKey);
+
+		if (defaultItem) newRecordPromise = newRecordPromise.then((record) => record ?? defaultItem);
+
 		this.#asyncRecord.load(newRecordPromise);
 		this.#resetAutoSaver();
 	}
@@ -99,7 +102,6 @@ export class RecordManager<T> implements RecordManager<T> {
 
 	destroy() {
 		this.#autoSaver?.destroy();
-		this.#effectRootDestroy();
 	}
 }
 
