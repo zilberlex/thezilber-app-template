@@ -1,12 +1,18 @@
 type DeviceId = string;
 type VectorClock = Record<DeviceId, number>;
 
-interface AppRecord<T> {
+interface AppRecord<TData, TMeta> {
 	recordId: string;
-	meta: AppRecordMetadata;
-	data: T;
+	meta: TMeta;
+	data: TData;
 	get key(): string;
 	set key(value: string);
+}
+
+interface DbAppRecord<TData, TMeta> {
+	recordId: string;
+	meta: TMeta;
+	data: TData;
 }
 
 type SyncableData<T> = {

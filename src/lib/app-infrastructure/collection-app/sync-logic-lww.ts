@@ -1,12 +1,14 @@
-// TODO AZ move to work with Record
-export function syncData<T>(localData: AppRecord<T>, incomingData: AppRecord<T>) {
+export function syncData<T>(
+	localData: AppRecord<T, SyncableAppRecordMetadata>,
+	incomingData: AppRecord<T, SyncableAppRecordMetadata>
+) {
 	return returnSyncedDataLww(localData, incomingData);
 }
 
 function returnSyncedDataLww<T>(
-	localRecord: AppRecord<T>,
-	incomingRecord: AppRecord<T>
-): AppRecord<T> {
+	localRecord: AppRecord<T, SyncableAppRecordMetadata>,
+	incomingRecord: AppRecord<T, SyncableAppRecordMetadata>
+): AppRecord<T, SyncableAppRecordMetadata> {
 	if (localRecord.recordId !== incomingRecord.recordId)
 		throw new Error(
 			`Expected Data To have the same id localData: ${localRecord.recordId}, incomingData: ${incomingRecord.recordId}`

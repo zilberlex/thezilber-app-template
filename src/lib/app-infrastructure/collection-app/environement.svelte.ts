@@ -6,8 +6,8 @@ export function collectionAppInit<T>(
 	page: Page,
 	dataPlaceholder: T,
 	fallbackData: T,
-	recordConverter: AppRecordAdapter<T>,
-	repo: AppRecordRepo<T>
+	recordConverter: AppRecordAdapter<T, SyncableAppRecordMetadata>,
+	repo: AppRecordRepo<T, SyncableAppRecordMetadata>
 ): CollectionAppEnvironmentTemp<T> {
 	let slugItemKey = page.params.itemKey;
 	let itemKey = $state(slugItemKey ?? '_draft_');

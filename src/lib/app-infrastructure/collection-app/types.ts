@@ -1,12 +1,14 @@
 type EditMode = 'permanent' | 'draft';
 
-type AppRecordMetadata = {
+type SyncableAppRecordMetadata = {
 	vc: VectorClock;
 
 	modifiedAt: number;
 	modifiedBy: string;
 	isDeleted?: boolean;
 };
+
+type CollectionAppRecord<TData> = AppRecord<TData, SyncableAppRecordMetadata>;
 
 type CollectionAppRuntimeTemp<T> = {
 	data: T;
@@ -21,25 +23,19 @@ type CollectionAppContext = {
 	itemKey: string;
 };
 
-interface DbAppRecord<T> {
-	recordId: string;
-	meta: AppRecordMetadata;
-	data: T;
-}
-
-type AppRecordAdapter<T> = {
-	constructRecord(data: T): AppRecord<T>;
-	constructDbRecord(data: T): DbAppRecord<T>;
-	fromDb: (dbRecord: DbAppRecord<T>) => AppRecord<T>;
-	toDb: (AppRecord: AppRecord<T>) => DbAppRecord<T>;
+type AppRecordAdapter<TData, TMeta> = {
+	constructRecord(data: TData): AppRecord<TData, TMeta>;
+	constructDbRecord(data: TData): DbAppRecord<TData, TMeta>;
+	fromDb: (dbRecord: DbAppRecord<TData, TMeta>) => AppRecord<TData, TMeta>;
+	toDb: (AppRecord: AppRecord<TData, TMeta>) => DbAppRecord<TData, TMeta>;
 };
 
-interface AppRecordRepo<TData> {
-	update(context: CollectionAppContext, record: DbAppRecord<TData>): Promise<void>;
+interface AppRecordRepo<TData, TMeta> {
+	update(context: CollectionAppContext, record: DbAppRecord<TData, TMeta>): Promise<void>;
 
-	create(context: CollectionAppContext, data: TData): Promise<DbAppRecord<TData>>;
-	load(context: CollectionAppContext): Promise<DbAppRecord<TData> | undefined>;
-	delete(context: CollectionAppContext, record: DbAppRecord<TData>): Promise<void>;
+	create(context: CollectionAppContext, data: TData): Promise<DbAppRecord<TData, TMeta>>;
+	load(context: CollectionAppContext): Promise<DbAppRecord<TData, TMeta> | undefined>;
+	delete(context: CollectionAppContext, record: DbAppRecord<TData, TMeta>): Promise<void>;
 }
 
 type AppDataState = 'saving' | 'ready' | 'loading' | 'record-not-found' | 'error';

@@ -1,7 +1,7 @@
 import { browser } from '$app/environment';
 import { deepAssign } from '$lib/app-infrastructure/async-state.svelte';
-import { stampAppRecord } from '$lib/engine/storage/data/data';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
+import { stampAppRecord } from './data';
 
 export type SmartStoreOptions<T> = {
 	loadNotFoundBehavior: { action: 'error' } | { action: 'create-new'; createObj: () => T };
@@ -13,11 +13,11 @@ const defaultOptions: SmartStoreOptions<any> = {
 
 export class SmartStore<T> {
 	#context: CollectionAppContext;
-	#record: AppRecord<T>;
+	#record: AppRecord<T, SyncableAppRecordMetadata>;
 	#dataState: AppDataState;
-	#recordManager: AppRecordAdapter<T>;
+	#recordManager: AppRecordAdapter<T, SyncableAppRecordMetadata>;
 	#options: SmartStoreOptions<T>;
-	#repository: AppRecordRepo<T>;
+	#repository: AppRecordRepo<T, SyncableAppRecordMetadata>;
 
 	get data() {
 		return this.#record.data;
@@ -30,8 +30,8 @@ export class SmartStore<T> {
 	constructor(
 		context: CollectionAppContext,
 		placeHolderValue: T,
-		repository: AppRecordRepo<T>,
-		recordManager: AppRecordAdapter<T>,
+		repository: AppRecordRepo<T, SyncableAppRecordMetadata>,
+		recordManager: AppRecordAdapter<T, SyncableAppRecordMetadata>,
 		options?: SmartStoreOptions<T>
 	) {
 		this.#context = context;
@@ -49,7 +49,7 @@ export class SmartStore<T> {
 
 	async save() {
 		stampAppRecord(getDeviceId(), this.#record.meta);
-		let saveData = $state.snapshot(this.#record) as AppRecord<T>;
+		let saveData = $state.snapshot(this.#record) as AppRecord<T, SyncableAppRecordMetadata>;
 
 		this.#dataState = 'saving';
 		let p = this.#repository.update(this.#context, saveData);

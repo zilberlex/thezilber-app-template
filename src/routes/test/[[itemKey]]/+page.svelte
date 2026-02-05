@@ -50,7 +50,7 @@
 	</div>
 	<Button
 		onclick={() => {
-			appEnvironment.data.commandStr = appEnvironment.data.commandStr + '2';
+			appEnvironment.data.commandStr = appEnvironment.data.commandStr + '3';
 		}}
 	>
 		change data
@@ -64,7 +64,7 @@
 	</Button>
 	<Button
 		onclick={() => {
-			appEnvironment.saveAs('2');
+			appEnvironment.saveAs('3');
 		}}
 	>
 		SaveAs
