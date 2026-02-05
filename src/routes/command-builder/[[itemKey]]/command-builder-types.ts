@@ -4,35 +4,27 @@ import { generateId } from '$lib/engine/crypto/crypto-utils';
 import { createDbAppRecord } from '$lib/engine/storage/data/data';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
 
-type CommandBuilderState = {
+export type CbState = {
+	commandName: string;
 	commandStr: string;
 	formData: DynamicForm;
 };
 
-type PermanentCommandBuilderState = CommandBuilderState & {
-	commandName: string;
-};
+export type CbRecord = CollectionAppRecord<CbState>;
 
-export type CommandBuilderRecord = CollectionAppRecord<PermanentCommandBuilderState>;
+export type DbCbRecord = DbAppRecord<CbState, SyncableAppRecordMetadata>;
 
-export type CommandBuilderDbRecord = DbAppRecord<
-	PermanentCommandBuilderState,
-	SyncableAppRecordMetadata
->;
-
-function createCommandBuilderRecord(data: PermanentCommandBuilderState) {
+function createCommandBuilderRecord(data: CbState) {
 	let genericRecord = createDbAppRecord(data, createSyncableRecordMetadata(generateId()));
 
 	return convertToCommandBuilderRecord(genericRecord);
 }
 
-function createDbCommandBuilderRecord(data: PermanentCommandBuilderState) {
+function createDbCommandBuilderRecord(data: CbState) {
 	return createDbAppRecord(data, createSyncableRecordMetadata(getDeviceId()));
 }
 
-export function convertToCommandBuilderRecord(
-	record: CommandBuilderDbRecord
-): DbAppRecord<PermanentCommandBuilderState, SyncableAppRecordMetadata> {
+export function convertToCommandBuilderRecord(record: DbCbRecord): CbRecord {
 	let ret = {
 		...record,
 		get key(): string {
@@ -46,11 +38,11 @@ export function convertToCommandBuilderRecord(
 	return ret;
 }
 
-export const commandBuilderRecordAdapter: AppRecordAdapter<
-	PermanentCommandBuilderState,
+export const commandBuilderRecordAdapter: CollectionAppRecordAdapter<
+	CbState,
 	SyncableAppRecordMetadata
 > = {
-	constructRecord: function (data: PermanentCommandBuilderState) {
+	constructRecord: function (data: CbState) {
 		return createCommandBuilderRecord(data);
 	},
 
@@ -58,11 +50,11 @@ export const commandBuilderRecordAdapter: AppRecordAdapter<
 		return createDbCommandBuilderRecord(data);
 	},
 
-	fromDb: function (dbRecord: CommandBuilderDbRecord): CommandBuilderRecord {
+	fromDb: function (dbRecord: DbCbRecord): CbRecord {
 		return convertToCommandBuilderRecord(dbRecord);
 	},
 
-	toDb: function (appRecord: CommandBuilderRecord): CommandBuilderDbRecord {
+	toDb: function (appRecord: CbRecord): DbCbRecord {
 		return {
 			meta: appRecord.meta,
 			data: appRecord.data,

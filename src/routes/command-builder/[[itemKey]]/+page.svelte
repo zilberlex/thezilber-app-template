@@ -18,11 +18,9 @@
 	import { temporaryMessageState } from '$lib/engine/application/temp-messages/temporary-message-state.svelte';
 	import type { RecordManager } from '$lib/app-infrastructure/record-manager.svelte';
 
-	let { data: cbAppContext }: { data: CollectionAppEnvironment<PermanentCommandBuilderState> } =
-		$props();
+	let { data: cbAppContext }: { data: CollectionAppEnvironment<CbState> } = $props();
 
-	let recordManager: RecordManager<PermanentCommandBuilderState> =
-		cbAppContext.runtime.recordManager;
+	let recordManager: RecordManager<CbState> = cbAppContext.runtime.recordManager;
 
 	appState.pageContext.title = 'Command Builder';
 

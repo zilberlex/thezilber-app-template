@@ -1,12 +1,12 @@
 export const ssr = false;
 
 import { CommandBuilderRepo } from './command-builder-state-store';
-import { RecordManager } from '$lib/app-infrastructure/record-manager.svelte';
 import type { PageLoad, PageLoadEvent } from './$types';
 import { createDbAppRecord } from '$lib/engine/storage/data/data';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
+import type { CbState } from './command-builder-types';
 
-type AppData = PermanentCommandBuilderState;
+type AppData = CbState;
 
 function getCollectionAppContext(loadEvent: PageLoadEvent): CollectionAppContext {
 	const { params } = loadEvent;
@@ -19,7 +19,7 @@ function getCollectionAppContext(loadEvent: PageLoadEvent): CollectionAppContext
 	};
 }
 
-function getExampleCommand(): PermanentCommandBuilderState {
+function getExampleCommand(): CbState {
 	const commandName = 'Draft Command';
 	const commandStr = 'cp -r {src} {dest}';
 	const formData = {

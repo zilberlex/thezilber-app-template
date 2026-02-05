@@ -9,16 +9,21 @@ import {
 	saveCommandDb,
 	updateCommandDb
 } from './command-builder-db-repo';
-import { commandBuilderRecordAdapter, type CommandBuilderDbRecord } from './command-builder-types';
+import {
+	commandBuilderRecordAdapter,
+	type DbCbRecord,
+	type CbRecord,
+	type CbState
+} from './command-builder-types';
 
 const CommandBuilderDraftStateStorageKey = 'DynamicForm';
 
-async function sleep(msec) {
+async function sleep(msec: number) {
 	return new Promise((resolve) => setTimeout(resolve, msec));
 }
 
-export class CommandBuilderRepo implements AppRecordRepo<PermanentCommandBuilderState> {
-	async update(context: CollectionAppContext, record: AppRecord<PermanentCommandBuilderState>) {
+export class CommandBuilderRepo implements CommandBuilderRepo {
+	async update(context: CollectionAppContext, record: CbRecord) {
 		const storageType = context.editMode;
 		console.log(
 			`Saving data to repo [${storageType === 'permanent' ? 'IndexDb' : 'Local Storage'}`
@@ -31,10 +36,7 @@ export class CommandBuilderRepo implements AppRecordRepo<PermanentCommandBuilder
 		}
 	}
 
-	async create(
-		context: CollectionAppContext,
-		data: PermanentCommandBuilderState
-	): Promise<CommandBuilderDbRecord> {
+	async create(context: CollectionAppContext, data: CbState): Promise<DbCbRecord> {
 		const { itemKey } = context;
 
 		data.commandName = itemKey;
@@ -46,9 +48,7 @@ export class CommandBuilderRepo implements AppRecordRepo<PermanentCommandBuilder
 		return initializedRecord;
 	}
 
-	async load(
-		context: CollectionAppContext
-	): Promise<DbAppRecord<PermanentCommandBuilderState> | undefined> {
+	async load(context: CollectionAppContext): Promise<DbCbRecord | undefined> {
 		const { itemKey } = context;
 
 		// TODO AZ Remove
@@ -59,7 +59,7 @@ export class CommandBuilderRepo implements AppRecordRepo<PermanentCommandBuilder
 			ret = await loadCommandByName(itemKey);
 		} else {
 			ret = await Promise.resolve(
-				loadLocalStorage(CommandBuilderDraftStateStorageKey) as CommandBuilderDbRecord
+				loadLocalStorage(CommandBuilderDraftStateStorageKey) as DbCbRecord
 			);
 		}
 		console.log('Loading Command', itemKey, 'editMode', context.editMode, 'Command:', ret);
@@ -67,7 +67,7 @@ export class CommandBuilderRepo implements AppRecordRepo<PermanentCommandBuilder
 		return ret;
 	}
 
-	async delete(context: CollectionAppContext, record: CommandBuilderDbRecord) {
+	async delete(context: CollectionAppContext, record: DbCbRecord) {
 		if (context.editMode === 'permanent') {
 			await deleteCommandById(record.recordId);
 			console.log('Deleted Record', record.recordId);

@@ -3,30 +3,32 @@
 	import { collectionAppInit } from '$lib/app-infrastructure/collection-app/environement.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { CommandBuilderRepo } from '../../command-builder/[[itemKey]]/command-builder-state-store';
-	import { commandBuilderRecordAdapter } from '../../command-builder/[[itemKey]]/command-builder-types';
+	import {
+		commandBuilderRecordAdapter,
+		type CbState
+	} from '../../command-builder/[[itemKey]]/command-builder-types';
 
-	let loadingPlaceHolderState: PermanentCommandBuilderState = {
+	let loadingPlaceHolderState: CbState = {
 		commandName: '_draft_',
 		commandStr: 'loading',
 		formData: {}
 	};
 
-	let newCommandFallback: PermanentCommandBuilderState = {
+	let newCommandFallback: CbState = {
 		commandName: '_draft_',
 		commandStr: 'New Command',
-		formData: []
+		formData: {}
 	};
 
 	let repo = new CommandBuilderRepo();
 
-	let appEnvironment: CollectionAppEnvironmentTemp<PermanentCommandBuilderState> =
-		collectionAppInit(
-			page,
-			loadingPlaceHolderState,
-			newCommandFallback,
-			commandBuilderRecordAdapter,
-			repo
-		);
+	let appEnvironment: CollectionAppEnvironmentTemp<CbState> = collectionAppInit(
+		page,
+		loadingPlaceHolderState,
+		newCommandFallback,
+		commandBuilderRecordAdapter,
+		repo
+	);
 
 	// new api:
 	// createCollectionAppPersistancyInfra(type) -> recordAdapter, repo
@@ -50,7 +52,7 @@
 	</div>
 	<Button
 		onclick={() => {
-			appEnvironment.data.commandStr = appEnvironment.data.commandStr + '3';
+			appEnvironment.data.commandStr = appEnvironment.data.commandStr + '4';
 		}}
 	>
 		change data
@@ -64,7 +66,7 @@
 	</Button>
 	<Button
 		onclick={() => {
-			appEnvironment.saveAs('3');
+			appEnvironment.saveAs('4');
 		}}
 	>
 		SaveAs

@@ -1,9 +1,9 @@
 import { generateId } from '$lib/engine/crypto/crypto-utils';
 import Dexie, { type EntityTable } from 'dexie';
-import type { CommandBuilderDbRecord } from './command-builder-types';
+import type { DbCbRecord } from './command-builder-types';
 
 const commandBuilderDb = new Dexie('CommandBuilderDb') as Dexie & {
-	commands: EntityTable<CommandBuilderDbRecord, 'recordId'>;
+	commands: EntityTable<DbCbRecord, 'recordId'>;
 };
 
 commandBuilderDb.version(2).stores({
@@ -19,7 +19,7 @@ function informativeStructuredClone<T>(item: T): T {
 	}
 }
 
-export async function saveCommandDb(command: CommandBuilderDbRecord) {
+export async function saveCommandDb(command: DbCbRecord) {
 	try {
 		command.recordId = generateId();
 
@@ -36,7 +36,7 @@ export async function saveCommandDb(command: CommandBuilderDbRecord) {
 	}
 }
 
-export async function updateCommandDb(dbCommand: CommandBuilderDbRecord) {
+export async function updateCommandDb(dbCommand: DbCbRecord) {
 	try {
 		await commandBuilderDb.commands.put(dbCommand);
 	} catch (error) {

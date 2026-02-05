@@ -15,7 +15,7 @@ export class SmartStore<T> {
 	#context: CollectionAppContext;
 	#record: AppRecord<T, SyncableAppRecordMetadata>;
 	#dataState: AppDataState;
-	#recordManager: AppRecordAdapter<T, SyncableAppRecordMetadata>;
+	#recordManager: CollectionAppRecordAdapter<T, SyncableAppRecordMetadata>;
 	#options: SmartStoreOptions<T>;
 	#repository: AppRecordRepo<T, SyncableAppRecordMetadata>;
 
@@ -31,7 +31,7 @@ export class SmartStore<T> {
 		context: CollectionAppContext,
 		placeHolderValue: T,
 		repository: AppRecordRepo<T, SyncableAppRecordMetadata>,
-		recordManager: AppRecordAdapter<T, SyncableAppRecordMetadata>,
+		recordManager: CollectionAppRecordAdapter<T, SyncableAppRecordMetadata>,
 		options?: SmartStoreOptions<T>
 	) {
 		this.#context = context;

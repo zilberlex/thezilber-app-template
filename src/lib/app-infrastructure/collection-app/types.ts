@@ -23,7 +23,7 @@ type CollectionAppContext = {
 	itemKey: string;
 };
 
-type AppRecordAdapter<TData, TMeta> = {
+type CollectionAppRecordAdapter<TData, TMeta> = {
 	constructRecord(data: TData): AppRecord<TData, TMeta>;
 	constructDbRecord(data: TData): DbAppRecord<TData, TMeta>;
 	fromDb: (dbRecord: DbAppRecord<TData, TMeta>) => AppRecord<TData, TMeta>;
