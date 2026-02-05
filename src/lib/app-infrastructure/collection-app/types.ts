@@ -1,8 +1,12 @@
 type EditMode = 'permanent' | 'draft';
 
-// type CollectionAppRuntime<T> = {
-// 	recordManager: RecordManager<T>;
-// };
+type AppRecordMetadata = {
+	vc: VectorClock;
+
+	modifiedAt: number;
+	modifiedBy: string;
+	isDeleted?: boolean;
+};
 
 type CollectionAppRuntimeTemp<T> = {
 	data: T;
@@ -10,12 +14,24 @@ type CollectionAppRuntimeTemp<T> = {
 	save(): Promise<void>;
 	saveAs(itemKey: string): Promise<void>;
 	delete(): Promise<void>;
-	editMode: EditMode;
 };
 
 type CollectionAppContext = {
 	editMode: EditMode;
 	itemKey: string;
+};
+
+interface DbAppRecord<T> {
+	recordId: string;
+	meta: AppRecordMetadata;
+	data: T;
+}
+
+type AppRecordAdapter<T> = {
+	constructRecord(data: T): AppRecord<T>;
+	constructDbRecord(data: T): DbAppRecord<T>;
+	fromDb: (dbRecord: DbAppRecord<T>) => AppRecord<T>;
+	toDb: (AppRecord: AppRecord<T>) => DbAppRecord<T>;
 };
 
 interface AppRecordRepo<TData> {

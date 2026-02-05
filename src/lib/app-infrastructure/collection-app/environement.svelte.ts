@@ -1,6 +1,6 @@
 import type { Page } from '@sveltejs/kit';
-import { SmartStore, type SmartStoreOptions } from './SmartStore.svelte';
-import { createCollectionAppContextManager } from './collection-app-context-manager.svelte';
+import { createCollectionAppContextManager } from './context-manager.svelte';
+import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';
 
 export function collectionAppInit<T>(
 	page: Page,

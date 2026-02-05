@@ -7,9 +7,9 @@ function returnSyncedDataLww<T>(
 	localRecord: AppRecord<T>,
 	incomingRecord: AppRecord<T>
 ): AppRecord<T> {
-	if (localRecord.id !== incomingRecord.id)
+	if (localRecord.recordId !== incomingRecord.recordId)
 		throw new Error(
-			`Expected Data To have the same id localData: ${localRecord.id}, incomingData: ${incomingRecord.id}`
+			`Expected Data To have the same id localData: ${localRecord.recordId}, incomingData: ${incomingRecord.recordId}`
 		);
 
 	const vc1 = localRecord.meta.vc;

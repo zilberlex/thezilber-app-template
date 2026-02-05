@@ -1,14 +1,20 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { collectionAppInit } from '$lib/app-infrastructure/collection-app/environement.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { CommandBuilderRepo } from '../../command-builder/[[itemKey]]/command-builder-state-store';
 	import { commandBuilderRecordAdapter } from '../../command-builder/[[itemKey]]/command-builder-types';
-	import { collectionAppInit } from './NewArchitecture.svelte';
 
 	let loadingPlaceHolderState: PermanentCommandBuilderState = {
 		commandName: '_draft_',
 		commandStr: 'loading',
 		formData: {}
+	};
+
+	let newCommandFallback: PermanentCommandBuilderState = {
+		commandName: '_draft_',
+		commandStr: 'New Command',
+		formData: []
 	};
 
 	let repo = new CommandBuilderRepo();
@@ -17,14 +23,19 @@
 		collectionAppInit(
 			page,
 			loadingPlaceHolderState,
-			{
-				commandName: '_draft_',
-				commandStr: 'New Command',
-				formData: []
-			},
+			newCommandFallback,
 			commandBuilderRecordAdapter,
 			repo
 		);
+
+	// new api:
+	// createCollectionAppPersistancyInfra(type) -> recordAdapter, repo
+	// hemm - the problem is that i will need to refactor the smartRepot
+	// ok this is a different refactor  because that would create risk.
+	//
+	// Next step refactor places for app pieces
+	// write on paper the main classes and pieces, and make shit organized
+	//
 </script>
 
 <div class="flex-col">
@@ -39,7 +50,7 @@
 	</div>
 	<Button
 		onclick={() => {
-			appEnvironment.data.commandStr = appEnvironment.data.commandStr + '1';
+			appEnvironment.data.commandStr = appEnvironment.data.commandStr + '2';
 		}}
 	>
 		change data
@@ -53,7 +64,7 @@
 	</Button>
 	<Button
 		onclick={() => {
-			appEnvironment.saveAs('1');
+			appEnvironment.saveAs('2');
 		}}
 	>
 		SaveAs
