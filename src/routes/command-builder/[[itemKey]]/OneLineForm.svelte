@@ -7,6 +7,7 @@
 	} from '$lib/engine/storage/session/session-storage';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
+	import Tooltip from '$lib/ui/basic-components/Tooltip.svelte';
 	import { onMount } from 'svelte';
 
 	type BasicFunction = (x: string) => void;
@@ -18,6 +19,7 @@
 		actionText?: string;
 		defaultInput?: string;
 		id: string;
+		errorMessage?: string;
 	};
 
 	let {
@@ -26,7 +28,8 @@
 		onClose,
 		actionText = 'Save',
 		defaultInput = 'Input Here',
-		id
+		id,
+		errorMessage
 	}: Props = $props();
 
 	let inputField = $state(defaultInput);
@@ -63,6 +66,12 @@
 		</Button>
 	</div>
 </form>
+
+{#if errorMessage}
+	<Tooltip>
+		<div>{errorMessage}</div>
+	</Tooltip>
+{/if}
 
 <style>
 	.form {

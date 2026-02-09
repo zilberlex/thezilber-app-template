@@ -18,12 +18,14 @@
 		formSchema,
 		outputFunc,
 		OutputComponent,
-		form = $bindable({})
+		form = $bindable({}),
+		disabled = false
 	} = $props<{
 		formSchema: DynamicFormSchema;
 		outputFunc: (...args: any[]) => AnyNonVoid;
 		OutputComponent?: Component;
 		form: DynamicForm;
+		disabled?: boolean;
 	}>();
 
 	// 🔹 entries derived directly from state
@@ -62,6 +64,7 @@
 				type={dynamicFormField.schema.type}
 				placeholder={resolveFieldValue(dynamicFormField).toString()}
 				bind:value={dynamicFormField.value}
+				{disabled}
 			>
 				{fieldName}
 			</InputCombo>

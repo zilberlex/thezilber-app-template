@@ -20,28 +20,19 @@ function informativeStructuredClone<T>(item: T): T {
 }
 
 export async function saveCommandDb(command: DbCbRecord) {
-	try {
-		command.recordId = generateId();
+	command.recordId = generateId();
 
-		console.log('[NEW] saveCommandDb', command);
+	console.log('[NEW] saveCommandDb', command);
 
-		let cloned = informativeStructuredClone(command);
+	let cloned = informativeStructuredClone(command);
 
-		await commandBuilderDb.commands.add(cloned);
+	await commandBuilderDb.commands.add(cloned);
 
-		return command;
-	} catch (error) {
-		console.error('saveCommand failed.', error);
-		throw error;
-	}
+	return command;
 }
 
 export async function updateCommandDb(dbCommand: DbCbRecord) {
-	try {
-		await commandBuilderDb.commands.put(dbCommand);
-	} catch (error) {
-		console.error('updateCommand failed.', error);
-	}
+	await commandBuilderDb.commands.put(dbCommand);
 }
 
 export async function deleteCommandById(redordId: string) {

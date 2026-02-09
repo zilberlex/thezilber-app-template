@@ -2,10 +2,13 @@
 	import type { DynamicFormSchema } from '$lib/app/dynamic-form/dynamic-form-types';
 	import DynamicForm from '$lib/app/dynamic-form/DynamicForm.svelte';
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
+	import type { CbState } from './command-builder-types';
 	import { tokenize, type Token } from './custom-tokenizer';
 
-	let { commandBuilderState = $bindable() }: { commandBuilderState: CommandBuilderState } =
-		$props();
+	let {
+		commandBuilderState = $bindable(),
+		disabled = false
+	}: { commandBuilderState: CbState; disabled?: boolean } = $props();
 
 	let tokens = $derived(tokenize(commandBuilderState.commandStr));
 	let formSchema = $derived.by(() => {
@@ -54,10 +57,12 @@
 <InputCombo
 	hotkey={{ hotkey: '0', tooltip: 'Modify Command' }}
 	placeholder={'Enter Command here, use curly brackets for {field}'}
-	bind:value={commandBuilderState.commandStr}>Command String</InputCombo
+	bind:value={commandBuilderState.commandStr}
+	{disabled}>Command String</InputCombo
 >
 <DynamicForm
 	{formSchema}
 	outputFunc={(...fields: any[]) => constructTextCommandFromFields(tokens, formSchema, fields)}
 	bind:form={commandBuilderState.formData}
+	{disabled}
 />

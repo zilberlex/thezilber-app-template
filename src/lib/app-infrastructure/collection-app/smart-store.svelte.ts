@@ -15,9 +15,9 @@ export class SmartStore<T> {
 	#context: CollectionAppContext;
 	#record: AppRecord<T, SyncableAppRecordMetadata>;
 	#dataState: AppDataState;
-	#recordManager: CollectionAppRecordAdapter<T, SyncableAppRecordMetadata>;
+	#recordAdapter: CollectionAppRecordAdapter<T, SyncableAppRecordMetadata>;
 	#options: SmartStoreOptions<T>;
-	#repository: AppRecordRepo<T, SyncableAppRecordMetadata>;
+	#repository: AppRecordRepo<T, SyncableAppRecordMetadata, unknown>;
 
 	get data() {
 		return this.#record.data;
@@ -30,15 +30,15 @@ export class SmartStore<T> {
 	constructor(
 		context: CollectionAppContext,
 		placeHolderValue: T,
-		repository: AppRecordRepo<T, SyncableAppRecordMetadata>,
-		recordManager: CollectionAppRecordAdapter<T, SyncableAppRecordMetadata>,
+		repository: AppRecordRepo<T, SyncableAppRecordMetadata, unknown>,
+		recordAdapter: CollectionAppRecordAdapter<T, SyncableAppRecordMetadata>,
 		options?: SmartStoreOptions<T>
 	) {
 		this.#context = context;
 		this.#options = options ?? defaultOptions;
-		this.#recordManager = recordManager;
+		this.#recordAdapter = recordAdapter;
 
-		this.#record = $state(this.#recordManager.constructRecord(placeHolderValue));
+		this.#record = $state(this.#recordAdapter.constructRecord(placeHolderValue));
 		this.#dataState = $state('loading');
 		this.#repository = repository;
 
@@ -66,6 +66,7 @@ export class SmartStore<T> {
 		let saveData = $state.snapshot(this.#record.data) as T;
 
 		this.#dataState = 'saving';
+		console.log('Creating New Data', saveData);
 		let p = this.#repository.create(context, saveData);
 
 		p.then(() => (this.#dataState = 'ready'));
@@ -87,7 +88,7 @@ export class SmartStore<T> {
 		this.#dataState = 'loading';
 
 		if (placeHolderValue) {
-			this.#record = this.#recordManager.constructRecord(placeHolderValue);
+			this.#record = this.#recordAdapter.constructRecord(placeHolderValue);
 		}
 
 		let recordPromise = this.#repository.load(context);
@@ -95,14 +96,14 @@ export class SmartStore<T> {
 		recordPromise.then((r) => {
 			if (r) {
 				// todo Az refactor not code dup
-				deepAssign(this.#record, this.#recordManager.fromDb(r));
+				deepAssign(this.#record, this.#recordAdapter.fromDb(r));
 				this.#dataState = 'ready';
 			} else {
-				const notFoundBehvior = this.#options.loadNotFoundBehavior;
-				if (notFoundBehvior.action === 'create-new') {
+				const notFoundBehvior = options?.loadNotFoundBehavior;
+				if (notFoundBehvior?.action === 'create-new') {
 					deepAssign(
 						this.#record,
-						this.#recordManager.constructRecord(notFoundBehvior.createObj())
+						this.#recordAdapter.constructRecord(notFoundBehvior.createObj())
 					);
 					this.#dataState = 'ready';
 				} else {

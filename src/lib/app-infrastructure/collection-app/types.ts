@@ -1,4 +1,5 @@
 type EditMode = 'permanent' | 'draft';
+type ItemKey = '_draft' | string;
 
 type SyncableAppRecordMetadata = {
 	vc: VectorClock;
@@ -10,12 +11,12 @@ type SyncableAppRecordMetadata = {
 
 type CollectionAppRecord<TData> = AppRecord<TData, SyncableAppRecordMetadata>;
 
-type CollectionAppRuntimeTemp<T> = {
+type CollectionAppRuntime<T> = {
 	data: T;
 	dataState: AppDataState;
-	save(): Promise<void>;
-	saveAs(itemKey: string): Promise<void>;
-	delete(): Promise<void>;
+	save(): Promise<CollectionAppActionResult<void>>;
+	saveAs(itemKey: string): Promise<CollectionAppActionResult<void>>;
+	delete(): Promise<CollectionAppActionResult<void>>;
 };
 
 type CollectionAppContext = {
@@ -30,19 +31,37 @@ type CollectionAppRecordAdapter<TData, TMeta> = {
 	toDb: (AppRecord: AppRecord<TData, TMeta>) => DbAppRecord<TData, TMeta>;
 };
 
-interface AppRecordRepo<TData, TMeta> {
-	update(context: CollectionAppContext, record: DbAppRecord<TData, TMeta>): Promise<void>;
+// todo az move one layer type
+type Ok<T> = { ok: true; value: T };
+type Err<E> = { ok: false; error: E };
+type ActionResult<T, E> = Ok<T> | Err<E>;
+interface AppRecordRepo<TData, TMeta, TError> {
+	update(
+		context: CollectionAppContext,
+		record: DbAppRecord<TData, TMeta>
+	): Promise<ActionResult<void, Err<any>>>;
 
-	create(context: CollectionAppContext, data: TData): Promise<DbAppRecord<TData, TMeta>>;
-	load(context: CollectionAppContext): Promise<DbAppRecord<TData, TMeta> | undefined>;
-	delete(context: CollectionAppContext, record: DbAppRecord<TData, TMeta>): Promise<void>;
+	create(
+		context: CollectionAppContext,
+		data: TData
+	): Promise<ActionResult<DbAppRecord<TData, TMeta>, TError>>;
+	load(
+		context: CollectionAppContext
+	): Promise<ActionResult<DbAppRecord<TData, TMeta> | undefined, TError>>;
+	delete(
+		context: CollectionAppContext,
+		record: DbAppRecord<TData, TMeta>
+	): Promise<ActionResult<void, TError>>;
 }
 
 type AppDataState = 'saving' | 'ready' | 'loading' | 'record-not-found' | 'error';
 
-type CollectionAppEnvironmentTemp<T> = CollectionAppContext & CollectionAppRuntimeTemp<T>;
+type CollectionAppEnvironment<T> = CollectionAppContext & CollectionAppRuntime<T>;
 
 type DataManagerOptions<T> = {
 	loadNotFoundBehavior: 'error' | 'create-new';
 	loadNotFoundNewObject?: () => T;
 };
+
+type CollectionAppError = { kind: 'Key Already Exists'; message: string };
+type CollectionAppActionResult<T> = ActionResult<T, CollectionAppError>;

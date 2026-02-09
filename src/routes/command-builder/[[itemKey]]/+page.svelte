@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/ui/basic-components/Button.svelte';
-	import { page } from '$app/state';
-	import { onDestroy, untrack } from 'svelte';
+	import { untrack } from 'svelte';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import {
 		createClickHotKeyAttachment,
@@ -10,80 +9,63 @@
 	import { appState } from '$lib/engine/state/application-state.svelte';
 
 	import CommandBuilder from './CommandBuilder.svelte';
-	import { goto } from '$app/navigation';
-	import { type Page } from '@sveltejs/kit';
 	import Dialog from '$lib/ui/components/dialog/Dialog.svelte';
-	import { browser } from '$app/environment';
 	import OneLineForm from './OneLineForm.svelte';
 	import { temporaryMessageState } from '$lib/engine/application/temp-messages/temporary-message-state.svelte';
-	import type { RecordManager } from '$lib/app-infrastructure/record-manager.svelte';
+	import { cbRecordAdaper, type CbState } from './command-builder-types';
+	import { collectionAppInit } from '$lib/app-infrastructure/collection-app/environement.svelte';
+	import { page } from '$app/state';
+	import { cbRepo } from './app-repo';
 
-	let { data: cbAppContext }: { data: CollectionAppEnvironment<CbState> } = $props();
+	let placeholderState = {
+		commandName: '',
+		commandStr: 'Loading...',
+		formData: {}
+	};
 
-	let recordManager: RecordManager<CbState> = cbAppContext.runtime.recordManager;
+	let draftFallback: CbState = {
+		commandName: 'Draft Command',
+		commandStr: 'cp -r {src} {dest}',
+		formData: {
+			src: { value: './origin/', schema: { type: 'string' } },
+			dest: { value: './bkp/origin/', schema: { type: 'string' } }
+		}
+	};
+
+	let cbAppEnv = collectionAppInit<CbState>(
+		placeholderState,
+		draftFallback,
+		cbRecordAdaper,
+		cbRepo
+	);
 
 	appState.pageContext.title = 'Command Builder';
 
 	let isSaveDialogOpen = $state(false);
 
-	let editMode = $derived(cbAppContext.editMode);
+	let editMode = $derived(cbAppEnv.editMode);
+	let dataState = $derived(cbAppEnv.dataState);
 	let isPermanentCommandPage = $derived(editMode === 'permanent');
 
-	onDestroy(async () => {
-		if (browser) {
-			await recordManager?.save();
-		}
-	});
-
-	function getPathWithoutParams(page: Page) {
-		return page.route.id ? page.route.id.replace(/\/[^/]+$/, '') : page.url.pathname;
-	}
+	let saveAsErrorMessage = $state('');
 
 	$effect(() => {
-		if (!recordManager) return;
-		const recordManagerSafe = recordManager;
+		track(dataState);
 
-		console.log('Setting Message working state:', recordManager.dataState);
-		track(recordManager.dataState);
-
-		// TODO AZ Figure out why causes this loop and forcing me untrack
 		untrack(() => {
-			if (recordManagerSafe.dataState === 'saving')
+			console.log('Setting Message working state:', dataState);
+
+			if (dataState === 'saving')
 				temporaryMessageState.message =
 					editMode === 'permanent'
-						? `Saving Command [${recordManager.recordData?.commandName}]...`
+						? `Saving Command [${cbAppEnv.data.commandName}]...`
 						: `Saving Draft...`;
 		});
 	});
 
-	async function saveNewCommand(commandName: string) {
-		if (!recordManager.dataReady) {
-			console.warn(
-				'recordManager data not ready when trying to saveAs. dataState:',
-				recordManager.dataState
-			);
-			return;
-		}
-
-		let newCommand = $state.snapshot(recordManager.recordData);
-		newCommand.commandName = commandName;
-
-		try {
-			await recordManager.saveAs(commandName);
-			let basePath = getPathWithoutParams(page);
-			console.log('recordManager new Data', $state.snapshot(recordManager.recordData));
-			await goto(`${basePath}/${commandName}`);
-		} catch (e) {
-			temporaryMessageState.setMessageWithTimout(
-				`Failed to save command [${commandName}] error message: ${e.message}`,
-				15000
-			);
-		}
-	}
-
 	function defaultSaveButtonBehavior() {
-		if (editMode === 'permanent') {
-			recordManager?.save();
+		if (isPermanentCommandPage) {
+			cbAppEnv.save();
 		} else {
 			openSaveAsPopup();
 		}
@@ -93,20 +75,31 @@
 		isSaveDialogOpen = true;
 	}
 
-	$effect(() => {
-		appState.debug.viewObject = recordManager.recordData;
-	});
+	async function saveAsHandler(newCommandName: string) {
+		let result = await cbAppEnv.saveAs(newCommandName);
+		if (result.ok) {
+			isSaveDialogOpen = false;
+		} else {
+			const error = result.error;
+			if (error.kind === 'Key Already Exists') {
+				saveAsErrorMessage = error.message;
+			} else {
+				saveAsErrorMessage = 'Critical Error - ' + error.message;
+			}
+		}
+	}
 </script>
 
 <div class="mini-app">
 	{#if isPermanentCommandPage}
 		<input
-			bind:value={recordManager.recordData.commandName}
+			bind:value={cbAppEnv.data.commandName}
 			class="input-title"
 			{@attach createFocusHotKeyAttachment('Modify Title', 'i', 'alt')}
 		/>
 	{/if}
-	<CommandBuilder bind:commandBuilderState={recordManager.recordData} />
+
+	<CommandBuilder bind:commandBuilderState={cbAppEnv.data} disabled={dataState !== 'ready'} />
 
 	<Button
 		class="button-save"
@@ -129,10 +122,13 @@
 	<OneLineForm
 		title="Save New Command"
 		defaultInput="New Command"
-		onAction={(input) => saveNewCommand(input)}
+		onAction={async (newCommandName) => {
+			await saveAsHandler(newCommandName);
+		}}
 		actionText="Save"
 		onClose={() => (isSaveDialogOpen = false)}
 		id="save-as-form"
+		errorMessage={saveAsErrorMessage}
 	/>
 </Dialog>
 

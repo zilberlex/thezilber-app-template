@@ -11,8 +11,8 @@ export type CbState = {
 };
 
 export type CbRecord = CollectionAppRecord<CbState>;
-
 export type DbCbRecord = DbAppRecord<CbState, SyncableAppRecordMetadata>;
+export type CbRepo = AppRecordRepo<CbState, SyncableAppRecordMetadata, CollectionAppError>;
 
 function createCommandBuilderRecord(data: CbState) {
 	let genericRecord = createDbAppRecord(data, createSyncableRecordMetadata(generateId()));
@@ -38,7 +38,10 @@ export function convertToCommandBuilderRecord(record: DbCbRecord): CbRecord {
 	return ret;
 }
 
-export const cbRecordAdaper: CollectionAppRecordAdapter<CbState, SyncableAppRecordMetadata> = {
+export const commandBuilderRecordAdapter: CollectionAppRecordAdapter<
+	CbState,
+	SyncableAppRecordMetadata
+> = {
 	constructRecord: function (data: CbState) {
 		return createCommandBuilderRecord(data);
 	},

@@ -1,4 +1,5 @@
 import { pushState, replaceState } from '$app/navigation';
+import { page } from '$app/state';
 import { deepAssign } from '$lib/app-infrastructure/async-state.svelte';
 import type { Page } from '@sveltejs/kit';
 
@@ -7,16 +8,21 @@ type CollectionAppContextManager<TContext extends CollectionAppContext> = {
 	moveRouteRelative: (itemKey: string) => { undoMoveRoute: () => void };
 };
 
-export function createCollectionAppContextManager<TContext extends CollectionAppContext>(
-	page: Page
-): CollectionAppContextManager<TContext> {
+export function createCollectionAppContextManager<
+	TContext extends CollectionAppContext
+>(): CollectionAppContextManager<TContext> {
 	let slugItemKey = page.params.itemKey;
-	let itemKey = $state(slugItemKey ?? '_draft_');
-	let editMode: EditMode = $state(slugItemKey ? 'permanent' : 'draft');
 
-	let appContext = $derived({
-		itemKey,
-		editMode
+	let _itemKey = $state(slugItemKey ?? '_draft_');
+	let _editMode: EditMode = $derived(_itemKey === '_draft_' ? 'draft' : 'permanent');
+
+	let appContext = $state({
+		get itemKey() {
+			return _itemKey;
+		},
+		get editMode() {
+			return _editMode;
+		}
 	}) as TContext;
 
 	return {
@@ -29,9 +35,9 @@ export function createCollectionAppContextManager<TContext extends CollectionApp
 			let prevUrl = page.url;
 
 			const newUrl = new URL(page.url);
-			newUrl.pathname = `/${itemKey}`;
+			newUrl.pathname = `${getBasePath(page, '[[itemKey]]')}/${itemKey}`;
 
-			appContext.itemKey = itemKey;
+			_itemKey = itemKey;
 			pushState(newUrl, { itemKey });
 
 			return {
@@ -44,30 +50,19 @@ export function createCollectionAppContextManager<TContext extends CollectionApp
 	};
 }
 
-export function moveRouteRelaltive(
-	appContext: CollectionAppContext,
-	newAppContext: CollectionAppContext,
-	page: Page,
-	baseRouteKey: string
-) {
-	let prevContext = {};
-	deepAssign(prevContext, appContext);
-	deepAssign(appContext, newAppContext);
+// TODO AZ move to engine
+function escapeRegex(str: string) {
+	return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
-	const newItemKey = appContext.itemKey;
+export function getBasePath(page: Page, trimmedSuffix: string = '[[itemKey]]') {
+	let routeId = page.route.id ?? '';
 
-	const prevUrl = page.url;
-	const prevState = page.state;
+	const suffix = trimmedSuffix.startsWith('/') ? trimmedSuffix : '/' + trimmedSuffix;
 
-	const newUrl = new URL(page.url);
-	newUrl.pathname = `/${newItemKey}`;
+	const re = new RegExp(`${escapeRegex(suffix)}$`);
 
-	pushState(newUrl, { itemKey: newItemKey });
-
-	return {
-		undo: () => {
-			deepAssign(appContext, prevContext);
-			replaceState(prevUrl, prevState);
-		}
-	};
+	return routeId
+		.replace(re, '') // remove suffix
+		.replace(/^\/+/, ''); // remove leading slash
 }

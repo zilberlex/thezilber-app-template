@@ -3,18 +3,15 @@ import {
 	removeLocalStorage,
 	saveLocalStorage
 } from '$lib/engine/storage/local/local-storage-repository';
+import { deleteCommandById, loadCommandByName, saveCommandDb, updateCommandDb } from './db-repo';
 import {
-	deleteCommandById,
-	loadCommandByName,
-	saveCommandDb,
-	updateCommandDb
-} from './command-builder-db-repo';
-import {
-	commandBuilderRecordAdapter,
+	cbRecordAdaper,
 	type DbCbRecord,
 	type CbRecord,
 	type CbState
 } from './command-builder-types';
+import type { CbRepo } from './types';
+import { Dexie } from 'dexie';
 
 const CommandBuilderDraftStateStorageKey = 'DynamicForm';
 
@@ -22,7 +19,7 @@ async function sleep(msec: number) {
 	return new Promise((resolve) => setTimeout(resolve, msec));
 }
 
-export class CommandBuilderRepo implements CommandBuilderRepo {
+class CommandBuilderRepo implements CbRepo {
 	async update(context: CollectionAppContext, record: CbRecord) {
 		const storageType = context.editMode;
 		console.log(
@@ -36,16 +33,30 @@ export class CommandBuilderRepo implements CommandBuilderRepo {
 		}
 	}
 
-	async create(context: CollectionAppContext, data: CbState): Promise<DbCbRecord> {
+	async create(
+		context: CollectionAppContext,
+		data: CbState
+	): Promise<CollectionAppActionResult<DbCbRecord>> {
 		const { itemKey } = context;
 
 		data.commandName = itemKey;
 
-		const newDbRecord = commandBuilderRecordAdapter.constructDbRecord(data);
-		console.log('newDbRecord', newDbRecord);
-		const initializedRecord = await saveCommandDb(newDbRecord);
-
-		return initializedRecord;
+		const newDbRecord = cbRecordAdaper.constructDbRecord(data);
+		console.log('creating new record. itemKey', itemKey, 'DbRecord', newDbRecord);
+		try {
+			const initializedRecord = await saveCommandDb(newDbRecord);
+			return { ok: true, value: initializedRecord };
+		} catch (e) {
+			if (e instanceof Dexie.ConstraintError) {
+				console.warn('Create, got ConstraintError', e);
+				return {
+					ok: false,
+					error: { kind: 'Key Already Exists', message: `Item Key: [${itemKey}] already exists` }
+				};
+			} else {
+				throw e;
+			}
+		}
 	}
 
 	async load(context: CollectionAppContext): Promise<DbCbRecord | undefined> {
@@ -76,3 +87,5 @@ export class CommandBuilderRepo implements CommandBuilderRepo {
 		}
 	}
 }
+
+export const cbRepo = new CommandBuilderRepo();

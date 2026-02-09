@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { collectionAppInit } from '$lib/app-infrastructure/collection-app/environement.svelte';
+	import { appState } from '$lib/engine/state/application-state.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
-	import { CommandBuilderRepo } from '../../command-builder/[[itemKey]]/command-builder-state-store';
+	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
+	import { cbRepo } from '../../command-builder/[[itemKey]]/app-repo';
 	import {
-		commandBuilderRecordAdapter,
+		cbRecordAdaper,
 		type CbState
 	} from '../../command-builder/[[itemKey]]/command-builder-types';
 
@@ -20,14 +22,11 @@
 		formData: {}
 	};
 
-	let repo = new CommandBuilderRepo();
-
-	let appEnvironment: CollectionAppEnvironmentTemp<CbState> = collectionAppInit(
-		page,
+	let appEnvironment: CollectionAppEnvironment<CbState> = collectionAppInit(
 		loadingPlaceHolderState,
 		newCommandFallback,
-		commandBuilderRecordAdapter,
-		repo
+		cbRecordAdaper,
+		cbRepo
 	);
 
 	// new api:
@@ -38,6 +37,12 @@
 	// Next step refactor places for app pieces
 	// write on paper the main classes and pieces, and make shit organized
 	//
+
+	let num = $state(13);
+
+	appState.debug.debugConsole = true;
+
+	appState.debug.viewObject = page;
 </script>
 
 <div class="flex-col">
@@ -50,9 +55,13 @@
 	<div class="box">
 		data state: {appEnvironment.dataState}
 	</div>
+	<div class="box">
+		itemKey: {appEnvironment.itemKey}
+	</div>
+	<InputCombo bind:value={num}>Added Num</InputCombo>
 	<Button
 		onclick={() => {
-			appEnvironment.data.commandStr = appEnvironment.data.commandStr + '4';
+			appEnvironment.data.commandStr = appEnvironment.data.commandStr + num.toString();
 		}}
 	>
 		change data
@@ -66,7 +75,7 @@
 	</Button>
 	<Button
 		onclick={() => {
-			appEnvironment.saveAs('4');
+			appEnvironment.saveAs(num.toString());
 		}}
 	>
 		SaveAs

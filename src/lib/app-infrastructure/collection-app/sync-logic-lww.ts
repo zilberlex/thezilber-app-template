@@ -61,7 +61,10 @@ function mergeClocksAfterDataSync(vc1: VectorClock, vc2: VectorClock): VectorClo
 	return finalVc;
 }
 
-function resolveConcurrentConflictLww<T>(localRecord: AppRecord<T>, incomindRecord: AppRecord<T>) {
+function resolveConcurrentConflictLww<T>(
+	localRecord: AppRecord<T, SyncableAppRecordMetadata>,
+	incomindRecord: AppRecord<T, SyncableAppRecordMetadata>
+) {
 	let newest =
 		localRecord.meta.modifiedAt > incomindRecord.meta.modifiedAt ? localRecord : incomindRecord;
 	let ret = newest;

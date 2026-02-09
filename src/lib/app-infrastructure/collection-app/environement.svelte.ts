@@ -1,19 +1,14 @@
-import type { Page } from '@sveltejs/kit';
 import { createCollectionAppContextManager } from './context-manager.svelte';
 import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';
 
 export function collectionAppInit<T>(
-	page: Page,
 	dataPlaceholder: T,
 	fallbackData: T,
-	recordConverter: CollectionAppRecordAdapter<T, SyncableAppRecordMetadata>,
-	repo: AppRecordRepo<T, SyncableAppRecordMetadata>
-): CollectionAppEnvironmentTemp<T> {
-	let slugItemKey = page.params.itemKey;
-	let itemKey = $state(slugItemKey ?? '_draft_');
-	let editMode: EditMode = $state(slugItemKey ? 'permanent' : 'draft');
+	recordAdapter: CollectionAppRecordAdapter<T, SyncableAppRecordMetadata>,
+	repo: AppRecordRepo<T, SyncableAppRecordMetadata, CollectionAppError>
+): CollectionAppEnvironment<T> {
 	let store: SmartStore<T>;
-	let contextManager = createCollectionAppContextManager(page);
+	let contextManager = createCollectionAppContextManager();
 
 	let storeOptions = generateStoreOptions(contextManager.appContext, fallbackData);
 
@@ -21,7 +16,7 @@ export function collectionAppInit<T>(
 		contextManager.appContext,
 		dataPlaceholder,
 		repo,
-		recordConverter,
+		recordAdapter,
 		storeOptions
 	);
 
@@ -35,10 +30,10 @@ export function collectionAppInit<T>(
 			return store.dataState;
 		},
 		get editMode() {
-			return editMode;
+			return contextManager.appContext.editMode;
 		},
 		get itemKey() {
-			return itemKey;
+			return contextManager.appContext.itemKey;
 		},
 		save: async () => {
 			store.save();
@@ -46,9 +41,14 @@ export function collectionAppInit<T>(
 		saveAs: async (newItemKey: string) => {
 			let { undoMoveRoute } = contextManager.moveRouteRelative(newItemKey);
 			try {
-				await store.saveAs(contextManager.appContext);
+				let ret = await store.saveAs(contextManager.appContext);
+
+				if (!ret.ok) {
+					undoMoveRoute();
+				}
+
+				return ret;
 			} catch (e) {
-				undoMoveRoute();
 				console.error('saveAs Error', e);
 			}
 		},
