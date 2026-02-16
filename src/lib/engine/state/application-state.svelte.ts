@@ -1,6 +1,6 @@
-import { tooltipState, type TooltipState } from '../tooltip/tooltip-state.svelte';
 import { pageContext, type PageContext } from './page-context.svelte';
 import { debugState, type DebugState } from './debug-state.svelte';
+import { tooltipState, type TooltipState } from '../hotkey-tooltip/tooltip-state.svelte';
 
 export interface AppState {
 	isAppLoaded: boolean;

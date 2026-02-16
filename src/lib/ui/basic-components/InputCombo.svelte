@@ -16,6 +16,7 @@
 		disabled?: boolean;
 		hotkey?: HotKeyParams;
 		children?: Snippet;
+		thisElement?: HTMLElement;
 	};
 
 	let {
@@ -27,11 +28,12 @@
 		disabled = false,
 		hotkey,
 		children,
+		thisElement = $bindable(),
 		...rest
 	}: InputComboProps = $props();
 </script>
 
-<input-combo {...rest}>
+<input-combo {...rest} bind:this={thisElement}>
 	<label for={id}
 		><span class="prefix" style="min-width: {minLableWidth}">{@render children?.()}</span><span
 			class="suffix">:</span

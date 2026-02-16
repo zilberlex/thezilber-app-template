@@ -8,7 +8,7 @@ import { engineHotkeysConfig } from './hotkey-module-config';
 import { shouldIgnoreHotKey } from './bl-events';
 import type { HotKeyModifier } from './types';
 import { HotKey } from './hotkey-class';
-import { HotkeyTooltipAttribute } from '../tooltip/tooltip-consts';
+import { HotkeyTooltipAttribute } from '../hotkey-tooltip/tooltip-consts';
 
 const HOTKEY_COOLDOWN_MS = engineHotkeysConfig.buttonRapidFireCooldownMs;
 

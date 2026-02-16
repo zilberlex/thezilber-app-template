@@ -1,10 +1,25 @@
 	@mixin app-tooltip {
+    --cl-tooltip-primary: var(--cl-primary);
+    
+
     border: var(--base-border-thin);
-    padding: var(--base-padding);
+    border-color: var(--cl-tooltip-primary);
     background-color: var(--cl-surface);
     color: var(--cl-on-surface);
 
-    width: max-content;
+		.tooltip-content {
+			width: max-content;
+      padding: var(--base-padding);
+		}
+
+    // TODO AZ move color to tokens...
+    &[data-tooltip-variant="warn"] {
+      --cl-tooltip-primary: yellow;
+    }
+
+    &[data-tooltip-variant="error"] {
+      --cl-tooltip-primary: red;
+    }
 	}
 
 .app-tooltip {

@@ -4,9 +4,9 @@
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onMount } from 'svelte';
 	import HotKeysInitialization from '$lib/engine/keyboard-navigation/svelte-components/HotKeysInitialization.svelte';
-	import TooltipTracker from '$lib/engine/tooltip/TooltipTracker.svelte';
 	import ForegroundLayer from '$lib/ui/components/ForegroundLayer.svelte';
 	import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
+	import TooltipTracker from '$lib/engine/hotkey-tooltip/TooltipTracker.svelte';
 
 	onMount(() => {
 		if (browser) {

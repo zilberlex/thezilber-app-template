@@ -69,7 +69,13 @@ export class SmartStore<T> {
 		console.log('Creating New Data', saveData);
 		let p = this.#repository.create(context, saveData);
 
-		p.then(() => (this.#dataState = 'ready'));
+		p.then((v) => {
+			this.#dataState = 'ready';
+
+			if (v.ok) {
+				this.#record.key = context.itemKey;
+			}
+		});
 
 		this.#handleErrorOnOperation(p, 'saveAs');
 

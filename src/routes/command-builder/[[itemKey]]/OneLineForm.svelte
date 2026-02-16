@@ -7,7 +7,8 @@
 	} from '$lib/engine/storage/session/session-storage';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
-	import Tooltip from '$lib/ui/basic-components/Tooltip.svelte';
+	import TooltipElement from '$lib/ui/basic-components/TooltipElement.svelte';
+	import TooltipAssigner from '$lib/ui/components/tooltips/TooltipAssigner.svelte';
 	import { onMount } from 'svelte';
 
 	type BasicFunction = (x: string) => void;
@@ -33,6 +34,7 @@
 	}: Props = $props();
 
 	let inputField = $state(defaultInput);
+	let inputComboElement: HTMLElement = $state();
 
 	onMount(() => {
 		if (browser) {
@@ -46,35 +48,39 @@
 	});
 </script>
 
-<form class="form box" {id}>
-	<h3 class="form-title">{title}</h3>
-	<div class="form-content">
-		<InputCombo bind:value={inputField} hotkey={{ hotkey: '1', tooltip: 'Input' }}
-			>Command Name</InputCombo
-		>
-	</div>
-	<div class="form-controls">
-		<Button
-			onclick={() => onAction(inputField)}
-			{@attach createClickHotKeyAttachment(actionText, 'Enter', 'alt')}
-		>
-			{actionText}
-		</Button>
+<div class="form-container">
+	<form class="form box" {id} bind:this={inputComboElement}>
+		<h3 class="form-title">{title}</h3>
+		<div class="form-content">
+			<InputCombo bind:value={inputField} hotkey={{ hotkey: '1', tooltip: 'Input' }}
+				>Command Name</InputCombo
+			>
+		</div>
+		<div class="form-controls">
+			<Button
+				onclick={() => onAction(inputField)}
+				{@attach createClickHotKeyAttachment(actionText, 'Enter', 'alt')}
+			>
+				{actionText}
+			</Button>
 
-		<Button onclick={onClose} {@attach createClickHotKeyAttachment('Close Dialog', 'q', 'alt')}>
-			Close
-		</Button>
-	</div>
-</form>
-
-{#if errorMessage}
-	<Tooltip>
-		<div>{errorMessage}</div>
-	</Tooltip>
-{/if}
+			<Button onclick={onClose} {@attach createClickHotKeyAttachment('Close Dialog', 'q', 'alt')}>
+				Close
+			</Button>
+		</div>
+	</form>
+	{#if errorMessage}
+		<div class="error-message">
+			<TooltipElement variant="error">
+				{errorMessage}
+			</TooltipElement>
+		</div>
+	{/if}
+</div>
 
 <style>
 	.form {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		padding: var(--space-2);
@@ -91,6 +97,18 @@
 			display: flex;
 			flex-direction: row-reverse;
 			gap: var(--space-3);
+		}
+	}
+
+	.form-container {
+		position: relative;
+		& .error-message {
+			position: absolute;
+
+			--error-gap: 8px;
+			top: calc(100% + var(--error-gap));
+			left: 0;
+			right: 0;
 		}
 	}
 </style>

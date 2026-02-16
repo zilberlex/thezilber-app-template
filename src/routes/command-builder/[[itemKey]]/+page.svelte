@@ -88,6 +88,12 @@
 			}
 		}
 	}
+
+	$effect(() => {
+		if (!isSaveDialogOpen) {
+			saveAsErrorMessage = '';
+		}
+	});
 </script>
 
 <div class="mini-app">

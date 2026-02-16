@@ -36,7 +36,7 @@ export function collectionAppInit<T>(
 			return contextManager.appContext.itemKey;
 		},
 		save: async () => {
-			store.save();
+			return store.save();
 		},
 		saveAs: async (newItemKey: string) => {
 			let { undoMoveRoute } = contextManager.moveRouteRelative(newItemKey);
@@ -44,7 +44,10 @@ export function collectionAppInit<T>(
 				let ret = await store.saveAs(contextManager.appContext);
 
 				if (!ret.ok) {
+					console.log('context before', $state.snapshot(contextManager.appContext));
+
 					undoMoveRoute();
+					console.log('context after', $state.snapshot(contextManager.appContext));
 				}
 
 				return ret;
