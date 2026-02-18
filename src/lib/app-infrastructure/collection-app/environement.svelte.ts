@@ -1,3 +1,4 @@
+import { AutoSaver } from '../auto-saver.svelte';
 import { createCollectionAppContextManager } from './context-manager.svelte';
 import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';
 
@@ -22,7 +23,7 @@ export function collectionAppInit<T>(
 
 	console.log(`loaded collection applicatoin context.`, contextManager.appContext);
 
-	return {
+	let ret = {
 		get data() {
 			return store.data;
 		},
@@ -73,6 +74,11 @@ export function collectionAppInit<T>(
 			}
 		}
 	};
+
+	// TODO AZ add destroyer and a save on destroy.
+	let autoSaver = new AutoSaver(ret.data, () => ret.save());
+
+	return ret;
 }
 
 function generateStoreOptions<T>(

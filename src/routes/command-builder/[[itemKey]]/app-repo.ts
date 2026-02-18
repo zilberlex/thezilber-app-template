@@ -12,6 +12,8 @@ import {
 } from './command-builder-types';
 import type { CbRepo } from './types';
 import { Dexie } from 'dexie';
+import { getErrorMessage } from '$lib/engine/general-js-ts/extract-error-message';
+import { error } from '@sveltejs/kit';
 
 const CommandBuilderDraftStateStorageKey = 'DynamicForm';
 
@@ -20,23 +22,34 @@ async function sleep(msec: number) {
 }
 
 class CommandBuilderRepo implements CbRepo {
-	async update(context: CollectionAppContext, record: CbRecord) {
+	async update(
+		context: CollectionAppContext,
+		record: CbRecord
+	): Promise<ActionResult<void, CollectionAppError>> {
 		const storageType = context.editMode;
 		console.log(
 			`Saving data to repo [${storageType === 'permanent' ? 'IndexDb' : 'Local Storage'}`
 		);
 
+		let promise: Promise<void>;
 		if (storageType === 'permanent') {
-			await updateCommandDb(record);
+			promise = updateCommandDb(record);
 		} else {
-			saveLocalStorage(CommandBuilderDraftStateStorageKey, record);
+			promise = Promise.resolve(saveLocalStorage(CommandBuilderDraftStateStorageKey, record));
+		}
+
+		try {
+			await promise;
+			return { ok: true };
+		} catch (e) {
+			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
 		}
 	}
 
 	async create(
 		context: CollectionAppContext,
 		data: CbState
-	): Promise<CollectionAppActionResult<DbCbRecord>> {
+	): Promise<ActionResult<DbCbRecord, CollectionAppError>> {
 		const { itemKey } = context;
 
 		data.commandName = itemKey;
@@ -59,31 +72,48 @@ class CommandBuilderRepo implements CbRepo {
 		}
 	}
 
-	async load(context: CollectionAppContext): Promise<DbCbRecord | undefined> {
+	async load(
+		context: CollectionAppContext
+	): Promise<ActionResult<DbCbRecord | undefined, CollectionAppError>> {
 		const { itemKey } = context;
 
 		// TODO AZ Remove
 		await sleep(3000);
 
-		let ret;
+		let retPromise;
 		if (context.editMode === 'permanent') {
-			ret = await loadCommandByName(itemKey);
+			retPromise = loadCommandByName(itemKey);
 		} else {
-			ret = await Promise.resolve(
+			retPromise = Promise.resolve(
 				loadLocalStorage(CommandBuilderDraftStateStorageKey) as DbCbRecord
 			);
 		}
-		console.log('Loading Command', itemKey, 'editMode', context.editMode, 'Command:', ret);
 
-		return ret;
+		try {
+			let result = await retPromise;
+			console.log('Loading Command', itemKey, 'editMode', context.editMode, 'Command:', retPromise);
+			return { ok: true, value: result };
+		} catch (e) {
+			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
+		}
 	}
 
-	async delete(context: CollectionAppContext, record: DbCbRecord) {
+	async delete(
+		context: CollectionAppContext,
+		record: DbCbRecord
+	): Promise<ActionResult<void, CollectionAppError>> {
+		let promise: Promise<void>;
 		if (context.editMode === 'permanent') {
-			await deleteCommandById(record.recordId);
-			console.log('Deleted Record', record.recordId);
+			promise = deleteCommandById(record.recordId);
 		} else {
-			removeLocalStorage(CommandBuilderDraftStateStorageKey);
+			promise = Promise.resolve(removeLocalStorage(CommandBuilderDraftStateStorageKey));
+		}
+
+		try {
+			await promise;
+			return { ok: true };
+		} catch (e) {
+			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
 		}
 	}
 }

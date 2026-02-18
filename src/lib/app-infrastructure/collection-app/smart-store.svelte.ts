@@ -54,7 +54,9 @@ export class SmartStore<T> {
 		this.#dataState = 'saving';
 		let p = this.#repository.update(this.#context, saveData);
 
-		p.then(() => (this.#dataState = 'ready'));
+		p.then(() => {
+			this.#dataState = 'ready';
+		});
 
 		this.#handleErrorOnOperation(p, 'save');
 
@@ -91,32 +93,33 @@ export class SmartStore<T> {
 		placeHolderValue?: T,
 		options?: SmartStoreOptions<T>
 	) {
+		if (options) {
+			this.#options = options;
+		}
+
 		this.#dataState = 'loading';
 
 		if (placeHolderValue) {
 			this.#record = this.#recordAdapter.constructRecord(placeHolderValue);
 		}
 
-		let recordPromise = this.#repository.load(context);
+		let loadResult = await this.#repository.load(context);
 
-		recordPromise.then((r) => {
-			if (r) {
-				// todo Az refactor not code dup
-				deepAssign(this.#record, this.#recordAdapter.fromDb(r));
+    if (loadResult.ok) {
+				deepAssign(this.#record, this.#recordAdapter.fromDb(loadResult.value));
 				this.#dataState = 'ready';
-			} else {
-				const notFoundBehvior = options?.loadNotFoundBehavior;
+    } else {
+				const notFoundBehvior = this.#options?.loadNotFoundBehavior;
 				if (notFoundBehvior?.action === 'create-new') {
 					deepAssign(
 						this.#record,
 						this.#recordAdapter.constructRecord(notFoundBehvior.createObj())
 					);
 					this.#dataState = 'ready';
-				} else {
+    } else {
 					this.#dataState = 'error';
-				}
-			}
-		});
+      }
+
 	}
 
 	#handleErrorOnOperation(promise: Promise<any>, strContext: string) {

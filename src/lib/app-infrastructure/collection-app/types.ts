@@ -12,7 +12,7 @@ type SyncableAppRecordMetadata = {
 type CollectionAppRecord<TData> = AppRecord<TData, SyncableAppRecordMetadata>;
 
 type CollectionAppRuntime<T> = {
-	data: T;
+	get data(): T;
 	dataState: AppDataState;
 	save(): Promise<CollectionAppActionResult<void>>;
 	saveAs(itemKey: string): Promise<CollectionAppActionResult<void>>;
@@ -32,14 +32,15 @@ type CollectionAppRecordAdapter<TData, TMeta> = {
 };
 
 // todo az move one layer type
-type Ok<T> = { ok: true; value: T };
+// If value not found it is undefined rather than error
+type Ok<T> = T extends void ? { ok: true } : { ok: true; value: T };
 type Err<E> = { ok: false; error: E };
 type ActionResult<T, E> = Ok<T> | Err<E>;
 interface AppRecordRepo<TData, TMeta, TError> {
 	update(
 		context: CollectionAppContext,
 		record: DbAppRecord<TData, TMeta>
-	): Promise<ActionResult<void, Err<any>>>;
+	): Promise<ActionResult<void, TError>>;
 
 	create(
 		context: CollectionAppContext,
@@ -63,5 +64,5 @@ type DataManagerOptions<T> = {
 	loadNotFoundNewObject?: () => T;
 };
 
-type CollectionAppError = { kind: 'Key Already Exists'; message: string };
-type CollectionAppActionResult<T> = ActionResult<T, CollectionAppError>;
+type CollectionAppError = { kind: 'Key Already Exists' | 'General Error'; message: string };
+type CollectionAppActionResult<T> = ActionResult<T | undefined, CollectionAppError>;

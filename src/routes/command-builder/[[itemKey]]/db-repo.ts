@@ -35,7 +35,7 @@ export async function updateCommandDb(dbCommand: DbCbRecord) {
 	await commandBuilderDb.commands.put(dbCommand);
 }
 
-export async function deleteCommandById(redordId: string) {
+export async function deleteCommandById(redordId: string): Promise<void> {
 	await commandBuilderDb.commands.delete(redordId);
 }
 

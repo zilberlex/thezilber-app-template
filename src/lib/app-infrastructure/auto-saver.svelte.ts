@@ -14,18 +14,14 @@ const defaultOptions: AutoSaverOptions = {
 	maxWaitMs: 10000
 };
 
-export class AutoSaver<T extends AppRecord<any>> {
+export class AutoSaver<T> {
 	#autoSaveHandler: () => Promise<any>;
 	#options: AutoSaverOptions;
 
 	#autoSaveArmed: boolean = false;
 	#effectDestroy: () => void;
 
-	constructor(
-		dataState: T,
-		autoSaveHandler: (data: T) => Promise<any>,
-		options?: AutoSaverOptions
-	) {
+	constructor(data: T, autoSaveHandler: (data: T) => Promise<any>, options?: AutoSaverOptions) {
 		this.#options = {
 			...defaultOptions,
 			...options
@@ -36,21 +32,21 @@ export class AutoSaver<T extends AppRecord<any>> {
 		this.#autoSaveHandler = createSmartHandler(
 			async () => {
 				//todo az move this to Data module
-				await autoSaveHandler(dataState);
+				await autoSaveHandler(data);
 			},
 			{ debounceDelay: this.#options.debounceMs }
 		);
 
 		this.#effectDestroy = $effect.root(() => {
 			$effect(() => {
-				track(dataState.data);
+				track(data);
 
 				untrack(async () => {
 					if (!this.#autoSaveArmed) {
 						return;
 					}
 
-					await this.#autoSaveHandler(null);
+					await this.#autoSaveHandler();
 				});
 			});
 		});
