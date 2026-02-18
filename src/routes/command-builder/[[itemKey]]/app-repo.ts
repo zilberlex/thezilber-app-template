@@ -40,7 +40,7 @@ class CommandBuilderRepo implements CbRepo {
 
 		try {
 			await promise;
-			return { ok: true };
+			return { ok: true, value: undefined };
 		} catch (e) {
 			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
 		}
@@ -111,7 +111,7 @@ class CommandBuilderRepo implements CbRepo {
 
 		try {
 			await promise;
-			return { ok: true };
+			return { ok: true, value: undefined };
 		} catch (e) {
 			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
 		}

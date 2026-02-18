@@ -14,9 +14,9 @@ type CollectionAppRecord<TData> = AppRecord<TData, SyncableAppRecordMetadata>;
 type CollectionAppRuntime<T> = {
 	get data(): T;
 	dataState: AppDataState;
-	save(): Promise<CollectionAppActionResult<void>>;
-	saveAs(itemKey: string): Promise<CollectionAppActionResult<void>>;
-	delete(): Promise<CollectionAppActionResult<void>>;
+	save(): Promise<CollectionAppBlankResult>;
+	saveAs(itemKey: string): Promise<CollectionAppBlankResult>;
+	delete(): Promise<CollectionAppBlankResult>;
 };
 
 type CollectionAppContext = {
@@ -33,7 +33,7 @@ type CollectionAppRecordAdapter<TData, TMeta> = {
 
 // todo az move one layer type
 // If value not found it is undefined rather than error
-type Ok<T> = T extends void ? { ok: true } : { ok: true; value: T };
+type Ok<T> = { ok: true; value: T };
 type Err<E> = { ok: false; error: E };
 type ActionResult<T, E> = Ok<T> | Err<E>;
 interface AppRecordRepo<TData, TMeta, TError> {
@@ -65,4 +65,5 @@ type DataManagerOptions<T> = {
 };
 
 type CollectionAppError = { kind: 'Key Already Exists' | 'General Error'; message: string };
-type CollectionAppActionResult<T> = ActionResult<T | undefined, CollectionAppError>;
+type CollectionAppLoadResult<T> = ActionResult<T | undefined, CollectionAppError>;
+type CollectionAppBlankResult = ActionResult<void, CollectionAppError>;

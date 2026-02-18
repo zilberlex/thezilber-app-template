@@ -1,3 +1,4 @@
+import { getErrorMessage } from '$lib/engine/general-js-ts/extract-error-message';
 import { AutoSaver } from '../auto-saver.svelte';
 import { createCollectionAppContextManager } from './context-manager.svelte';
 import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';
@@ -23,7 +24,7 @@ export function collectionAppInit<T>(
 
 	console.log(`loaded collection applicatoin context.`, contextManager.appContext);
 
-	let ret = {
+	let ret: CollectionAppEnvironment<T> = {
 		get data() {
 			return store.data;
 		},
@@ -54,23 +55,28 @@ export function collectionAppInit<T>(
 				return ret;
 			} catch (e) {
 				console.error('saveAs Error', e);
+				return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
 			}
 		},
 		delete: async () => {
 			try {
-				store.delete(contextManager.appContext);
+				let ret = await store.delete(contextManager.appContext);
 
-				if (contextManager.appContext.editMode === 'permanent') {
-					contextManager.moveRouteRelative('/');
+				if (ret.ok) {
+					if (contextManager.appContext.editMode === 'permanent') {
+						contextManager.moveRouteRelative('/');
+					}
+					store.reload(
+						contextManager.appContext,
+						dataPlaceholder,
+						generateStoreOptions(contextManager.appContext, fallbackData)
+					);
 				}
 
-				store.reload(
-					contextManager.appContext,
-					dataPlaceholder,
-					generateStoreOptions(contextManager.appContext, fallbackData)
-				);
+				return ret as CollectionAppBlankResult;
 			} catch (e) {
 				console.error('delete Error', e);
+				return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
 			}
 		}
 	};

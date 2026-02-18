@@ -1,7 +1,9 @@
 import { browser } from '$app/environment';
-import { deepAssign } from '$lib/app-infrastructure/async-state.svelte';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
+import { Value } from 'sass';
+import { deepAssign } from '../deep-assign';
 import { stampAppRecord } from './data';
+import { getErrorMessage } from '$lib/engine/general-js-ts/extract-error-message';
 
 export type SmartStoreOptions<T> = {
 	loadNotFoundBehavior: { action: 'error' } | { action: 'create-new'; createObj: () => T };
@@ -60,10 +62,10 @@ export class SmartStore<T> {
 
 		this.#handleErrorOnOperation(p, 'save');
 
-		return p;
+		return p as Promise<CollectionAppBlankResult>;
 	}
 
-	async saveAs(context: CollectionAppContext) {
+	async saveAs(context: CollectionAppContext): Promise<CollectionAppBlankResult> {
 		stampAppRecord(getDeviceId(), this.#record.meta);
 		let saveData = $state.snapshot(this.#record.data) as T;
 
@@ -81,11 +83,16 @@ export class SmartStore<T> {
 
 		this.#handleErrorOnOperation(p, 'saveAs');
 
-		return p;
+		return p as Promise<CollectionAppBlankResult>;
 	}
 
-	async delete(context: CollectionAppContext) {
-		this.#repository.delete(context, this.#record);
+	async delete(context: CollectionAppContext): Promise<CollectionAppBlankResult> {
+		try {
+			await this.#repository.delete(context, this.#record);
+			return { ok: true, value: undefined };
+		} catch (e) {
+			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
+		}
 	}
 
 	async reload(
@@ -105,10 +112,11 @@ export class SmartStore<T> {
 
 		let loadResult = await this.#repository.load(context);
 
-    if (loadResult.ok) {
+		if (loadResult.ok && loadResult.value) {
+			if (loadResult.value) {
 				deepAssign(this.#record, this.#recordAdapter.fromDb(loadResult.value));
 				this.#dataState = 'ready';
-    } else {
+			} else {
 				const notFoundBehvior = this.#options?.loadNotFoundBehavior;
 				if (notFoundBehvior?.action === 'create-new') {
 					deepAssign(
@@ -116,10 +124,12 @@ export class SmartStore<T> {
 						this.#recordAdapter.constructRecord(notFoundBehvior.createObj())
 					);
 					this.#dataState = 'ready';
-    } else {
+				} else {
 					this.#dataState = 'error';
-      }
-
+				}
+			}
+		} else {
+		}
 	}
 
 	#handleErrorOnOperation(promise: Promise<any>, strContext: string) {

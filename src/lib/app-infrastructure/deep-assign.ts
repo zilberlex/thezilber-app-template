@@ -11,7 +11,15 @@ function replaceArrayInPlace(target: unknown[], source: unknown[]) {
 	target.push(...source);
 }
 
-export function deepAssign<T extends AnyRecord>(
+function get(obj: object, key: PropertyKey): unknown {
+	return (obj as Record<PropertyKey, unknown>)[key];
+}
+
+function set(obj: object, key: PropertyKey, value: unknown) {
+	(obj as Record<PropertyKey, unknown>)[key] = value;
+}
+
+export function deepAssign<T extends object>(
 	target: T,
 	...sources: Array<Partial<T> | null | undefined>
 ): T {
@@ -21,20 +29,15 @@ export function deepAssign<T extends AnyRecord>(
 		const keys: PropertyKey[] = [...Object.keys(source), ...Object.getOwnPropertySymbols(source)];
 
 		for (const key of keys) {
-			const sVal = (source as AnyRecord)[key];
-			const tVal = (target as AnyRecord)[key];
+			const sVal = get(source, key);
+			const tVal = get(target, key);
 
-			// In-place array replacement
 			if (Array.isArray(tVal) && Array.isArray(sVal)) {
 				replaceArrayInPlace(tVal, sVal);
-			}
-			// Recursive merge for plain objects
-			else if (isPlainObject(tVal) && isPlainObject(sVal)) {
-				(target as AnyRecord)[key] = deepAssign(tVal as AnyRecord, sVal as AnyRecord);
-			}
-			// Fallback: replace
-			else {
-				(target as AnyRecord)[key] = sVal;
+			} else if (isPlainObject(tVal) && isPlainObject(sVal)) {
+				set(target, key, deepAssign(tVal, sVal));
+			} else {
+				set(target, key, sVal);
 			}
 		}
 	}
