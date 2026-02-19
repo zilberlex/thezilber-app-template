@@ -38,26 +38,48 @@ export function collectionAppInit<T>(
 			return contextManager.appContext.itemKey;
 		},
 		save: async () => {
-			return store.save();
+			let res = await store.save();
+
+			if (res.ok && res.value.kind === 'update-with-key-change') {
+				contextManager.moveRouteRelative(res.value.newItemKey);
+			}
+
+			return res as CollectionAppBlankResult;
 		},
 		saveAs: async (newItemKey: string) => {
-			let { undoMoveRoute } = contextManager.moveRouteRelative(newItemKey);
 			try {
-				let ret = await store.saveAs(contextManager.appContext);
+				let ret = await store.saveAs(contextManager.appContext, newItemKey);
 
-				if (!ret.ok) {
-					console.log('context before', $state.snapshot(contextManager.appContext));
-
-					undoMoveRoute();
-					console.log('context after', $state.snapshot(contextManager.appContext));
+				if (ret.ok) {
+					if (ret.value.kind === 'update-with-key-change' || ret.value.kind === 'create') {
+						contextManager.moveRouteRelative(ret.value.newItemKey);
+					}
 				}
 
-				return ret;
+				return ret as CollectionAppBlankResult;
 			} catch (e) {
 				console.error('saveAs Error', e);
 				return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
 			}
 		},
+		// saveAs: async (newItemKey: string) => {
+		// 	let { undoMoveRoute } = contextManager.moveRouteRelative(newItemKey);
+		// 	try {
+		// 		let ret = await store.saveAs(contextManager.appContext);
+		//
+		// 		if (!ret.ok) {
+		// 			console.log('context before', $state.snapshot(contextManager.appContext));
+		//
+		// 			undoMoveRoute();
+		// 			console.log('context after', $state.snapshot(contextManager.appContext));
+		// 		}
+		//
+		// 		return ret;
+		// 	} catch (e) {
+		// 		console.error('saveAs Error', e);
+		// 		return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
+		// 	}
+		// },
 		delete: async () => {
 			try {
 				let ret = await store.delete(contextManager.appContext);

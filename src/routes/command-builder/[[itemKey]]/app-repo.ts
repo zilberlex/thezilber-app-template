@@ -50,10 +50,7 @@ class CommandBuilderRepo implements CbRepo {
 		context: CollectionAppContext,
 		data: CbState
 	): Promise<ActionResult<DbCbRecord, CollectionAppError>> {
-		const { itemKey } = context;
-
-		data.commandName = itemKey;
-
+		let itemKey = data.commandName;
 		const newDbRecord = cbRecordAdaper.constructDbRecord(data);
 		console.log('creating new record. itemKey', itemKey, 'DbRecord', newDbRecord);
 		try {

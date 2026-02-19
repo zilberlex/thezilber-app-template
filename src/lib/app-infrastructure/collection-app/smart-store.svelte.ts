@@ -19,7 +19,7 @@ export class SmartStore<T> {
 	#dataState: AppDataState;
 	#recordAdapter: CollectionAppRecordAdapter<T, SyncableAppRecordMetadata>;
 	#options: SmartStoreOptions<T>;
-	#repository: AppRecordRepo<T, SyncableAppRecordMetadata, unknown>;
+	#repository: AppRecordRepo<T, SyncableAppRecordMetadata, CollectionAppError>;
 
 	get data() {
 		return this.#record.data;
@@ -32,7 +32,7 @@ export class SmartStore<T> {
 	constructor(
 		context: CollectionAppContext,
 		placeHolderValue: T,
-		repository: AppRecordRepo<T, SyncableAppRecordMetadata, unknown>,
+		repository: AppRecordRepo<T, SyncableAppRecordMetadata, CollectionAppError>,
 		recordAdapter: CollectionAppRecordAdapter<T, SyncableAppRecordMetadata>,
 		options?: SmartStoreOptions<T>
 	) {
@@ -49,23 +49,37 @@ export class SmartStore<T> {
 		}
 	}
 
-	async save() {
+	async save(): Promise<StoreSaveActionResult> {
 		stampAppRecord(getDeviceId(), this.#record.meta);
 		let saveData = $state.snapshot(this.#record) as AppRecord<T, SyncableAppRecordMetadata>;
 
 		this.#dataState = 'saving';
 		let p = this.#repository.update(this.#context, saveData);
 
-		p.then(() => {
-			this.#dataState = 'ready';
-		});
+		try {
+			let v = await p;
 
-		this.#handleErrorOnOperation(p, 'save');
-
-		return p as Promise<CollectionAppBlankResult>;
+			if (v.ok) {
+				// TODO AZ add dirty flag and track key changes from data
+				this.#dataState = 'ready';
+				return { ok: true, value: { kind: 'update' } };
+			} else {
+				this.#dataState = 'error';
+				return { ok: false, error: v.error };
+			}
+		} catch (e) {
+			this.#handleErrorOnOperation(e, 'saveAs');
+			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
+		}
 	}
 
-	async saveAs(context: CollectionAppContext): Promise<CollectionAppBlankResult> {
+	async saveAs(context: CollectionAppContext, newItemKey: string): Promise<StoreSaveActionResult> {
+		let prevItemKey = this.#record.key;
+
+		console.log('record before change key', $state.snapshot(this.#record));
+
+		this.#record.key = newItemKey;
+		console.log('record after change key', $state.snapshot(this.#record));
 		stampAppRecord(getDeviceId(), this.#record.meta);
 		let saveData = $state.snapshot(this.#record.data) as T;
 
@@ -73,17 +87,25 @@ export class SmartStore<T> {
 		console.log('Creating New Data', saveData);
 		let p = this.#repository.create(context, saveData);
 
-		p.then((v) => {
-			this.#dataState = 'ready';
+		try {
+			let v = await p;
 
 			if (v.ok) {
-				this.#record.key = context.itemKey;
+				this.#dataState = 'ready';
+				this.#record = this.#recordAdapter.fromDb(v.value);
+				return { ok: true, value: { kind: 'create', newItemKey: newItemKey } };
+			} else {
+				this.#dataState = 'error';
+				this.#record.key = prevItemKey;
+				return { ok: false, error: v.error };
 			}
-		});
-
-		this.#handleErrorOnOperation(p, 'saveAs');
-
-		return p as Promise<CollectionAppBlankResult>;
+		} catch (e) {
+			// TODO AZ REMOVE THOSE TRY CATCHES.
+			this.#handleErrorOnOperation(e, 'saveAs');
+			this.#dataState = 'error';
+			this.#record.key = prevItemKey;
+			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
+		}
 	}
 
 	async delete(context: CollectionAppContext): Promise<CollectionAppBlankResult> {
@@ -132,14 +154,11 @@ export class SmartStore<T> {
 		}
 	}
 
-	#handleErrorOnOperation(promise: Promise<any>, strContext: string) {
-		promise.catch((e: any) => {
-			if (e instanceof Error) {
-				console.log(`Error on [${strContext}]`, e);
-			} else {
-				console.log(`Error on [${strContext}]`);
-			}
-			this.#dataState = 'error';
-		});
+	#handleErrorOnOperation(e: unknown, strContext: string) {
+		if (e instanceof Error) {
+			console.log(`Error on [${strContext}]`, e);
+		} else {
+			console.log(`Error on [${strContext}]`);
+		}
 	}
 }

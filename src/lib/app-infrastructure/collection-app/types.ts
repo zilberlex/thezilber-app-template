@@ -67,3 +67,10 @@ type DataManagerOptions<T> = {
 type CollectionAppError = { kind: 'Key Already Exists' | 'General Error'; message: string };
 type CollectionAppLoadResult<T> = ActionResult<T | undefined, CollectionAppError>;
 type CollectionAppBlankResult = ActionResult<void, CollectionAppError>;
+
+type StoreSaveResult =
+	| { kind: 'create'; newItemKey: string }
+	| { kind: 'update-with-key-change'; prevItemKey: string; newItemKey: string }
+	| { kind: 'update' };
+
+type StoreSaveActionResult = ActionResult<StoreSaveResult, CollectionAppError>;
