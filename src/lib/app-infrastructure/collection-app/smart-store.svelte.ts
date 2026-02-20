@@ -4,6 +4,7 @@ import { Value } from 'sass';
 import { deepAssign } from '../deep-assign';
 import { stampAppRecord } from './data';
 import { getErrorMessage } from '$lib/engine/general-js-ts/extract-error-message';
+import { keyBoardFocusNavigatedNode } from '$lib/engine/keyboard-navigation/navigation-utils';
 
 export type SmartStoreOptions<T> = {
 	loadNotFoundBehavior: { action: 'error' } | { action: 'create-new'; createObj: () => T };
@@ -41,7 +42,7 @@ export class SmartStore<T> {
 		this.#recordAdapter = recordAdapter;
 
 		this.#record = $state(this.#recordAdapter.constructRecord(placeHolderValue));
-		this.#dataState = $state('loading');
+		this.#dataState = $state({ kind: 'loading', key: this.#context.itemKey });
 		this.#repository = repository;
 
 		if (browser) {
@@ -53,23 +54,29 @@ export class SmartStore<T> {
 		stampAppRecord(getDeviceId(), this.#record.meta);
 		let saveData = $state.snapshot(this.#record) as AppRecord<T, SyncableAppRecordMetadata>;
 
-		this.#dataState = 'saving';
-		let p = this.#repository.update(this.#context, saveData);
+		this.#dataState = { kind: 'saving', key: saveData.key };
+		let res = await this.#repository.update(this.#context, saveData);
 
-		try {
-			let v = await p;
+		if (res.ok) {
+			let contextItemKey = this.#context.itemKey;
+			let newItemKey = this.#record.key;
 
-			if (v.ok) {
-				// TODO AZ add dirty flag and track key changes from data
-				this.#dataState = 'ready';
-				return { ok: true, value: { kind: 'update' } };
-			} else {
-				this.#dataState = 'error';
-				return { ok: false, error: v.error };
+			this.#dataState = { kind: 'ready', key: newItemKey };
+
+			if (contextItemKey !== newItemKey) {
+				return {
+					ok: true,
+					value: {
+						kind: 'update-with-key-change',
+						prevItemKey: contextItemKey,
+						newItemKey: newItemKey
+					}
+				};
 			}
-		} catch (e) {
-			this.#handleErrorOnOperation(e, 'saveAs');
-			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
+			return { ok: true, value: { kind: 'update' } };
+		} else {
+			this.#dataState = { kind: 'error' };
+			return { ok: false, error: res.error };
 		}
 	}
 
@@ -83,37 +90,28 @@ export class SmartStore<T> {
 		stampAppRecord(getDeviceId(), this.#record.meta);
 		let saveData = $state.snapshot(this.#record.data) as T;
 
-		this.#dataState = 'saving';
+		this.#dataState = { kind: 'saving', key: this.#record.key };
 		console.log('Creating New Data', saveData);
-		let p = this.#repository.create(context, saveData);
+		let res = await this.#repository.create(context, saveData);
 
-		try {
-			let v = await p;
-
-			if (v.ok) {
-				this.#dataState = 'ready';
-				this.#record = this.#recordAdapter.fromDb(v.value);
-				return { ok: true, value: { kind: 'create', newItemKey: newItemKey } };
-			} else {
-				this.#dataState = 'error';
-				this.#record.key = prevItemKey;
-				return { ok: false, error: v.error };
-			}
-		} catch (e) {
-			// TODO AZ REMOVE THOSE TRY CATCHES.
-			this.#handleErrorOnOperation(e, 'saveAs');
-			this.#dataState = 'error';
+		if (res.ok) {
+			this.#dataState = { kind: 'ready', key: newItemKey };
+			this.#record = this.#recordAdapter.fromDb(res.value);
+			return { ok: true, value: { kind: 'create', newItemKey: newItemKey } };
+		} else {
+			this.#dataState = { kind: 'error' };
 			this.#record.key = prevItemKey;
-			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
+			return { ok: false, error: res.error };
 		}
 	}
 
 	async delete(context: CollectionAppContext): Promise<CollectionAppBlankResult> {
-		try {
-			await this.#repository.delete(context, this.#record);
+		let res = await this.#repository.delete(context, this.#record);
+
+		if (res.ok) {
 			return { ok: true, value: undefined };
-		} catch (e) {
-			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
+		} else {
+			return res;
 		}
 	}
 
@@ -122,22 +120,29 @@ export class SmartStore<T> {
 		placeHolderValue?: T,
 		options?: SmartStoreOptions<T>
 	) {
+		this.#context = context;
+
 		if (options) {
 			this.#options = options;
 		}
 
-		this.#dataState = 'loading';
+		this.#dataState = { kind: 'loading', key: context.itemKey };
 
 		if (placeHolderValue) {
 			this.#record = this.#recordAdapter.constructRecord(placeHolderValue);
 		}
 
-		let loadResult = await this.#repository.load(context);
+		let loadResult = await this.#repository.load(this.#context);
 
-		if (loadResult.ok && loadResult.value) {
+		if (loadResult.ok) {
 			if (loadResult.value) {
 				deepAssign(this.#record, this.#recordAdapter.fromDb(loadResult.value));
-				this.#dataState = 'ready';
+
+				// TODO AZ refactor draft handling and normalization of drafts. - this if this shit is even needed
+				// - technically not needed or maybe needed on save instead of load. or maybe both
+				if (this.#context.editMode === 'draft') this.#record.key = '_draft_';
+
+				this.#dataState = { kind: 'ready', key: this.#record.key };
 			} else {
 				const notFoundBehvior = this.#options?.loadNotFoundBehavior;
 				if (notFoundBehvior?.action === 'create-new') {
@@ -145,20 +150,13 @@ export class SmartStore<T> {
 						this.#record,
 						this.#recordAdapter.constructRecord(notFoundBehvior.createObj())
 					);
-					this.#dataState = 'ready';
+					this.#dataState = { kind: 'ready', key: this.#record.key };
 				} else {
-					this.#dataState = 'error';
+					this.#dataState = { kind: 'record-not-found', key: this.#context.itemKey };
 				}
 			}
 		} else {
-		}
-	}
-
-	#handleErrorOnOperation(e: unknown, strContext: string) {
-		if (e instanceof Error) {
-			console.log(`Error on [${strContext}]`, e);
-		} else {
-			console.log(`Error on [${strContext}]`);
+			this.#dataState = { kind: 'error' };
 		}
 	}
 }

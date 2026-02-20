@@ -7,6 +7,7 @@
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
 	import TooltipElement from '$lib/ui/basic-components/TooltipElement.svelte';
 	import TooltipAssigner from '$lib/ui/components/tooltips/TooltipAssigner.svelte';
+	import { onDestroy } from 'svelte';
 	import { cbRepo } from '../../command-builder/[[itemKey]]/app-repo';
 	import {
 		cbRecordAdaper,
@@ -39,6 +40,8 @@
 		lol = !lol;
 		console.log('lol', lol);
 	}
+
+	onDestroy(() => appEnvironment.destroy());
 
 	// new api:
 	// createCollectionAppPersistancyInfra(type) -> recordAdapter, repo

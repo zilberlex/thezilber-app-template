@@ -17,11 +17,18 @@ type CollectionAppRuntime<T> = {
 	save(): Promise<CollectionAppBlankResult>;
 	saveAs(itemKey: string): Promise<CollectionAppBlankResult>;
 	delete(): Promise<CollectionAppBlankResult>;
+	destroy(): () => () => void;
 };
 
 type CollectionAppContext = {
 	editMode: EditMode;
 	itemKey: string;
+};
+
+type CollectionAppContextChangeEvent = {
+	kind: 'data-key-update' | 'browser-navigation';
+	prevContext: CollectionAppContext;
+	newContext: CollectionAppContext;
 };
 
 type CollectionAppRecordAdapter<TData, TMeta> = {
@@ -55,7 +62,14 @@ interface AppRecordRepo<TData, TMeta, TError> {
 	): Promise<ActionResult<void, TError>>;
 }
 
-type AppDataState = 'saving' | 'ready' | 'loading' | 'record-not-found' | 'error';
+type AppDataStateOld = 'saving' | 'ready' | 'loading' | 'record-not-found' | 'error';
+
+type AppDataState =
+	| { kind: 'saving'; key: string }
+	| { kind: 'loading'; key: string }
+	| { kind: 'record-not-found'; key: string }
+	| { kind: 'ready'; key: string }
+	| { kind: 'error' };
 
 type CollectionAppEnvironment<T> = CollectionAppContext & CollectionAppRuntime<T>;
 

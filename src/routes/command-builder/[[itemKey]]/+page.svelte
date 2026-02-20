@@ -14,7 +14,6 @@
 	import { temporaryMessageState } from '$lib/engine/application/temp-messages/temporary-message-state.svelte';
 	import { cbRecordAdaper, type CbState } from './command-builder-types';
 	import { collectionAppInit } from '$lib/app-infrastructure/collection-app/environement.svelte';
-	import { page } from '$app/state';
 	import { cbRepo } from './app-repo';
 
 	let placeholderState = {
@@ -55,11 +54,25 @@
 		untrack(() => {
 			console.log('Setting Message working state:', dataState);
 
-			if (dataState === 'saving')
-				temporaryMessageState.message =
-					editMode === 'permanent'
-						? `Saving Command [${cbAppEnv.data.commandName}]...`
-						: `Saving Draft...`;
+			switch (dataState.kind) {
+				case 'saving':
+					temporaryMessageState.message =
+						editMode === 'permanent' ? `Saving Command [${dataState.key}]...` : `Saving Draft...`;
+					break;
+				case 'loading':
+					temporaryMessageState.message =
+						editMode === 'permanent' ? `Loading Command [${dataState.key}]...` : `Loading Draft...`;
+					break;
+				case 'record-not-found':
+					temporaryMessageState.message = `Record Not Found [${dataState.key}]`;
+					break;
+				case 'ready':
+					temporaryMessageState.message =
+						editMode === 'permanent' ? `Ready [${dataState.key}]` : `Draft Ready`;
+					break;
+				default:
+					temporaryMessageState.message = 'Error';
+			}
 		});
 	});
 
@@ -105,7 +118,7 @@
 		/>
 	{/if}
 
-	<CommandBuilder bind:commandBuilderState={cbAppEnv.data} disabled={dataState !== 'ready'} />
+	<CommandBuilder bind:commandBuilderState={cbAppEnv.data} disabled={dataState.kind !== 'ready'} />
 
 	<Button
 		class="button-save"

@@ -1,27 +1,30 @@
 import { pushState, replaceState } from '$app/navigation';
 import { page } from '$app/state';
-import { getBasePath } from '$lib/engine/routing/routing-helps';
+import { getBasePath, getContextPath } from '$lib/engine/routing/routing-helps';
+import { track } from '$lib/engine/svelte-helpers/track.svelte';
+import { untrack } from 'svelte';
 
 type CollectionAppContextManager<TContext extends CollectionAppContext> = {
 	appContext: TContext;
+	// Tech Debt
+	appContextChangeEvent: CollectionAppContextChangeEvent | undefined;
 	moveRouteRelative: (itemKey: string) => { undoMoveRoute: () => void };
 };
 
-function getNewPath(baseUrlPath: string, itemKey: string) {
-	const newUrl = new URL(page.url);
-	newUrl.pathname = `${baseUrlPath}/${itemKey}`;
-
-	return newUrl;
-}
+const DRAFT_ITEM_KEY = '_draft_';
 
 export function createCollectionAppContextManager<
 	TContext extends CollectionAppContext
 >(): CollectionAppContextManager<TContext> {
-	let slugItemKey = page.params.itemKey;
+	function getItemKey() {
+		return page.params.itemKey;
+	}
 
-	let _itemKey = $state(slugItemKey ?? '_draft_');
-	let _editMode: EditMode = $derived(_itemKey === '_draft_' ? 'draft' : 'permanent');
-	let _baseUrlPath = getBasePath(page, '[[itemKey]]');
+	let slugItemKey = getItemKey();
+	let _itemKey = $state(slugItemKey ?? DRAFT_ITEM_KEY);
+	let _editMode: EditMode = $derived(_itemKey === DRAFT_ITEM_KEY ? 'draft' : 'permanent');
+	let _baseUrlPath = getBasePath('[[itemKey]]');
+	let appContextChangeEvent: CollectionAppContextChangeEvent | undefined = $state();
 
 	let appContext = $state({
 		get itemKey() {
@@ -32,9 +35,35 @@ export function createCollectionAppContextManager<
 		}
 	}) as TContext;
 
+	let skipFirstCounter = 0;
+	$effect(() => {
+		track(page.url);
+
+		untrack(() => {
+			if (skipFirstCounter++ == 0) return;
+
+			let itemKey = getItemKey() ?? DRAFT_ITEM_KEY;
+			let prevContext = { ...appContext };
+
+			_itemKey = itemKey;
+
+			appContextChangeEvent = {
+				kind: 'browser-navigation',
+				prevContext: prevContext,
+				newContext: { ...appContext }
+			};
+			console.log('detected route change, emitting', $state.snapshot(appContextChangeEvent));
+		});
+	});
+
+	console.log('initiated context', $state.snapshot(appContext));
+
 	return {
 		get appContext() {
 			return appContext;
+		},
+		get appContextChangeEvent() {
+			return appContextChangeEvent;
 		},
 		moveRouteRelative(itemKey: string) {
 			let prevContext = { ...appContext };
@@ -42,12 +71,12 @@ export function createCollectionAppContextManager<
 
 			_itemKey = itemKey;
 			// TODO AZ make better logic with encapsulated when key changes. push state and replace state
-			pushState(getNewPath(_baseUrlPath, _itemKey), { itemKey });
+			pushState(getContextPath(_baseUrlPath, _itemKey), { itemKey });
 
 			return {
 				undoMoveRoute: () => {
 					_itemKey = prevContext.itemKey;
-					replaceState(getNewPath(_baseUrlPath, _itemKey), prevState);
+					replaceState(getContextPath(_baseUrlPath, _itemKey), prevState);
 				}
 			};
 		}

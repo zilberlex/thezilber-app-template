@@ -1,7 +1,9 @@
 import { getErrorMessage } from '$lib/engine/general-js-ts/extract-error-message';
+import { untrack } from 'svelte';
 import { AutoSaver } from '../auto-saver.svelte';
 import { createCollectionAppContextManager } from './context-manager.svelte';
 import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';
+import { track } from '$lib/engine/svelte-helpers/track.svelte';
 
 export function collectionAppInit<T>(
 	dataPlaceholder: T,
@@ -22,9 +24,37 @@ export function collectionAppInit<T>(
 		storeOptions
 	);
 
-	console.log(`loaded collection applicatoin context.`, contextManager.appContext);
+	console.log(`loaded collection application context.`, $state.snapshot(contextManager.appContext));
 
 	let ret: CollectionAppEnvironment<T> = {
+		destroy: $effect.root(() => {
+			$effect(() => {
+				let ctxChangeEvent = contextManager.appContextChangeEvent;
+				track(ctxChangeEvent);
+
+				untrack(() => {
+					if (!ctxChangeEvent) return;
+					if (
+						ctxChangeEvent?.kind === 'browser-navigation' &&
+						ctxChangeEvent.prevContext !== ctxChangeEvent.newContext
+					) {
+						console.log(
+							'context change due to browser-navigation, reloading store. - new context',
+							$state.snapshot(contextManager.appContext)
+						);
+
+						store.reload(contextManager.appContext);
+					}
+				});
+			});
+
+			return () => {
+				console.log(
+					'destroying CollectionAppEnvironment. CurrentData',
+					$state.snapshot(store.data)
+				);
+			};
+		}),
 		get data() {
 			return store.data;
 		},
@@ -62,24 +92,6 @@ export function collectionAppInit<T>(
 				return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
 			}
 		},
-		// saveAs: async (newItemKey: string) => {
-		// 	let { undoMoveRoute } = contextManager.moveRouteRelative(newItemKey);
-		// 	try {
-		// 		let ret = await store.saveAs(contextManager.appContext);
-		//
-		// 		if (!ret.ok) {
-		// 			console.log('context before', $state.snapshot(contextManager.appContext));
-		//
-		// 			undoMoveRoute();
-		// 			console.log('context after', $state.snapshot(contextManager.appContext));
-		// 		}
-		//
-		// 		return ret;
-		// 	} catch (e) {
-		// 		console.error('saveAs Error', e);
-		// 		return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
-		// 	}
-		// },
 		delete: async () => {
 			try {
 				let ret = await store.delete(contextManager.appContext);
