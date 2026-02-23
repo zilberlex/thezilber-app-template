@@ -19,6 +19,23 @@ const defaultOptions: SmartStoreOptions<any> = {
 // TODO AZ think of a better name and placement;
 type RecordI<T> = AppRecord<T, SyncableAppRecordMetadata>;
 
+type AbortablePromise<T> = {
+	isAborted: boolean;
+	promise: Promise<T>;
+};
+
+function abortable<T>(p: Promise<T>): { abort: () => void; abortablePromise: AbortablePromise<T> } {
+	let isAborted = false;
+
+	return {
+		abort: () => (isAborted = true),
+		abortablePromise: {
+			promise: p,
+			isAborted
+		}
+	};
+}
+
 export class SmartStore<T> {
 	#context: CollectionAppContext;
 	#record: RecordI<T>;
@@ -27,6 +44,8 @@ export class SmartStore<T> {
 	#options: SmartStoreOptions<T>;
 	#repository: AppRecordRepo<T, SyncableAppRecordMetadata, CollectionAppError>;
 	#cache: Cache<string, RecordI<T>>;
+
+	#reloadAbort: (() => void) | undefined;
 
 	get data() {
 		return this.#record.data;
@@ -81,6 +100,7 @@ export class SmartStore<T> {
 					}
 				};
 			}
+
 			return { ok: true, value: { kind: 'update' } };
 		} else {
 			this.#dataState = { kind: 'error' };
@@ -111,6 +131,7 @@ export class SmartStore<T> {
 		} else {
 			this.#dataState = { kind: 'error' };
 			this.#record.key = prevItemKey;
+
 			return { ok: false, error: res.error };
 		}
 	}
@@ -131,6 +152,7 @@ export class SmartStore<T> {
 		placeHolderValue?: T,
 		options?: SmartStoreOptions<T>
 	) {
+		this.#reloadAbort?.();
 		this.#context = context;
 
 		if (options) {
@@ -144,7 +166,15 @@ export class SmartStore<T> {
 			this.#record = this.#recordAdapter.constructRecord(placeHolderValue);
 		}
 
-		let loadResult = await this.#getItemWithCaching(this.#context);
+		let { abort, abortablePromise } = abortable(this.#getItemWithCaching(this.#context));
+		this.#reloadAbort = abort;
+
+		let loadResult = await abortablePromise.promise;
+
+		if (abortablePromise.isAborted) {
+			console.log('Store - Aborted Reload', context);
+			return;
+		}
 
 		if (!loadResult.ok) {
 			this.#dataState = { kind: 'error' };
@@ -156,7 +186,6 @@ export class SmartStore<T> {
 		let record = loadResult.value;
 		if (record) {
 			deepAssign(this.#record, record);
-
 			// TODO AZ refactor draft handling and normalization of drafts. - this if this shit is even needed
 			// - technically not needed or maybe needed on save instead of load. or maybe both
 			if (this.#context.editMode === 'draft') this.#record.key = '_draft_';

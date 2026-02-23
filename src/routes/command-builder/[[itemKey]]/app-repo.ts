@@ -28,7 +28,7 @@ class CommandBuilderRepo implements CbRepo {
 	): Promise<ActionResult<void, CollectionAppError>> {
 		const storageType = context.editMode;
 		console.log(
-			`Saving data to repo [${storageType === 'permanent' ? 'IndexDb' : 'Local Storage'}`
+			`Saving data to repo [${storageType === 'permanent' ? 'IndexDb' : 'Local Storage'}]. itemKey: [${context.itemKey}]`
 		);
 
 		let promise: Promise<void>;
@@ -87,10 +87,8 @@ class CommandBuilderRepo implements CbRepo {
 		}
 
 		try {
-			console.log('wtf');
-
 			let result = await retPromise;
-			console.log(`Fetched Command ${itemKey}, editMode ${context.editMode}, Command: ${result}`);
+			console.log(`Fetched Command ${itemKey}, editMode ${context.editMode}, Command: `, result);
 			return { ok: true, value: result };
 		} catch (e) {
 			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
