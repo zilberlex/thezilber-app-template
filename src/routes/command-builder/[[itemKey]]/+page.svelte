@@ -56,8 +56,6 @@
 		track(dataState);
 
 		untrack(() => {
-			console.log('Setting Message working state:', dataState);
-
 			switch (dataState.kind) {
 				case 'saving':
 					temporaryMessageState.message =

@@ -148,6 +148,8 @@ export class SmartStore<T> {
 
 		if (!loadResult.ok) {
 			this.#dataState = { kind: 'error' };
+			console.error('Store Load Data Failed', loadResult.error);
+
 			return;
 		}
 

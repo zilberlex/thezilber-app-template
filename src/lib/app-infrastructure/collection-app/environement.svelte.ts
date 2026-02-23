@@ -24,7 +24,7 @@ export function collectionAppInit<T>(
 		storeOptions
 	);
 
-	console.log(`loaded collection application context.`, $state.snapshot(contextManager.appContext));
+	console.log('Collection App Initiated. Context:', $state.snapshot(contextManager.appContext));
 
 	let ret: CollectionAppEnvironment<T> = {
 		destroy: $effect.root(() => {
@@ -36,11 +36,13 @@ export function collectionAppInit<T>(
 					if (!ctxChangeEvent) return;
 					if (
 						ctxChangeEvent?.kind === 'browser-navigation' &&
-						ctxChangeEvent.prevContext !== ctxChangeEvent.newContext
+						ctxChangeEvent.prevContext.itemKey !== ctxChangeEvent.newContext.itemKey
 					) {
 						console.log(
 							'context change due to browser-navigation, reloading store. - new context',
-							$state.snapshot(contextManager.appContext)
+							$state.snapshot(ctxChangeEvent.newContext),
+							'prevContext',
+							$state.snapshot(ctxChangeEvent.prevContext)
 						);
 
 						store.reload(contextManager.appContext);
@@ -53,10 +55,9 @@ export function collectionAppInit<T>(
 				track(dataState);
 
 				untrack(() => {
-					console.log('itemKey not found - Rerouting to "/"');
-
 					if (dataState.kind === 'record-not-found') {
-						contextManager.moveRouteRelative('');
+						console.log('itemKey not found - Rerouting to "/"');
+						contextManager.changeContext('');
 					}
 				});
 			});
@@ -84,7 +85,7 @@ export function collectionAppInit<T>(
 			let res = await store.save();
 
 			if (res.ok && res.value.kind === 'update-with-key-change') {
-				contextManager.moveRouteRelative(res.value.newItemKey);
+				contextManager.changeContext(res.value.newItemKey);
 			}
 
 			return res as CollectionAppBlankResult;
@@ -95,7 +96,7 @@ export function collectionAppInit<T>(
 
 				if (ret.ok) {
 					if (ret.value.kind === 'update-with-key-change' || ret.value.kind === 'create') {
-						contextManager.moveRouteRelative(ret.value.newItemKey);
+						contextManager.changeContext(ret.value.newItemKey);
 					}
 				}
 
@@ -111,7 +112,7 @@ export function collectionAppInit<T>(
 
 				if (ret.ok) {
 					if (contextManager.appContext.editMode === 'permanent') {
-						contextManager.moveRouteRelative('/');
+						contextManager.changeContext('/');
 					}
 					store.reload(
 						contextManager.appContext,

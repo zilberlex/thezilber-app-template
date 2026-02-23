@@ -87,8 +87,10 @@ class CommandBuilderRepo implements CbRepo {
 		}
 
 		try {
+			console.log('wtf');
+
 			let result = await retPromise;
-			console.log('Loading Command', itemKey, 'editMode', context.editMode, 'Command:', retPromise);
+			console.log(`Fetched Command ${itemKey}, editMode ${context.editMode}, Command: ${result}`);
 			return { ok: true, value: result };
 		} catch (e) {
 			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
