@@ -1,4 +1,4 @@
-import { pushState, replaceState } from '$app/navigation';
+import { goto, pushState, replaceState } from '$app/navigation';
 import { page } from '$app/state';
 import { getBasePath, getContextPath } from '$lib/engine/routing/routing-helps';
 import { track } from '$lib/engine/svelte-helpers/track.svelte';
@@ -35,13 +35,10 @@ export function createCollectionAppContextManager<
 		}
 	}) as TContext;
 
-	let skipFirstCounter = 0;
 	$effect(() => {
 		track(page.url);
 
 		untrack(() => {
-			if (skipFirstCounter++ == 0) return;
-
 			let itemKey = getItemKey() ?? DRAFT_ITEM_KEY;
 			let prevContext = { ...appContext };
 
@@ -71,12 +68,12 @@ export function createCollectionAppContextManager<
 
 			_itemKey = itemKey;
 			// TODO AZ make better logic with encapsulated when key changes. push state and replace state
-			pushState(getContextPath(_baseUrlPath, _itemKey), { itemKey });
+			goto(getContextPath(_baseUrlPath, _itemKey));
 
 			return {
 				undoMoveRoute: () => {
 					_itemKey = prevContext.itemKey;
-					replaceState(getContextPath(_baseUrlPath, _itemKey), prevState);
+					goto(getContextPath(_baseUrlPath, _itemKey));
 				}
 			};
 		}

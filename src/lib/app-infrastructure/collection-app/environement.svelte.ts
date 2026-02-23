@@ -48,6 +48,19 @@ export function collectionAppInit<T>(
 				});
 			});
 
+			$effect(() => {
+				let dataState = store.dataState;
+				track(dataState);
+
+				untrack(() => {
+					console.log('itemKey not found - Rerouting to "/"');
+
+					if (dataState.kind === 'record-not-found') {
+						contextManager.moveRouteRelative('');
+					}
+				});
+			});
+
 			return () => {
 				console.log(
 					'destroying CollectionAppEnvironment. CurrentData',

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/ui/basic-components/Button.svelte';
-	import { untrack } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import {
 		createClickHotKeyAttachment,
@@ -37,6 +37,10 @@
 		cbRecordAdaper,
 		cbRepo
 	);
+
+	onDestroy(() => {
+		cbAppEnv.destroy();
+	});
 
 	appState.pageContext.title = 'Command Builder';
 

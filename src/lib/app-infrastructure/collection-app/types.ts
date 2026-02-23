@@ -17,7 +17,7 @@ type CollectionAppRuntime<T> = {
 	save(): Promise<CollectionAppBlankResult>;
 	saveAs(itemKey: string): Promise<CollectionAppBlankResult>;
 	delete(): Promise<CollectionAppBlankResult>;
-	destroy(): () => () => void;
+	destroy(): void;
 };
 
 type CollectionAppContext = {
