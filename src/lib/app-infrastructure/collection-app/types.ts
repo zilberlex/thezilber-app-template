@@ -85,6 +85,7 @@ type CollectionAppBlankResult = ActionResult<void, CollectionAppError>;
 type StoreSaveResult =
 	| { kind: 'create'; newItemKey: string }
 	| { kind: 'update-with-key-change'; prevItemKey: string; newItemKey: string }
-	| { kind: 'update' };
+	| { kind: 'update' }
+	| { kind: 'another-operation-in-progress'; currentOperation: AppDataState };
 
 type StoreSaveActionResult = ActionResult<StoreSaveResult, CollectionAppError>;

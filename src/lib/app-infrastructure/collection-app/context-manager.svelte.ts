@@ -62,6 +62,7 @@ export function createCollectionAppContextManager<
 		},
 		changeContext(itemKey: string) {
 			let prevContext = { ...appContext };
+			console.log('changing context', 'new itemKey', itemKey, 'prevContext', prevContext);
 
 			_itemKey = itemKey;
 			goto(getContextPath(_baseUrlPath, _itemKey));

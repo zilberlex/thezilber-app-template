@@ -4,6 +4,7 @@ import { AutoSaver } from '../auto-saver.svelte';
 import { createCollectionAppContextManager } from './context-manager.svelte';
 import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';
 import { track } from '$lib/engine/svelte-helpers/track.svelte';
+import { appState } from '$lib/engine/state/application-state.svelte';
 
 export function collectionAppInit<T>(
 	dataPlaceholder: T,
@@ -132,6 +133,19 @@ export function collectionAppInit<T>(
 	// TODO AZ add destroyer and a save on destroy.
 	let autoSaver = new AutoSaver(ret.data, () => ret.save());
 
+	let debugHelper = $derived.by(() => {
+		let contextKey = contextManager.appContext.itemKey;
+		let dataKey = store.dataKey;
+		return {
+			bigIssue:
+				dataKey !== contextKey
+					? `Context Does Not Correspond with recordKey - contextKey: [${contextKey}], recordKey: [${dataKey}]`
+					: 'All Good'
+		};
+	});
+	appState.debug.debugMode = true;
+	appState.debug.debugConsole = true;
+	appState.debug.viewObject = debugHelper;
 	return ret;
 }
 

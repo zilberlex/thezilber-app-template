@@ -30,6 +30,7 @@ class CommandBuilderRepo implements CbRepo {
 		console.log(
 			`Saving data to repo [${storageType === 'permanent' ? 'IndexDb' : 'Local Storage'}]. itemKey: [${context.itemKey}]`
 		);
+		await sleep(2000);
 
 		let promise: Promise<void>;
 		if (storageType === 'permanent') {
