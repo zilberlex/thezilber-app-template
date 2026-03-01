@@ -1,4 +1,9 @@
 import { browser } from '$app/environment';
+import {
+	DispatcherImpl,
+	type Dispatcher,
+	type DispatchHandler
+} from '$lib/engine/patterns/observer';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
 import { deepAssign } from '../deep-assign';
 import { Cache } from './cache';
@@ -34,10 +39,9 @@ function abortable<T>(p: Promise<T>): { abort: () => void; abortablePromise: Abo
 	};
 }
 
-export class SmartStore<T> {
+export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 	#context: CollectionAppContext;
 	#record: RecordI<T>;
-	#dataState: AppDataState;
 
 	#recordAdapter: CollectionAppRecordAdapter<T, SyncableAppRecordMetadata>;
 	#options: SmartStoreOptions<T>;
@@ -46,19 +50,8 @@ export class SmartStore<T> {
 
 	#reloadAbort: (() => void) | undefined;
 
-	#saveOpCouter = 0;
-
-	get data() {
-		return this.#record.data;
-	}
-
-	get dataState() {
-		return this.#dataState;
-	}
-
-	get dataKey() {
-		return this.#record?.key;
-	}
+	#dataStateDispatacher = new DispatcherImpl<WithOpId<AppDataState>>();
+	#runningOpId = 0;
 
 	constructor(
 		context: CollectionAppContext,
@@ -73,7 +66,6 @@ export class SmartStore<T> {
 		this.#cache = new Cache();
 
 		this.#record = $state(this.#recordAdapter.constructRecord(placeHolderValue));
-		this.#dataState = $state({ kind: 'loading', key: this.#context.itemKey });
 		this.#repository = repository;
 
 		if (browser) {
@@ -81,25 +73,48 @@ export class SmartStore<T> {
 		}
 	}
 
+	get dataKey() {
+		return this.#record.key;
+	}
+
+	get data() {
+		return this.#record.data;
+	}
+
+	register(handler: DispatchHandler<WithOpId<AppDataState>>): void {
+		this.#dataStateDispatacher.register(handler);
+	}
+
+	unregister(handler: DispatchHandler<WithOpId<AppDataState>>): boolean {
+		return this.#dataStateDispatacher.unregister(handler);
+	}
+
+	#getOpId(): number {
+		return ++this.#runningOpId;
+	}
+
+	#signalStateChange(dataState: AppDataState, opId: number) {
+		this.#dataStateDispatacher.signal({ ...dataState, opId });
+	}
+
 	async save(): Promise<StoreSaveActionResult> {
+		let opId = this.#getOpId();
 		let contextSnapshot = $state.snapshot(this.#context);
-		// TODO AZ unify logic with saveAs
-		let dataState = $state.snapshot(this.#dataState);
-		if (dataState.kind !== 'ready' && dataState.kind !== 'saving') {
-			return {
-				ok: true,
-				value: { kind: 'another-operation-in-progress', currentOperation: dataState }
-			};
-		}
 
 		stampAppRecord(getDeviceId(), this.#record.meta);
 		let saveData = $state.snapshot(this.#record) as AppRecord<T, SyncableAppRecordMetadata>;
 
-		let currentSaveOp = ++this.#saveOpCouter;
-
 		let recordSnapshot = $state.snapshot(this.#record);
 
-		this.#dataState = { kind: 'saving', key: saveData.key };
+		this.#signalStateChange(
+			{
+				kind: 'saving',
+				key: saveData.key,
+				prevKey: contextSnapshot.itemKey
+			},
+			opId
+		);
+
 		let res = await this.#repository.update(this.#context, saveData);
 
 		if (res.ok) {
@@ -108,15 +123,14 @@ export class SmartStore<T> {
 
 			await this.#cache.setOrUpdateKey(newItemKey, saveData, prevItemKey);
 
-			const dataStateAfterOp = $state.snapshot(this.#dataState) as AppDataState;
-			if (
-				dataStateAfterOp.kind !== 'loading' &&
-				currentSaveOp === this.#saveOpCouter &&
-				// this is to check if context have changed since save start to prevent false reporting on context.itemKey
-				contextSnapshot.itemKey !== this.#context.itemKey
-			) {
-				this.#dataState = { kind: 'ready', key: newItemKey };
-			}
+			this.#signalStateChange(
+				{
+					kind: 'ready',
+					key: saveData.key,
+					prevKey: prevItemKey
+				},
+				opId
+			);
 
 			if (prevItemKey !== newItemKey) {
 				return {
@@ -131,20 +145,13 @@ export class SmartStore<T> {
 
 			return { ok: true, value: { kind: 'update' } };
 		} else {
-			this.#dataState = { kind: 'error' };
+			this.#signalStateChange({ kind: 'error', key: saveData.key }, opId);
 			return { ok: false, error: res.error };
 		}
 	}
 
 	async saveAs(context: CollectionAppContext, newItemKey: string): Promise<StoreSaveActionResult> {
-		let dataState = $state.snapshot(this.#dataState);
-		if (dataState.kind !== 'ready' && dataState.kind !== 'saving') {
-			return {
-				ok: true,
-				value: { kind: 'another-operation-in-progress', currentOperation: dataState }
-			};
-		}
-
+		let opId = this.#getOpId();
 		let contextSnapshot = $state.snapshot(context);
 
 		let prevItemKey = this.#record.key;
@@ -154,8 +161,7 @@ export class SmartStore<T> {
 		stampAppRecord(getDeviceId(), this.#record.meta);
 		let saveData = $state.snapshot(this.#record.data) as T;
 
-		this.#dataState = { kind: 'saving', key: this.#record.key };
-		let currentSaveOp = this.#saveOpCouter++;
+		this.#signalStateChange({ kind: 'create', key: newItemKey, prevKey: prevItemKey }, opId);
 
 		console.log('Creating New Data', saveData);
 		let res = await this.#repository.create(context, saveData);
@@ -166,17 +172,14 @@ export class SmartStore<T> {
 
 			if (contextSnapshot.itemKey === this.#context.itemKey) {
 				// this check is to prevent changing of working record during context changes
-				this.#record = newRecord;
+				deepAssign(this.#record, newRecord);
 			}
 
-			const dataStateAfterOp = $state.snapshot(this.#dataState) as AppDataState;
-			if (dataStateAfterOp.kind !== 'loading' && currentSaveOp === this.#saveOpCouter) {
-				this.#dataState = { kind: 'ready', key: newItemKey };
-			}
+			this.#signalStateChange({ kind: 'ready', key: newItemKey, prevKey: prevItemKey }, opId);
 
 			return { ok: true, value: { kind: 'create', newItemKey: newItemKey } };
 		} else {
-			this.#dataState = { kind: 'error' };
+			this.#signalStateChange({ kind: 'error', key: newItemKey }, opId);
 			this.#record.key = prevItemKey;
 
 			return { ok: false, error: res.error };
@@ -184,10 +187,6 @@ export class SmartStore<T> {
 	}
 
 	async delete(context: CollectionAppContext): Promise<CollectionAppBlankResult> {
-		// TODO AZ add result here also
-
-		if (this.#dataState.kind !== 'ready') return { ok: true, value: undefined };
-
 		let res = await this.#repository.delete(context, this.#record);
 
 		if (res.ok) {
@@ -204,8 +203,9 @@ export class SmartStore<T> {
 		placeHolderValue?: T,
 		options?: SmartStoreOptions<T>
 	) {
+		let opId = this.#getOpId();
+
 		let recordSnapshot = $state.snapshot(this.#record);
-		let prevContextSnapshot = $state.snapshot(this.#context);
 		let prevItemKey = recordSnapshot.key;
 		let newContextSnapshot = $state.snapshot(newContext);
 
@@ -231,9 +231,12 @@ export class SmartStore<T> {
 		}
 
 		console.log('Store Starting Store Reload. new Context', newContextSnapshot);
-		this.#dataState = { kind: 'loading', key: newContext.itemKey };
+		this.#signalStateChange(
+			{ kind: 'loading', key: newContext.itemKey, prevKey: prevItemKey },
+			opId
+		);
 		if (placeHolderValue) {
-			this.#record = this.#recordAdapter.constructRecord(placeHolderValue);
+			deepAssign(this.#record, this.#recordAdapter.constructRecord(placeHolderValue));
 		}
 
 		let { abort, abortablePromise } = abortable(this.#getItemWithCaching(this.#context));
@@ -247,8 +250,7 @@ export class SmartStore<T> {
 		}
 
 		if (!loadResult.ok) {
-			this.#dataState = { kind: 'error' };
-			console.error('Store Load Data Failed', loadResult.error);
+			this.#signalStateChange({ kind: 'error', key: this.#record.key }, opId);
 
 			return;
 		}
@@ -259,14 +261,25 @@ export class SmartStore<T> {
 			// TODO AZ refactor draft handling and normalization of drafts. - this if this shit is even needed
 			// - technically not needed or maybe needed on save instead of load. or maybe both
 			if (this.#context.editMode === 'draft') this.#record.key = '_draft_';
-			this.#dataState = { kind: 'ready', key: this.#record.key };
+			this.#signalStateChange({ kind: 'ready', key: this.#record.key, prevKey: prevItemKey }, opId);
 		} else {
 			const notFoundBehvior = this.#options?.loadNotFoundBehavior;
 			if (notFoundBehvior?.action === 'create-new') {
 				deepAssign(this.#record, this.#recordAdapter.constructRecord(notFoundBehvior.createObj()));
-				this.#dataState = { kind: 'ready', key: this.#record.key };
+
+				this.#signalStateChange(
+					{ kind: 'ready', key: this.#record.key, prevKey: prevItemKey },
+					opId
+				);
 			} else {
-				this.#dataState = { kind: 'record-not-found', key: this.#context.itemKey };
+				this.#signalStateChange(
+					{
+						kind: 'record-not-found',
+						key: this.#record.key,
+						prevKey: prevItemKey
+					},
+					opId
+				);
 			}
 		}
 	}

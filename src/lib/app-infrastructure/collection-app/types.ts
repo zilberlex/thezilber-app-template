@@ -62,14 +62,18 @@ interface AppRecordRepo<TData, TMeta, TError> {
 	): Promise<ActionResult<void, TError>>;
 }
 
+// TODO AZ figure out where to move this.
+type WithOpId<T> = T & { opId: number };
+
 type AppDataStateOld = 'saving' | 'ready' | 'loading' | 'record-not-found' | 'error';
 
 type AppDataState =
-	| { kind: 'saving'; key: string }
-	| { kind: 'loading'; key: string }
-	| { kind: 'record-not-found'; key: string }
-	| { kind: 'ready'; key: string }
-	| { kind: 'error' };
+	| { kind: 'create'; key: string; prevKey: string }
+	| { kind: 'saving'; key: string; prevKey: string }
+	| { kind: 'loading'; key: string; prevKey?: string }
+	| { kind: 'record-not-found'; key: string; prevKey?: string }
+	| { kind: 'ready'; key: string; prevKey?: string }
+	| { kind: 'error'; key: string };
 
 type CollectionAppEnvironment<T> = CollectionAppContext & CollectionAppRuntime<T>;
 

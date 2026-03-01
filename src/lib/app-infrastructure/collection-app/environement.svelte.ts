@@ -5,6 +5,7 @@ import { createCollectionAppContextManager } from './context-manager.svelte';
 import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';
 import { track } from '$lib/engine/svelte-helpers/track.svelte';
 import { appState } from '$lib/engine/state/application-state.svelte';
+import { DataStateManager } from './data-state-manager.svelte';
 
 export function collectionAppInit<T>(
 	dataPlaceholder: T,
@@ -24,6 +25,23 @@ export function collectionAppInit<T>(
 		recordAdapter,
 		storeOptions
 	);
+
+	let dataStateManager = new DataStateManager(store);
+
+	let currentDataState = $derived.by(() =>
+		dataStateManager.dataStates.get(contextManager.appContext.itemKey)
+	);
+
+	let debugHelper = $derived.by(() => {
+		let contextKey = contextManager.appContext.itemKey;
+		let dataKey = store.dataKey;
+		return {
+			bigIssue:
+				dataKey !== contextKey
+					? `Context Does Not Correspond with recordKey - contextKey: [${contextKey}], recordKey: [${dataKey}]`
+					: 'All Good'
+		};
+	});
 
 	console.log('Collection App Initiated. Context:', $state.snapshot(contextManager.appContext));
 
@@ -52,15 +70,18 @@ export function collectionAppInit<T>(
 			});
 
 			$effect(() => {
-				let dataState = store.dataState;
-				track(dataState);
+				track(currentDataState);
 
 				untrack(() => {
-					if (dataState.kind === 'record-not-found') {
+					if (currentDataState?.kind === 'record-not-found') {
 						console.log('itemKey not found - Rerouting to "/"');
 						contextManager.changeContext('');
 					}
 				});
+			});
+
+			$effect(() => {
+				appState.debug.viewObject = debugHelper;
 			});
 
 			return () => {
@@ -74,7 +95,13 @@ export function collectionAppInit<T>(
 			return store.data;
 		},
 		get dataState() {
-			return store.dataState;
+			// TODO AZ clean this up, maybe add another state kind.
+			return (
+				currentDataState ?? {
+					key: contextManager.appContext.itemKey,
+					kind: 'loading'
+				}
+			);
 		},
 		get editMode() {
 			return contextManager.appContext.editMode;
@@ -132,20 +159,8 @@ export function collectionAppInit<T>(
 
 	// TODO AZ add destroyer and a save on destroy.
 	let autoSaver = new AutoSaver(ret.data, () => ret.save());
-
-	let debugHelper = $derived.by(() => {
-		let contextKey = contextManager.appContext.itemKey;
-		let dataKey = store.dataKey;
-		return {
-			bigIssue:
-				dataKey !== contextKey
-					? `Context Does Not Correspond with recordKey - contextKey: [${contextKey}], recordKey: [${dataKey}]`
-					: 'All Good'
-		};
-	});
 	appState.debug.debugMode = true;
 	appState.debug.debugConsole = true;
-	appState.debug.viewObject = debugHelper;
 	return ret;
 }
 

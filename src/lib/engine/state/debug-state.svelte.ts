@@ -1,7 +1,7 @@
 export interface DebugState {
 	debugConsole: boolean;
 	debugMode: boolean;
-	viewObject?: any;
+	viewObject?: object;
 }
 
 export const debugState: DebugState = $state({
