@@ -70,7 +70,9 @@
 					break;
 				case 'ready':
 					temporaryMessageState.message =
-						editMode === 'permanent' ? `Ready [${dataState.key}]` : `Draft Ready`;
+						editMode === 'permanent'
+							? `Ready [${dataState.key}], prevKey [${dataState.prevKey}]`
+							: `Draft Ready`;
 					break;
 				default:
 					temporaryMessageState.message = 'Error';

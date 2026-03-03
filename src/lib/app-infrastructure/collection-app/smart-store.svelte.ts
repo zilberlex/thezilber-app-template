@@ -156,8 +156,6 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 
 		let prevItemKey = this.#record.key;
 
-		this.#record.key = newItemKey;
-
 		stampAppRecord(getDeviceId(), this.#record.meta);
 		let saveData = $state.snapshot(this.#record.data) as T;
 
@@ -208,6 +206,7 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 		let recordSnapshot = $state.snapshot(this.#record);
 		let prevItemKey = recordSnapshot.key;
 		let newContextSnapshot = $state.snapshot(newContext);
+		let newItemKey = newContextSnapshot.itemKey;
 
 		this.#reloadAbort?.();
 
@@ -218,7 +217,7 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 		}
 
 		// TODO AZ organize this mess
-		if (newContextSnapshot.itemKey === prevItemKey) {
+		if (newItemKey === prevItemKey) {
 			console.log(
 				'Store reload canceled - current record key matches new context:',
 				newContextSnapshot,
@@ -231,10 +230,8 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 		}
 
 		console.log('Store Starting Store Reload. new Context', newContextSnapshot);
-		this.#signalStateChange(
-			{ kind: 'loading', key: newContext.itemKey, prevKey: prevItemKey },
-			opId
-		);
+		this.#signalStateChange({ kind: 'loading', key: newItemKey, prevKey: prevItemKey }, opId);
+
 		if (placeHolderValue) {
 			deepAssign(this.#record, this.#recordAdapter.constructRecord(placeHolderValue));
 		}
@@ -250,7 +247,7 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 		}
 
 		if (!loadResult.ok) {
-			this.#signalStateChange({ kind: 'error', key: this.#record.key }, opId);
+			this.#signalStateChange({ kind: 'error', key: newItemKey }, opId);
 
 			return;
 		}
@@ -261,21 +258,20 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 			// TODO AZ refactor draft handling and normalization of drafts. - this if this shit is even needed
 			// - technically not needed or maybe needed on save instead of load. or maybe both
 			if (this.#context.editMode === 'draft') this.#record.key = '_draft_';
-			this.#signalStateChange({ kind: 'ready', key: this.#record.key, prevKey: prevItemKey }, opId);
+			this.#signalStateChange({ kind: 'ready', key: newItemKey, prevKey: prevItemKey }, opId);
 		} else {
 			const notFoundBehvior = this.#options?.loadNotFoundBehavior;
 			if (notFoundBehvior?.action === 'create-new') {
 				deepAssign(this.#record, this.#recordAdapter.constructRecord(notFoundBehvior.createObj()));
 
-				this.#signalStateChange(
-					{ kind: 'ready', key: this.#record.key, prevKey: prevItemKey },
-					opId
-				);
+				this.#signalStateChange({ kind: 'ready', key: newItemKey, prevKey: prevItemKey }, opId);
 			} else {
+				console.warn('Sinaling record-not-found', newItemKey);
+
 				this.#signalStateChange(
 					{
 						kind: 'record-not-found',
-						key: this.#record.key,
+						key: newItemKey,
 						prevKey: prevItemKey
 					},
 					opId
@@ -289,6 +285,8 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 	): Promise<CollectionAppLoadResult<RecordI<T>>> {
 		let itemKey = context.itemKey;
 		let record = await this.#cache.get(itemKey);
+		// todo az remove
+		record = undefined;
 
 		if (!record) {
 			let loadFromRepoResult = await this.#repository.load(context);

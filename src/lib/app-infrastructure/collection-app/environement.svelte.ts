@@ -113,6 +113,13 @@ export function collectionAppInit<T>(
 			let res = await store.save();
 
 			if (res.ok && res.value.kind === 'update-with-key-change') {
+				console.log(
+					'keychange changeContext new key:',
+					res.value.newItemKey,
+					'old key:',
+					res.value.prevItemKey
+				);
+
 				contextManager.changeContext(res.value.newItemKey);
 			}
 
@@ -120,15 +127,21 @@ export function collectionAppInit<T>(
 		},
 		saveAs: async (newItemKey: string) => {
 			try {
-				let ret = await store.saveAs(contextManager.appContext, newItemKey);
+				let res = await store.saveAs(contextManager.appContext, newItemKey);
 
-				if (ret.ok) {
-					if (ret.value.kind === 'update-with-key-change' || ret.value.kind === 'create') {
-						contextManager.changeContext(ret.value.newItemKey);
+				if (res.ok) {
+					if (res.value.kind === 'update-with-key-change' || res.value.kind === 'create') {
+						console.log(
+							'keychange changeContext new key:',
+							res.value.newItemKey,
+							'old key:',
+							res.value.prevItemKey ?? 'NoKeyInCreate'
+						);
+						contextManager.changeContext(res.value.newItemKey);
 					}
 				}
 
-				return ret as CollectionAppBlankResult;
+				return res as CollectionAppBlankResult;
 			} catch (e) {
 				console.error('saveAs Error', e);
 				return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
@@ -158,7 +171,7 @@ export function collectionAppInit<T>(
 	};
 
 	// TODO AZ add destroyer and a save on destroy.
-	let autoSaver = new AutoSaver(ret.data, () => ret.save());
+	// let autoSaver = new AutoSaver(ret.data, () => ret.save());
 	appState.debug.debugMode = true;
 	appState.debug.debugConsole = true;
 	return ret;

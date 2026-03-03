@@ -69,6 +69,13 @@ export function createCollectionAppContextManager<
 
 			return {
 				undoChangeContext: () => {
+					console.warn(
+						'Undoing Context Change new Key:',
+						prevContext.itemKey,
+						'prev itemKey',
+						itemKey
+					);
+
 					goto(getContextPath(_baseUrlPath, prevContext.itemKey), { replaceState: true });
 				}
 			};
