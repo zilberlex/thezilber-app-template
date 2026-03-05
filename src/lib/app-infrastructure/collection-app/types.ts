@@ -51,7 +51,8 @@ interface AppRecordRepo<TData, TMeta, TError> {
 
 	create(
 		context: CollectionAppContext,
-		data: TData
+		data: TData,
+		newItemKey: string
 	): Promise<ActionResult<DbAppRecord<TData, TMeta>, TError>>;
 	load(
 		context: CollectionAppContext
@@ -67,13 +68,14 @@ type WithOpId<T> = T & { opId: number };
 
 type AppDataStateOld = 'saving' | 'ready' | 'loading' | 'record-not-found' | 'error';
 
-type AppDataState =
-	| { kind: 'create'; key: string; prevKey: string }
+type AppDataState = { context: CollectionAppContext } & (
+	| { kind: 'creating'; key: string; prevKey: string }
 	| { kind: 'saving'; key: string; prevKey: string }
 	| { kind: 'loading'; key: string; prevKey?: string }
 	| { kind: 'record-not-found'; key: string; prevKey?: string }
 	| { kind: 'ready'; key: string; prevKey?: string }
-	| { kind: 'error'; key: string };
+	| { kind: 'error'; key: string }
+);
 
 type CollectionAppEnvironment<T> = CollectionAppContext & CollectionAppRuntime<T>;
 
@@ -82,14 +84,19 @@ type DataManagerOptions<T> = {
 	loadNotFoundNewObject?: () => T;
 };
 
-type CollectionAppError = { kind: 'Key Already Exists' | 'General Error'; message: string };
+type CollectionAppError = {
+	context: CollectionAppContext;
+	kind: 'Key Already Exists' | 'General Error';
+	message: string;
+};
 type CollectionAppLoadResult<T> = ActionResult<T | undefined, CollectionAppError>;
 type CollectionAppBlankResult = ActionResult<void, CollectionAppError>;
 
-type StoreSaveResult =
+type StoreSaveResult = { context: CollectionAppContext } & (
 	| { kind: 'create'; newItemKey: string }
 	| { kind: 'update-with-key-change'; prevItemKey: string; newItemKey: string }
 	| { kind: 'update' }
-	| { kind: 'another-operation-in-progress'; currentOperation: AppDataState };
+	| { kind: 'another-operation-in-progress'; currentOperation: AppDataState }
+);
 
 type StoreSaveActionResult = ActionResult<StoreSaveResult, CollectionAppError>;

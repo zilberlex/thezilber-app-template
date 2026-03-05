@@ -1,7 +1,7 @@
 import { getErrorMessage } from '$lib/engine/general-js-ts/extract-error-message';
 import { untrack } from 'svelte';
 import { AutoSaver } from '../auto-saver.svelte';
-import { createCollectionAppContextManager } from './context-manager.svelte';
+import { createCollectionAppContextManager, ctxEquals } from './context-manager.svelte';
 import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';
 import { track } from '$lib/engine/svelte-helpers/track.svelte';
 import { appState } from '$lib/engine/state/application-state.svelte';
@@ -99,7 +99,8 @@ export function collectionAppInit<T>(
 			return (
 				currentDataState ?? {
 					key: contextManager.appContext.itemKey,
-					kind: 'loading'
+					kind: 'loading',
+					context: contextManager.appContext
 				}
 			);
 		},
@@ -112,7 +113,11 @@ export function collectionAppInit<T>(
 		save: async () => {
 			let res = await store.save();
 
-			if (res.ok && res.value.kind === 'update-with-key-change') {
+			if (
+				res.ok &&
+				res.value.kind === 'update-with-key-change' &&
+				ctxEquals(res.value.context, contextManager.appContext)
+			) {
 				console.log(
 					'keychange changeContext new key:',
 					res.value.newItemKey,
@@ -120,36 +125,47 @@ export function collectionAppInit<T>(
 					res.value.prevItemKey
 				);
 
-				contextManager.changeContext(res.value.newItemKey);
+				contextManager.replaceContext(res.value.context, res.value.newItemKey);
 			}
 
 			return res as CollectionAppBlankResult;
 		},
 		saveAs: async (newItemKey: string) => {
+			let ctxSnapshot = $state.snapshot(contextManager.appContext);
 			try {
+				// TODO AZ make store receive snapshots everywhere.
 				let res = await store.saveAs(contextManager.appContext, newItemKey);
 
 				if (res.ok) {
 					if (res.value.kind === 'update-with-key-change' || res.value.kind === 'create') {
-						console.log(
-							'keychange changeContext new key:',
-							res.value.newItemKey,
-							'old key:',
-							res.value.prevItemKey ?? 'NoKeyInCreate'
-						);
-						contextManager.changeContext(res.value.newItemKey);
+						if (res.value.kind === 'create') {
+							console.log('keychange Create changeContext new key:', res.value.newItemKey);
+							contextManager.changeContext(res.value.newItemKey);
+						} else {
+							console.log(
+								'keychange ReplaceKey changeContext new key:',
+								res.value.newItemKey,
+								'old key:',
+								res.value.prevItemKey ?? 'NoKeyInCreate'
+							);
+							contextManager.replaceContext(res.value.context, res.value.newItemKey);
+						}
 					}
 				}
 
 				return res as CollectionAppBlankResult;
 			} catch (e) {
 				console.error('saveAs Error', e);
-				return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
+				return {
+					ok: false,
+					error: { kind: 'General Error', message: getErrorMessage(e), context: ctxSnapshot }
+				};
 			}
 		},
 		delete: async () => {
+			let contextSnapshot = $state.snapshot(contextManager.appContext);
 			try {
-				let ret = await store.delete(contextManager.appContext);
+				let ret = await store.delete(contextSnapshot);
 
 				if (ret.ok) {
 					if (contextManager.appContext.editMode === 'permanent') {
@@ -165,7 +181,10 @@ export function collectionAppInit<T>(
 				return ret as CollectionAppBlankResult;
 			} catch (e) {
 				console.error('delete Error', e);
-				return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
+				return {
+					ok: false,
+					error: { kind: 'General Error', message: getErrorMessage(e), context: contextSnapshot }
+				};
 			}
 		}
 	};

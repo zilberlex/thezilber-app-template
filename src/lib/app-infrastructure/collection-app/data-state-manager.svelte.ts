@@ -18,7 +18,8 @@ export class DataStateManager {
 			if (!currentDataStateEntry) {
 				currentDataStateEntry = {
 					kind: 'ready',
-					key
+					key,
+					context: ds.context
 				};
 			}
 

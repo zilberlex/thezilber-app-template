@@ -9,9 +9,14 @@ type CollectionAppContextManager<TContext extends CollectionAppContext> = {
 	// Tech Debt
 	appContextChangeEvent: CollectionAppContextChangeEvent | undefined;
 	changeContext: (itemKey: string) => { undoChangeContext: () => void };
+	replaceContext: (prevContext: TContext, newItemKey: string) => void;
 };
 
 const DRAFT_ITEM_KEY = '_draft_';
+
+export function ctxEquals(ctx1: CollectionAppContext, ctx2: CollectionAppContext) {
+	return ctx1.itemKey === ctx2.itemKey;
+}
 
 export function createCollectionAppContextManager<
 	TContext extends CollectionAppContext
@@ -79,6 +84,21 @@ export function createCollectionAppContextManager<
 					goto(getContextPath(_baseUrlPath, prevContext.itemKey), { replaceState: true });
 				}
 			};
+		},
+		replaceContext(prevContext: TContext, newItemKey) {
+			if (ctxEquals(prevContext, appContext)) {
+				goto(getContextPath(_baseUrlPath, newItemKey), { replaceState: true });
+			} else {
+				console.warn(
+					'Tried to replace *stale* context Ignoring Replace Context... context for replacement',
+					prevContext,
+					'new itemKey',
+					newItemKey,
+					'current context:',
+					appContext
+				);
+			}
+			// TODO AZ make a cache for non current context changes so it can be changed on history navigation
 		}
 	};
 }

@@ -13,7 +13,6 @@ import {
 import type { CbRepo } from './types';
 import { Dexie } from 'dexie';
 import { getErrorMessage } from '$lib/engine/general-js-ts/extract-error-message';
-import { error } from '@sveltejs/kit';
 
 const CommandBuilderDraftStateStorageKey = 'DynamicForm';
 
@@ -43,16 +42,19 @@ class CommandBuilderRepo implements CbRepo {
 			await promise;
 			return { ok: true, value: undefined };
 		} catch (e) {
-			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
+			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e), context } };
 		}
 	}
 
 	async create(
 		context: CollectionAppContext,
-		data: CbState
+		data: CbState,
+		newItemKey: string
 	): Promise<ActionResult<DbCbRecord, CollectionAppError>> {
-		let itemKey = data.commandName;
+		let itemKey = newItemKey;
+		data.commandName = newItemKey;
 		const newDbRecord = cbRecordAdaper.constructDbRecord(data);
+		await sleep(500);
 		console.log('creating new record. itemKey', itemKey, 'DbRecord', newDbRecord);
 		try {
 			const initializedRecord = await saveCommandDb(newDbRecord);
@@ -62,7 +64,11 @@ class CommandBuilderRepo implements CbRepo {
 				console.warn('Create, got ConstraintError', e);
 				return {
 					ok: false,
-					error: { kind: 'Key Already Exists', message: `Item Key: [${itemKey}] already exists` }
+					error: {
+						kind: 'Key Already Exists',
+						message: `Item Key: [${itemKey}] already exists`,
+						context
+					}
 				};
 			} else {
 				throw e;
@@ -92,7 +98,7 @@ class CommandBuilderRepo implements CbRepo {
 			console.log(`Fetched Command ${itemKey}, editMode ${context.editMode}, Command: `, result);
 			return { ok: true, value: result };
 		} catch (e) {
-			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
+			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e), context } };
 		}
 	}
 
@@ -111,7 +117,7 @@ class CommandBuilderRepo implements CbRepo {
 			await promise;
 			return { ok: true, value: undefined };
 		} catch (e) {
-			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e) } };
+			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e), context } };
 		}
 	}
 }
