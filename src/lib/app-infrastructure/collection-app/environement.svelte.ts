@@ -1,6 +1,5 @@
 import { getErrorMessage } from '$lib/engine/general-js-ts/extract-error-message';
 import { untrack } from 'svelte';
-import { AutoSaver } from '../auto-saver.svelte';
 import { createCollectionAppContextManager, ctxEquals } from './context-manager.svelte';
 import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';
 import { track } from '$lib/engine/svelte-helpers/track.svelte';
@@ -28,10 +27,22 @@ export function collectionAppInit<T>(
 
 	let dataStateManager = new DataStateManager(store);
 
-	let currentDataState = $derived.by(() =>
-		dataStateManager.dataStates.get(contextManager.appContext.itemKey)
-	);
+	let currentlySavedNewValue = $state<string>();
 
+	let currentDataState = $derived.by(() => {
+		console.log(
+			'contextManager.appContext.itemKey change, changing current data state. Key:',
+			contextManager.appContext.itemKey
+		);
+
+		if (currentlySavedNewValue) {
+			return dataStateManager.dataStates.get(currentlySavedNewValue);
+		}
+
+		return dataStateManager.dataStates.get(contextManager.appContext.itemKey);
+	});
+
+	currentDataState;
 	let debugHelper = $derived.by(() => {
 		let contextKey = contextManager.appContext.itemKey;
 		let dataKey = store.dataKey;
@@ -134,6 +145,8 @@ export function collectionAppInit<T>(
 			let ctxSnapshot = $state.snapshot(contextManager.appContext);
 			try {
 				// TODO AZ make store receive snapshots everywhere.
+
+				currentlySavedNewValue = newItemKey;
 				let res = await store.saveAs(contextManager.appContext, newItemKey);
 
 				if (res.ok) {
@@ -152,6 +165,8 @@ export function collectionAppInit<T>(
 						}
 					}
 				}
+
+				currentlySavedNewValue = undefined;
 
 				return res as CollectionAppBlankResult;
 			} catch (e) {

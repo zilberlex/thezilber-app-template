@@ -56,27 +56,33 @@
 		track(dataState);
 
 		untrack(() => {
+			let message = '';
 			switch (dataState.kind) {
 				case 'saving':
-					temporaryMessageState.message =
+					message =
 						editMode === 'permanent' ? `Saving Command [${dataState.key}]...` : `Saving Draft...`;
 					break;
 				case 'loading':
-					temporaryMessageState.message =
+					message =
 						editMode === 'permanent' ? `Loading Command [${dataState.key}]...` : `Loading Draft...`;
 					break;
 				case 'record-not-found':
-					temporaryMessageState.message = `Record Not Found [${dataState.key}]`;
+					message = `Record Not Found [${dataState.key}]`;
 					break;
 				case 'ready':
-					temporaryMessageState.message =
-						editMode === 'permanent'
-							? `Ready [${dataState.key}], prevKey [${dataState.prevKey}]`
-							: `Draft Ready`;
+					message = editMode === 'permanent' ? `Ready [${dataState.key}]` : `Draft Ready`;
+					break;
+				case 'creating':
+					message = editMode === 'permanent' ? `Creating [${dataState.key}]` : `Draft Ready`;
 					break;
 				default:
-					temporaryMessageState.message = 'Error';
+					message = `Error [${dataState.kind}]`;
 			}
+			let suffix = appState.debug
+				? `. (Previous Key ${'prevKey' in dataState ? (dataState.prevKey ?? '') : ''})`
+				: '';
+
+			temporaryMessageState.message = message + suffix;
 		});
 	});
 

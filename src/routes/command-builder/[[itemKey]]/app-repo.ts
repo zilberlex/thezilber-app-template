@@ -54,7 +54,7 @@ class CommandBuilderRepo implements CbRepo {
 		let itemKey = newItemKey;
 		data.commandName = newItemKey;
 		const newDbRecord = cbRecordAdaper.constructDbRecord(data);
-		await sleep(500);
+		await sleep(3000);
 		console.log('creating new record. itemKey', itemKey, 'DbRecord', newDbRecord);
 		try {
 			const initializedRecord = await saveCommandDb(newDbRecord);

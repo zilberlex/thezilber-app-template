@@ -6,6 +6,8 @@ class TemporaryMessageState {
 	#counter = $state(0);
 	#isShowing = new AutoResetValue(false, 2000);
 
+	messageTimeoutMs = 10000;
+
 	get message() {
 		track(this.#counter);
 		return this.#message;
@@ -23,7 +25,7 @@ class TemporaryMessageState {
 	setMessageWithTimout(v: string, timeoutMs?: number) {
 		this.#counter++;
 		this.#message = v;
-		this.#isShowing.setWithTimeout(true, timeoutMs);
+		this.#isShowing.setWithTimeout(true, timeoutMs ?? this.messageTimeoutMs);
 	}
 }
 
