@@ -5,6 +5,15 @@ import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';
 import { track } from '$lib/engine/svelte-helpers/track.svelte';
 import { appState } from '$lib/engine/state/application-state.svelte';
 import { DataStateManager } from './data-state-manager.svelte';
+import type {
+	AppRecordRepo,
+	CollectionAppBlankResult,
+	CollectionAppContext,
+	CollectionAppEnvironment,
+	CollectionAppError,
+	CollectionAppRecordAdapter,
+	SyncableAppRecordMetadata
+} from './types';
 
 export function collectionAppInit<T>(
 	dataPlaceholder: T,

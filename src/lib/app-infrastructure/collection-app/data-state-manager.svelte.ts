@@ -1,5 +1,6 @@
 import type { Dispatcher } from '$lib/engine/patterns/observer';
 import { SvelteMap } from 'svelte/reactivity';
+import type { AppDataState, WithOpId } from './types';
 
 export class DataStateManager {
 	#dataStates = new SvelteMap<string, AppDataState>();

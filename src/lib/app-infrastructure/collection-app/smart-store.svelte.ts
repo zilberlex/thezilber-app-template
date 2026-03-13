@@ -8,6 +8,29 @@ import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
 import { deepAssign } from '../deep-assign';
 import { Cache } from './cache';
 import { stampAppRecord } from './data';
+import type {
+	AppDataState,
+	AppRecordRepo,
+	CollectionAppBlankResult,
+	CollectionAppContext,
+	CollectionAppError,
+	CollectionAppLoadResult,
+	CollectionAppRecordAdapter,
+	StoreSaveActionResult,
+	SyncableAppRecordMetadata,
+	WithOpId
+} from './types';
+
+type SaveOperationsParams =
+	| {
+			kind: 'update';
+			context: CollectionAppContext;
+	  }
+	| {
+			kind: 'create';
+			context: CollectionAppContext;
+			newItemKey: string;
+	  };
 
 export type SmartStoreOptions<T> = {
 	loadNotFoundBehavior: { action: 'error' } | { action: 'create-new'; createObj: () => T };
@@ -89,7 +112,7 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 		return this.#dataStateDispatacher.unregister(handler);
 	}
 
-	#getOpId(): number {
+	#nextOpId(): number {
 		return ++this.#runningOpId;
 	}
 
@@ -97,38 +120,71 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 		this.#dataStateDispatacher.signal({ ...dataState, opId });
 	}
 
-	async save(): Promise<StoreSaveActionResult> {
-		let opId = this.#getOpId();
-		let contextSnapshot = $state.snapshot(this.#context);
+	async #saveOperations(saveOperationsParams: SaveOperationsParams) {
+		const { kind: operation, context } = saveOperationsParams;
+		let opId = this.#nextOpId();
+
+		let contextSnapshot = $state.snapshot(context);
 
 		stampAppRecord(getDeviceId(), this.#record.meta);
-		let saveData = $state.snapshot(this.#record) as AppRecord<T, SyncableAppRecordMetadata>;
+		let saveRecord = $state.snapshot(this.#record) as AppRecord<T, SyncableAppRecordMetadata>;
 
-		let recordSnapshot = $state.snapshot(this.#record);
+		let prevItemKey = contextSnapshot.itemKey;
+		let newItemKey = operation === 'update' ? saveRecord.key : saveOperationsParams.newItemKey;
+
+		let signalKind: 'saving' | 'creating';
+		switch (operation) {
+			case 'update':
+				signalKind = 'saving';
+
+				break;
+			case 'create':
+				signalKind = 'creating';
+		}
+		console.log(`${operation === 'update' ? 'Saving' : 'Creating'}  Data...`, saveRecord.data);
 
 		this.#signalStateChange(
 			{
 				context: contextSnapshot,
-				kind: 'saving',
-				key: saveData.key,
-				prevKey: contextSnapshot.itemKey
+				kind: signalKind,
+				key: newItemKey,
+				prevKey: prevItemKey
 			},
 			opId
 		);
 
-		let res = await this.#repository.update(this.#context, saveData);
+		let res;
+		if (operation === 'update') {
+			console.log('update');
+
+			res = await this.#repository.update(this.#context, saveRecord);
+		} else {
+			let saveData = saveRecord.data;
+			console.log('create');
+			res = await this.#repository.create(this.#context, saveData, newItemKey);
+		}
+
+		return { repoOpResult: res, opId, newItemKey, prevItemKey, contextSnapshot };
+	}
+
+	async save(): Promise<StoreSaveActionResult> {
+		let {
+			repoOpResult: res,
+			opId,
+			prevItemKey,
+			newItemKey,
+			contextSnapshot
+		} = await this.#saveOperations({ context: this.#context, kind: 'update' });
 
 		if (res.ok) {
-			let prevItemKey = contextSnapshot.itemKey;
-			let newItemKey = recordSnapshot.key;
-
-			await this.#cache.setOrUpdateKey(newItemKey, saveData, prevItemKey);
+			let record = this.#recordAdapter.fromDb(res.value);
+			await this.#cache.setOrUpdateKey(newItemKey, record, prevItemKey);
 
 			this.#signalStateChange(
 				{
 					context: contextSnapshot,
 					kind: 'ready',
-					key: saveData.key,
+					key: newItemKey,
 					prevKey: prevItemKey
 				},
 				opId
@@ -148,28 +204,20 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 
 			return { ok: true, value: { kind: 'update', context: contextSnapshot } };
 		} else {
-			this.#signalStateChange({ kind: 'error', key: saveData.key, context: contextSnapshot }, opId);
+			// TODO AZ newItemKey here is potential for issues.
+			this.#signalStateChange({ kind: 'error', key: newItemKey, context: contextSnapshot }, opId);
 			return { ok: false, error: res.error };
 		}
 	}
 
 	async saveAs(context: CollectionAppContext, newItemKey: string): Promise<StoreSaveActionResult> {
-		let opId = this.#getOpId();
-		let contextSnapshot = $state.snapshot(context);
-
-		let prevItemKey = this.#record.key;
-
-		stampAppRecord(getDeviceId(), this.#record.meta);
-
-		let saveData = $state.snapshot(this.#record.data) as T;
-
-		this.#signalStateChange(
-			{ kind: 'creating', key: newItemKey, prevKey: prevItemKey, context: contextSnapshot },
-			opId
-		);
-
-		console.log('Creating New Data', saveData);
-		let res = await this.#repository.create(context, saveData, newItemKey);
+		let {
+			repoOpResult: res,
+			opId,
+			prevItemKey,
+			newItemKey: newItemKeyRet,
+			contextSnapshot
+		} = await this.#saveOperations({ context, kind: 'create', newItemKey });
 
 		if (res.ok) {
 			let newRecord = this.#recordAdapter.fromDb(res.value);
@@ -181,7 +229,7 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 			}
 
 			this.#signalStateChange(
-				{ kind: 'ready', context: contextSnapshot, key: newItemKey, prevKey: prevItemKey },
+				{ kind: 'ready', context: contextSnapshot, key: newItemKeyRet, prevKey: prevItemKey },
 				opId
 			);
 
@@ -191,7 +239,6 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 			};
 		} else {
 			this.#signalStateChange({ kind: 'error', key: newItemKey, context: contextSnapshot }, opId);
-			this.#record.key = prevItemKey;
 
 			return { ok: false, error: res.error };
 		}
@@ -214,7 +261,7 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 		placeHolderValue?: T,
 		options?: SmartStoreOptions<T>
 	) {
-		let opId = this.#getOpId();
+		let opId = this.#nextOpId();
 
 		let recordSnapshot = $state.snapshot(this.#record);
 		let prevItemKey = recordSnapshot.key;
@@ -311,8 +358,6 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 	): Promise<CollectionAppLoadResult<RecordI<T>>> {
 		let itemKey = context.itemKey;
 		let record = await this.#cache.get(itemKey);
-		// todo az remove
-		record = undefined;
 
 		if (!record) {
 			let loadFromRepoResult = await this.#repository.load(context);
@@ -323,7 +368,7 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 
 			if (loadFromRepoResult.value) {
 				record = this.#recordAdapter.fromDb(loadFromRepoResult.value);
-				await this.#cache.setOrUpdateKey(itemKey, record);
+				await this.#cache.setOrUpdateKey(itemKey, record as RecordI<T>);
 			}
 		}
 

@@ -1,7 +1,7 @@
-type EditMode = 'permanent' | 'draft';
-type ItemKey = '_draft' | string;
+export type EditMode = 'permanent' | 'draft';
+export type ItemKey = '_draft_' | string;
 
-type SyncableAppRecordMetadata = {
+export type SyncableAppRecordMetadata = {
 	vc: VectorClock;
 
 	modifiedAt: number;
@@ -9,9 +9,9 @@ type SyncableAppRecordMetadata = {
 	isDeleted?: boolean;
 };
 
-type CollectionAppRecord<TData> = AppRecord<TData, SyncableAppRecordMetadata>;
+export type CollectionAppRecord<TData> = AppRecord<TData, SyncableAppRecordMetadata>;
 
-type CollectionAppRuntime<T> = {
+export type CollectionAppRuntime<T> = {
 	get data(): T;
 	dataState: AppDataState;
 	save(): Promise<CollectionAppBlankResult>;
@@ -20,18 +20,18 @@ type CollectionAppRuntime<T> = {
 	destroy(): void;
 };
 
-type CollectionAppContext = {
+export type CollectionAppContext = {
 	editMode: EditMode;
 	itemKey: string;
 };
 
-type CollectionAppContextChangeEvent = {
+export type CollectionAppContextChangeEvent = {
 	kind: 'data-key-update' | 'browser-navigation';
 	prevContext: CollectionAppContext;
 	newContext: CollectionAppContext;
 };
 
-type CollectionAppRecordAdapter<TData, TMeta> = {
+export type CollectionAppRecordAdapter<TData, TMeta> = {
 	constructRecord(data: TData): AppRecord<TData, TMeta>;
 	constructDbRecord(data: TData): DbAppRecord<TData, TMeta>;
 	fromDb: (dbRecord: DbAppRecord<TData, TMeta>) => AppRecord<TData, TMeta>;
@@ -42,12 +42,12 @@ type CollectionAppRecordAdapter<TData, TMeta> = {
 // If value not found it is undefined rather than error
 type Ok<T> = { ok: true; value: T };
 type Err<E> = { ok: false; error: E };
-type ActionResult<T, E> = Ok<T> | Err<E>;
-interface AppRecordRepo<TData, TMeta, TError> {
+export type ActionResult<T, E> = Ok<T> | Err<E>;
+export interface AppRecordRepo<TData, TMeta, TError> {
 	update(
 		context: CollectionAppContext,
 		record: DbAppRecord<TData, TMeta>
-	): Promise<ActionResult<void, TError>>;
+	): Promise<ActionResult<DbAppRecord<TData, TMeta>, TError>>;
 
 	create(
 		context: CollectionAppContext,
@@ -64,11 +64,11 @@ interface AppRecordRepo<TData, TMeta, TError> {
 }
 
 // TODO AZ figure out where to move this.
-type WithOpId<T> = T & { opId: number };
+export type WithOpId<T> = T & { opId: number };
 
-type AppDataStateOld = 'saving' | 'ready' | 'loading' | 'record-not-found' | 'error';
+export type AppDataStateOld = 'saving' | 'ready' | 'loading' | 'record-not-found' | 'error';
 
-type AppDataState = { context: CollectionAppContext } & (
+export type AppDataState = { context: CollectionAppContext } & (
 	| { kind: 'creating'; key: string; prevKey: string }
 	| { kind: 'saving'; key: string; prevKey: string }
 	| { kind: 'loading'; key: string; prevKey?: string }
@@ -77,26 +77,26 @@ type AppDataState = { context: CollectionAppContext } & (
 	| { kind: 'error'; key: string }
 );
 
-type CollectionAppEnvironment<T> = CollectionAppContext & CollectionAppRuntime<T>;
+export type CollectionAppEnvironment<T> = CollectionAppContext & CollectionAppRuntime<T>;
 
-type DataManagerOptions<T> = {
+export type DataManagerOptions<T> = {
 	loadNotFoundBehavior: 'error' | 'create-new';
 	loadNotFoundNewObject?: () => T;
 };
 
-type CollectionAppError = {
+export type CollectionAppError = {
 	context: CollectionAppContext;
 	kind: 'Key Already Exists' | 'General Error';
 	message: string;
 };
-type CollectionAppLoadResult<T> = ActionResult<T | undefined, CollectionAppError>;
-type CollectionAppBlankResult = ActionResult<void, CollectionAppError>;
+export type CollectionAppLoadResult<T> = ActionResult<T | undefined, CollectionAppError>;
+export type CollectionAppBlankResult = ActionResult<void, CollectionAppError>;
 
-type StoreSaveResult = { context: CollectionAppContext } & (
+export type StoreSaveResult = { context: CollectionAppContext } & (
 	| { kind: 'create'; newItemKey: string }
 	| { kind: 'update-with-key-change'; prevItemKey: string; newItemKey: string }
 	| { kind: 'update' }
 	| { kind: 'another-operation-in-progress'; currentOperation: AppDataState }
 );
 
-type StoreSaveActionResult = ActionResult<StoreSaveResult, CollectionAppError>;
+export type StoreSaveActionResult = ActionResult<StoreSaveResult, CollectionAppError>;

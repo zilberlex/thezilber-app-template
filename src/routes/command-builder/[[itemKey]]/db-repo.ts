@@ -31,8 +31,10 @@ export async function saveCommandDb(command: DbCbRecord) {
 	return command;
 }
 
-export async function updateCommandDb(dbCommand: DbCbRecord) {
+export async function updateCommandDb(dbCommand: DbCbRecord): Promise<DbCbRecord> {
 	await commandBuilderDb.commands.put(dbCommand);
+
+	return dbCommand;
 }
 
 export async function deleteCommandById(redordId: string): Promise<void> {

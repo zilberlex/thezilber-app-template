@@ -1,10 +1,8 @@
-export function saveLocalStorage(key: string, object: unknown) {
-	try {
-		const jsonStr = JSON.stringify(object);
-		window.localStorage.setItem(key, jsonStr);
-	} catch {
-		console.error('error at saving item to localStorage, key', key, 'value');
-	}
+export function saveLocalStorage<T>(key: string, object: T): T {
+	const jsonStr = JSON.stringify(object);
+	window.localStorage.setItem(key, jsonStr);
+
+	return object;
 }
 
 export function loadLocalStorage(key: string) {

@@ -13,6 +13,11 @@ import {
 import type { CbRepo } from './types';
 import { Dexie } from 'dexie';
 import { getErrorMessage } from '$lib/engine/general-js-ts/extract-error-message';
+import type {
+	ActionResult,
+	CollectionAppContext,
+	CollectionAppError
+} from '$lib/app-infrastructure/collection-app/types';
 
 const CommandBuilderDraftStateStorageKey = 'DynamicForm';
 
@@ -24,23 +29,24 @@ class CommandBuilderRepo implements CbRepo {
 	async update(
 		context: CollectionAppContext,
 		record: CbRecord
-	): Promise<ActionResult<void, CollectionAppError>> {
+	): Promise<ActionResult<DbCbRecord, CollectionAppError>> {
 		const storageType = context.editMode;
 		console.log(
 			`Saving data to repo [${storageType === 'permanent' ? 'IndexDb' : 'Local Storage'}]. itemKey: [${context.itemKey}]`
 		);
 		await sleep(2000);
 
-		let promise: Promise<void>;
+		let promise: Promise<DbCbRecord>;
 		if (storageType === 'permanent') {
 			promise = updateCommandDb(record);
 		} else {
-			promise = Promise.resolve(saveLocalStorage(CommandBuilderDraftStateStorageKey, record));
+			saveLocalStorage(CommandBuilderDraftStateStorageKey, record);
+			promise = Promise.resolve(record);
 		}
 
 		try {
 			await promise;
-			return { ok: true, value: undefined };
+			return { ok: true, value: record };
 		} catch (e) {
 			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e), context } };
 		}

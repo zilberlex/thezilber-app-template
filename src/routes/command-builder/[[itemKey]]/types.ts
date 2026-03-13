@@ -1,4 +1,11 @@
 import { createSyncableRecordMetadata } from '$lib/app-infrastructure/collection-app/data';
+import type {
+	AppRecordRepo,
+	CollectionAppError,
+	CollectionAppRecord,
+	CollectionAppRecordAdapter,
+	SyncableAppRecordMetadata
+} from '$lib/app-infrastructure/collection-app/types';
 import type { DynamicForm } from '$lib/app/dynamic-form/dynamic-form-types';
 import { generateId } from '$lib/engine/crypto/crypto-utils';
 import { createDbAppRecord } from '$lib/engine/storage/data/data';
