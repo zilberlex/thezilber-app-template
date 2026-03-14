@@ -12,15 +12,15 @@
 </script>
 
 <div class="application-foreground">
-	<div class="modal-layer">
+	<div class="layer modal-layer">
 		<DialogAnchor />
 	</div>
 
-	<div class="application-layer">
+	<div class="layer application-layer">
 		<TempMessageDisplay />
 	</div>
 
-	<div class="tooltip-layer">
+	<div class="layer tooltip-layer">
 		{#if appState.userAgentType === 'desktop'}
 			<MouseTracker shouldUpdatePos={showHotkeyTooltip}>
 				<HotkeyTooltip bind:thisElement={hotkeyTooltip} bind:show={showHotkeyTooltip} />
@@ -35,7 +35,7 @@
 	</div>
 
 	{#if appState.debug.debugConsole}
-		<div class="debug-layer">
+		<div class="layer debug-layer">
 			<DebugConsole />
 		</div>
 	{/if}
@@ -47,6 +47,13 @@
 		inset: 0;
 		pointer-events: none;
 		z-index: 9999;
+		height: 100dvh;
+
+		.layer {
+			position: absolute;
+			inset: 0;
+			min-height: 0;
+		}
 	}
 
 	.modal-layer {

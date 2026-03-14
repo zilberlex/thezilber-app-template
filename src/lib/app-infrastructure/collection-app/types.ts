@@ -13,7 +13,8 @@ export type CollectionAppRecord<TData> = AppRecord<TData, SyncableAppRecordMetad
 
 export type CollectionAppRuntime<T> = {
 	get data(): T;
-	dataState: AppDataState;
+	currentDataState: AppDataState;
+	projectedDataState: AppDataState | undefined;
 	save(): Promise<CollectionAppBlankResult>;
 	saveAs(itemKey: string): Promise<CollectionAppBlankResult>;
 	delete(): Promise<CollectionAppBlankResult>;
@@ -36,6 +37,17 @@ export type CollectionAppRecordAdapter<TData, TMeta> = {
 	constructDbRecord(data: TData): DbAppRecord<TData, TMeta>;
 	fromDb: (dbRecord: DbAppRecord<TData, TMeta>) => AppRecord<TData, TMeta>;
 	toDb: (AppRecord: AppRecord<TData, TMeta>) => DbAppRecord<TData, TMeta>;
+};
+
+export type CollectionAppContextManager<TContext extends CollectionAppContext> = {
+	appContext: TContext;
+	projectedContext: TContext | undefined;
+	// Tech Debt
+	appContextChangeEvent: CollectionAppContextChangeEvent | undefined;
+	changeContext: (itemKey: string) => { undoChangeContext: () => void };
+	replaceContext: (prevContext: TContext, newItemKey: string) => void;
+	changeProjectedContext: (itemKey: string) => void;
+	resetProjectedContext: () => void;
 };
 
 // todo az move one layer type

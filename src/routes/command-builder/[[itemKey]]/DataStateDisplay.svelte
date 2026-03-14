@@ -7,19 +7,25 @@
 
 	let { appEnv }: { appEnv: CollectionAppEnvironment<any> } = $props();
 
-	let dataState = $derived(appEnv.dataState);
+	let currentDataState = $derived(appEnv.currentDataState);
+	let projectedDataState = $derived(appEnv.projectedDataState);
 
 	let editMode = $derived(appEnv.editMode);
 
 	$effect(() => {
-		track(dataState);
+		track(currentDataState, projectedDataState);
+		console.log('WOW currentDataState', currentDataState);
+		console.log('WOW projectedDataState', projectedDataState);
 
 		untrack(() => {
+			let dataState = projectedDataState ?? currentDataState;
 			let message = '';
 			switch (dataState.kind) {
 				case 'saving':
 					message =
-						editMode === 'permanent' ? `Saving Command [${dataState.key}]...` : `Saving Draft...`;
+						editMode === 'permanent'
+							? `Saving Command [${dataState.key}]...`
+							: `Saving Draft As...`;
 					break;
 				case 'loading':
 					message =
@@ -32,16 +38,22 @@
 					message = editMode === 'permanent' ? `Ready [${dataState.key}]` : `Draft Ready`;
 					break;
 				case 'creating':
-					message = editMode === 'permanent' ? `Creating [${dataState.key}]` : `Draft Ready`;
+					message =
+						editMode === 'permanent'
+							? `Saving As [${dataState.key}]`
+							: `Saving Draft as [${dataState.key}]`;
 					break;
 				default:
 					message = `Error [${dataState.kind}]`;
 			}
+
 			let suffix = appState.debug
-				? `. (Previous Key ${'prevKey' in dataState ? (dataState.prevKey ?? '') : ''})`
+				? `. (Previous Key [${'prevKey' in dataState ? (dataState.prevKey ?? '') : ''}])`
 				: '';
 
 			temporaryMessageState.message = message + suffix;
+
+			console.log('WOW message', message + suffix, 'DataState', dataState);
 		});
 	});
 </script>

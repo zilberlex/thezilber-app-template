@@ -34,33 +34,20 @@ export function collectionAppInit<T>(
 		storeOptions
 	);
 
-	let dataStateManager = new DataStateManager(store);
+	let dataStateManager = new DataStateManager(store, contextManager);
 
-	let currentlySavedNewValue = $state<string>();
-
-	let currentDataState = $derived.by(() => {
-		console.log(
-			'contextManager.appContext.itemKey change, changing current data state. Key:',
-			contextManager.appContext.itemKey
-		);
-
-		if (currentlySavedNewValue) {
-			return dataStateManager.dataStates.get(currentlySavedNewValue);
-		}
-
-		return dataStateManager.dataStates.get(contextManager.appContext.itemKey);
+	let debugHelper = $state({
+		bigIssue: 'All Good'
 	});
 
-	currentDataState;
-	let debugHelper = $derived.by(() => {
+	$effect(() => {
 		let contextKey = contextManager.appContext.itemKey;
 		let dataKey = store.dataKey;
-		return {
-			bigIssue:
-				dataKey !== contextKey
-					? `Context Does Not Correspond with recordKey - contextKey: [${contextKey}], recordKey: [${dataKey}]`
-					: 'All Good'
-		};
+
+		debugHelper.bigIssue =
+			dataKey !== contextKey
+				? `Context Does Not Correspond with recordKey - contextKey: [${contextKey}], recordKey: [${dataKey}]`
+				: 'All Good';
 	});
 
 	console.log('Collection App Initiated. Context:', $state.snapshot(contextManager.appContext));
@@ -90,19 +77,27 @@ export function collectionAppInit<T>(
 			});
 
 			$effect(() => {
-				track(currentDataState);
+				track(dataStateManager.currentDataState);
 
 				untrack(() => {
-					if (currentDataState?.kind === 'record-not-found') {
+					if (dataStateManager.currentDataState?.kind === 'record-not-found') {
 						console.log('itemKey not found - Rerouting to "/"');
 						contextManager.changeContext('');
 					}
 				});
 			});
 
+			appState.debug.viewObjects.set('Record Key and Context Correlation Helper', debugHelper);
 			$effect(() => {
-				appState.debug.viewObject = debugHelper;
+				appState.debug.viewObjects.set('currentDataState', dataStateManager.currentDataState);
 			});
+
+			$effect(() => {
+				appState.debug.viewObjects.set('Projected Context', contextManager.projectedContext);
+				appState.debug.viewObjects.set('projectedDataState', dataStateManager.projectedDataState);
+			});
+
+			appState.debug.viewObjects.set('DataStates', dataStateManager.dataStates);
 
 			return () => {
 				console.log(
@@ -114,15 +109,19 @@ export function collectionAppInit<T>(
 		get data() {
 			return store.data;
 		},
-		get dataState() {
+		get currentDataState() {
 			// TODO AZ clean this up, maybe add another state kind.
 			return (
-				currentDataState ?? {
+				dataStateManager.currentDataState ?? {
 					key: contextManager.appContext.itemKey,
 					kind: 'loading',
-					context: contextManager.appContext
+					context: $state.snapshot(contextManager.appContext)
 				}
 			);
+		},
+		get projectedDataState() {
+			// TODO AZ clean this up, maybe add another state kind.
+			return dataStateManager.projectedDataState;
 		},
 		get editMode() {
 			return contextManager.appContext.editMode;
@@ -155,7 +154,7 @@ export function collectionAppInit<T>(
 			try {
 				// TODO AZ make store receive snapshots everywhere.
 
-				currentlySavedNewValue = newItemKey;
+				contextManager.changeProjectedContext(newItemKey);
 				let res = await store.saveAs(contextManager.appContext, newItemKey);
 
 				if (res.ok) {
@@ -175,7 +174,7 @@ export function collectionAppInit<T>(
 					}
 				}
 
-				currentlySavedNewValue = undefined;
+				contextManager.resetProjectedContext();
 
 				return res as CollectionAppBlankResult;
 			} catch (e) {

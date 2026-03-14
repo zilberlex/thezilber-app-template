@@ -3,14 +3,12 @@ import { page } from '$app/state';
 import { getBasePath, getContextPath } from '$lib/engine/routing/routing-helps';
 import { track } from '$lib/engine/svelte-helpers/track.svelte';
 import { untrack } from 'svelte';
-
-type CollectionAppContextManager<TContext extends CollectionAppContext> = {
-	appContext: TContext;
-	// Tech Debt
-	appContextChangeEvent: CollectionAppContextChangeEvent | undefined;
-	changeContext: (itemKey: string) => { undoChangeContext: () => void };
-	replaceContext: (prevContext: TContext, newItemKey: string) => void;
-};
+import type {
+	CollectionAppContext,
+	CollectionAppContextChangeEvent,
+	CollectionAppContextManager,
+	EditMode as CollectionAppEditMode
+} from './types';
 
 const DRAFT_ITEM_KEY = '_draft_';
 
@@ -27,7 +25,9 @@ export function createCollectionAppContextManager<
 
 	let slugItemKey = getItemKey();
 	let _itemKey = $state(slugItemKey ?? DRAFT_ITEM_KEY);
-	let _editMode: EditMode = $derived(_itemKey === DRAFT_ITEM_KEY ? 'draft' : 'permanent');
+	let _editMode = $derived<CollectionAppEditMode>(
+		_itemKey === DRAFT_ITEM_KEY ? 'draft' : 'permanent'
+	);
 	let _baseUrlPath = getBasePath('[[itemKey]]');
 	let appContextChangeEvent: CollectionAppContextChangeEvent | undefined = $state();
 
@@ -39,6 +39,24 @@ export function createCollectionAppContextManager<
 			return _editMode;
 		}
 	}) as TContext;
+
+	let _projectedItemKey = $state<string | null>(null);
+	let _projectedEditMode = $derived<CollectionAppEditMode>(
+		_projectedItemKey === DRAFT_ITEM_KEY ? 'draft' : 'permanent'
+	);
+
+	let projectedContext = $state(
+		_itemKey
+			? {
+					get itemKey() {
+						return _projectedItemKey;
+					},
+					get editMode() {
+						return _projectedEditMode;
+					}
+				}
+			: undefined
+	) as TContext;
 
 	$effect(() => {
 		track(page.url);
@@ -64,6 +82,9 @@ export function createCollectionAppContextManager<
 		},
 		get appContextChangeEvent() {
 			return appContextChangeEvent;
+		},
+		get projectedContext() {
+			return projectedContext;
 		},
 		changeContext(itemKey: string) {
 			let prevContext = { ...appContext };
@@ -99,6 +120,12 @@ export function createCollectionAppContextManager<
 				);
 			}
 			// TODO AZ make a cache for non current context changes so it can be changed on history navigation
+		},
+		changeProjectedContext(itemKey: string) {
+			_projectedItemKey = itemKey;
+		},
+		resetProjectedContext() {
+			_projectedItemKey = null;
 		}
 	};
 }

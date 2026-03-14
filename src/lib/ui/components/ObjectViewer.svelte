@@ -1,25 +1,38 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import ObjectViewer from './ObjectViewer.svelte';
+	import { mergeProps } from 'svelte-toolbelt';
 
 	type Props = {
 		objectName?: string;
-		object: Object;
+		object?: object;
 		recursive?: boolean;
 	} & HTMLAttributes<HTMLDivElement>;
 
 	let { objectName, object, recursive = false, ...rest }: Props = $props();
 
-	function isObject(val: any) {
-		return val === Object(val);
-	}
+	let objIterable = $derived.by(() => {
+		if (!object) return [];
 
-	let objIterable = $derived.by(() =>
-		isObject(object) ? Object.entries(object) : [[typeof object, object]]
-	);
+		if (object instanceof Map) {
+			return [...object.entries()];
+		}
+
+		if (Array.isArray(object)) {
+			return object.map((v, i) => [i, v]);
+		}
+
+		if (typeof object === 'object') {
+			return Object.entries(object);
+		}
+
+		return [[typeof object, object]];
+	});
+
+	const mergedProps = $derived(mergeProps({ class: 'object-viewer' }, rest));
 </script>
 
-<div {...rest}>
+<div {...mergedProps}>
 	{#if objectName}
 		<strong>{objectName}:</strong>
 	{/if}

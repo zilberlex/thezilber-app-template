@@ -11,7 +11,6 @@
 	import CommandBuilder from './CommandBuilder.svelte';
 	import Dialog from '$lib/ui/components/dialog/Dialog.svelte';
 	import OneLineForm from './OneLineForm.svelte';
-	import { temporaryMessageState } from '$lib/engine/application/temp-messages/temporary-message-state.svelte';
 	import { cbRecordAdaper, type CbState } from './command-builder-types';
 	import { collectionAppInit } from '$lib/app-infrastructure/collection-app/environement.svelte';
 	import { cbRepo } from './app-repo';
@@ -48,44 +47,10 @@
 	let isSaveDialogOpen = $state(false);
 
 	let editMode = $derived(cbAppEnv.editMode);
-	let dataState = $derived(cbAppEnv.dataState);
+	let dataState = $derived(cbAppEnv.currentDataState);
 	let isPermanentCommandPage = $derived(editMode === 'permanent');
 
 	let saveAsErrorMessage = $state('');
-
-	// $effect(() => {
-	// 	track(dataState);
-	//
-	// 	untrack(() => {
-	// 		let message = '';
-	// 		switch (dataState.kind) {
-	// 			case 'saving':
-	// 				message =
-	// 					editMode === 'permanent' ? `Saving Command [${dataState.key}]...` : `Saving Draft...`;
-	// 				break;
-	// 			case 'loading':
-	// 				message =
-	// 					editMode === 'permanent' ? `Loading Command [${dataState.key}]...` : `Loading Draft...`;
-	// 				break;
-	// 			case 'record-not-found':
-	// 				message = `Record Not Found [${dataState.key}]`;
-	// 				break;
-	// 			case 'ready':
-	// 				message = editMode === 'permanent' ? `Ready [${dataState.key}]` : `Draft Ready`;
-	// 				break;
-	// 			case 'creating':
-	// 				message = editMode === 'permanent' ? `Creating [${dataState.key}]` : `Draft Ready`;
-	// 				break;
-	// 			default:
-	// 				message = `Error [${dataState.kind}]`;
-	// 		}
-	// 		let suffix = appState.debug
-	// 			? `. (Previous Key ${'prevKey' in dataState ? (dataState.prevKey ?? '') : ''})`
-	// 			: '';
-	//
-	// 		temporaryMessageState.message = message + suffix;
-	// 	});
-	// });
 
 	function defaultSaveButtonBehavior() {
 		if (isPermanentCommandPage) {
