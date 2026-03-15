@@ -16,6 +16,7 @@ import type {
 	CollectionAppError,
 	CollectionAppLoadResult,
 	CollectionAppRecordAdapter,
+	StoreDeleteActionResult,
 	StoreSaveActionResult,
 	SyncableAppRecordMetadata,
 	WithOpId
@@ -244,12 +245,25 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 		}
 	}
 
-	async delete(context: CollectionAppContext): Promise<CollectionAppBlankResult> {
+	async delete(context: CollectionAppContext): Promise<StoreDeleteActionResult> {
+		let opId = this.#nextOpId();
+		let ctxSnapshot = $state.snapshot(context);
+		this.#signalStateChange(
+			{ kind: 'deleting', key: ctxSnapshot.itemKey, context: ctxSnapshot },
+			opId
+		);
 		let res = await this.#repository.delete(context, this.#record);
 
 		if (res.ok) {
 			await this.#cache.delete(this.#record.key);
-			return { ok: true, value: undefined };
+			this.#signalStateChange(
+				{ kind: 'deleted', key: ctxSnapshot.itemKey, context: ctxSnapshot },
+				opId
+			);
+			return {
+				ok: true,
+				value: { kind: 'deleted', key: ctxSnapshot.itemKey, context: ctxSnapshot }
+			};
 		} else {
 			return res;
 		}

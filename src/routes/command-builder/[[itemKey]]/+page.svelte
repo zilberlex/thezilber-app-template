@@ -64,6 +64,10 @@
 		isSaveDialogOpen = true;
 	}
 
+	async function deleteItem() {
+		await cbAppEnv.delete();
+	}
+
 	async function saveAsHandler(newCommandName: string) {
 		let result = await cbAppEnv.saveAs(newCommandName);
 		if (result.ok) {
@@ -111,6 +115,9 @@
 			onclick={openSaveAsPopup}
 		>
 			Save As
+		</Button>
+		<Button {@attach createClickHotKeyAttachment('Delete', 'd', 'alt')} onclick={deleteItem}>
+			Delete
 		</Button>
 	{/if}
 </div>

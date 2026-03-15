@@ -112,6 +112,7 @@ class CommandBuilderRepo implements CbRepo {
 		context: CollectionAppContext,
 		record: DbCbRecord
 	): Promise<ActionResult<void, CollectionAppError>> {
+		await sleep(3000);
 		let promise: Promise<void>;
 		if (context.editMode === 'permanent') {
 			promise = deleteCommandById(record.recordId);

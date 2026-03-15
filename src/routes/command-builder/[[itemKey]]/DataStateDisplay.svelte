@@ -14,8 +14,6 @@
 
 	$effect(() => {
 		track(currentDataState, projectedDataState);
-		console.log('WOW currentDataState', currentDataState);
-		console.log('WOW projectedDataState', projectedDataState);
 
 		untrack(() => {
 			let dataState = projectedDataState ?? currentDataState;
@@ -43,8 +41,14 @@
 							? `Saving As [${dataState.key}]`
 							: `Saving Draft as [${dataState.key}]`;
 					break;
+				case 'deleting':
+					message = `Deleting Item: [${dataState.key}]`;
+					break;
+				case 'deleted':
+					message = `Successfully Deleted Item: [${dataState.key}]`;
+					break;
 				default:
-					message = `Error [${dataState.kind}]`;
+					message = `Error not behavior defined for: [${dataState.kind}]`;
 			}
 
 			let suffix = appState.debug
@@ -52,8 +56,6 @@
 				: '';
 
 			temporaryMessageState.message = message + suffix;
-
-			console.log('WOW message', message + suffix, 'DataState', dataState);
 		});
 	});
 </script>

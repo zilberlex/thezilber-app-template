@@ -191,8 +191,9 @@ export function collectionAppInit<T>(
 				let ret = await store.delete(contextSnapshot);
 
 				if (ret.ok) {
+					console.log('Successfully Deleted Record. [', ret.value.key, ']. Rerouting...');
 					if (contextManager.appContext.editMode === 'permanent') {
-						contextManager.changeContext('/');
+						contextManager.changeContext('');
 					}
 					store.reload(
 						contextManager.appContext,
@@ -214,8 +215,6 @@ export function collectionAppInit<T>(
 
 	// TODO AZ add destroyer and a save on destroy.
 	// let autoSaver = new AutoSaver(ret.data, () => ret.save());
-	appState.debug.debugMode = true;
-	appState.debug.debugConsole = true;
 	return ret;
 }
 

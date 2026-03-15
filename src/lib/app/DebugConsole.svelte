@@ -5,6 +5,7 @@
 
 <div class="debug-console">
 	<ObjectViewer objectName="App State" object={appState} class="app-state-viewer box" />
+	<ObjectViewer objectName="Debug State" object={appState.debug} class="app-state-viewer box" />
 	{#if appState.debug.viewObject}
 		<ObjectViewer
 			objectName="Debug View Object"

@@ -84,6 +84,8 @@ export type AppDataState = { context: CollectionAppContext } & (
 	| { kind: 'creating'; key: string; prevKey: string }
 	| { kind: 'saving'; key: string; prevKey: string }
 	| { kind: 'loading'; key: string; prevKey?: string }
+	| { kind: 'deleting'; key: string }
+	| { kind: 'deleted'; key: string }
 	| { kind: 'record-not-found'; key: string; prevKey?: string }
 	| { kind: 'ready'; key: string; prevKey?: string }
 	| { kind: 'error'; key: string }
@@ -111,4 +113,10 @@ export type StoreSaveResult = { context: CollectionAppContext } & (
 	| { kind: 'another-operation-in-progress'; currentOperation: AppDataState }
 );
 
+export type StoreDeleteResult = { context: CollectionAppContext } & {
+	kind: 'deleted';
+	key: string;
+};
+
 export type StoreSaveActionResult = ActionResult<StoreSaveResult, CollectionAppError>;
+export type StoreDeleteActionResult = ActionResult<StoreDeleteResult, CollectionAppError>;

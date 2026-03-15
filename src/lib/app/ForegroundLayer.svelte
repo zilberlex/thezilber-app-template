@@ -3,9 +3,9 @@
 	import TempMessageDisplay from '$lib/engine/application/temp-messages/TempMessageDisplay.svelte';
 	import HotkeyTooltip from '$lib/engine/hotkey-tooltip/HotkeyTooltip.svelte';
 	import { appState } from '$lib/engine/state/application-state.svelte';
-	import DialogAnchor from './dialog/DialogAnchor.svelte';
-	import MouseTracker from './MouseTracker.svelte';
-	import TooltipsContainer from './tooltips/TooltipsContainer.svelte';
+	import DialogAnchor from '$lib/ui/components/dialog/DialogAnchor.svelte';
+	import MouseTracker from '$lib/ui/components/MouseTracker.svelte';
+	import TooltipsContainer from '$lib/ui/components/tooltips/TooltipsContainer.svelte';
 
 	let hotkeyTooltip = $state();
 	let showHotkeyTooltip = $state(false);
