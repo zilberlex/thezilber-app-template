@@ -60,6 +60,10 @@ export async function loadCommandByName(commandName: string) {
 	}
 }
 
+// export async function getAllCommandsMetadata(): Promise {
+// commandBuilderDb.commands.
+// }
+
 function findCloneFailurePath(
 	value: any,
 	path = 'root',

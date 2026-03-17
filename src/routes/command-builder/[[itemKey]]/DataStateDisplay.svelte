@@ -47,6 +47,9 @@
 				case 'deleted':
 					message = `Successfully Deleted Item: [${dataState.key}]`;
 					break;
+				case 'error':
+					message = `Error in Operation: [${dataState.key}].  Error Data: [${JSON.stringify(dataState.errorData)}]`;
+					break;
 				default:
 					message = `Error not behavior defined for: [${dataState.kind}]`;
 			}

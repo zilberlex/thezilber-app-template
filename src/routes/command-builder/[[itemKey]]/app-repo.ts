@@ -15,9 +15,12 @@ import { Dexie } from 'dexie';
 import { getErrorMessage } from '$lib/engine/general-js-ts/extract-error-message';
 import type {
 	ActionResult,
+	AllRecordsInfo,
 	CollectionAppContext,
 	CollectionAppError
 } from '$lib/app-infrastructure/collection-app/types';
+import type { SyncableAppRecordMetadata } from '$lib/engine/storage/data/types';
+import { error } from '@sveltejs/kit';
 
 const CommandBuilderDraftStateStorageKey = 'DynamicForm';
 
@@ -26,9 +29,14 @@ async function sleep(msec: number) {
 }
 
 class CommandBuilderRepo implements CbRepo {
+	getAllRecords(): Promise<
+		ActionResult<AllRecordsInfo<SyncableAppRecordMetadata>, CollectionAppError>
+	> {
+		throw new Error('Method not implemented.');
+	}
 	async update(
 		context: CollectionAppContext,
-		record: CbRecord
+		record: DbCbRecord
 	): Promise<ActionResult<DbCbRecord, CollectionAppError>> {
 		const storageType = context.editMode;
 		console.log(
@@ -48,6 +56,7 @@ class CommandBuilderRepo implements CbRepo {
 			await promise;
 			return { ok: true, value: record };
 		} catch (e) {
+			console.error('Failed Updated', e);
 			return { ok: false, error: { kind: 'General Error', message: getErrorMessage(e), context } };
 		}
 	}

@@ -1,13 +1,11 @@
+import type {
+	AppRecord,
+	DbAppRecord,
+	SyncableAppRecordMetadata
+} from '$lib/engine/storage/data/types';
+
 export type EditMode = 'permanent' | 'draft';
 export type ItemKey = '_draft_' | string;
-
-export type SyncableAppRecordMetadata = {
-	vc: VectorClock;
-
-	modifiedAt: number;
-	modifiedBy: string;
-	isDeleted?: boolean;
-};
 
 export type CollectionAppRecord<TData> = AppRecord<TData, SyncableAppRecordMetadata>;
 
@@ -73,9 +71,11 @@ export interface AppRecordRepo<TData, TMeta, TError> {
 		context: CollectionAppContext,
 		record: DbAppRecord<TData, TMeta>
 	): Promise<ActionResult<void, TError>>;
+	getAllRecords(): Promise<ActionResult<AllRecordsInfo<TMeta>, TError>>;
 }
 
-// TODO AZ figure out where to move this.
+export type AllRecordsInfo<TMeta> = Omit<DbAppRecord<any, TMeta>, 'data'>[];
+
 export type WithOpId<T> = T & { opId: number };
 
 export type AppDataStateOld = 'saving' | 'ready' | 'loading' | 'record-not-found' | 'error';
@@ -88,7 +88,7 @@ export type AppDataState = { context: CollectionAppContext } & (
 	| { kind: 'deleted'; key: string }
 	| { kind: 'record-not-found'; key: string; prevKey?: string }
 	| { kind: 'ready'; key: string; prevKey?: string }
-	| { kind: 'error'; key: string }
+	| { kind: 'error'; key: string; errorData: CollectionAppError }
 );
 
 export type CollectionAppEnvironment<T> = CollectionAppContext & CollectionAppRuntime<T>;

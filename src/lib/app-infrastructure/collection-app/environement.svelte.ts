@@ -11,9 +11,9 @@ import type {
 	CollectionAppContext,
 	CollectionAppEnvironment,
 	CollectionAppError,
-	CollectionAppRecordAdapter,
-	SyncableAppRecordMetadata
+	CollectionAppRecordAdapter
 } from './types';
+import type { SyncableAppRecordMetadata } from '$lib/engine/storage/data/types';
 
 export function collectionAppInit<T>(
 	dataPlaceholder: T,
@@ -145,6 +145,10 @@ export function collectionAppInit<T>(
 				);
 
 				contextManager.replaceContext(res.value.context, res.value.newItemKey);
+			}
+
+			if (!res.ok) {
+				console.error('Error at saving data:', res.error);
 			}
 
 			return res as CollectionAppBlankResult;

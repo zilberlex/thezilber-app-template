@@ -15,11 +15,12 @@ interface DbAppRecord<TData, TMeta> {
 	data: TData;
 }
 
-type SyncableData<T> = {
+type DbAllRecordsInfo<TMeta> = Omit<DbAppRecord<any, TMeta>, 'data'>[];
+
+export type SyncableAppRecordMetadata = {
 	vc: VectorClock;
 
 	modifiedAt: number;
 	modifiedBy: string;
 	isDeleted?: boolean;
-	data: T;
 };

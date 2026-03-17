@@ -1,5 +1,6 @@
 import { generateId } from '$lib/engine/crypto/crypto-utils';
 import { timestamp } from '$lib/engine/storage/data/data';
+import type { SyncableAppRecordMetadata, VectorClock } from '$lib/engine/storage/data/types';
 
 export function stampAppRecord(deviceId: string, meta: SyncableAppRecordMetadata) {
 	meta.modifiedAt = timestamp();
@@ -19,10 +20,4 @@ export function createSyncableRecordMetadata(deviceId: string): SyncableAppRecor
 function stampeVectorClock(deviceId: string, vc: VectorClock) {
 	let deviceVcVal = vc[deviceId] ?? 0;
 	vc[deviceId] = ++deviceVcVal;
-}
-
-export function stampSyncableData(deviceId: string, permasState: SyncableData<unknown>) {
-	permasState.modifiedAt = timestamp();
-	permasState.modifiedBy = deviceId;
-	stampeVectorClock(deviceId, permasState.vc);
 }

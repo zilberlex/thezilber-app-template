@@ -4,6 +4,7 @@ import {
 	type Dispatcher,
 	type DispatchHandler
 } from '$lib/engine/patterns/observer';
+import type { AppRecord, SyncableAppRecordMetadata } from '$lib/engine/storage/data/types';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
 import { deepAssign } from '../deep-assign';
 import { Cache } from './cache';
@@ -11,14 +12,12 @@ import { stampAppRecord } from './data';
 import type {
 	AppDataState,
 	AppRecordRepo,
-	CollectionAppBlankResult,
 	CollectionAppContext,
 	CollectionAppError,
 	CollectionAppLoadResult,
 	CollectionAppRecordAdapter,
 	StoreDeleteActionResult,
 	StoreSaveActionResult,
-	SyncableAppRecordMetadata,
 	WithOpId
 } from './types';
 
@@ -156,13 +155,13 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 
 		let res;
 		if (operation === 'update') {
-			console.log('update');
+			console.log('update record', contextSnapshot);
 
-			res = await this.#repository.update(this.#context, saveRecord);
+			res = await this.#repository.update(contextSnapshot, this.#recordAdapter.toDb(saveRecord));
 		} else {
 			let saveData = saveRecord.data;
-			console.log('create');
-			res = await this.#repository.create(this.#context, saveData, newItemKey);
+			console.log('create record. Key:', newItemKey, 'context:', context);
+			res = await this.#repository.create(contextSnapshot, saveData, newItemKey);
 		}
 
 		return { repoOpResult: res, opId, newItemKey, prevItemKey, contextSnapshot };
@@ -206,7 +205,10 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 			return { ok: true, value: { kind: 'update', context: contextSnapshot } };
 		} else {
 			// TODO AZ newItemKey here is potential for issues.
-			this.#signalStateChange({ kind: 'error', key: newItemKey, context: contextSnapshot }, opId);
+			this.#signalStateChange(
+				{ kind: 'error', key: newItemKey, context: contextSnapshot, errorData: res.error },
+				opId
+			);
 			return { ok: false, error: res.error };
 		}
 	}
@@ -239,7 +241,10 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 				value: { kind: 'create', newItemKey: newItemKey, context: contextSnapshot }
 			};
 		} else {
-			this.#signalStateChange({ kind: 'error', key: newItemKey, context: contextSnapshot }, opId);
+			this.#signalStateChange(
+				{ kind: 'error', key: newItemKey, context: contextSnapshot, errorData: res.error },
+				opId
+			);
 
 			return { ok: false, error: res.error };
 		}
@@ -252,7 +257,7 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 			{ kind: 'deleting', key: ctxSnapshot.itemKey, context: ctxSnapshot },
 			opId
 		);
-		let res = await this.#repository.delete(context, this.#record);
+		let res = await this.#repository.delete(context, this.#recordAdapter.toDb(this.#record));
 
 		if (res.ok) {
 			await this.#cache.delete(this.#record.key);
@@ -325,7 +330,12 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 
 		if (!loadResult.ok) {
 			this.#signalStateChange(
-				{ kind: 'error', key: newItemKey, context: newContextSnapshot },
+				{
+					kind: 'error',
+					key: newItemKey,
+					context: newContextSnapshot,
+					errorData: loadResult.error
+				},
 				opId
 			);
 

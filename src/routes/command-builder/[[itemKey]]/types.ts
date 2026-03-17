@@ -3,12 +3,12 @@ import type {
 	AppRecordRepo,
 	CollectionAppError,
 	CollectionAppRecord,
-	CollectionAppRecordAdapter,
-	SyncableAppRecordMetadata
+	CollectionAppRecordAdapter
 } from '$lib/app-infrastructure/collection-app/types';
 import type { DynamicForm } from '$lib/app/dynamic-form/dynamic-form-types';
 import { generateId } from '$lib/engine/crypto/crypto-utils';
 import { createDbAppRecord } from '$lib/engine/storage/data/data';
+import type { DbAppRecord, SyncableAppRecordMetadata } from '$lib/engine/storage/data/types';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
 
 export type CbState = {
@@ -65,7 +65,7 @@ export const commandBuilderRecordAdapter: CollectionAppRecordAdapter<
 		return {
 			meta: appRecord.meta,
 			data: appRecord.data,
-			recordId: appRecord.recordId
+			recordId: appRecord.key
 		};
 	}
 };

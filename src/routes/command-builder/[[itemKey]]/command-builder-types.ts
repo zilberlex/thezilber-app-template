@@ -1,7 +1,12 @@
 import { createSyncableRecordMetadata } from '$lib/app-infrastructure/collection-app/data';
+import type {
+	CollectionAppRecord,
+	CollectionAppRecordAdapter
+} from '$lib/app-infrastructure/collection-app/types';
 import type { DynamicForm } from '$lib/app/dynamic-form/dynamic-form-types';
 import { generateId } from '$lib/engine/crypto/crypto-utils';
 import { createDbAppRecord } from '$lib/engine/storage/data/data';
+import type { DbAppRecord, SyncableAppRecordMetadata } from '$lib/engine/storage/data/types';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
 
 export type CbState = {
