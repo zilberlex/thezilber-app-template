@@ -1,14 +1,16 @@
+import type { AppRecord, SyncableAppRecordMetadata, VectorClock } from './data/types';
+
 export function syncData<T>(
-	localData: AppRecord<T, SyncableAppRecordMetadata>,
-	incomingData: AppRecord<T, SyncableAppRecordMetadata>
+	localData: AppRecord<T, any, SyncableAppRecordMetadata>,
+	incomingData: AppRecord<T, any, SyncableAppRecordMetadata>
 ) {
 	return returnSyncedDataLww(localData, incomingData);
 }
 
 function returnSyncedDataLww<T>(
-	localRecord: AppRecord<T, SyncableAppRecordMetadata>,
-	incomingRecord: AppRecord<T, SyncableAppRecordMetadata>
-): AppRecord<T, SyncableAppRecordMetadata> {
+	localRecord: AppRecord<T, any, SyncableAppRecordMetadata>,
+	incomingRecord: AppRecord<T, any, SyncableAppRecordMetadata>
+): AppRecord<T, any, SyncableAppRecordMetadata> {
 	if (localRecord.recordId !== incomingRecord.recordId)
 		throw new Error(
 			`Expected Data To have the same id localData: ${localRecord.recordId}, incomingData: ${incomingRecord.recordId}`
@@ -62,8 +64,8 @@ function mergeClocksAfterDataSync(vc1: VectorClock, vc2: VectorClock): VectorClo
 }
 
 function resolveConcurrentConflictLww<T>(
-	localRecord: AppRecord<T, SyncableAppRecordMetadata>,
-	incomindRecord: AppRecord<T, SyncableAppRecordMetadata>
+	localRecord: AppRecord<T, any, SyncableAppRecordMetadata>,
+	incomindRecord: AppRecord<T, any, SyncableAppRecordMetadata>
 ) {
 	let newest =
 		localRecord.meta.modifiedAt > incomindRecord.meta.modifiedAt ? localRecord : incomindRecord;

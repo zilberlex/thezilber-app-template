@@ -1,66 +1,26 @@
 import { createSyncableRecordMetadata } from '$lib/app-infrastructure/collection-app/data';
-import type {
-	CollectionAppRecord,
-	CollectionAppRecordAdapter
-} from '$lib/app-infrastructure/collection-app/types';
+import type { CollectionAppRecord } from '$lib/app-infrastructure/collection-app/types';
 import type { DynamicForm } from '$lib/app/dynamic-form/dynamic-form-types';
 import { generateId } from '$lib/engine/crypto/crypto-utils';
 import { createDbAppRecord } from '$lib/engine/storage/data/data';
-import type { DbAppRecord, SyncableAppRecordMetadata } from '$lib/engine/storage/data/types';
+import type {
+	DataProjection,
+	DbAppRecord,
+	SyncableAppRecordMetadata
+} from '$lib/app-infrastructure/collection-app/data/types';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
 
-export type CbState = {
+export type CbData = {
 	commandName: string;
 	commandStr: string;
 	formData: DynamicForm;
 };
+export type CbProjection = {
+	commandName: string;
+} & DataProjection;
 
-export type CbRecord = CollectionAppRecord<CbState>;
+export type CbRecord = CollectionAppRecord<CbData, CbProjection>;
 
-export type DbCbRecord = DbAppRecord<CbState, SyncableAppRecordMetadata>;
-
-function createCommandBuilderRecord(data: CbState) {
-	let genericRecord = createDbAppRecord(data, createSyncableRecordMetadata(generateId()));
-
-	return convertToCommandBuilderRecord(genericRecord);
-}
-
-function createDbCommandBuilderRecord(data: CbState) {
-	return createDbAppRecord(data, createSyncableRecordMetadata(getDeviceId()));
-}
-
-export function convertToCommandBuilderRecord(record: DbCbRecord): CbRecord {
-	let ret = {
-		...record,
-		get key(): string {
-			return this.data.commandName;
-		},
-		set key(value) {
-			this.data.commandName = value;
-		}
-	};
-
-	return ret;
-}
-
-export const cbRecordAdaper: CollectionAppRecordAdapter<CbState, SyncableAppRecordMetadata> = {
-	constructRecord: function (data: CbState) {
-		return createCommandBuilderRecord(data);
-	},
-
-	constructDbRecord(data) {
-		return createDbCommandBuilderRecord(data);
-	},
-
-	fromDb: function (dbRecord: DbCbRecord): CbRecord {
-		return convertToCommandBuilderRecord(dbRecord);
-	},
-
-	toDb: function (appRecord: CbRecord): DbCbRecord {
-		return {
-			meta: appRecord.meta,
-			data: appRecord.data,
-			recordId: appRecord.recordId
-		};
-	}
-};
+export type DbCbRecord = DbAppRecord<CbData, CbProjection, SyncableAppRecordMetadata>;
+export type DbCbData = { recordId: string } & CbData;
+export type DbCbProjection = { recordId: string } & CbProjection;

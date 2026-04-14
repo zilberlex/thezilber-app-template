@@ -24,24 +24,33 @@ export class DataStateManager {
 		contextManager: CollectionAppContextManager<any>
 	) {
 		this.#currentDataState = $derived.by(() => {
-			console.log('contextManager.appContext.itemKey', contextManager.appContext.itemKey);
+			let dataState = this.#dataStates.get(contextManager.appContext.slug);
+			console.log(
+				'Changing currentDataState - contextManager.appContext.slug - [',
+				contextManager.appContext.slug,
+				']',
+				'state:',
+				dataState
+			);
 
-			return this.#dataStates.get(contextManager.appContext.itemKey);
+			return dataState;
 		});
 
 		this.#projectedDataState = $derived.by(() => {
-			return this.#dataStates.get(contextManager.projectedContext.itemKey);
+			let slug = contextManager.projectedContext?.slug;
+			return slug ? this.#dataStates.get(slug) : undefined;
 		});
 
 		dataStateDispatcher.register((ds) => {
-			let key = ds.key;
-			let currentDataStateEntry = this.#dataStates.get(key);
-			let currentDataStateOpId = this.#dataStateOpIdTracking.get(key);
+			let slug = ds.slug;
+			let currentDataStateEntry = this.#dataStates.get(slug);
+			let currentDataStateOpId = this.#dataStateOpIdTracking.get(slug);
 
 			if (!currentDataStateEntry) {
 				currentDataStateEntry = {
 					kind: 'ready',
-					key,
+					slug: slug,
+					displayName: ds.slug,
 					context: ds.context
 				};
 			}
@@ -71,7 +80,7 @@ export class DataStateManager {
 		});
 	}
 	#updateDataState(ds: WithOpId<AppDataState>) {
-		this.#dataStates.set(ds.key, ds);
-		this.#dataStateOpIdTracking.set(ds.key, ds.opId);
+		this.#dataStates.set(ds.slug, ds);
+		this.#dataStateOpIdTracking.set(ds.slug, ds.opId);
 	}
 }

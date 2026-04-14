@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { onDestroy, untrack } from 'svelte';
-	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import {
 		createClickHotKeyAttachment,
 		createFocusHotKeyAttachment
@@ -11,10 +10,11 @@
 	import CommandBuilder from './CommandBuilder.svelte';
 	import Dialog from '$lib/ui/components/dialog/Dialog.svelte';
 	import OneLineForm from './OneLineForm.svelte';
-	import { cbRecordAdaper, type CbState } from './command-builder-types';
+	import { type CbData, type CbProjection } from './command-builder-types';
 	import { collectionAppInit } from '$lib/app-infrastructure/collection-app/environement.svelte';
-	import { cbRepo } from './app-repo';
 	import DataStateDisplay from './DataStateDisplay.svelte';
+	import { cbDbAdapter } from './command-builder-db-adapter';
+	import Debug from './Debug.svelte';
 
 	let placeholderState = {
 		commandName: '',
@@ -22,7 +22,7 @@
 		formData: {}
 	};
 
-	let draftFallback: CbState = {
+	let draftFallback: CbData = {
 		commandName: 'Draft Command',
 		commandStr: 'cp -r {src} {dest}',
 		formData: {
@@ -31,11 +31,11 @@
 		}
 	};
 
-	let cbAppEnv = collectionAppInit<CbState>(
+	let cbAppEnv = collectionAppInit<CbData, CbProjection>(
 		placeholderState,
 		draftFallback,
-		cbRecordAdaper,
-		cbRepo
+		cbDbAdapter,
+		'CommandBuilderDataDb'
 	);
 
 	onDestroy(() => {
@@ -89,6 +89,7 @@
 	});
 </script>
 
+<Debug appEnv={cbAppEnv} />
 <DataStateDisplay appEnv={cbAppEnv} />
 
 <div class="mini-app">
@@ -105,18 +106,18 @@
 	<Button
 		class="button-save"
 		onclick={defaultSaveButtonBehavior}
-		{@attach createClickHotKeyAttachment('Save', 's', 'alt')}
+		{@attach createClickHotKeyAttachment('Save', false, 's', 'alt')}
 		>{isPermanentCommandPage ? 'Save' : 'Save As'}</Button
 	>
 
 	{#if isPermanentCommandPage}
 		<Button
-			{@attach createClickHotKeyAttachment('Save As', 's', 'alt', 'shift')}
+			{@attach createClickHotKeyAttachment('Save As', false, 's', 'alt', 'shift')}
 			onclick={openSaveAsPopup}
 		>
 			Save As
 		</Button>
-		<Button {@attach createClickHotKeyAttachment('Delete', 'd', 'alt')} onclick={deleteItem}>
+		<Button {@attach createClickHotKeyAttachment('Delete', false, 'd', 'alt')} onclick={deleteItem}>
 			Delete
 		</Button>
 	{/if}

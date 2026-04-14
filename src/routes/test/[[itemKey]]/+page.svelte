@@ -11,22 +11,22 @@
 	import { cbRepo } from '../../command-builder/[[itemKey]]/app-repo';
 	import {
 		cbRecordAdaper,
-		type CbState
+		type CbData
 	} from '../../command-builder/[[itemKey]]/command-builder-types';
 
-	let loadingPlaceHolderState: CbState = {
+	let loadingPlaceHolderState: CbData = {
 		commandName: '_draft_',
 		commandStr: 'loading',
 		formData: {}
 	};
 
-	let newCommandFallback: CbState = {
+	let newCommandFallback: CbData = {
 		commandName: '_draft_',
 		commandStr: 'New Command',
 		formData: {}
 	};
 
-	let appEnvironment: CollectionAppEnvironment<CbState> = collectionAppInit(
+	let appEnvironment: CollectionAppEnvironment<CbData> = collectionAppInit(
 		loadingPlaceHolderState,
 		newCommandFallback,
 		cbRecordAdaper,

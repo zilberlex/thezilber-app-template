@@ -3,56 +3,48 @@ import { untrack } from 'svelte';
 import { createCollectionAppContextManager, ctxEquals } from './context-manager.svelte';
 import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';
 import { track } from '$lib/engine/svelte-helpers/track.svelte';
-import { appState } from '$lib/engine/state/application-state.svelte';
 import { DataStateManager } from './data-state-manager.svelte';
 import type {
-	AppRecordRepo,
 	CollectionAppBlankResult,
 	CollectionAppContext,
-	CollectionAppEnvironment,
-	CollectionAppError,
-	CollectionAppRecordAdapter
+	CollectionAppEnvironment
 } from './types';
-import type { SyncableAppRecordMetadata } from '$lib/engine/storage/data/types';
+import type {
+	CollectionAppDbAdapter,
+	DataProjection
+} from '$lib/app-infrastructure/collection-app/data/types';
+import { CollectionAppContextualRepo } from './data/collection-app-contextual-repo';
+import { CollectionAppPermanentRepo } from './data/collection-app-permanent-repo';
 
-export function collectionAppInit<T>(
+export function collectionAppInit<
+	T extends Omit<object, 'recordId'>,
+	TProjection extends DataProjection
+>(
 	dataPlaceholder: T,
 	fallbackData: T,
-	recordAdapter: CollectionAppRecordAdapter<T, SyncableAppRecordMetadata>,
-	repo: AppRecordRepo<T, SyncableAppRecordMetadata, CollectionAppError>
-): CollectionAppEnvironment<T> {
-	let store: SmartStore<T>;
+	dbAdapter: CollectionAppDbAdapter<T, TProjection>,
+	dbName: string
+): CollectionAppEnvironment<T, TProjection> {
+	let store: SmartStore<T, TProjection>;
 	let contextManager = createCollectionAppContextManager();
 
 	let storeOptions = generateStoreOptions(contextManager.appContext, fallbackData);
+	let permaRepo = new CollectionAppPermanentRepo<T, TProjection>(dbName, dbAdapter);
+	let repo = new CollectionAppContextualRepo(permaRepo, dbName);
 
-	store = new SmartStore<T>(
+	store = new SmartStore<T, TProjection>(
 		contextManager.appContext,
 		dataPlaceholder,
 		repo,
-		recordAdapter,
+		dbAdapter,
 		storeOptions
 	);
 
 	let dataStateManager = new DataStateManager(store, contextManager);
 
-	let debugHelper = $state({
-		bigIssue: 'All Good'
-	});
-
-	$effect(() => {
-		let contextKey = contextManager.appContext.itemKey;
-		let dataKey = store.dataKey;
-
-		debugHelper.bigIssue =
-			dataKey !== contextKey
-				? `Context Does Not Correspond with recordKey - contextKey: [${contextKey}], recordKey: [${dataKey}]`
-				: 'All Good';
-	});
-
 	console.log('Collection App Initiated. Context:', $state.snapshot(contextManager.appContext));
 
-	let ret: CollectionAppEnvironment<T> = {
+	let ret: CollectionAppEnvironment<T, TProjection> = {
 		destroy: $effect.root(() => {
 			$effect(() => {
 				let ctxChangeEvent = contextManager.appContextChangeEvent;
@@ -61,8 +53,8 @@ export function collectionAppInit<T>(
 				untrack(() => {
 					if (!ctxChangeEvent) return;
 					if (
-						ctxChangeEvent?.kind === 'browser-navigation' &&
-						ctxChangeEvent.prevContext.itemKey !== ctxChangeEvent.newContext.itemKey
+						ctxChangeEvent.kind === 'browser-navigation' &&
+						ctxChangeEvent.prevContext.slug !== ctxChangeEvent.newContext.slug
 					) {
 						console.log(
 							'context change due to browser-navigation, reloading store. - new context',
@@ -71,7 +63,11 @@ export function collectionAppInit<T>(
 							$state.snapshot(ctxChangeEvent.prevContext)
 						);
 
-						store.reload(contextManager.appContext);
+						store.reload(
+							contextManager.appContext,
+							undefined,
+							generateStoreOptions(contextManager.appContext, fallbackData)
+						);
 					}
 				});
 			});
@@ -81,23 +77,11 @@ export function collectionAppInit<T>(
 
 				untrack(() => {
 					if (dataStateManager.currentDataState?.kind === 'record-not-found') {
-						console.log('itemKey not found - Rerouting to "/"');
+						console.log('slug Key not found - Rerouting to "/"');
 						contextManager.changeContext('');
 					}
 				});
 			});
-
-			appState.debug.viewObjects.set('Record Key and Context Correlation Helper', debugHelper);
-			$effect(() => {
-				appState.debug.viewObjects.set('currentDataState', dataStateManager.currentDataState);
-			});
-
-			$effect(() => {
-				appState.debug.viewObjects.set('Projected Context', contextManager.projectedContext);
-				appState.debug.viewObjects.set('projectedDataState', dataStateManager.projectedDataState);
-			});
-
-			appState.debug.viewObjects.set('DataStates', dataStateManager.dataStates);
 
 			return () => {
 				console.log(
@@ -113,11 +97,19 @@ export function collectionAppInit<T>(
 			// TODO AZ clean this up, maybe add another state kind.
 			return (
 				dataStateManager.currentDataState ?? {
-					key: contextManager.appContext.itemKey,
+					slug: contextManager.appContext.slug,
+					displayName: store.displayName,
 					kind: 'loading',
 					context: $state.snapshot(contextManager.appContext)
 				}
 			);
+		},
+		get dataStates() {
+			return dataStateManager.dataStates;
+		},
+		get projectedContext() {
+			// TODO AZ clean this up, maybe add another state kind.
+			return contextManager.projectedContext;
 		},
 		get projectedDataState() {
 			// TODO AZ clean this up, maybe add another state kind.
@@ -126,54 +118,77 @@ export function collectionAppInit<T>(
 		get editMode() {
 			return contextManager.appContext.editMode;
 		},
-		get itemKey() {
-			return contextManager.appContext.itemKey;
+		get slug() {
+			return contextManager.appContext.slug;
+		},
+		get displayName() {
+			return store.displayName;
+		},
+		get allRecordProjections() {
+			return store.allRecordProjections;
+		},
+		get _internal() {
+			return {
+				store
+			};
 		},
 		save: async () => {
 			let res = await store.save();
 
-			if (
-				res.ok &&
-				res.value.kind === 'update-with-key-change' &&
-				ctxEquals(res.value.context, contextManager.appContext)
-			) {
+			if (res.ok) {
+				let resValue = res.value;
+
 				console.log(
-					'keychange changeContext new key:',
-					res.value.newItemKey,
-					'old key:',
-					res.value.prevItemKey
+					'Save return. ',
+					'result kind:',
+					resValue.kind,
+					'res context:',
+					resValue.context,
+					'currentContext:',
+					$state.snapshot(contextManager.appContext)
 				);
 
-				contextManager.replaceContext(res.value.context, res.value.newItemKey);
-			}
+				if (
+					resValue.kind === 'update-with-key-change' &&
+					ctxEquals(res.value.context, contextManager.appContext)
+				) {
+					console.log(
+						'keychange changeContext new slug:',
+						resValue.newSlug,
+						'old slug:',
+						resValue.prevSlug
+					);
 
-			if (!res.ok) {
+					contextManager.replaceContext(resValue.context, resValue.newSlug);
+				}
+			} else {
 				console.error('Error at saving data:', res.error);
 			}
 
 			return res as CollectionAppBlankResult;
 		},
-		saveAs: async (newItemKey: string) => {
+		saveAs: async (newItemName: string) => {
 			let ctxSnapshot = $state.snapshot(contextManager.appContext);
 			try {
-				// TODO AZ make store receive snapshots everywhere.
-
-				contextManager.changeProjectedContext(newItemKey);
-				let res = await store.saveAs(contextManager.appContext, newItemKey);
+				let res = await store.saveAs(contextManager.appContext, newItemName);
 
 				if (res.ok) {
 					if (res.value.kind === 'update-with-key-change' || res.value.kind === 'create') {
 						if (res.value.kind === 'create') {
-							console.log('keychange Create changeContext new key:', res.value.newItemKey);
-							contextManager.changeContext(res.value.newItemKey);
+							console.log('keychange Create changeContext new key:', res.value.newSlug);
+							contextManager.changeContext(res.value.newSlug, res.value.newDisplayName);
 						} else {
 							console.log(
 								'keychange ReplaceKey changeContext new key:',
-								res.value.newItemKey,
+								res.value.newSlug,
 								'old key:',
-								res.value.prevItemKey ?? 'NoKeyInCreate'
+								res.value.prevSlug ?? 'NoKeyInCreate'
 							);
-							contextManager.replaceContext(res.value.context, res.value.newItemKey);
+							contextManager.replaceContext(
+								res.value.context,
+								res.value.newSlug,
+								res.value.newDisplayName
+							);
 						}
 					}
 				}
@@ -197,7 +212,7 @@ export function collectionAppInit<T>(
 				if (ret.ok) {
 					console.log('Successfully Deleted Record. [', ret.value.key, ']. Rerouting...');
 					if (contextManager.appContext.editMode === 'permanent') {
-						contextManager.changeContext('');
+						contextManager.replaceContext(contextSnapshot, '');
 					}
 					store.reload(
 						contextManager.appContext,

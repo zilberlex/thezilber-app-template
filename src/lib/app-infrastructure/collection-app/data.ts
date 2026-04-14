@@ -1,6 +1,9 @@
 import { generateId } from '$lib/engine/crypto/crypto-utils';
 import { timestamp } from '$lib/engine/storage/data/data';
-import type { SyncableAppRecordMetadata, VectorClock } from '$lib/engine/storage/data/types';
+import type {
+	SyncableAppRecordMetadata,
+	VectorClock
+} from '$lib/app-infrastructure/collection-app/data/types';
 
 export function stampAppRecord(deviceId: string, meta: SyncableAppRecordMetadata) {
 	meta.modifiedAt = timestamp();

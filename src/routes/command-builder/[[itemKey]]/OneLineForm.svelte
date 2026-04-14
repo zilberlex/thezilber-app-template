@@ -34,7 +34,7 @@
 	}: Props = $props();
 
 	let inputField = $state(defaultInput);
-	let inputComboElement: HTMLElement = $state();
+	let inputComboElement: HTMLElement | undefined = $state();
 
 	onMount(() => {
 		if (browser) {
@@ -59,12 +59,15 @@
 		<div class="form-controls">
 			<Button
 				onclick={() => onAction(inputField)}
-				{@attach createClickHotKeyAttachment(actionText, 'Enter', 'alt')}
+				{@attach createClickHotKeyAttachment(actionText, false, 'Enter', 'alt')}
 			>
 				{actionText}
 			</Button>
 
-			<Button onclick={onClose} {@attach createClickHotKeyAttachment('Close Dialog', 'q', 'alt')}>
+			<Button
+				onclick={onClose}
+				{@attach createClickHotKeyAttachment('Close Dialog', false, 'q', 'alt')}
+			>
 				Close
 			</Button>
 		</div>

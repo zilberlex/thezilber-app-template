@@ -36,6 +36,7 @@ export function createFocusHotKeyAttachment(
 
 export function createClickHotKeyAttachment(
 	hotKeyTooltipText: string = '',
+	moveFocus: boolean = true,
 	key: string,
 	...modifiers: HotKeyModifier[]
 ): Attachment {
@@ -45,7 +46,7 @@ export function createClickHotKeyAttachment(
 		const nodeElement = node as HTMLElement;
 		if (!nodeElement) throw new Error(`Expected node to be HTML Element. Node: ${node}`);
 
-		let clickHandler = createClickHandler(nodeElement, hotKey.key);
+		let clickHandler = createClickHandler(nodeElement, hotKey.key, moveFocus);
 		hotKeysModule.assignHotKey(hotKey, clickHandler);
 
 		assignHotKeyTooltip(node, hotKey, hotKeyTooltipText);
@@ -72,10 +73,18 @@ export function createFocusHandler(node: HTMLElement, key: HotKey) {
 	);
 }
 
-export function createClickHandler(node: HTMLElement, initiatingKey: string) {
+export function createClickHandler(node: HTMLElement, initiatingKey: string, moveFocus: boolean) {
 	return createSmartHandler(
 		(_event: Event) => {
+			let currentActiveElement = document.activeElement;
 			node.click();
+
+			if (!moveFocus) {
+				if (currentActiveElement instanceof HTMLElement) {
+					currentActiveElement.focus();
+				} else node.blur();
+			}
+
 			signalClickHotkeyEvent(initiatingKey, node);
 		},
 		{ cooldownDelay: HOTKEY_COOLDOWN_MS, context: `click node: [${node.toString()}]` }

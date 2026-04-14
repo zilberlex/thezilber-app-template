@@ -79,7 +79,7 @@
 				<div class="copy-button">
 					<CopyButtonSimple
 						textToCopy={output}
-						{@attach createClickHotKeyAttachment('Copy', 'c', 'alt')}
+						{@attach createClickHotKeyAttachment('Copy', false, 'c', 'alt')}
 					/>
 				</div>
 				<OutputCombo id="output" value={output}>Output</OutputCombo>

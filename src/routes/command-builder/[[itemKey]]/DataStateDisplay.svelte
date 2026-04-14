@@ -22,37 +22,39 @@
 				case 'saving':
 					message =
 						editMode === 'permanent'
-							? `Saving Command [${dataState.key}]...`
+							? `Saving Command [${dataState.slug}]...`
 							: `Saving Draft As...`;
 					break;
 				case 'loading':
 					message =
-						editMode === 'permanent' ? `Loading Command [${dataState.key}]...` : `Loading Draft...`;
+						editMode === 'permanent'
+							? `Loading Command [${dataState.slug}]...`
+							: `Loading Draft...`;
 					break;
 				case 'record-not-found':
-					message = `Record Not Found [${dataState.key}]`;
+					message = `Record Not Found [${dataState.slug}]`;
 					break;
 				case 'ready':
-					message = editMode === 'permanent' ? `Ready [${dataState.key}]` : `Draft Ready`;
+					message = editMode === 'permanent' ? `Ready [${dataState.slug}]` : `Draft Ready`;
 					break;
 				case 'creating':
 					message =
 						editMode === 'permanent'
-							? `Saving As [${dataState.key}]`
-							: `Saving Draft as [${dataState.key}]`;
+							? `Saving As [${dataState.slug}]`
+							: `Saving Draft as [${dataState.slug}]`;
 					break;
 				case 'deleting':
-					message = `Deleting Item: [${dataState.key}]`;
+					message = `Deleting Item: [${dataState.slug}]`;
 					break;
 				case 'deleted':
-					message = `Successfully Deleted Item: [${dataState.key}]`;
+					message = `Successfully Deleted Item: [${dataState.slug}]`;
 					break;
 				case 'error':
-					message = `Error in Operation: [${dataState.key}].  Error Data: [${JSON.stringify(dataState.errorData)}]`;
+					message = `Error in Operation: [${dataState.slug}].  Error Data: [${JSON.stringify(dataState.errorData)}]`;
 					break;
-				default:
-					message = `Error not behavior defined for: [${dataState.kind}]`;
 			}
+
+			if (!message) message = 'Critical Error';
 
 			let suffix = appState.debug
 				? `. (Previous Key [${'prevKey' in dataState ? (dataState.prevKey ?? '') : ''}])`

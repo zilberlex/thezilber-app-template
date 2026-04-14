@@ -1,40 +1,59 @@
 import type {
+	AllRecordsProjections,
 	AppRecord,
-	DbAppRecord,
+	DataProjection,
+	RecordProjection,
 	SyncableAppRecordMetadata
-} from '$lib/engine/storage/data/types';
+} from '$lib/app-infrastructure/collection-app/data/types';
+import type { SvelteMap } from 'svelte/reactivity';
+import type { SmartStore } from './smart-store.svelte';
 
 export type EditMode = 'permanent' | 'draft';
 export type ItemKey = '_draft_' | string;
 
-export type CollectionAppRecord<TData> = AppRecord<TData, SyncableAppRecordMetadata>;
+export type CollectionAppRecord<TData, TProjection extends DataProjection> = AppRecord<
+	TData,
+	TProjection,
+	SyncableAppRecordMetadata
+>;
 
-export type CollectionAppRuntime<T> = {
+export type CollectionAppRuntime<
+	T extends Omit<object, 'recordId'>,
+	TProjection extends DataProjection
+> = {
 	get data(): T;
-	currentDataState: AppDataState;
-	projectedDataState: AppDataState | undefined;
+	get dataStates(): SvelteMap<string, AppDataState>;
+	get displayName(): string;
+
+	get currentDataState(): AppDataState;
+	get projectedDataState(): AppDataState | undefined;
+	get projectedContext(): CollectionAppContext | undefined;
+	get allRecordProjections(): SvelteMap<
+		string,
+		RecordProjection<T, TProjection, SyncableAppRecordMetadata>
+	>;
 	save(): Promise<CollectionAppBlankResult>;
-	saveAs(itemKey: string): Promise<CollectionAppBlankResult>;
+	saveAs(slug: string): Promise<CollectionAppBlankResult>;
 	delete(): Promise<CollectionAppBlankResult>;
 	destroy(): void;
+
+	get _internal(): {
+		store: SmartStore<T, any>;
+	};
 };
 
 export type CollectionAppContext = {
 	editMode: EditMode;
-	itemKey: string;
+	slug: string;
+	displayName?: string;
 };
+
+export type ContextChangeEventKind = 'data-key-update' | 'browser-navigation';
 
 export type CollectionAppContextChangeEvent = {
-	kind: 'data-key-update' | 'browser-navigation';
+	kind: ContextChangeEventKind;
 	prevContext: CollectionAppContext;
 	newContext: CollectionAppContext;
-};
-
-export type CollectionAppRecordAdapter<TData, TMeta> = {
-	constructRecord(data: TData): AppRecord<TData, TMeta>;
-	constructDbRecord(data: TData): DbAppRecord<TData, TMeta>;
-	fromDb: (dbRecord: DbAppRecord<TData, TMeta>) => AppRecord<TData, TMeta>;
-	toDb: (AppRecord: AppRecord<TData, TMeta>) => DbAppRecord<TData, TMeta>;
 };
 
 export type CollectionAppContextManager<TContext extends CollectionAppContext> = {
@@ -42,9 +61,9 @@ export type CollectionAppContextManager<TContext extends CollectionAppContext> =
 	projectedContext: TContext | undefined;
 	// Tech Debt
 	appContextChangeEvent: CollectionAppContextChangeEvent | undefined;
-	changeContext: (itemKey: string) => { undoChangeContext: () => void };
-	replaceContext: (prevContext: TContext, newItemKey: string) => void;
-	changeProjectedContext: (itemKey: string) => void;
+	changeContext: (slug: string, displayName?: string) => { undoChangeContext: () => void };
+	replaceContext: (prevContext: TContext, newSlug: string, newDisplayName?: string) => void;
+	changeProjectedContext: (slug: string) => void;
 	resetProjectedContext: () => void;
 };
 
@@ -53,45 +72,46 @@ export type CollectionAppContextManager<TContext extends CollectionAppContext> =
 type Ok<T> = { ok: true; value: T };
 type Err<E> = { ok: false; error: E };
 export type ActionResult<T, E> = Ok<T> | Err<E>;
-export interface AppRecordRepo<TData, TMeta, TError> {
-	update(
-		context: CollectionAppContext,
-		record: DbAppRecord<TData, TMeta>
-	): Promise<ActionResult<DbAppRecord<TData, TMeta>, TError>>;
-
-	create(
-		context: CollectionAppContext,
-		data: TData,
-		newItemKey: string
-	): Promise<ActionResult<DbAppRecord<TData, TMeta>, TError>>;
-	load(
-		context: CollectionAppContext
-	): Promise<ActionResult<DbAppRecord<TData, TMeta> | undefined, TError>>;
-	delete(
-		context: CollectionAppContext,
-		record: DbAppRecord<TData, TMeta>
-	): Promise<ActionResult<void, TError>>;
-	getAllRecords(): Promise<ActionResult<AllRecordsInfo<TMeta>, TError>>;
-}
-
-export type AllRecordsInfo<TMeta> = Omit<DbAppRecord<any, TMeta>, 'data'>[];
 
 export type WithOpId<T> = T & { opId: number };
 
 export type AppDataStateOld = 'saving' | 'ready' | 'loading' | 'record-not-found' | 'error';
 
 export type AppDataState = { context: CollectionAppContext } & (
-	| { kind: 'creating'; key: string; prevKey: string }
-	| { kind: 'saving'; key: string; prevKey: string }
-	| { kind: 'loading'; key: string; prevKey?: string }
-	| { kind: 'deleting'; key: string }
-	| { kind: 'deleted'; key: string }
-	| { kind: 'record-not-found'; key: string; prevKey?: string }
-	| { kind: 'ready'; key: string; prevKey?: string }
-	| { kind: 'error'; key: string; errorData: CollectionAppError }
+	| {
+			kind: 'creating';
+			slug: string;
+			prevSlug: string;
+			displayName: string;
+			prevDisplayName: string;
+	  }
+	| { kind: 'saving'; slug: string; prevSlug: string; displayName: string; prevDisplayName: string }
+	| {
+			kind: 'loading';
+			slug: string;
+			prevSlug?: string;
+	  }
+	| { kind: 'deleting'; slug: string; displayName: string }
+	| { kind: 'deleted'; slug: string; displayName: string }
+	| {
+			kind: 'record-not-found';
+			slug: string;
+			prevSlug?: string;
+	  }
+	| {
+			kind: 'ready';
+			slug: string;
+			prevSlug?: string;
+			displayName: string;
+			prevDisplayName?: string;
+	  }
+	| { kind: 'error'; slug: string; errorData: CollectionAppError }
 );
 
-export type CollectionAppEnvironment<T> = CollectionAppContext & CollectionAppRuntime<T>;
+export type CollectionAppEnvironment<
+	T extends Omit<object, 'recordId'>,
+	TProjection extends DataProjection
+> = CollectionAppContext & CollectionAppRuntime<T, DataProjection>;
 
 export type DataManagerOptions<T> = {
 	loadNotFoundBehavior: 'error' | 'create-new';
@@ -100,15 +120,21 @@ export type DataManagerOptions<T> = {
 
 export type CollectionAppError = {
 	context: CollectionAppContext;
-	kind: 'Key Already Exists' | 'General Error';
+	kind: 'Key Already Exists' | 'Key Not Found' | 'Corrupted Record' | 'General Error';
 	message: string;
 };
 export type CollectionAppLoadResult<T> = ActionResult<T | undefined, CollectionAppError>;
 export type CollectionAppBlankResult = ActionResult<void, CollectionAppError>;
 
 export type StoreSaveResult = { context: CollectionAppContext } & (
-	| { kind: 'create'; newItemKey: string }
-	| { kind: 'update-with-key-change'; prevItemKey: string; newItemKey: string }
+	| { kind: 'create'; newSlug: string; newDisplayName: string }
+	| {
+			kind: 'update-with-key-change';
+			prevSlug: string;
+			newSlug: string;
+			prevDisplayName: string;
+			newDisplayName: string;
+	  }
 	| { kind: 'update' }
 	| { kind: 'another-operation-in-progress'; currentOperation: AppDataState }
 );

@@ -4,22 +4,28 @@ import {
 	type Dispatcher,
 	type DispatchHandler
 } from '$lib/engine/patterns/observer';
-import type { AppRecord, SyncableAppRecordMetadata } from '$lib/engine/storage/data/types';
+import type {
+	AllRecordsProjections,
+	AppRecord,
+	AppRecordRepo,
+	DataProjection,
+	DbAdapter,
+	RecordProjection,
+	SyncableAppRecordMetadata
+} from '$lib/app-infrastructure/collection-app/data/types';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
-import { deepAssign } from '../deep-assign';
 import { Cache } from './cache';
 import { stampAppRecord } from './data';
 import type {
 	AppDataState,
-	AppRecordRepo,
 	CollectionAppContext,
 	CollectionAppError,
 	CollectionAppLoadResult,
-	CollectionAppRecordAdapter,
 	StoreDeleteActionResult,
 	StoreSaveActionResult,
 	WithOpId
 } from './types';
+import { SvelteMap } from 'svelte/reactivity';
 
 type SaveOperationsParams =
 	| {
@@ -29,19 +35,19 @@ type SaveOperationsParams =
 	| {
 			kind: 'create';
 			context: CollectionAppContext;
-			newItemKey: string;
+			newItemDisplayName: string;
 	  };
 
 export type SmartStoreOptions<T> = {
 	loadNotFoundBehavior: { action: 'error' } | { action: 'create-new'; createObj: () => T };
 };
 
-const defaultOptions: SmartStoreOptions<any> = {
-	loadNotFoundBehavior: { action: 'error' }
-};
-
 // TODO AZ think of a better name and placement;
-type RecordI<T> = AppRecord<T, SyncableAppRecordMetadata>;
+type RecordI<T, TProjection extends DataProjection> = AppRecord<
+	T,
+	TProjection,
+	SyncableAppRecordMetadata
+>;
 
 type AbortablePromise<T> = {
 	isAborted: boolean;
@@ -62,14 +68,19 @@ function abortable<T>(p: Promise<T>): { abort: () => void; abortablePromise: Abo
 	};
 }
 
-export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
+export class SmartStore<T, TProjection extends DataProjection>
+	implements Dispatcher<WithOpId<AppDataState>>
+{
 	#context: CollectionAppContext;
-	#record: RecordI<T>;
+	#record: RecordI<T, TProjection>;
+	#recordProjections: SvelteMap<
+		string,
+		RecordProjection<T, TProjection, SyncableAppRecordMetadata>
+	>;
 
-	#recordAdapter: CollectionAppRecordAdapter<T, SyncableAppRecordMetadata>;
-	#options: SmartStoreOptions<T>;
-	#repository: AppRecordRepo<T, SyncableAppRecordMetadata, CollectionAppError>;
-	#cache: Cache<string, RecordI<T>>;
+	#dbAdapter: DbAdapter<T, TProjection, SyncableAppRecordMetadata>;
+	#repository: AppRecordRepo<T, TProjection, SyncableAppRecordMetadata, CollectionAppError>;
+	#cache: Cache<string, RecordI<T, TProjection>>;
 
 	#reloadAbort: (() => void) | undefined;
 
@@ -79,29 +90,52 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 	constructor(
 		context: CollectionAppContext,
 		placeHolderValue: T,
-		repository: AppRecordRepo<T, SyncableAppRecordMetadata, CollectionAppError>,
-		recordAdapter: CollectionAppRecordAdapter<T, SyncableAppRecordMetadata>,
+		repository: AppRecordRepo<T, TProjection, SyncableAppRecordMetadata, CollectionAppError>,
+		dbAdapter: DbAdapter<T, TProjection, SyncableAppRecordMetadata>,
 		options?: SmartStoreOptions<T>
 	) {
 		this.#context = context;
-		this.#options = options ?? defaultOptions;
-		this.#recordAdapter = recordAdapter;
 		this.#cache = new Cache();
 
-		this.#record = $state(this.#recordAdapter.constructRecord(placeHolderValue));
+		this.#dbAdapter = dbAdapter;
+		this.#record = $state(this.#dbAdapter.constructRecord(placeHolderValue));
+		this.#recordProjections = $state(new SvelteMap());
 		this.#repository = repository;
 
+		// TODO AZ - create repo here instead of injection, or find a better way for testing also.
 		if (browser) {
 			this.reload(context, placeHolderValue, options);
+
+			this.#initeRecordProjections();
 		}
 	}
 
-	get dataKey() {
-		return this.#record.key;
+	async #initeRecordProjections() {
+		let recordPrjectionsActionResult = await this.#repository.getAllRecordProjections();
+
+		if (recordPrjectionsActionResult.ok) {
+			let recordProjectionsFromRepo = recordPrjectionsActionResult.value;
+			recordProjectionsFromRepo.forEach((p) => {
+				this.#recordProjections.set(p.recordId, p);
+			});
+		}
+	}
+
+	get slug() {
+		// todo az normalize
+		return this.#record.slug ? this.#record.slug : '_draft_';
 	}
 
 	get data() {
 		return this.#record.data;
+	}
+
+	get displayName() {
+		return this.#record.projection?.displayName;
+	}
+
+	get allRecordProjections() {
+		return this.#recordProjections;
 	}
 
 	register(handler: DispatchHandler<WithOpId<AppDataState>>): void {
@@ -126,11 +160,27 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 
 		let contextSnapshot = $state.snapshot(context);
 
-		stampAppRecord(getDeviceId(), this.#record.meta);
-		let saveRecord = $state.snapshot(this.#record) as AppRecord<T, SyncableAppRecordMetadata>;
+		console.log('saveOperations - operation', operation, 'record:', $state.snapshot(this.#record));
 
-		let prevItemKey = contextSnapshot.itemKey;
-		let newItemKey = operation === 'update' ? saveRecord.key : saveOperationsParams.newItemKey;
+		stampAppRecord(getDeviceId(), this.#record.meta);
+		this.#dbAdapter.refreshProjection(this.#record);
+
+		let saveRecord = $state.snapshot(this.#record) as RecordI<T, TProjection>;
+
+		let prevItemSlug = contextSnapshot.slug;
+		let prevItemDisplayName = contextSnapshot.displayName;
+
+		let newItemDisplayName =
+			operation === 'update'
+				? saveRecord.projection.displayName
+				: saveOperationsParams.newItemDisplayName;
+
+		let slug = saveRecord.slug;
+		if (newItemDisplayName !== prevItemDisplayName) {
+			console.log('Requesting new slug for displayName', newItemDisplayName);
+			slug = await this.#repository.getSlug(newItemDisplayName, saveRecord.slug);
+			console.log('Generated Slug for displayName', newItemDisplayName, 'slug:', slug);
+		}
 
 		let signalKind: 'saving' | 'creating';
 		switch (operation) {
@@ -141,62 +191,91 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 			case 'create':
 				signalKind = 'creating';
 		}
-		console.log(`${operation === 'update' ? 'Saving' : 'Creating'}  Data...`, saveRecord.data);
+
+		if (operation === 'update') {
+			console.log(`Saving Data...`, saveRecord.data);
+		} else {
+			console.log(`Creating Data...`, saveRecord.data);
+		}
 
 		this.#signalStateChange(
 			{
 				context: contextSnapshot,
 				kind: signalKind,
-				key: newItemKey,
-				prevKey: prevItemKey
+				slug: slug,
+				prevSlug: prevItemSlug,
+				displayName: newItemDisplayName,
+				prevDisplayName: prevItemDisplayName ?? ''
 			},
 			opId
 		);
 
 		let res;
 		if (operation === 'update') {
-			console.log('update record', contextSnapshot);
-
-			res = await this.#repository.update(contextSnapshot, this.#recordAdapter.toDb(saveRecord));
+			console.log('update record context:', contextSnapshot, '\nrecord:', saveRecord);
+			saveRecord.slug = slug;
+			res = await this.#repository.update(contextSnapshot, saveRecord);
 		} else {
-			let saveData = saveRecord.data;
-			console.log('create record. Key:', newItemKey, 'context:', context);
-			res = await this.#repository.create(contextSnapshot, saveData, newItemKey);
+			let saveData = saveRecord.data as T;
+			console.log(
+				'create record. slug:',
+				slug,
+				'displayName:',
+				newItemDisplayName,
+				'context:',
+				contextSnapshot
+			);
+
+			res = await this.#repository.create(contextSnapshot, saveData, newItemDisplayName, slug);
 		}
 
-		return { repoOpResult: res, opId, newItemKey, prevItemKey, contextSnapshot };
+		return {
+			repoOpResult: res,
+			opId,
+			slug,
+			displayName: newItemDisplayName,
+			prevDisplayName: prevItemDisplayName,
+			prevSlug: prevItemSlug,
+			contextSnapshot
+		};
 	}
 
 	async save(): Promise<StoreSaveActionResult> {
 		let {
 			repoOpResult: res,
 			opId,
-			prevItemKey,
-			newItemKey,
+			slug,
+			prevSlug,
+			displayName,
+			prevDisplayName,
 			contextSnapshot
 		} = await this.#saveOperations({ context: this.#context, kind: 'update' });
 
 		if (res.ok) {
-			let record = this.#recordAdapter.fromDb(res.value);
-			await this.#cache.setOrUpdateKey(newItemKey, record, prevItemKey);
+			let record = res.value;
+			await this.#cache.setOrUpdateKey(slug, record, prevSlug);
 
 			this.#signalStateChange(
 				{
 					context: contextSnapshot,
 					kind: 'ready',
-					key: newItemKey,
-					prevKey: prevItemKey
+					slug,
+					prevSlug,
+					displayName,
+					prevDisplayName
 				},
 				opId
 			);
 
-			if (prevItemKey !== newItemKey) {
+			if (slug !== prevSlug) {
 				return {
 					ok: true,
 					value: {
 						kind: 'update-with-key-change',
-						prevItemKey: prevItemKey,
-						newItemKey: newItemKey,
+						newSlug: slug,
+						prevSlug,
+						newDisplayName: displayName,
+						prevDisplayName: prevDisplayName ?? '',
 						context: contextSnapshot
 					}
 				};
@@ -206,43 +285,70 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 		} else {
 			// TODO AZ newItemKey here is potential for issues.
 			this.#signalStateChange(
-				{ kind: 'error', key: newItemKey, context: contextSnapshot, errorData: res.error },
+				{ kind: 'error', slug, context: contextSnapshot, errorData: res.error },
 				opId
 			);
 			return { ok: false, error: res.error };
 		}
 	}
 
-	async saveAs(context: CollectionAppContext, newItemKey: string): Promise<StoreSaveActionResult> {
+	async saveAs(
+		context: CollectionAppContext,
+		newItemDisplayName: string
+	): Promise<StoreSaveActionResult> {
 		let {
 			repoOpResult: res,
 			opId,
-			prevItemKey,
-			newItemKey: newItemKeyRet,
+			slug,
+			prevSlug,
+			displayName,
+			prevDisplayName,
 			contextSnapshot
-		} = await this.#saveOperations({ context, kind: 'create', newItemKey });
+		} = await this.#saveOperations({
+			context,
+			kind: 'create',
+			newItemDisplayName: newItemDisplayName
+		});
 
 		if (res.ok) {
-			let newRecord = this.#recordAdapter.fromDb(res.value);
-			await this.#cache.setOrUpdateKey(newItemKey, newRecord);
+			let newRecord = res.value;
+			await this.#cache.setOrUpdateKey(slug, newRecord);
 
-			if (contextSnapshot.itemKey === this.#context.itemKey) {
+			if (contextSnapshot.slug === this.#context.slug) {
 				// this check is to prevent changing of working record during context changes
-				deepAssign(this.#record, newRecord);
+				this.#record = newRecord;
 			}
 
 			this.#signalStateChange(
-				{ kind: 'ready', context: contextSnapshot, key: newItemKeyRet, prevKey: prevItemKey },
+				{
+					kind: 'ready',
+					context: contextSnapshot,
+					slug,
+					prevSlug: prevSlug,
+					displayName,
+					prevDisplayName
+				},
 				opId
 			);
 
 			return {
 				ok: true,
-				value: { kind: 'create', newItemKey: newItemKey, context: contextSnapshot }
+				value: {
+					kind: 'create',
+					newSlug: slug,
+					context: contextSnapshot,
+					newDisplayName: displayName
+				}
 			};
 		} else {
 			this.#signalStateChange(
-				{ kind: 'error', key: newItemKey, context: contextSnapshot, errorData: res.error },
+				{
+					kind: 'error',
+
+					slug,
+					context: contextSnapshot,
+					errorData: res.error
+				},
 				opId
 			);
 
@@ -253,21 +359,36 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 	async delete(context: CollectionAppContext): Promise<StoreDeleteActionResult> {
 		let opId = this.#nextOpId();
 		let ctxSnapshot = $state.snapshot(context);
+
+		// This display name may be wrong udner some conditions, but in general it is good enough
+		let displayName = this.#record.projection.displayName;
 		this.#signalStateChange(
-			{ kind: 'deleting', key: ctxSnapshot.itemKey, context: ctxSnapshot },
+			{
+				kind: 'deleting',
+				slug: ctxSnapshot.slug,
+				displayName: displayName,
+				context: ctxSnapshot
+			},
 			opId
 		);
-		let res = await this.#repository.delete(context, this.#recordAdapter.toDb(this.#record));
+		console.log('deleting item', ctxSnapshot);
+
+		let res = await this.#repository.delete(ctxSnapshot, this.#record);
 
 		if (res.ok) {
-			await this.#cache.delete(this.#record.key);
+			await this.#cache.delete(this.#record.slug);
 			this.#signalStateChange(
-				{ kind: 'deleted', key: ctxSnapshot.itemKey, context: ctxSnapshot },
+				{
+					kind: 'deleted',
+					slug: ctxSnapshot.slug,
+					displayName: displayName,
+					context: ctxSnapshot
+				},
 				opId
 			);
 			return {
 				ok: true,
-				value: { kind: 'deleted', key: ctxSnapshot.itemKey, context: ctxSnapshot }
+				value: { kind: 'deleted', key: ctxSnapshot.slug, context: ctxSnapshot }
 			};
 		} else {
 			return res;
@@ -283,25 +404,22 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 		let opId = this.#nextOpId();
 
 		let recordSnapshot = $state.snapshot(this.#record);
-		let prevItemKey = recordSnapshot.key;
+		let prevSlug = recordSnapshot.slug;
+		let prevDisplayName = recordSnapshot.projection.displayName;
 		let newContextSnapshot = $state.snapshot(newContext);
-		let newItemKey = newContextSnapshot.itemKey;
+		let newSlug = newContextSnapshot.slug;
 
 		this.#reloadAbort?.();
 
 		this.#context = newContext;
 
-		if (options) {
-			this.#options = options;
-		}
-
 		// TODO AZ organize this mess
-		if (newItemKey === prevItemKey) {
+		if (newSlug === prevSlug) {
 			console.log(
 				'Store reload canceled - current record key matches new context:',
 				newContextSnapshot,
 				'prevItemKey',
-				prevItemKey,
+				prevSlug,
 				'current record',
 				$state.snapshot(this.#record)
 			);
@@ -310,15 +428,20 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 
 		console.log('Store Starting Store Reload. new Context', newContextSnapshot);
 		this.#signalStateChange(
-			{ kind: 'loading', key: newItemKey, prevKey: prevItemKey, context: newContextSnapshot },
+			{
+				kind: 'loading',
+				slug: newSlug,
+				context: newContextSnapshot
+			},
 			opId
 		);
 
 		if (placeHolderValue) {
-			deepAssign(this.#record, this.#recordAdapter.constructRecord(placeHolderValue));
+			this.#record = this.#dbAdapter.constructRecord(placeHolderValue);
+			console.log('constructRecord', this.#record);
 		}
 
-		let { abort, abortablePromise } = abortable(this.#getItemWithCaching(this.#context));
+		let { abort, abortablePromise } = abortable(this.#getItemWithCaching(newContextSnapshot));
 		this.#reloadAbort = abort;
 
 		let loadResult = await abortablePromise.promise;
@@ -332,7 +455,7 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 			this.#signalStateChange(
 				{
 					kind: 'error',
-					key: newItemKey,
+					slug: newSlug,
 					context: newContextSnapshot,
 					errorData: loadResult.error
 				},
@@ -344,31 +467,45 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 
 		let record = loadResult.value;
 		if (record) {
-			deepAssign(this.#record, record);
+			this.#dbAdapter.refreshProjection(record);
+			this.#record = record;
 			// TODO AZ refactor draft handling and normalization of drafts. - this if this shit is even needed
 			// - technically not needed or maybe needed on save instead of load. or maybe both
-			if (this.#context.editMode === 'draft') this.#record.key = '_draft_';
 			this.#signalStateChange(
-				{ kind: 'ready', key: newItemKey, prevKey: prevItemKey, context: newContextSnapshot },
+				{
+					kind: 'ready',
+					slug: newSlug,
+					prevSlug: prevSlug,
+					displayName: record.projection.displayName,
+					prevDisplayName: prevDisplayName,
+					context: newContextSnapshot
+				},
 				opId
 			);
 		} else {
-			const notFoundBehvior = this.#options?.loadNotFoundBehavior;
+			const notFoundBehvior = options?.loadNotFoundBehavior;
 			if (notFoundBehvior?.action === 'create-new') {
-				deepAssign(this.#record, this.#recordAdapter.constructRecord(notFoundBehvior.createObj()));
+				this.#record = this.#dbAdapter.constructRecord(notFoundBehvior.createObj());
 
 				this.#signalStateChange(
-					{ kind: 'ready', key: newItemKey, prevKey: prevItemKey, context: newContextSnapshot },
+					{
+						kind: 'ready',
+						slug: newSlug,
+						prevSlug: prevSlug,
+						displayName: this.#record.projection.displayName,
+						prevDisplayName: prevDisplayName,
+						context: newContextSnapshot
+					},
 					opId
 				);
 			} else {
-				console.warn('Sinaling record-not-found', newItemKey);
+				console.warn('Signaling record-not-found', newSlug);
 
 				this.#signalStateChange(
 					{
 						kind: 'record-not-found',
-						key: newItemKey,
-						prevKey: prevItemKey,
+						slug: newSlug,
+						prevSlug: prevSlug,
 						context: newContextSnapshot
 					},
 					opId
@@ -379,8 +516,8 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 
 	async #getItemWithCaching(
 		context: CollectionAppContext
-	): Promise<CollectionAppLoadResult<RecordI<T>>> {
-		let itemKey = context.itemKey;
+	): Promise<CollectionAppLoadResult<RecordI<T, TProjection>>> {
+		let itemKey = context.slug;
 		let record = await this.#cache.get(itemKey);
 
 		if (!record) {
@@ -391,8 +528,8 @@ export class SmartStore<T> implements Dispatcher<WithOpId<AppDataState>> {
 			}
 
 			if (loadFromRepoResult.value) {
-				record = this.#recordAdapter.fromDb(loadFromRepoResult.value);
-				await this.#cache.setOrUpdateKey(itemKey, record as RecordI<T>);
+				record = loadFromRepoResult.value;
+				await this.#cache.setOrUpdateKey(itemKey, record as RecordI<T, TProjection>);
 			}
 		}
 

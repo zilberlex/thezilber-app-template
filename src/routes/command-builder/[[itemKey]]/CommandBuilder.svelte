@@ -2,13 +2,13 @@
 	import type { DynamicFormSchema } from '$lib/app/dynamic-form/dynamic-form-types';
 	import DynamicForm from '$lib/app/dynamic-form/DynamicForm.svelte';
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
-	import type { CbState } from './command-builder-types';
+	import type { CbData } from './command-builder-types';
 	import { tokenize, type Token } from './custom-tokenizer';
 
 	let {
 		commandBuilderState = $bindable(),
 		disabled = false
-	}: { commandBuilderState: CbState; disabled?: boolean } = $props();
+	}: { commandBuilderState: CbData; disabled?: boolean } = $props();
 
 	let tokens = $derived(tokenize(commandBuilderState.commandStr));
 	let formSchema = $derived.by(() => {

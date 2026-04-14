@@ -8,7 +8,10 @@ import type {
 import type { DynamicForm } from '$lib/app/dynamic-form/dynamic-form-types';
 import { generateId } from '$lib/engine/crypto/crypto-utils';
 import { createDbAppRecord } from '$lib/engine/storage/data/data';
-import type { DbAppRecord, SyncableAppRecordMetadata } from '$lib/engine/storage/data/types';
+import type {
+	DbAppRecord,
+	SyncableAppRecordMetadata
+} from '$lib/app-infrastructure/collection-app/data/types';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
 
 export type CbState = {
@@ -29,20 +32,6 @@ function createCommandBuilderRecord(data: CbState) {
 
 function createDbCommandBuilderRecord(data: CbState) {
 	return createDbAppRecord(data, createSyncableRecordMetadata(getDeviceId()));
-}
-
-export function convertToCommandBuilderRecord(record: DbCbRecord): CbRecord {
-	let ret = {
-		...record,
-		get key(): string {
-			return this.data.commandName;
-		},
-		set key(value) {
-			this.data.commandName = value;
-		}
-	};
-
-	return ret;
 }
 
 export const commandBuilderRecordAdapter: CollectionAppRecordAdapter<
