@@ -132,6 +132,9 @@ export function collectionAppInit<
 				store
 			};
 		},
+		get baseUrlPath() {
+			return contextManager.baseUrlPath;
+		},
 		save: async () => {
 			let res = await store.save();
 

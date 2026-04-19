@@ -8,7 +8,6 @@
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
 	import TooltipElement from '$lib/ui/basic-components/TooltipElement.svelte';
-	import TooltipAssigner from '$lib/ui/components/tooltips/TooltipAssigner.svelte';
 	import { onMount } from 'svelte';
 
 	type BasicFunction = (x: string) => void;

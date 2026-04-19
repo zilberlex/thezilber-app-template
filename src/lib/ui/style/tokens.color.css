@@ -29,6 +29,8 @@
 	--color-3-brighter: oklch(from var(--color-3) calc(l + 0.18) c h);
 
 	--color-3-dim: oklch(from var(--color-3) calc(l - 0.15) c h);
+	--color-3-dimmer: oklch(from var(--color-3) calc(l - 0.25) c h);
+	--color-3-dimmest: oklch(from var(--color-3) calc(l - 0.8) c h);
 
 	/* Semantic Palette */
 	--accent: var(--color-1);
@@ -54,6 +56,8 @@
 
 	--cl-surface: var(--color-3);
 	--cl-surface-dim: var(--color-3-dim);
+	--cl-surface-dimmer: var(--color-3-dimmer);
+	--cl-surface-dimmest: var(--color-3-dimmest);
 	--cl-on-surface: var(--color-2);
 	--cl-on-surface-dim: var(--color-2-dim);
 	--cl-on-surface-dimmer: var(--color-2-dimmer);

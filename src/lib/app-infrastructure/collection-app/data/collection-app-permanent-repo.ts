@@ -30,7 +30,7 @@ class CollectionAppDexieRepo<
 		this.version(1).stores({
 			data: 'recordId',
 			projection: 'recordId',
-			metadata: 'recordId',
+			metadata: 'recordId, [modifiedAt+recordId]',
 			keys: 'recordId, &slug'
 		});
 	}
@@ -253,33 +253,45 @@ export class CollectionAppPermanentRepo<
 		const db = this.#dexieRepo;
 
 		return await db.transaction('r', db.projection, db.metadata, db.keys, async () => {
-			const [projectionRows, metaRows, keysRows] = await Promise.all([
-				db.projection.toArray(),
-				db.metadata.toArray(),
-				db.keys.toArray()
+			const metaRows = await db.metadata.orderBy('modifiedAt').reverse().toArray();
+
+			const recordIds = metaRows.map((row) => row.recordId);
+
+			const [projectionRows, keysRows] = await Promise.all([
+				db.projection.bulkGet(recordIds),
+				db.keys.bulkGet(recordIds)
 			]);
 
-			const metaByRecordId = new Map(metaRows.map((row) => [row.recordId, stripRecordId(row)]));
-			const keysByRecordId = new Map(keysRows.map((row) => [row.recordId, stripRecordId(row)]));
+			const projectionByRecordId = new Map(
+				projectionRows
+					.filter((row): row is DbItem<TProjection> => row !== undefined)
+					.map((row) => [row.recordId, row])
+			);
+
+			const keysByRecordId = new Map(
+				keysRows
+					.filter((row): row is DbItem<RecordKeys> => row !== undefined)
+					.map((row) => [row.recordId, row])
+			);
 
 			const allProjections: AllRecordsProjections<TData, TProjection, SyncableAppRecordMetadata> =
-				projectionRows
-					.map((projectionRow) => {
-						const meta = metaByRecordId.get(projectionRow.recordId);
-						const keys = keysByRecordId.get(projectionRow.recordId);
+				metaRows
+					.map((metaRow) => {
+						const projectionRow = projectionByRecordId.get(metaRow.recordId);
+						const keysRow = keysByRecordId.get(metaRow.recordId);
 
-						if (!meta || !keys) {
+						if (!projectionRow || !keysRow) {
 							console.error(
-								`Corrupted record: projection exists for recordId [${projectionRow.recordId}] but metadata or keys are missing, meta: [${meta}], keys: [${keys}]`
+								`Corrupted record: metadata exists for recordId [${metaRow.recordId}] but projection or keys are missing. projection: [${projectionRow}], keys: [${keysRow}]`
 							);
 							return undefined;
 						}
 
 						return {
-							recordId: projectionRow.recordId,
+							recordId: metaRow.recordId,
 							projection: stripRecordId(projectionRow),
-							slug: keys.slug,
-							meta
+							slug: keysRow.slug,
+							meta: stripRecordId(metaRow)
 						};
 					})
 					.filter(

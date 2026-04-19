@@ -5,7 +5,7 @@
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import { untrack } from 'svelte';
 
-	let { appEnv }: { appEnv: CollectionAppEnvironment<any> } = $props();
+	let { appEnv }: { appEnv: CollectionAppEnvironment<any, any> } = $props();
 
 	let currentDataState = $derived(appEnv.currentDataState);
 	let projectedDataState = $derived(appEnv.projectedDataState);

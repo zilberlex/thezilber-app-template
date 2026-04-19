@@ -7,6 +7,7 @@ import type {
 } from '$lib/app-infrastructure/collection-app/data/types';
 import type { SvelteMap } from 'svelte/reactivity';
 import type { SmartStore } from './smart-store.svelte';
+import type { TouchMap } from './touch-map.svelte';
 
 export type EditMode = 'permanent' | 'draft';
 export type ItemKey = '_draft_' | string;
@@ -28,7 +29,9 @@ export type CollectionAppRuntime<
 	get currentDataState(): AppDataState;
 	get projectedDataState(): AppDataState | undefined;
 	get projectedContext(): CollectionAppContext | undefined;
-	get allRecordProjections(): SvelteMap<
+	get baseUrlPath(): string;
+
+	get allRecordProjections(): TouchMap<
 		string,
 		RecordProjection<T, TProjection, SyncableAppRecordMetadata>
 	>;
@@ -65,6 +68,7 @@ export type CollectionAppContextManager<TContext extends CollectionAppContext> =
 	replaceContext: (prevContext: TContext, newSlug: string, newDisplayName?: string) => void;
 	changeProjectedContext: (slug: string) => void;
 	resetProjectedContext: () => void;
+	get baseUrlPath(): string;
 };
 
 // todo az move one layer type

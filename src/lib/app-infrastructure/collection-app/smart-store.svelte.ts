@@ -26,6 +26,7 @@ import type {
 	WithOpId
 } from './types';
 import { SvelteMap } from 'svelte/reactivity';
+import { TouchMap } from './touch-map.svelte';
 
 type SaveOperationsParams =
 	| {
@@ -73,10 +74,7 @@ export class SmartStore<T, TProjection extends DataProjection>
 {
 	#context: CollectionAppContext;
 	#record: RecordI<T, TProjection>;
-	#recordProjections: SvelteMap<
-		string,
-		RecordProjection<T, TProjection, SyncableAppRecordMetadata>
-	>;
+	#recordProjections: TouchMap<string, RecordProjection<T, TProjection, SyncableAppRecordMetadata>>;
 
 	#dbAdapter: DbAdapter<T, TProjection, SyncableAppRecordMetadata>;
 	#repository: AppRecordRepo<T, TProjection, SyncableAppRecordMetadata, CollectionAppError>;
@@ -99,7 +97,7 @@ export class SmartStore<T, TProjection extends DataProjection>
 
 		this.#dbAdapter = dbAdapter;
 		this.#record = $state(this.#dbAdapter.constructRecord(placeHolderValue));
-		this.#recordProjections = $state(new SvelteMap());
+		this.#recordProjections = $state(new TouchMap('prepend'));
 		this.#repository = repository;
 
 		// TODO AZ - create repo here instead of injection, or find a better way for testing also.
@@ -254,6 +252,9 @@ export class SmartStore<T, TProjection extends DataProjection>
 		if (res.ok) {
 			let record = res.value;
 			await this.#cache.setOrUpdateKey(slug, record, prevSlug);
+			let { data, ...rest } = record;
+			let recordProjection = rest;
+			this.#recordProjections.set(record.recordId, recordProjection);
 
 			this.#signalStateChange(
 				{
@@ -311,8 +312,12 @@ export class SmartStore<T, TProjection extends DataProjection>
 		});
 
 		if (res.ok) {
+			//TODO AZ make post save record operations so not code dupe with save
 			let newRecord = res.value;
-			await this.#cache.setOrUpdateKey(slug, newRecord);
+			await this.#cache.setOrUpdateKey(slug, newRecord, prevSlug);
+			let { data, ...rest } = newRecord;
+			let recordProjection = rest;
+			this.#recordProjections.set(newRecord.recordId, recordProjection);
 
 			if (contextSnapshot.slug === this.#context.slug) {
 				// this check is to prevent changing of working record during context changes
@@ -373,6 +378,7 @@ export class SmartStore<T, TProjection extends DataProjection>
 		);
 		console.log('deleting item', ctxSnapshot);
 
+		this.#recordProjections.delete(this.#record.recordId);
 		let res = await this.#repository.delete(ctxSnapshot, this.#record);
 
 		if (res.ok) {

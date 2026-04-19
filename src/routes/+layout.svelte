@@ -39,18 +39,18 @@
 	@use '$lib/ui/style/utility/utility.scss' as *;
 
 	.app-container {
-		min-height: 100vh;
+		height: 100dvh;
 		width: 100%;
 		min-width: 350px;
-
 		padding-top: 10px;
-
 		display: flex;
 		flex-direction: column;
+		min-height: 0;
 	}
 
 	.page-container {
 		flex: 1 1 auto;
-		@include ly-center();
+		min-height: 0;
+		min-width: 0;
 	}
 </style>

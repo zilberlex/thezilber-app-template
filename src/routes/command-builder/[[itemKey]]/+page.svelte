@@ -1,28 +1,20 @@
 <script lang="ts">
-	import Button from '$lib/ui/basic-components/Button.svelte';
-	import { onDestroy, untrack } from 'svelte';
-	import {
-		createClickHotKeyAttachment,
-		createFocusHotKeyAttachment
-	} from '$lib/engine/hotkeys/hotkey-actions';
 	import { appState } from '$lib/engine/state/application-state.svelte';
-
-	import CommandBuilder from './CommandBuilder.svelte';
-	import Dialog from '$lib/ui/components/dialog/Dialog.svelte';
-	import OneLineForm from './OneLineForm.svelte';
-	import { type CbData, type CbProjection } from './command-builder-types';
-	import { collectionAppInit } from '$lib/app-infrastructure/collection-app/environement.svelte';
-	import DataStateDisplay from './DataStateDisplay.svelte';
+	import SidebarAppShell from '$lib/ui/components/appshells/SidebarAppShell.svelte';
+	import { onDestroy } from 'svelte';
+	import CommandLineBuilderMain from './CommandLineBuilderMain.svelte';
 	import { cbDbAdapter } from './command-builder-db-adapter';
-	import Debug from './Debug.svelte';
+	import type { CbAppEnv, CbData, CbProjection } from './command-builder-types';
+	import { collectionAppInit } from '$lib/app-infrastructure/collection-app/environement.svelte';
+	import CommandBuilderSidebar from './CommandBuilderSidebar.svelte';
 
-	let placeholderState = {
+	let placeholderData = {
 		commandName: '',
 		commandStr: 'Loading...',
 		formData: {}
 	};
 
-	let draftFallback: CbData = {
+	let draftData: CbData = {
 		commandName: 'Draft Command',
 		commandStr: 'cp -r {src} {dest}',
 		formData: {
@@ -31,9 +23,9 @@
 		}
 	};
 
-	let cbAppEnv = collectionAppInit<CbData, CbProjection>(
-		placeholderState,
-		draftFallback,
+	let cbAppEnv: CbAppEnv = collectionAppInit<CbData, CbProjection>(
+		placeholderData,
+		draftData,
 		cbDbAdapter,
 		'CommandBuilderDataDb'
 	);
@@ -43,119 +35,13 @@
 	});
 
 	appState.pageContext.title = 'Command Builder';
-
-	let isSaveDialogOpen = $state(false);
-
-	let editMode = $derived(cbAppEnv.editMode);
-	let dataState = $derived(cbAppEnv.currentDataState);
-	let isPermanentCommandPage = $derived(editMode === 'permanent');
-
-	let saveAsErrorMessage = $state('');
-
-	function defaultSaveButtonBehavior() {
-		if (isPermanentCommandPage) {
-			cbAppEnv.save();
-		} else {
-			openSaveAsPopup();
-		}
-	}
-
-	function openSaveAsPopup() {
-		isSaveDialogOpen = true;
-	}
-
-	async function deleteItem() {
-		await cbAppEnv.delete();
-	}
-
-	async function saveAsHandler(newCommandName: string) {
-		let result = await cbAppEnv.saveAs(newCommandName);
-		if (result.ok) {
-			isSaveDialogOpen = false;
-		} else {
-			const error = result.error;
-			if (error.kind === 'Key Already Exists') {
-				saveAsErrorMessage = error.message;
-			} else {
-				saveAsErrorMessage = 'Critical Error - ' + error.message;
-			}
-		}
-	}
-
-	$effect(() => {
-		if (!isSaveDialogOpen) {
-			saveAsErrorMessage = '';
-		}
-	});
 </script>
 
-<Debug appEnv={cbAppEnv} />
-<DataStateDisplay appEnv={cbAppEnv} />
-
-<div class="mini-app">
-	{#if isPermanentCommandPage}
-		<input
-			bind:value={cbAppEnv.data.commandName}
-			class="input-title"
-			{@attach createFocusHotKeyAttachment('Modify Title', 'i', 'alt')}
-		/>
-	{/if}
-
-	<CommandBuilder bind:commandBuilderState={cbAppEnv.data} disabled={dataState.kind !== 'ready'} />
-
-	<Button
-		class="button-save"
-		onclick={defaultSaveButtonBehavior}
-		{@attach createClickHotKeyAttachment('Save', false, 's', 'alt')}
-		>{isPermanentCommandPage ? 'Save' : 'Save As'}</Button
-	>
-
-	{#if isPermanentCommandPage}
-		<Button
-			{@attach createClickHotKeyAttachment('Save As', false, 's', 'alt', 'shift')}
-			onclick={openSaveAsPopup}
-		>
-			Save As
-		</Button>
-		<Button {@attach createClickHotKeyAttachment('Delete', false, 'd', 'alt')} onclick={deleteItem}>
-			Delete
-		</Button>
-	{/if}
-</div>
-
-<Dialog bind:open={isSaveDialogOpen}>
-	<OneLineForm
-		title="Save New Command"
-		defaultInput="New Command"
-		onAction={async (newCommandName) => {
-			await saveAsHandler(newCommandName);
-		}}
-		actionText="Save"
-		onClose={() => (isSaveDialogOpen = false)}
-		id="save-as-form"
-		errorMessage={saveAsErrorMessage}
-	/>
-</Dialog>
-
-<style lang="scss">
-	.mini-app {
-		flex-direction: row;
-		width: min(600px, 80%);
-		position: relative;
-		justify-content: end;
-	}
-
-	:global(.button-save) {
-		margin-top: var(--space-2);
-	}
-
-	.input-title {
-		display: block;
-		width: 100%;
-		font-size: var(--font-size-4);
-		padding-left: var(--space-2);
-		margin-block-end: 4rem;
-		color: var(--cl-on-surface);
-		border-left: var(--base-border-thick);
-	}
-</style>
+<SidebarAppShell>
+	{#snippet sidebar()}
+		<CommandBuilderSidebar {cbAppEnv} />
+	{/snippet}
+	{#snippet main()}
+		<CommandLineBuilderMain {cbAppEnv} />
+	{/snippet}
+</SidebarAppShell>

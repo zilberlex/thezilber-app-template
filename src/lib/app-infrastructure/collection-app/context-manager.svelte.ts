@@ -138,6 +138,9 @@ export function createCollectionAppContextManager<
 				undoChangeContext
 			};
 		},
+		get baseUrlPath() {
+			return _baseUrlPath;
+		},
 		replaceContext(prevContext: TContext, newItemSlug, newItemDisplayName?: string) {
 			if (ctxEquals(prevContext, appContext)) {
 				goto(getContextPath(_baseUrlPath, newItemSlug), { replaceState: true });

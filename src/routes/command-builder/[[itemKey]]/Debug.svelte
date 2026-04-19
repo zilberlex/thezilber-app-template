@@ -4,7 +4,7 @@
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 
 	type Props = {
-		appEnv: CollectionAppEnvironment<any>;
+		appEnv: CollectionAppEnvironment<any, any>;
 	};
 
 	let { appEnv }: Props = $props();
@@ -32,10 +32,13 @@
 		appState.debug.viewObjects.set('DataStates Debug', appEnv.dataStates);
 	});
 
-	appState.debug.viewObjects.set('Record Key and Context Correlation Helper', debugHelper);
-
 	$effect(() => {
 		appState.debug.viewObjects.set('Projected Context', appEnv.projectedContext);
 		appState.debug.viewObjects.set('Projected DataState', appEnv.projectedDataState);
+	});
+
+	$effect(() => {
+		let projections = appEnv.allRecordProjections.toValueArray();
+		appState.debug.viewObjects.set('RecordProjections', projections);
 	});
 </script>

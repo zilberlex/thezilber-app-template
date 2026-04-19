@@ -10,22 +10,24 @@
 		thisNode = $bindable(),
 		onkeydown: userOnKeydown = () => {},
 		onclick: userOnClick,
+		class: userClass,
 		...rest
 	} = $props();
 
 	const onkeyDown = createEngineButtonClickOnKeyDownHandler();
 	const onClick = createEngineButtonOnClickHandler();
+	const cls = 'icon-button';
 
 	const mergedProps = $derived(
 		mergeProps(
-			{ onkeydown: userOnKeydown, onclick: userOnClick },
-			{ onkeydown: onkeyDown, onclick: onClick },
+			{ onkeydown: userOnKeydown, onclick: userOnClick, class: userClass },
+			{ onkeydown: onkeyDown, onclick: onClick, class: cls },
 			rest
 		)
 	);
 </script>
 
-<button class="icon-button" {...mergedProps} bind:this={thisNode}>
+<button {...mergedProps} bind:this={thisNode}>
 	{@render children()}
 </button>
 
