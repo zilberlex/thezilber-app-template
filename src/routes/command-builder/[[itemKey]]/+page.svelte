@@ -38,6 +38,9 @@
 </script>
 
 <SidebarAppShell>
+	{#snippet title()}
+		<h2>CommandBuilder</h2>
+	{/snippet}
 	{#snippet sidebar()}
 		<CommandBuilderSidebar {cbAppEnv} />
 	{/snippet}

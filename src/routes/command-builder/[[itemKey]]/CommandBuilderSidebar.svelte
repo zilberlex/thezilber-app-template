@@ -25,14 +25,13 @@
 
 <style>
 	.command-builder-sidebar {
-		--sidebar-item-width: 250px;
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
 		gap: var(--space-1);
 
 		& > * {
-			width: var(--sidebar-item-width);
+			width: 100%;
 			white-space: nowrap;
 			overflow: hidden;
 		}

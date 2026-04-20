@@ -8,6 +8,7 @@
 	type Props = {
 		sidebar: Snippet;
 		main: Snippet;
+		title?: Snippet;
 		breakpoint?: number;
 		sidebarWidth?: string;
 		collapsedWidth?: string;
@@ -18,9 +19,10 @@
 	let {
 		sidebar,
 		main,
+		title,
 		breakpoint = 1024,
 		sidebarWidth = '280px',
-		collapsedWidth = '0px',
+		collapsedWidth = '56px',
 		defaultOpen = true,
 		persistKey = 'sidebar-app-shell'
 	}: Props = $props();
@@ -60,7 +62,6 @@
 		const mq = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
 
 		function applyMode(matches: boolean) {
-			const wasOverlay = isOverlay;
 			isOverlay = matches;
 
 			if (isOverlay) {
@@ -68,14 +69,7 @@
 				return;
 			}
 
-			if (wasOverlay && !isOverlay) {
-				isSidebarOpen = readStoredDesktopState();
-				return;
-			}
-
-			if (!wasOverlay && !isOverlay) {
-				isSidebarOpen = readStoredDesktopState();
-			}
+			isSidebarOpen = readStoredDesktopState();
 		}
 
 		applyMode(mq.matches);
@@ -101,32 +95,51 @@
 	style:--sidebar-width={sidebarWidth}
 	style:--collapsed-width={collapsedWidth}
 >
-	<IconButton
-		class="sidebar-toggle"
-		type="button"
-		aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-		aria-expanded={isSidebarOpen}
-		aria-controls="app-shell-sidebar"
-		onclick={toggleSidebar}
-		{@attach createClickHotKeyAttachment('Open Sidebar', false, 'o', 'alt')}
-	>
-		<HamburgerIcon />
-	</IconButton>
-
-	{#if isOverlay && isSidebarOpen}
-		<IconButton class="backdrop" type="button" aria-label="Close sidebar" onclick={closeSidebar}>
-			<HamburgerIcon />
-		</IconButton>
-	{/if}
-
 	<aside id="app-shell-sidebar" class="sidebar" aria-hidden={isOverlay && !isSidebarOpen}>
-		<div class="sidebar-scroll">
-			{@render sidebar()}
-		</div>
+		{#if !isOverlay || isSidebarOpen}
+			<div class="sidebar-header">
+				{#if isSidebarOpen && title}
+					<div class="sidebar-title">
+						{@render title()}
+					</div>
+				{:else}
+					<div class="sidebar-title-spacer"></div>
+				{/if}
+
+				<IconButton
+					class="sidebar-toggle"
+					type="button"
+					aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+					aria-expanded={isSidebarOpen}
+					aria-controls="app-shell-sidebar"
+					onclick={toggleSidebar}
+					{@attach createClickHotKeyAttachment('Open Sidebar', false, 'o', 'alt')}
+				>
+					<HamburgerIcon />
+				</IconButton>
+
+				{#if isOverlay && isSidebarOpen}
+					<IconButton
+						class="sidebar-close"
+						type="button"
+						aria-label="Close sidebar"
+						onclick={closeSidebar}
+					>
+						<HamburgerIcon />
+					</IconButton>
+				{/if}
+			</div>
+		{/if}
+
+		{#if isSidebarOpen}
+			<div class="sidebar-content">
+				{@render sidebar()}
+			</div>
+		{/if}
 	</aside>
 
 	<main class="main">
-		<div class="main-scroll">
+		<div class="main-content">
 			{@render main()}
 		</div>
 	</main>
@@ -135,6 +148,9 @@
 <style>
 	.shell {
 		--current-sidebar-width: var(--sidebar-width);
+		--sidebar-pad-inline: 12px;
+		--sidebar-pad-block: 12px;
+		--sidebar-header-height: 64px;
 
 		position: relative;
 		display: grid;
@@ -143,6 +159,7 @@
 		max-block-size: 100dvh;
 		min-block-size: 0;
 		min-inline-size: 0;
+		overflow: auto;
 	}
 
 	.shell.desktop.open {
@@ -159,46 +176,64 @@
 
 	.shell.overlay {
 		--current-sidebar-width: 0px;
-	}
-
-	:global(.sidebar-toggle) {
-		position: absolute;
-		inset-block-start: 12px;
-		inset-inline-start: 12px;
-		z-index: 30;
+		overflow: hidden;
 	}
 
 	.sidebar {
 		min-inline-size: 0;
 		min-block-size: 0;
-		overflow: hidden;
-	}
-
-	.sidebar-scroll {
-		block-size: 100%;
-		min-block-size: 0;
 		overflow: auto;
-		box-sizing: border-box;
-		padding: 64px 12px 12px;
+		scrollbar-gutter: stable;
+
+		background-color: var(--cl-bg);
 	}
 
+	.sidebar-header {
+		position: sticky;
+		inset-block-start: 0;
+		z-index: 1;
+
+		background-color: var(--cl-surface);
+
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		min-block-size: var(--sidebar-header-height);
+		padding-block: var(--sidebar-pad-block);
+		padding-inline: var(--sidebar-pad-inline);
+		box-sizing: border-box;
+	}
+
+	.sidebar-title {
+		flex: 1;
+		min-inline-size: 0;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+
+	.sidebar-title-spacer {
+		flex: 1;
+		min-inline-size: 0;
+	}
+
+	:global(.sidebar-toggle) {
+		margin-inline-start: auto;
+	}
+
+	.sidebar-content {
+		padding: 0 var(--sidebar-pad-inline) var(--sidebar-pad-block);
+		box-sizing: border-box;
+	}
 	.main {
 		min-inline-size: 0;
 		min-block-size: 0;
 	}
 
-	.main-scroll {
-		block-size: 100%;
-		min-block-size: 0;
-		overflow: auto;
+	.main-content {
+		min-block-size: 100%;
+		padding: var(--sidebar-header-height) 16px 16px;
 		box-sizing: border-box;
-		padding: 64px 16px 16px;
-	}
-
-	.shell.desktop.closed .sidebar-scroll {
-		opacity: 0;
-		pointer-events: none;
-		visibility: hidden;
 	}
 
 	.shell.overlay .sidebar {
@@ -208,6 +243,7 @@
 		z-index: 20;
 		inline-size: min(85vw, var(--sidebar-width));
 		max-inline-size: 100%;
+		overflow: auto;
 		transform: translateX(-100%);
 		transition: transform 0.18s ease;
 	}
