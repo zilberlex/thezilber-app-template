@@ -79,7 +79,7 @@ input {
 		transition-timing-function: ease-out;
 	}
 
-	&:focus {
+	&:focus, &:hover {
 		--_animate-padding-delta: 0.25rem;
 
 		font-weight: 900;

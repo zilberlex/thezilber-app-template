@@ -7,6 +7,8 @@ export const MODIFIER_INDEX: Record<HotKeyModifier, number> = {
 	shift: 2
 } as const;
 
+const ALL_MODIFIERS: HotKeyModifier[] = ['ctrl|option', 'alt', 'shift'];
+
 export class HotKey implements KeyLike {
 	readonly key: string;
 	readonly #flags: [boolean, boolean, boolean]; // [ctrl|option, alt, shift]
@@ -109,5 +111,39 @@ export class HotKey implements KeyLike {
 		}
 
 		return bestValue;
+	}
+
+	#getRequiredModifiers(): HotKeyModifier[] {
+		const result: HotKeyModifier[] = [];
+
+		for (const mod of ALL_MODIFIERS) {
+			if (this.#flags[MODIFIER_INDEX[mod]]) {
+				result.push(mod);
+			}
+		}
+
+		return result;
+	}
+
+	getPossibleRegisteredMatches(): HotKey[] {
+		const activeMods = this.#getRequiredModifiers();
+		const results: HotKey[] = [];
+
+		const recurse = (index: number, currentMods: HotKeyModifier[]) => {
+			if (index >= activeMods.length) {
+				results.push(new HotKey(this.key, ...currentMods));
+				return;
+			}
+
+			// without this modifier
+			recurse(index + 1, currentMods);
+
+			// with this modifier
+			recurse(index + 1, [...currentMods, activeMods[index]]);
+		};
+
+		recurse(0, []);
+
+		return results;
 	}
 }

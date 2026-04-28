@@ -1,5 +1,4 @@
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
-import { appState } from '../state/application-state.svelte';
 import { HotKey } from './hotkey-class';
 
 type EventHandler<E extends Event> = (event: E) => void;
@@ -48,11 +47,16 @@ class HotkeysModule {
 		}
 
 		let eventKey = HotKey.fromEvent(event);
-		let handlers = hotKeyedHandlers.get(eventKey);
+		const possibleMatches = eventKey.getPossibleRegisteredMatches();
 
-		if (eventKey.key.toLowerCase() === 'escape') {
-			console.log('phase', event.eventPhase, 'handlers', handlers);
-		}
+		const matches = hotKeyedHandlers.getMultiple(possibleMatches);
+
+		const handlers = eventKey.pickBestMatch(
+			matches.map(({ key, values }) => ({
+				hotKey: key,
+				cbObject: values
+			}))
+		);
 
 		console.debug(
 			'HotkeysModule - reachedKeydownEvent key:',

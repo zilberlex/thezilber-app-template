@@ -11,6 +11,9 @@
 	import DataStateDisplay from './DataStateDisplay.svelte';
 	import Debug from './Debug.svelte';
 	import type { CbAppEnv } from './command-builder-types';
+	import PreventBrowserHotkeys from '$lib/engine/keyboard-navigation/svelte-components/PreventBrowserHotkeys.svelte';
+	import { HotKey } from '$lib/engine/hotkeys/hotkey-class';
+	import { hotkeys } from '$lib/engine/hotkeys/hotkey-helpers';
 
 	let { cbAppEnv = $bindable() }: { cbAppEnv: CbAppEnv } = $props();
 
@@ -57,10 +60,13 @@
 			saveAsErrorMessage = '';
 		}
 	});
+
+	const preventedBrowserDefaults = hotkeys([...Array(10).keys()].map(String), 'alt');
 </script>
 
 <Debug appEnv={cbAppEnv} />
 <DataStateDisplay appEnv={cbAppEnv} />
+<PreventBrowserHotkeys preventedKeys={preventedBrowserDefaults} />
 
 <div class="main-app-layout">
 	<main class="command-builder-main-app">

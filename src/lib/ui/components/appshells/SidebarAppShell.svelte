@@ -150,7 +150,11 @@
 		</aside>
 	</NavigationScope>
 
-	<NavigationScope class="main-content" scopeName="main-navigation-scope">
+	<NavigationScope
+		class="main-content"
+		scopeName="main-navigation-scope"
+		navigationKeys={NavigationKeysConfigSets.Vertical}
+	>
 		<div>
 			{@render main()}
 		</div>
