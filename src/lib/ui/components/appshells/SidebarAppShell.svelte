@@ -1,6 +1,8 @@
 <script lang="ts">
 	import HamburgerIcon from '$lib/assets/icons/HamburgerIcon.svelte';
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
+	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
+	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/types';
 	import IconButton from '$lib/ui/basic-components/IconButton.svelte';
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
@@ -40,6 +42,7 @@
 	}
 
 	function writeStoredDesktopState(next: boolean) {
+		// TODO AZ use repo or better design
 		try {
 			localStorage.setItem(persistKey, JSON.stringify(next));
 		} catch {}
@@ -84,6 +87,8 @@
 			mq.removeEventListener('change', onChange);
 		};
 	});
+
+	let refreshNodesSidebar = $state<() => void>();
 </script>
 
 <div
@@ -95,54 +100,61 @@
 	style:--sidebar-width={sidebarWidth}
 	style:--collapsed-width={collapsedWidth}
 >
-	<aside id="app-shell-sidebar" class="sidebar" aria-hidden={isOverlay && !isSidebarOpen}>
-		{#if !isOverlay || isSidebarOpen}
-			<div class="sidebar-header">
-				{#if isSidebarOpen && title}
-					<div class="sidebar-title">
-						{@render title()}
-					</div>
-				{:else}
-					<div class="sidebar-title-spacer"></div>
-				{/if}
+	<NavigationScope
+		navigationKeys={NavigationKeysConfigSets.Vertical}
+		scopeName="sidebar-navigation-scope"
+		class="sidebar"
+	>
+		<aside id="app-shell-sidebar" aria-hidden={isOverlay && !isSidebarOpen}>
+			{#if !isOverlay || isSidebarOpen}
+				<div class="sidebar-header">
+					{#if isSidebarOpen && title}
+						<div class="sidebar-title">
+							{@render title()}
+						</div>
+					{:else}
+						<div class="sidebar-title-spacer"></div>
+					{/if}
 
-				<IconButton
-					class="sidebar-toggle"
-					type="button"
-					aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-					aria-expanded={isSidebarOpen}
-					aria-controls="app-shell-sidebar"
-					onclick={toggleSidebar}
-					{@attach createClickHotKeyAttachment('Open Sidebar', false, 'o', 'alt')}
-				>
-					<HamburgerIcon />
-				</IconButton>
-
-				{#if isOverlay && isSidebarOpen}
 					<IconButton
-						class="sidebar-close"
+						class="sidebar-toggle"
 						type="button"
-						aria-label="Close sidebar"
-						onclick={closeSidebar}
+						aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+						aria-expanded={isSidebarOpen}
+						aria-controls="app-shell-sidebar"
+						onclick={toggleSidebar}
+						tabindex={-1}
+						{@attach createClickHotKeyAttachment('Open Sidebar', false, 'o', 'alt')}
 					>
 						<HamburgerIcon />
 					</IconButton>
-				{/if}
-			</div>
-		{/if}
 
-		{#if isSidebarOpen}
-			<div class="sidebar-content">
-				{@render sidebar()}
-			</div>
-		{/if}
-	</aside>
+					{#if isOverlay && isSidebarOpen}
+						<IconButton
+							class="sidebar-close"
+							type="button"
+							aria-label="Close sidebar"
+							onclick={closeSidebar}
+						>
+							<HamburgerIcon />
+						</IconButton>
+					{/if}
+				</div>
+			{/if}
 
-	<main class="main">
-		<div class="main-content">
+			{#if isSidebarOpen}
+				<div class="sidebar-content">
+					{@render sidebar()}
+				</div>
+			{/if}
+		</aside>
+	</NavigationScope>
+
+	<NavigationScope class="main-content" scopeName="main-navigation-scope">
+		<div>
 			{@render main()}
 		</div>
-	</main>
+	</NavigationScope>
 </div>
 
 <style>
@@ -159,7 +171,7 @@
 		max-block-size: 100dvh;
 		min-block-size: 0;
 		min-inline-size: 0;
-		overflow: auto;
+		overflow: hidden;
 	}
 
 	.shell.desktop.open {
@@ -179,22 +191,29 @@
 		overflow: hidden;
 	}
 
-	.sidebar {
+	:global(.sidebar) {
 		min-inline-size: 0;
 		min-block-size: 0;
-		overflow: auto;
+		overflow: hidden;
 		scrollbar-gutter: stable;
-
 		background-color: var(--cl-bg);
+		display: flex;
+		flex-direction: column;
+
+		& > aside {
+			flex: 1 1 auto;
+			min-inline-size: 0;
+			min-block-size: 0;
+			display: flex;
+			flex-direction: column;
+			overflow: hidden;
+		}
 	}
 
 	.sidebar-header {
 		position: sticky;
 		inset-block-start: 0;
-		z-index: 1;
-
 		background-color: var(--cl-surface);
-
 		display: flex;
 		align-items: center;
 		gap: 8px;
@@ -202,6 +221,7 @@
 		padding-block: var(--sidebar-pad-block);
 		padding-inline: var(--sidebar-pad-inline);
 		box-sizing: border-box;
+		flex: 0 0 auto;
 	}
 
 	.sidebar-title {
@@ -222,25 +242,25 @@
 	}
 
 	.sidebar-content {
+		flex: 1 1 auto;
+		min-block-size: 0;
+		overflow: auto;
 		padding: 0 var(--sidebar-pad-inline) var(--sidebar-pad-block);
 		box-sizing: border-box;
 	}
-	.main {
+
+	:global(.main-content) {
 		min-inline-size: 0;
 		min-block-size: 0;
-	}
-
-	.main-content {
 		min-block-size: 100%;
 		padding: var(--sidebar-header-height) 16px 16px;
 		box-sizing: border-box;
 	}
 
-	.shell.overlay .sidebar {
+	.shell.overlay :global(.sidebar) {
 		position: fixed;
 		inset-block: 0;
 		inset-inline-start: 0;
-		z-index: 20;
 		inline-size: min(85vw, var(--sidebar-width));
 		max-inline-size: 100%;
 		overflow: auto;
@@ -248,7 +268,7 @@
 		transition: transform 0.18s ease;
 	}
 
-	.shell.overlay.open .sidebar {
+	.shell.overlay.open :global(.sidebar) {
 		transform: translateX(0);
 	}
 </style>

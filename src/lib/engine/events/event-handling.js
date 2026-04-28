@@ -109,11 +109,6 @@ function _createSmartHandlerInternal(
 			isProcessing = true;
 			cooldown = true;
 			window.setTimeout(() => {
-				console.debug(
-					`setting timeout for handler. Cd: [${cooldownDelay}]. handler`,
-					handler.toString()
-				);
-
 				cooldown = false;
 			}, cooldownDelay);
 

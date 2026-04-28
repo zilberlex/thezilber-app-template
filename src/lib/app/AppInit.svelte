@@ -8,6 +8,7 @@
 	import TooltipTracker from '$lib/engine/hotkey-tooltip/TooltipTracker.svelte';
 	import ForegroundLayer from './ForegroundLayer.svelte';
 	import EngineHotKeysInit from './EngineHotKeysInit.svelte';
+	import NavigationStateManager from './NavigationStateManager.svelte';
 
 	onMount(() => {
 		if (browser) {
@@ -22,6 +23,7 @@
 </script>
 
 <HotKeysInitialization />
+<NavigationStateManager />
 <TooltipTracker />
 
 <ForegroundLayer />

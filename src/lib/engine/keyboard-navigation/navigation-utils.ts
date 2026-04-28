@@ -1,4 +1,4 @@
-import { navigationStateManager } from '$lib/engine/state/navigation-state';
+import { navigationStateManager } from '../state/navigation-state.svelte';
 import { safeInstanceOf } from '../types/type-utils';
 import type { FocusableElement } from './types';
 

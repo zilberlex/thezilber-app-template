@@ -9,9 +9,7 @@
 @keyframes focus-ring-out {
 	0% {
 		padding: var(--ef-focus-ring-out-size-start);
-		border-radius: 0px;
 		box-shadow: 0 0 0 2px oklch(from var(--cl-primary-brightest) l c h / 0);
-		border-radius: 5px;
 	}
 
 	50% {
@@ -21,16 +19,14 @@
 	100% {
 		padding: var(--ef-focus-ring-out-size-end);
 		box-shadow: 0 0 0px 2px oklch(from var(--cl-primary-brightest) l c h / 0);
-		border-radius: 5px;
+		border-radius: 0px;
 	}
 }
 
 @keyframes focus-ring-in {
 	0% {
 		padding: var(--ef-focus-ring-in-size-start);
-		border-radius: 0px;
 		box-shadow: 0 0 0 2px oklch(from var(--cl-primary-brightest) l c h / 0);
-		border-radius: 5px;
 	}
 	50% {
 		box-shadow: 0 0 0 2px oklch(from var(--cl-primary-brightest) l c h / 1);
@@ -38,7 +34,6 @@
 	100% {
 		padding: var(--ef-focus-ring-in-size-end);
 		box-shadow: 0 0 0px 2px oklch(from var(--cl-primary-brightest) l c h / 0);
-		border-radius: 5px;
 	}
 }
 

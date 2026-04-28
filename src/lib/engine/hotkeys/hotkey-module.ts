@@ -31,8 +31,8 @@ class HotkeysModule {
 		this.#hotKeysCaptureHandlers.remove(key, handler);
 	}
 
-	assignHotKeys(keys: HotKey[], handler: EventHandler<KeyboardEvent>) {
-		keys.forEach((key) => this.assignHotKey(key, handler));
+	assignHotKeys(keys: HotKey[], handler: EventHandler<KeyboardEvent>, isCaptrue = false) {
+		keys.forEach((key) => this.assignHotKey(key, handler, isCaptrue));
 	}
 
 	removeHotKeys(keys: HotKey[], handler: EventHandler<KeyboardEvent>) {

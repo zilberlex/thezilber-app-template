@@ -15,13 +15,14 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 	navigationKeys: NavigationKeysConfig;
 
 	scopeContainer: HTMLElement;
-	navigatiableNodes: HTMLElement[];
+	navigatiableNodes: HTMLElement[] = [];
 
 	#focusNodeDispatcher = new DispatcherImpl<NodeFocusEvent>();
 
 	#abortController: AbortController;
 
 	#currentNodeIndex?: number = undefined;
+	#currentNode: HTMLElement | undefined;
 
 	constructor(
 		scopeContainer: HTMLElement,
@@ -32,8 +33,7 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 		this.scopeContainer = scopeContainer;
 		this.navigationKeys = navigationKeys;
 
-		this.navigatiableNodes = getFocusableElementsByNode(scopeContainer);
-		this.#initializeFocusableElements(this.navigatiableNodes);
+		this.refreshNavigatableNodes();
 
 		this.#abortController = new AbortController();
 	}
@@ -88,6 +88,18 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 		return ret;
 	}
 
+	refreshNavigatableNodes() {
+		this.navigatiableNodes = getFocusableElementsByNode(this.scopeContainer);
+		this.#initializeFocusableElements(this.navigatiableNodes);
+
+		console.debug(
+			'Navigation Scope - Refreshing Navigatable Nodes',
+			this.scopeContainer,
+			'nodes found:',
+			this.navigatiableNodes
+		);
+	}
+
 	registerOnFocus(handler: (dispatchedObject: NodeFocusEvent) => void): { unregister: () => void } {
 		this.#focusNodeDispatcher.register(handler);
 
@@ -104,6 +116,28 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 		}
 	}
 
+	get currentNode() {
+		let nodeToFocus = this.#currentNode;
+
+		if (!nodeToFocus) {
+			let numOfNavNodes = this.navigatiableNodes.length;
+			if (numOfNavNodes >= 0) {
+				nodeToFocus = this.navigatiableNodes[0];
+			}
+
+			console.debug(
+				`Scope [${this.scopeName}] - Returning currentNode`,
+				this.#currentNode,
+				'numOfNavNodes:',
+				numOfNavNodes,
+				'nodeToFocus',
+				nodeToFocus
+			);
+		}
+
+		return nodeToFocus;
+	}
+
 	#onFocusElement_SetCurrentNode = (event: FocusEvent | PointerEvent) => {
 		console.debug(
 			'FOCUS_CHANGE handle. .eventType: ',
@@ -115,7 +149,10 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 		);
 
 		let node = event.target as HTMLElement;
-		console.debug('ARROW SCOPE FOCUS_CHANGE: Node focus trigger. Focused node:', node);
+
+		console.debug('ARROW SCOPE FOCUS_CHANGE: Node focus trigger. Setting Focused node:', node);
+		this.#currentNode = node;
+		this.#focusNodeDispatcher.signal({ targetNode: node });
 
 		let navid = node.getAttribute(NAVIGATION_ID_ATTRIBUTE);
 		if (navid === null) {
@@ -124,14 +161,12 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 		}
 
 		let nodeNavId = parseInt(navid);
-		if (nodeNavId != 0 && !nodeNavId) {
+		if (nodeNavId < 0) {
 			console.warn('ARROW SCOPE FOCUS_CHANGE: failed to parse navigation id on node.', navid, node);
 			return;
 		}
 
 		console.debug('ARROW SCOPE FOCUS_CHANGE: Setting current nodeId', nodeNavId);
-
-		this.#focusNodeDispatcher.signal({ targetNode: node });
 		this.#currentNodeIndex = nodeNavId;
 	};
 
@@ -139,7 +174,7 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 		this.#onFocusElement_SetCurrentNode,
 		{
 			debounceDelay: 50,
-			cooldownDelay: 200
+			cooldownDelay: 20
 		}
 	);
 }

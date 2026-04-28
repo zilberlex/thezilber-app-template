@@ -1,4 +1,5 @@
 <script lang="ts">
+	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import type { CbAppEnv } from './command-builder-types';
 
 	let { cbAppEnv }: { cbAppEnv: CbAppEnv } = $props();

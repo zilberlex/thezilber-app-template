@@ -1,6 +1,7 @@
 import { pageContext, type PageContext } from './page-context.svelte';
 import { debugState, type DebugState } from './debug-state.svelte';
 import { tooltipState, type TooltipState } from '../hotkey-tooltip/tooltip-state.svelte';
+import { navigationStateManager, type NavigationMode } from './navigation-state.svelte';
 
 export interface AppState {
 	isAppLoaded: boolean;
@@ -14,6 +15,7 @@ export interface AppState {
 	deviceId: string | undefined;
 	debug: DebugState;
 	appRoot: HTMLElement | undefined;
+	get navigationMode(): NavigationMode;
 }
 
 export const appState: AppState = createAppState();
@@ -27,6 +29,7 @@ function createAppState(): AppState {
 	let inJsEnabled = $state(false);
 	let deviceId = $state<string | undefined>(undefined);
 	let appRoot = $state<HTMLElement | undefined>(undefined);
+	let navigationMode = $derived(navigationStateManager.navigationMode);
 
 	return {
 		get isAppLoaded() {
@@ -95,6 +98,9 @@ function createAppState(): AppState {
 		},
 		set appRoot(value: HTMLElement | undefined) {
 			appRoot = value;
+		},
+		get navigationMode() {
+			return navigationMode;
 		}
 	};
 }

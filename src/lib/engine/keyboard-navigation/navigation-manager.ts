@@ -18,10 +18,13 @@ export class NavigationManager {
 	#currentScopeIndex: number = 0;
 	#dispatcher = new DispatcherImpl<NavigationEvent>();
 
-	#allNavigationKeys: OneToManyDictionary<string, object> = new OneToManyDictionary<
+	#allNavigationKeys: OneToManyDictionary<string, ScopeInfra> = new OneToManyDictionary<
 		string,
 		ScopeInfra
 	>();
+
+	#nextScopeNavigationKey = new HotKey('tab');
+	#prevScopeNavigationKey = new HotKey('tab', 'shift');
 
 	#destTargets: { unregister: () => void }[] = [];
 
@@ -34,6 +37,14 @@ export class NavigationManager {
 			nextKeys: [NavigationKeyConsts.ArrowDown],
 			prevKeys: [NavigationKeyConsts.ArrowUp]
 		};
+	}
+
+	init() {
+		hotKeysModule.assignHotKeys(
+			[this.#nextScopeNavigationKey, this.#prevScopeNavigationKey],
+			this.#onChangeScopeKey,
+			true
+		);
 	}
 
 	registerNavigationHandler(handler: (dispatchedObject: NavigationEvent) => void): () => unknown {
@@ -77,7 +88,7 @@ export class NavigationManager {
 		return this.#scopes.findIndex((s) => s === scope);
 	}
 
-	removeNavigationKeys(source: object, navigationKeys: NavigationKeysConfig) {
+	removeNavigationKeys(source: ScopeInfra, navigationKeys: NavigationKeysConfig) {
 		const flatNavigationKeys = navigationKeys.prevKeys.concat(navigationKeys.nextKeys);
 
 		console.log(`NavigationManager - removing NavigationKeys`, flatNavigationKeys);
@@ -92,8 +103,36 @@ export class NavigationManager {
 	}
 
 	destroy() {
+		hotKeysModule.removeHotKeys(
+			[this.#nextScopeNavigationKey, this.#prevScopeNavigationKey],
+			this.#onChangeScopeKey
+		);
 		this.#destTargets.forEach((dest) => dest.unregister());
 	}
+
+	#onChangeScopeKey = createKeyabordNavigationEventHandler((keyboardEvent: KeyboardEvent) => {
+		let eventHotkey = HotKey.fromEvent(keyboardEvent);
+
+		let nextScopeIndex = eventHotkey.pickBestMatch([
+			{ hotKey: this.#nextScopeNavigationKey, cbObject: this.#nextScopeIndex() },
+			{ hotKey: this.#prevScopeNavigationKey, cbObject: this.#prevScopeIndex() }
+		]);
+
+		console.log('Scope Change - Key', eventHotkey, 'nextScopeIndex:', nextScopeIndex);
+
+		if (nextScopeIndex !== undefined && nextScopeIndex !== this.#currentScopeIndex) {
+			this.#currentScopeIndex = nextScopeIndex;
+			const nextScope = this.#scopes[nextScopeIndex];
+			let nodeToFocus = nextScope.currentNode;
+			if (nodeToFocus) {
+				this.#navigateToNodeAndCompleteQuestForKey(
+					nodeToFocus,
+					eventHotkey.key,
+					document.activeElement as HTMLElement
+				);
+			}
+		}
+	}, 'hard');
 
 	#onNavigationKey = createKeyabordNavigationEventHandler((keyboardEvent: KeyboardEvent) => {
 		if (this.#scopes.length == 0) {
@@ -146,7 +185,7 @@ export class NavigationManager {
 		}
 	});
 
-	private addNavigationKeys(source: object, navigationKeys: NavigationKeysConfig) {
+	private addNavigationKeys(source: ScopeInfra, navigationKeys: NavigationKeysConfig) {
 		const flatNavigationKeys = navigationKeys.prevKeys.concat(navigationKeys.nextKeys);
 
 		console.log(`NavigationManager - adding NavigationKeys`, flatNavigationKeys);
@@ -167,14 +206,25 @@ export class NavigationManager {
 		if (!this.#scopes.length) return null;
 
 		if (this.#isNextKey(key)) {
-			return (this.#currentScopeIndex + 1) % this.#scopes.length;
+			return this.#nextScopeIndex();
 		} else if (this.#isPrevKey(key)) {
-			const prevScopeIndex = this.#currentScopeIndex - 1;
-
-			return prevScopeIndex >= 0 ? prevScopeIndex : this.#scopes.length - 1;
+			return this.#prevScopeIndex();
 		}
 
 		return null;
+	}
+
+	#nextScopeIndex() {
+		let ret = (this.#currentScopeIndex + 1) % this.#scopes.length;
+		console.log('currentScopeIndex', this.#currentScopeIndex, 'nextScope:', ret);
+
+		return ret;
+	}
+
+	#prevScopeIndex() {
+		const prevScopeIndex = this.#currentScopeIndex - 1;
+
+		return prevScopeIndex >= 0 ? prevScopeIndex : this.#scopes.length - 1;
 	}
 
 	#isPrevKey(key: string): boolean {
@@ -190,9 +240,9 @@ export class NavigationManager {
 	#navigateToNodeAndCompleteQuestForKey(
 		node: HTMLElement,
 		key: string,
-		initiatingNode: HTMLElement
+		initiatingNode: HTMLElement | undefined | null
 	) {
-		if (node !== initiatingNode) {
+		if (node && node !== initiatingNode) {
 			keyBoardFocusNavigatedNode(node);
 			this.#dispatcher.signal({ targetNode: node, initiatingKey: key });
 		}

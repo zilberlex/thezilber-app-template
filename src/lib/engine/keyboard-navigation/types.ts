@@ -1,5 +1,6 @@
 import type { DispatchHandler } from '$lib/engine/patterns/observer';
 import { NavigationKeyConsts } from '$lib/engine/hotkeys/consts';
+import type { HotKey } from '../hotkeys/hotkey-class';
 
 export function createNavigationKeys(nextKeys: string[], prevKeys: string[]): NavigationKeysConfig {
 	return {
@@ -27,6 +28,8 @@ export interface ScopeInfra {
 	init(): void;
 	destroy(): void;
 	registerOnFocus(handler: DispatchHandler<NodeFocusEvent>): { unregister: () => void };
+	refreshNavigatableNodes(): void;
+	get currentNode(): HTMLElement | undefined;
 }
 
 export interface NavigationKeysConfig {

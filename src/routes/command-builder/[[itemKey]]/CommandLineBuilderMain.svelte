@@ -12,7 +12,7 @@
 	import Debug from './Debug.svelte';
 	import type { CbAppEnv } from './command-builder-types';
 
-	let { cbAppEnv }: { cbAppEnv: CbAppEnv } = $props();
+	let { cbAppEnv = $bindable() }: { cbAppEnv: CbAppEnv } = $props();
 
 	let isSaveDialogOpen = $state(false);
 

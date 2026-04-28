@@ -45,6 +45,6 @@
 		<CommandBuilderSidebar {cbAppEnv} />
 	{/snippet}
 	{#snippet main()}
-		<CommandLineBuilderMain {cbAppEnv} />
+		<CommandLineBuilderMain bind:cbAppEnv />
 	{/snippet}
 </SidebarAppShell>

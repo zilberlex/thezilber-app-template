@@ -23,7 +23,10 @@
 <AppInit />
 
 <AppNavigationManager>
-	<div bind:this={appState.appRoot} class="app-container">
+	<div
+		bind:this={appState.appRoot}
+		class={['app-container', appState.navigationMode === 'keyboard' && 'keyboard-navigation']}
+	>
 		<header class="header">
 			<div>
 				<HomeButton />

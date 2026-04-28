@@ -3,6 +3,7 @@
 	import { NavigationManager } from '../navigation-manager';
 	import type { NavigationKeysConfig } from '../types';
 	import { signalNavigationHotkeyEvent } from '$lib/engine/hotkeys/bl-hotkeys-event-signals';
+	import { browser } from '$app/environment';
 
 	interface Props {
 		navigationKeyConfig?: NavigationKeysConfig;
@@ -20,19 +21,20 @@
 	});
 
 	$effect(() => {
-		const navManagerNavigationHotkeyHandlerDestroy = navigationManager.registerNavigationHandler(
-			(obj) => {
-				signalNavigationHotkeyEvent(obj.initiatingKey, obj.targetNode);
-			}
-		);
+		if (browser) {
+			navigationManager.init();
 
-		return () => {
-			navManagerNavigationHotkeyHandlerDestroy();
-		};
+			const navManagerNavigationHotkeyHandlerDestroy = navigationManager.registerNavigationHandler(
+				(obj) => {
+					signalNavigationHotkeyEvent(obj.initiatingKey, obj.targetNode);
+				}
+			);
+
+			return () => {
+				navManagerNavigationHotkeyHandlerDestroy();
+			};
+		}
 	});
 </script>
 
-<!-- TODO AZ Remove container and check -->
-<span class="navigation-manager">
-	{@render children()}
-</span>
+{@render children()}
