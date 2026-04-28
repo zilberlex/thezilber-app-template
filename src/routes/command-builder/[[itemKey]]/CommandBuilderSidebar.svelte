@@ -69,6 +69,10 @@
 		top: 0;
 		z-index: 1;
 		background-color: var(--cl-surface);
+
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.sidebar-section {
