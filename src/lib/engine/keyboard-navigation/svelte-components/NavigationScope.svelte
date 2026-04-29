@@ -2,7 +2,12 @@
 	import { getContext, onDestroy, onMount } from 'svelte';
 	import { NavigationManager } from '../navigation-manager';
 	import { browser } from '$app/environment';
-	import { type NavigationKeysConfig, type ScopeInfra, NavigationKeysConfigSets } from '../types';
+	import {
+		type NavigationKeysConfig,
+		type ScopeEscapeMode,
+		type ScopeInfra,
+		NavigationKeysConfigSets
+	} from '../types';
 	import NavigationScopeInfraImpl from '../navigation-scope';
 	import { mergeProps } from 'svelte-toolbelt';
 
@@ -11,9 +16,16 @@
 		scopeName: string;
 		children?: any;
 		class?: any;
+		escapeMode: ScopeEscapeMode;
 	}
 
-	let { navigationKeys, scopeName, children, class: usrCls }: Props = $props();
+	let {
+		navigationKeys,
+		scopeName,
+		children,
+		class: usrCls,
+		escapeMode = 'circular'
+	}: Props = $props();
 
 	let thisElement: HTMLElement;
 
@@ -37,7 +49,7 @@
 			console.debug('NavigationScope - NavigaitonManager Context', navigationManager);
 
 			navigationKeys = navigationKeys ?? NavigationKeysConfigSets.Horizontal;
-			scope = new NavigationScopeInfraImpl(thisElement, navigationKeys, scopeName);
+			scope = new NavigationScopeInfraImpl(thisElement, navigationKeys, scopeName, escapeMode);
 
 			const refreshChildren = () => scope.refreshNavigatableNodes();
 

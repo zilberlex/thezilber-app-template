@@ -146,4 +146,24 @@ export class HotKey implements KeyLike {
 
 		return results;
 	}
+
+	bestMatchingSetIndex(hotkeySets: HotKey[][]): number | undefined {
+		let bestScore = -1;
+		let bestSetIndex: number | undefined = undefined;
+
+		for (let setIndex = 0; setIndex < hotkeySets.length; setIndex++) {
+			const hotkeys = hotkeySets[setIndex];
+
+			for (const hotkey of hotkeys) {
+				const score = this.test(hotkey);
+
+				if (score > bestScore) {
+					bestScore = score;
+					bestSetIndex = setIndex;
+				}
+			}
+		}
+
+		return bestScore >= 0 ? bestSetIndex : undefined;
+	}
 }

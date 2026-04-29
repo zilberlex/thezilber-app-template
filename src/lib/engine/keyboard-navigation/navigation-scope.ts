@@ -4,7 +4,8 @@ import type {
 	NavigationKeysConfig,
 	NextNodeInfo,
 	ScopeInfra as NavigationScopeInfra,
-	NodeFocusEvent
+	NodeFocusEvent,
+	ScopeEscapeMode
 } from './types';
 import { getFocusableElementsByNode } from './navigation-utils';
 
@@ -23,11 +24,13 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 
 	#currentNodeIndex?: number = undefined;
 	#currentNode: HTMLElement | undefined;
+	#escapeMode: ScopeEscapeMode;
 
 	constructor(
 		scopeContainer: HTMLElement,
 		navigationKeys: NavigationKeysConfig,
-		scopeName: string
+		scopeName: string,
+		escapeMode: ScopeEscapeMode = 'circular'
 	) {
 		this.scopeName = scopeName;
 		this.scopeContainer = scopeContainer;
@@ -35,7 +38,13 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 
 		this.refreshNavigatableNodes();
 
+		this.#escapeMode = escapeMode;
+
 		this.#abortController = new AbortController();
+	}
+
+	get escapeMode(): ScopeEscapeMode {
+		return this.#escapeMode;
 	}
 
 	init() {
@@ -82,7 +91,12 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 			// Return either first or last node, depends on side of overflow (circular behavior)
 			nextNodeIndex = nextNodeIndex < 0 ? this.navigatiableNodes.length - 1 : 0;
 
-			ret.escapeBackupNode = this.navigatiableNodes[nextNodeIndex];
+			let nextNodeCircular = this.navigatiableNodes[nextNodeIndex];
+			if (this.escapeMode === 'escape') {
+				ret.escapeBackupNode = nextNodeCircular;
+			} else {
+				ret.nextNode = nextNodeCircular;
+			}
 		}
 
 		return ret;

@@ -3,9 +3,10 @@ import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
 import { keyBoardFocusNavigatedNode } from '$lib/engine/keyboard-navigation/navigation-utils';
 import { DispatcherImpl } from '$lib/engine/patterns/observer';
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
-import { NavigationKeyConsts } from '$lib/engine/hotkeys/consts';
+import { ArrowKeysArray, NavigationKeyConsts } from '$lib/engine/hotkeys/consts';
 import { type NavigationKeysConfig, type ScopeInfra } from './types';
 import { HotKey } from '../hotkeys/hotkey-class';
+import { hotkey, hotkeys } from '../hotkeys/hotkey-helpers';
 
 interface NavigationEvent {
 	targetNode: HTMLElement;
@@ -23,8 +24,9 @@ export class NavigationManager {
 		ScopeInfra
 	>();
 
-	#nextScopeNavigationKey = new HotKey('tab');
-	#prevScopeNavigationKey = new HotKey('tab', 'shift');
+	#nextScopeNavigationKeys = hotkeys(['tab', NavigationKeyConsts.ArrowRight]);
+
+	#prevScopeNavigationKeys = [hotkey('tab', 'shift'), hotkey(NavigationKeyConsts.ArrowLeft)];
 
 	#destTargets: { unregister: () => void }[] = [];
 
@@ -41,7 +43,7 @@ export class NavigationManager {
 
 	init() {
 		hotKeysModule.assignHotKeys(
-			[this.#nextScopeNavigationKey, this.#prevScopeNavigationKey],
+			[...this.#nextScopeNavigationKeys, ...this.#prevScopeNavigationKeys],
 			this.#onChangeScopeKey,
 			true
 		);
@@ -104,7 +106,7 @@ export class NavigationManager {
 
 	destroy() {
 		hotKeysModule.removeHotKeys(
-			[this.#nextScopeNavigationKey, this.#prevScopeNavigationKey],
+			[...this.#nextScopeNavigationKeys, ...this.#prevScopeNavigationKeys],
 			this.#onChangeScopeKey
 		);
 		this.#destTargets.forEach((dest) => dest.unregister());
@@ -113,10 +115,14 @@ export class NavigationManager {
 	#onChangeScopeKey = createKeyabordNavigationEventHandler((keyboardEvent: KeyboardEvent) => {
 		let eventHotkey = HotKey.fromEvent(keyboardEvent);
 
-		let nextScopeIndex = eventHotkey.pickBestMatch([
-			{ hotKey: this.#nextScopeNavigationKey, cbObject: this.#nextScopeIndex() },
-			{ hotKey: this.#prevScopeNavigationKey, cbObject: this.#prevScopeIndex() }
+		const matchedSetIndex = eventHotkey.bestMatchingSetIndex([
+			this.#nextScopeNavigationKeys,
+			this.#prevScopeNavigationKeys
 		]);
+
+		if (matchedSetIndex === undefined) return;
+
+		const nextScopeIndex = matchedSetIndex === 0 ? this.#nextScopeIndex() : this.#prevScopeIndex();
 
 		console.log('Scope Change - Key', eventHotkey, 'nextScopeIndex:', nextScopeIndex);
 

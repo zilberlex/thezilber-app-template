@@ -30,6 +30,7 @@ export interface ScopeInfra {
 	registerOnFocus(handler: DispatchHandler<NodeFocusEvent>): { unregister: () => void };
 	refreshNavigatableNodes(): void;
 	get currentNode(): HTMLElement | undefined;
+	get escapeMode(): ScopeEscapeMode;
 }
 
 export interface NavigationKeysConfig {
@@ -53,3 +54,5 @@ export const NavigationKeysConfigSets = {
 		nextKeys: [NavigationKeyConsts.ArrowDown, NavigationKeyConsts.ArrowRight]
 	}
 };
+
+export type ScopeEscapeMode = 'escape' | 'circular';
