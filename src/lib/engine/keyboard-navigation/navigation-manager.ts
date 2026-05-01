@@ -3,7 +3,7 @@ import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
 import { keyBoardFocusNavigatedNode } from '$lib/engine/keyboard-navigation/navigation-utils';
 import { DispatcherImpl } from '$lib/engine/patterns/observer';
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
-import { ArrowKeysArray, NavigationKeyConsts } from '$lib/engine/hotkeys/consts';
+import { NavigationKeyConsts } from '$lib/engine/hotkeys/consts';
 import { type NavigationKeysConfig, type ScopeInfra } from './types';
 import { HotKey } from '../hotkeys/hotkey-class';
 import { hotkey, hotkeys } from '../hotkeys/hotkey-helpers';
@@ -24,11 +24,12 @@ export class NavigationManager {
 		ScopeInfra
 	>();
 
-	#nextScopeNavigationKeys = hotkeys(['tab', NavigationKeyConsts.ArrowRight]);
+	#nextScopeNavigationKeys = hotkeys(['tab']);
 
-	#prevScopeNavigationKeys = [hotkey('tab', 'shift'), hotkey(NavigationKeyConsts.ArrowLeft)];
+	#prevScopeNavigationKeys = hotkeys(['tab'], 'shift');
 
 	#destTargets: { unregister: () => void }[] = [];
+	#assignHotKeysCounter = 0;
 
 	get #currentScope(): ScopeInfra {
 		return this.#scopes[this.#currentScopeIndex];
@@ -45,8 +46,56 @@ export class NavigationManager {
 		hotKeysModule.assignHotKeys(
 			[...this.#nextScopeNavigationKeys, ...this.#prevScopeNavigationKeys],
 			this.#onChangeScopeKey,
-			true
+			false
 		);
+	}
+
+	assignScopeNavigationKeys(nextScopeKeys: HotKey[], prevScopeKeys: HotKey[]) {
+		let relevantCounter = ++this.#assignHotKeysCounter;
+
+		let prevState = {
+			nextScopeKeys: this.#nextScopeNavigationKeys,
+			prevScopeKeys: this.#prevScopeNavigationKeys
+		};
+
+		hotKeysModule.removeHotKeys(
+			[...this.#nextScopeNavigationKeys, ...this.#prevScopeNavigationKeys],
+			this.#onChangeScopeKey
+		);
+
+		this.#nextScopeNavigationKeys = nextScopeKeys;
+		this.#prevScopeNavigationKeys = prevScopeKeys;
+
+		hotKeysModule.assignHotKeys(
+			[...this.#nextScopeNavigationKeys, ...this.#prevScopeNavigationKeys],
+			this.#onChangeScopeKey,
+			false
+		);
+
+		return () => {
+			if (relevantCounter != this.#assignHotKeysCounter) {
+				console.warn(
+					'Undo Assign Scope Navigation Counter discrepancy. Undo relevantCounter',
+					relevantCounter,
+					'assignHotKeysCounter:',
+					this.#assignHotKeysCounter
+				);
+				return;
+			}
+
+			hotKeysModule.removeHotKeys([...nextScopeKeys, ...prevScopeKeys], this.#onChangeScopeKey);
+
+			this.#nextScopeNavigationKeys = prevState.nextScopeKeys;
+			this.#prevScopeNavigationKeys = prevState.prevScopeKeys;
+
+			hotKeysModule.assignHotKeys(
+				[...this.#nextScopeNavigationKeys, ...this.#prevScopeNavigationKeys],
+				this.#onChangeScopeKey,
+				false
+			);
+
+			this.#assignHotKeysCounter--;
+		};
 	}
 
 	registerNavigationHandler(handler: (dispatchedObject: NavigationEvent) => void): () => unknown {
@@ -139,6 +188,25 @@ export class NavigationManager {
 			}
 		}
 	}, 'hard');
+
+	focusNextScope() {
+		this.#focusScopeInternal(this.#nextScopeIndex());
+	}
+
+	focusPrevScope() {
+		this.#focusScopeInternal(this.#prevScopeIndex());
+	}
+
+	#focusScopeInternal(scopeIndex: number) {
+		if (scopeIndex !== undefined && scopeIndex !== this.#currentScopeIndex) {
+			this.#currentScopeIndex = scopeIndex;
+			const nextScope = this.#scopes[scopeIndex];
+			let nodeToFocus = nextScope.currentNode;
+			if (nodeToFocus) {
+				keyBoardFocusNavigatedNode(nodeToFocus);
+			}
+		}
+	}
 
 	#onNavigationKey = createKeyabordNavigationEventHandler((keyboardEvent: KeyboardEvent) => {
 		if (this.#scopes.length == 0) {

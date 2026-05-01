@@ -4,6 +4,7 @@
 	import type { NavigationKeysConfig } from '../types';
 	import { signalNavigationHotkeyEvent } from '$lib/engine/hotkeys/bl-hotkeys-event-signals';
 	import { browser } from '$app/environment';
+	import { NAVIGATION_MANAGER_CONTEXT } from './consts';
 
 	interface Props {
 		navigationKeyConfig?: NavigationKeysConfig;
@@ -14,7 +15,7 @@
 
 	let navigationManager: NavigationManager = new NavigationManager(navigationKeyConfig);
 
-	setContext('navigationManager', navigationManager);
+	setContext(NAVIGATION_MANAGER_CONTEXT, navigationManager);
 
 	onDestroy(() => {
 		navigationManager.destroy();

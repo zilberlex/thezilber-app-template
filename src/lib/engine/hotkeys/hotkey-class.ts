@@ -113,6 +113,22 @@ export class HotKey implements KeyLike {
 		return bestValue;
 	}
 
+	pickBestMatchingKey(entries: HotKey[]): HotKey | undefined {
+		let bestScore = -1;
+		let bestValue: HotKey | undefined = undefined;
+
+		for (const entry of entries) {
+			const score = this.test(entry);
+
+			if (score > bestScore) {
+				bestScore = score;
+				bestValue = entry;
+			}
+		}
+
+		return bestValue;
+	}
+
 	#getRequiredModifiers(): HotKeyModifier[] {
 		const result: HotKeyModifier[] = [];
 

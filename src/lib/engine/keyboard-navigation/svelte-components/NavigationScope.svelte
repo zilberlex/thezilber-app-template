@@ -10,6 +10,7 @@
 	} from '../types';
 	import NavigationScopeInfraImpl from '../navigation-scope';
 	import { mergeProps } from 'svelte-toolbelt';
+	import { NAVIGATION_MANAGER_CONTEXT } from './consts';
 
 	interface Props {
 		navigationKeys?: NavigationKeysConfig;
@@ -34,7 +35,7 @@
 	let navigationManager: NavigationManager;
 	let mutationObserver: MutationObserver;
 
-	navigationManager = getContext('navigationManager');
+	navigationManager = getContext(NAVIGATION_MANAGER_CONTEXT);
 
 	const scopeClass = 'navigation-scope';
 

@@ -7,16 +7,12 @@ import {
 	NodesWhichTakePriorityOverSoftHotKeys
 } from './consts';
 import type { NavType } from './types';
+import { HotKey } from './hotkey-class';
 export type KeyboardEventHandler = (keyboardEvent: KeyboardEvent) => void;
 
-/**
- * @param {function(KeyboardEvent): void} onActionEventHandler
- * @returns {function(KeyboardEvent)}
- */
 export function createOnGoClickHandler(onActionEventHandler: KeyboardEventHandler) {
 	let smartClickHandling = createKeyabordNavigationEventHandler(onActionEventHandler);
 
-	/** @param {KeyboardEvent} event */
 	return async function (event: KeyboardEvent) {
 		// TODO create better infra for relevancy -> preventdefault -> cd+debounce creation
 		if (isKeyboardGoEvent(event)) {
@@ -29,20 +25,58 @@ export function createOnGoClickHandler(onActionEventHandler: KeyboardEventHandle
 	};
 }
 
-/**
- * @param {function(KeyboardEvent): void} handler
- * @returns {function(KeyboardEvent): void}
- */
-export function createKeyabordNavigationEventHandler(handler, strength: 'soft' | 'hard' = 'soft') {
+export function createKeyabordNavigationEventHandler(
+	handler: KeyboardEventHandler,
+	strength: 'soft' | 'hard' = 'soft'
+) {
 	return createSmartHandler(handler, {
 		cooldownDelay: 20,
 		shouldExecuteFunction: (event) => !shouldIgnoreHotKey(event, strength)
 	});
 }
 
-/** @param {KeyboardEvent} event */
-export function isKeyboardGoEvent(event) {
+export function createKeyboardNavigationEventHandlerMixedSoftness(
+	handler: KeyboardEventHandler,
+	softKeys: HotKey[],
+	hardKeys: HotKey[]
+) {
+	let shouldExecuteFunction = (event: Event) =>
+		!shouldIgnoreHotkeyPrecise(
+			event as KeyboardEvent,
+			HotKey.fromEvent(event as KeyboardEvent),
+			softKeys,
+			hardKeys
+		);
+
+	return createSmartHandler(handler, {
+		cooldownDelay: 20,
+		shouldExecuteFunction
+	});
+}
+
+export function isKeyboardGoEvent(event: KeyboardEvent) {
 	return GO_KEYS.includes(event.key.toLowerCase());
+}
+
+function shouldIgnoreHotkeyPrecise(
+	event: KeyboardEvent,
+	eventKey: HotKey,
+	softKeys: HotKey[],
+	hardKeys: HotKey[]
+) {
+	let hardMatch = eventKey.pickBestMatchingKey(hardKeys);
+
+	if (hardMatch) {
+		return true;
+	}
+
+	let softMatch = eventKey.pickBestMatchingKey(softKeys);
+
+	if (softMatch) {
+		return shouldIgnoreHotKey(event, 'soft');
+	}
+
+	return false;
 }
 
 export function shouldIgnoreHotKey(event: KeyboardEvent, strength: 'soft' | 'hard') {
