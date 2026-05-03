@@ -45,9 +45,9 @@
 	<p><b>Same child object?</b> {parent.child === childAlias ? 'YES' : 'NO'}</p>
 
 	<div style="display:flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
-		<button on:click={incParentCount}>+1 parent.count</button>
-		<button on:click={incChildViaParent}>+1 child via parent.child</button>
-		<button on:click={incChildViaAlias}>+1 child via childAlias</button>
+		<button onclick={incParentCount}>+1 parent.count</button>
+		<button onclick={incChildViaParent}>+1 child via parent.child</button>
+		<button onclick={incChildViaAlias}>+1 child via childAlias</button>
 	</div>
 
 	<hr style="margin: 1rem 0;" />
