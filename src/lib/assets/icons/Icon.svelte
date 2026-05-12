@@ -8,15 +8,17 @@
 
 <style>
 	.icon {
+		--_icon-bg: var(--icon-bg, var(--cl-bg));
+
 		box-sizing: border-box;
 		display: block;
 		line-height: 1;
 
+		--icon-color: currentColor;
 		--icon-stroke: var(--cl-primary);
-		--icon-bg: var(--cl-bg);
 
-		background-color: var(--icon-bg);
-		fill: var(--icon-bg);
+		background-color: var(--_icon-bg);
+		fill: var(--_icon-bg);
 
 		stroke: var(--icon-stroke);
 		height: var(--icon-height);

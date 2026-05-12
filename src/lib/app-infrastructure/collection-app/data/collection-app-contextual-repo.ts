@@ -17,8 +17,7 @@ import type {
 export class CollectionAppContextualRepo<
 	TData extends Omit<object, 'recordId'>,
 	TProjection extends DataProjection
-> implements AppRecordRepo<TData, TProjection, SyncableAppRecordMetadata, CollectionAppError>
-{
+> implements AppRecordRepo<TData, TProjection, SyncableAppRecordMetadata, CollectionAppError> {
 	#permanentRepo: AppRecordRepo<TData, TProjection, SyncableAppRecordMetadata, CollectionAppError>;
 	#dbName: string;
 
@@ -95,14 +94,9 @@ export class CollectionAppContextualRepo<
 		}
 	}
 
-	async delete(
-		context: CollectionAppContext,
-		record: AppRecord<TData, TProjection, SyncableAppRecordMetadata>
-	): Promise<ActionResult<void, CollectionAppError>> {
-		console.log('deleting item', context);
-
+	async delete(context: CollectionAppContext): Promise<ActionResult<void, CollectionAppError>> {
 		if (context.editMode === 'permanent') {
-			return await this.#permanentRepo.delete(context, record);
+			return await this.#permanentRepo.delete(context);
 		} else {
 			try {
 				removeLocalStorage(this.#localStorageKey);

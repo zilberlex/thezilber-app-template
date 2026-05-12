@@ -4,6 +4,7 @@ import type {
 	AppRecordRepo,
 	CollectionAppDbRecord,
 	CollectionAppRecord,
+	CollectionAppRecordProjection,
 	DataProjection,
 	DbAdapter,
 	DbItem,
@@ -39,8 +40,7 @@ class CollectionAppDexieRepo<
 export class CollectionAppPermanentRepo<
 	TData extends Omit<object, 'recordId'>,
 	TProjection extends DataProjection
-> implements AppRecordRepo<TData, TProjection, SyncableAppRecordMetadata, CollectionAppError>
-{
+> implements AppRecordRepo<TData, TProjection, SyncableAppRecordMetadata, CollectionAppError> {
 	#dexieRepo: CollectionAppDexieRepo<TData, TProjection>;
 	#adapter: DbAdapter<TData, TProjection, SyncableAppRecordMetadata>;
 
@@ -78,10 +78,12 @@ export class CollectionAppPermanentRepo<
 
 		try {
 			await db.transaction('rw', db.data, db.projection, db.metadata, db.keys, async () => {
-				await db.keys.add({ ...dbRecord.keys, recordId });
-				await db.data.add({ ...dbRecord.data, recordId });
-				await db.projection.add({ ...dbRecord.projection, recordId });
-				await db.metadata.add({ ...dbRecord.meta, recordId });
+				Promise.all([
+					db.keys.add({ ...dbRecord.keys, recordId }),
+					db.data.add({ ...dbRecord.data, recordId }),
+					db.projection.add({ ...dbRecord.projection, recordId }),
+					db.metadata.add({ ...dbRecord.meta, recordId })
+				]);
 			});
 
 			return { ok: true, value: this.#adapter.fromDbObject(dbRecord) };
@@ -92,7 +94,7 @@ export class CollectionAppPermanentRepo<
 					ok: false,
 					error: {
 						kind: 'Key Already Exists',
-						message: `Slug: [${dbRecord.recordId}] already exists. displayName: [${dbRecord.projection.displayName}]. data: [${JSON.stringify(record.data)}]`,
+						message: `Slug: [${dbRecord.keys.slug}] already exists. displayName: [${dbRecord.projection.displayName}]. data: [${JSON.stringify(record.data)}]`,
 						context
 					}
 				};
@@ -118,10 +120,12 @@ export class CollectionAppPermanentRepo<
 			// TODO AZ Add slug
 
 			await db.transaction('rw', db.data, db.projection, db.metadata, db.keys, async () => {
-				await db.keys.put({ ...dbRecord.keys, recordId });
-				await db.data.put({ ...dbRecord.data, recordId });
-				await db.projection.put({ ...dbRecord.projection, recordId });
-				await db.metadata.put({ ...dbRecord.meta, recordId });
+				await Promise.all([
+					db.keys.put({ ...dbRecord.keys, recordId }),
+					db.data.put({ ...dbRecord.data, recordId }),
+					db.projection.put({ ...dbRecord.projection, recordId }),
+					db.metadata.put({ ...dbRecord.meta, recordId })
+				]);
 			});
 
 			return { ok: true, value: this.#adapter.fromDbObject(dbRecord) };
@@ -134,50 +138,133 @@ export class CollectionAppPermanentRepo<
 		}
 	}
 
-	async delete(
+	async rename(
 		context: CollectionAppContext,
-		record: CollectionAppRecord<TData, TProjection>
-	): Promise<ActionResult<void, CollectionAppError>> {
+		displayName: string
+	): Promise<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
 		const db = this.#dexieRepo;
-		let dbRecord = this.#adapter.toDbObject(record);
-
-		console.log('Permanent Repo - Deleting item. Context:', context, 'record:', dbRecord);
-
-		let { recordId } = dbRecord;
+		const { slug } = context;
 
 		try {
-			await db.transaction('rw', db.data, db.projection, db.metadata, db.keys, async () => {
-				await db.keys.delete(recordId);
-				await db.data.delete(recordId);
-				await db.projection.delete(recordId);
-				await db.metadata.delete(recordId);
-			});
+			return await db.transaction('rw', db.keys, db.data, db.projection, db.metadata, async () => {
+				const keysRow = await db.keys.where('slug').equals(slug).first();
 
-			console.log(
-				'Permanent Repo - Succesfully deleted item. Context:',
-				context,
-				'record:',
-				dbRecord
-			);
+				if (!keysRow) {
+					return {
+						ok: false,
+						error: {
+							kind: 'Key Not Found',
+							message: `Cant find record with slug [${slug}].`,
+							context
+						}
+					};
+				}
 
-			return { ok: true, value: undefined };
-		} catch (e) {
-			if (e instanceof Dexie.NotFoundError) {
-				console.warn('Permanent Repo - Delete, Record Not found', e);
-				return {
-					ok: false,
-					error: {
-						kind: 'Key Not Found',
-						message: `Item Key: [${record.slug}] already exists. data: [${JSON.stringify(record.data)}]`,
-						context
+				const { recordId } = keysRow;
+
+				const [dataRow, metaRow] = await Promise.all([
+					db.data.get(recordId),
+					db.metadata.get(recordId)
+				]);
+
+				if (!dataRow || !metaRow) {
+					return {
+						ok: false,
+						error: {
+							kind: 'Corrupted Record',
+							message: `Keys row for slug [${slug}] exists, but data or metadata is missing.`,
+							context
+						}
+					};
+				}
+
+				const oldData = stripRecordId(dataRow);
+				const oldMeta = stripRecordId(metaRow);
+				const oldKeys = stripRecordId(keysRow);
+
+				const newData = this.#adapter.renameData(oldData, displayName);
+				const newProjection = this.#adapter.projectionFromData(newData);
+				const newSlug = await this.getSlug(displayName, keysRow.slug);
+
+				const dbRecord: CollectionAppDbRecord<TData, TProjection> = {
+					recordId,
+					data: newData,
+					projection: newProjection,
+					meta: {
+						...oldMeta,
+						modifiedAt: Date.now()
+					},
+					keys: {
+						...oldKeys,
+						slug: newSlug
 					}
 				};
-			} else {
-				throw e;
-			}
+
+				await Promise.all([
+					db.keys.put({ ...dbRecord.keys, recordId }),
+					db.data.put({ ...dbRecord.data, recordId }),
+					db.projection.put({ ...dbRecord.projection, recordId }),
+					db.metadata.put({ ...dbRecord.meta, recordId })
+				]);
+
+				return {
+					ok: true,
+					value: this.#adapter.fromDbObject(dbRecord)
+				};
+			});
+		} catch (e) {
+			return {
+				ok: false,
+				error: {
+					kind: 'General Error',
+					message: getErrorMessage(e),
+					context
+				}
+			};
 		}
 	}
 
+	async delete(context: CollectionAppContext): Promise<ActionResult<void, CollectionAppError>> {
+		const db = this.#dexieRepo;
+		const { slug } = context;
+
+		try {
+			return await db.transaction('rw', db.data, db.projection, db.metadata, db.keys, async () => {
+				const keysRow = await db.keys.where('slug').equals(slug).first();
+
+				if (!keysRow) {
+					return {
+						ok: false,
+						error: {
+							kind: 'Key Not Found',
+							message: `Cant find record with slug [${slug}].`,
+							context
+						}
+					};
+				}
+
+				const { recordId } = keysRow;
+
+				await Promise.all([
+					db.keys.delete(recordId),
+					db.data.delete(recordId),
+					db.projection.delete(recordId),
+					db.metadata.delete(recordId)
+				]);
+
+				return { ok: true, value: undefined };
+			});
+		} catch (e) {
+			return {
+				ok: false,
+				error: {
+					kind: 'General Error',
+					message: getErrorMessage(e),
+					context
+				}
+			};
+		}
+	}
 	async load(
 		context: CollectionAppContext
 	): Promise<
@@ -208,7 +295,7 @@ export class CollectionAppPermanentRepo<
 						ok: false,
 						error: {
 							kind: 'Corrupted Record',
-							message: `Projection for slug [${slug}] exists, but matching data or meta, or projectionRow is missing. dataRow: [${dataRow}], metaRow: [${metaRow}, projectionRow: [${projectionRow}]`,
+							message: `Keys row for slug [${slug}] exists, but matching data or meta is missing. dataRow: [${dataRow}], metaRow: [${metaRow}]`,
 							context
 						}
 					};

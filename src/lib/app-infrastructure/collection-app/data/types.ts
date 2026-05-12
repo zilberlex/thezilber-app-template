@@ -27,11 +27,20 @@ export type CollectionAppRecord<TData, TProjection> = AppRecord<
 	SyncableAppRecordMetadata
 >;
 
+export type CollectionAppRecordProjection<
+	TData,
+	TProjection extends DataProjection
+> = RecordProjection<TData, TProjection, SyncableAppRecordMetadata>;
+
 export type CollectionAppDbRecord<TData, TProjection> = DbAppRecord<
 	TData,
 	TProjection,
 	SyncableAppRecordMetadata
 >;
+
+export type CollectionAppStoreItem<TData, TProjection extends DataProjection> =
+	| CollectionAppRecordProjection<TData, TProjection>
+	| CollectionAppRecord<TData, TProjection>;
 
 export type SyncableAppRecordMetadata = {
 	vc: VectorClock;
@@ -66,6 +75,8 @@ export interface DbAdapter<TData, TProjection extends DataProjection, TMeta> {
 	refreshProjection(
 		record: AppRecord<TData, TProjection, TMeta>
 	): AppRecord<TData, TProjection, TMeta>;
+	renameData(data: TData, displayName: string): TData;
+	getDisplayName(data: TData): string;
 }
 
 export type CollectionAppDbAdapter<TData, TProjection extends DataProjection> = DbAdapter<
@@ -91,10 +102,12 @@ export interface AppRecordRepo<TData, TProjection extends DataProjection, TMeta,
 		context: CollectionAppContext
 	): Promise<ActionResult<AppRecord<TData, TProjection, TMeta> | undefined, TError>>;
 
-	delete(
+	delete(context: CollectionAppContext): Promise<ActionResult<void, TError>>;
+
+	rename(
 		context: CollectionAppContext,
-		record: AppRecord<TData, TProjection, TMeta>
-	): Promise<ActionResult<void, TError>>;
+		displayName: string
+	): Promise<ActionResult<CollectionAppRecord<TData, TProjection>, TError>>;
 
 	getAllRecordProjections(): Promise<
 		ActionResult<AllRecordsProjections<TData, TProjection, TMeta>, TError>

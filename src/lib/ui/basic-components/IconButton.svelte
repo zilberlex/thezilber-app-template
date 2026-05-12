@@ -9,8 +9,8 @@
 		children,
 		thisNode = $bindable(),
 		onkeydown: userOnKeydown = () => {},
-		onclick: userOnClick,
-		class: userClass,
+		onclick: userOnClick = undefined,
+		class: userClass = undefined,
 		...rest
 	} = $props();
 
@@ -33,6 +33,12 @@
 
 <style>
 	.icon-button {
+		--_stroke: var(--stroke, var(--cl-primary));
+		--_bg: var(--bg, transparent);
+		--_stroke-hover: var(--stroke-hover, var(--cl-primary));
+		--_bg-hover: var(--bg-hover, var(--cl-primary-dimmest));
+		--_bg-active: var(--bg-active, var(--cl-on-surface));
+
 		&,
 		&:is(:hover, :focus-visible, :active) {
 			&,
@@ -50,26 +56,27 @@
 		padding: 0.25rem;
 
 		& :global(.icon) {
-			--icon-stroke: var(--cl-primary);
+			--icon-bg: var(--_bg);
+			--icon-stroke: var(--_stroke);
 			transition: inherit;
 		}
 
 		&:is(:hover, :focus-visible),
 		&.btn-pressed {
-			background-color: var(--cl-primary-dimmest);
+			background-color: var(--_bg-hover);
 
 			& :global(.icon) {
-				--icon-bg: var(--cl-primary-dimmest);
+				--icon-bg: var(--_bg-hover);
 			}
 		}
 
 		&:active,
-		:global(&.btn-start-work) {
+		&:global(.btn-start-work) {
 			transition: none;
-			background-color: var(--cl-on-surface);
+			background-color: var(--_bg-active);
 
 			& :global(.icon) {
-				--icon-bg: var(--cl-on-surface);
+				--icon-bg: var(--_bg-active);
 			}
 		}
 	}

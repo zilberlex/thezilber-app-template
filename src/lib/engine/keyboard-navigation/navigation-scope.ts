@@ -9,7 +9,7 @@ import type {
 } from './types';
 import { getFocusableElementsByNode } from './navigation-utils';
 
-const NAVIGATION_ID_ATTRIBUTE = 'navigation-id';
+const NAVIGATION_ID_ATTRIBUTE = 'data-navigation-id';
 
 export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 	scopeName: string;
@@ -50,15 +50,16 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 	init() {
 		const { signal } = this.#abortController;
 
-		this.scopeContainer.addEventListener('focusin', this.#onFocusElement_SetCurrentNode, {
-			signal
-		});
-
-		this.navigatiableNodes.forEach((node) => {
-			node.addEventListener('pointerenter', this.#onFocusElement_SetCurrentNode_SmartHandler, {
+		this.scopeContainer.addEventListener(
+			'focusin',
+			createSmartHandler(this.#onFocusElement_SetCurrentNode, {
+				debounceDelay: 50,
+				cooldownDelay: 20
+			}),
+			{
 				signal
-			});
-		});
+			}
+		);
 	}
 
 	destroy() {
@@ -66,6 +67,8 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 	}
 
 	getNextNodeInfo(key: string): NextNodeInfo {
+		if (document.activeElement !== this.#currentNode) return { nextNode: this.#currentNode };
+
 		const navKeys = this.navigationKeys;
 
 		let nextNodeIndex = null;
@@ -88,10 +91,10 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 		if (nextNodeIndex >= 0 && nextNodeIndex < this.navigatiableNodes.length) {
 			ret.nextNode = this.navigatiableNodes[nextNodeIndex];
 		} else {
-			// Return either first or last node, depends on side of overflow (circular behavior)
 			nextNodeIndex = nextNodeIndex < 0 ? this.navigatiableNodes.length - 1 : 0;
 
 			let nextNodeCircular = this.navigatiableNodes[nextNodeIndex];
+
 			if (this.escapeMode === 'escape') {
 				ret.escapeBackupNode = nextNodeCircular;
 			} else {
@@ -103,6 +106,9 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 	}
 
 	refreshNavigatableNodes() {
+		const previousNode = this.#currentNode;
+		const previousIndex = this.#currentNodeIndex ?? 0;
+
 		this.navigatiableNodes = getFocusableElementsByNode(this.scopeContainer);
 		this.#initializeFocusableElements(this.navigatiableNodes);
 
@@ -112,6 +118,13 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 			'nodes found:',
 			this.navigatiableNodes
 		);
+
+		if (previousNode && this.scopeContainer.contains(previousNode)) {
+			this.#setCurrentNode(previousNode);
+			return;
+		}
+
+		this.#setCurrentByFallbackIndex(previousIndex);
 	}
 
 	registerOnFocus(handler: (dispatchedObject: NodeFocusEvent) => void): { unregister: () => void } {
@@ -122,73 +135,107 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 		};
 	}
 
+	get currentNode() {
+		if (this.#currentNode) {
+			return this.#currentNode;
+		}
+
+		return this.navigatiableNodes[0];
+	}
+
 	#initializeFocusableElements(focusableElements: HTMLElement[]) {
 		for (let i = 0; i < focusableElements.length; i++) {
 			const node = focusableElements[i];
-			console.debug(`FOCUS_CHANGE INIT - Focusable element id [${i}]:`, node);
+
 			node.setAttribute(NAVIGATION_ID_ATTRIBUTE, i.toString());
 		}
 	}
 
-	get currentNode() {
-		let nodeToFocus = this.#currentNode;
+	#setCurrentNode(node: HTMLElement) {
+		const index = this.#getNavigationIndexFromNode(node);
 
-		if (!nodeToFocus) {
-			let numOfNavNodes = this.navigatiableNodes.length;
-			if (numOfNavNodes >= 0) {
-				nodeToFocus = this.navigatiableNodes[0];
-			}
-
-			console.debug(
-				`Scope [${this.scopeName}] - Returning currentNode`,
-				this.#currentNode,
-				'numOfNavNodes:',
-				numOfNavNodes,
-				'nodeToFocus',
-				nodeToFocus
-			);
+		if (index === undefined) {
+			console.warn('ARROW SCOPE FOCUS_CHANGE: node missing/invalid navigation id.', node);
+			return;
 		}
 
-		return nodeToFocus;
+		this.#currentNode = node;
+		this.#currentNodeIndex = index;
+	}
+
+	#setCurrentByFallbackIndex(index: number) {
+		const length = this.navigatiableNodes.length;
+
+		if (length === 0) {
+			this.#currentNode = undefined;
+			this.#currentNodeIndex = undefined;
+			return;
+		}
+
+		const fallbackIndex = Math.min(index, length - 1);
+
+		this.#currentNodeIndex = fallbackIndex;
+		this.#currentNode = this.navigatiableNodes[fallbackIndex];
+	}
+
+	#getNavigatableNodeFromEvent(event: Event): HTMLElement | undefined {
+		const target = event.target;
+
+		if (!(target instanceof HTMLElement)) {
+			return;
+		}
+
+		const node = target.closest(`[${NAVIGATION_ID_ATTRIBUTE}]`);
+
+		if (!(node instanceof HTMLElement)) {
+			return;
+		}
+
+		if (!this.scopeContainer.contains(node)) {
+			return;
+		}
+
+		return node;
+	}
+
+	#getNavigationIndexFromNode(node: HTMLElement): number | undefined {
+		const navId = node.getAttribute(NAVIGATION_ID_ATTRIBUTE);
+
+		if (navId === null) {
+			return;
+		}
+
+		const parsedIndex = Number.parseInt(navId, 10);
+
+		if (Number.isNaN(parsedIndex)) {
+			return;
+		}
+
+		return parsedIndex;
 	}
 
 	#onFocusElement_SetCurrentNode = (event: FocusEvent | PointerEvent) => {
-		console.debug(
-			'FOCUS_CHANGE handle. .eventType: ',
-			event.type,
-			', event.target: ',
-			event.target,
-			', this:',
-			this.scopeContainer
-		);
+		const node = this.#getNavigatableNodeFromEvent(event);
 
-		let node = event.target as HTMLElement;
-
-		console.debug('ARROW SCOPE FOCUS_CHANGE: Node focus trigger. Setting Focused node:', node);
-		this.#currentNode = node;
-		this.#focusNodeDispatcher.signal({ targetNode: node });
-
-		let navid = node.getAttribute(NAVIGATION_ID_ATTRIBUTE);
-		if (navid === null) {
+		if (!node) {
 			console.warn('ARROW SCOPE FOCUS_CHANGE: reached unnavigatable node, skipping.');
 			return;
 		}
 
-		let nodeNavId = parseInt(navid);
-		if (nodeNavId < 0) {
-			console.warn('ARROW SCOPE FOCUS_CHANGE: failed to parse navigation id on node.', navid, node);
+		if (this.#currentNode === node) {
 			return;
 		}
 
-		console.debug('ARROW SCOPE FOCUS_CHANGE: Setting current nodeId', nodeNavId);
-		this.#currentNodeIndex = nodeNavId;
-	};
+		const nodeIndex = this.#getNavigationIndexFromNode(node);
 
-	#onFocusElement_SetCurrentNode_SmartHandler = createSmartHandler(
-		this.#onFocusElement_SetCurrentNode,
-		{
-			debounceDelay: 50,
-			cooldownDelay: 20
+		if (nodeIndex === undefined) {
+			console.warn('ARROW SCOPE FOCUS_CHANGE: node missing navigation id.', node);
+			return;
 		}
-	);
+
+		console.debug('ARROW SCOPE FOCUS_CHANGE: Setting current node/index', node, nodeIndex);
+
+		this.#setCurrentNode(node);
+		this.#focusNodeDispatcher.signal({ targetNode: node });
+	};
 }

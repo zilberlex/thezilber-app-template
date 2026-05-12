@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy, setContext } from 'svelte';
+	import { onDestroy, onMount, setContext, untrack } from 'svelte';
 	import { NavigationManager } from '../navigation-manager';
 	import type { NavigationKeysConfig } from '../types';
 	import { signalNavigationHotkeyEvent } from '$lib/engine/hotkeys/bl-hotkeys-event-signals';
@@ -13,26 +13,22 @@
 
 	let { navigationKeyConfig, children }: Props = $props();
 
-	let navigationManager: NavigationManager = new NavigationManager(navigationKeyConfig);
+	let navigationManager: NavigationManager = new NavigationManager(
+		untrack(() => navigationKeyConfig)
+	);
 
 	setContext(NAVIGATION_MANAGER_CONTEXT, navigationManager);
 
-	onDestroy(() => {
-		navigationManager.destroy();
-	});
-
-	$effect(() => {
+	onMount(() => {
 		if (browser) {
 			navigationManager.init();
 
-			const navManagerNavigationHotkeyHandlerDestroy = navigationManager.registerNavigationHandler(
-				(obj) => {
-					signalNavigationHotkeyEvent(obj.initiatingKey, obj.targetNode);
-				}
-			);
+			navigationManager.registerNavigationHandler((obj) => {
+				signalNavigationHotkeyEvent(obj.initiatingKey, obj.targetNode);
+			});
 
 			return () => {
-				navManagerNavigationHotkeyHandlerDestroy();
+				navigationManager.destroy();
 			};
 		}
 	});

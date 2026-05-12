@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import type { CbAppEnv } from './command-builder-types';
+	import CommandBuilderSiderbarItem from './CommandBuilderSiderbarItem.svelte';
 
 	let { cbAppEnv }: { cbAppEnv: CbAppEnv } = $props();
 
@@ -37,12 +38,7 @@
 		<h2 bind:this={menuLabel} class="menu-label">Saved Commands:</h2>
 
 		{#each cbRecordProjections as item (item.recordId)}
-			<a
-				href="/{cbAppEnv.baseUrlPath}/{item.slug}"
-				class={['nav-collection-item', item.slug === cbAppEnv.slug && 'current-item']}
-			>
-				{item.projection.displayName}
-			</a>
+			<CommandBuilderSiderbarItem {cbAppEnv} recordProjection={item} recordId={item.recordId} />
 		{/each}
 	</section>
 </nav>
@@ -79,24 +75,5 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-1);
-	}
-
-	.nav-collection-item {
-		font-size: var(--font-size-3);
-		text-decoration: none;
-		color: var(--cl-on-surface);
-		padding: var(--space-1) var(--space-2);
-		border-radius: 15px;
-
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		width: var(--sidebar-item-width);
-
-		scroll-margin-block-start: var(--section-label-height);
-
-		&:is(:hover, :focus-visible, .current-item) {
-			background-color: var(--cl-primary-dimmest);
-		}
 	}
 </style>

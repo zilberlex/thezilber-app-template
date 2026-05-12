@@ -1,8 +1,8 @@
 import type {
 	AllRecordsProjections,
 	AppRecord,
+	CollectionAppRecordProjection,
 	DataProjection,
-	RecordProjection,
 	SyncableAppRecordMetadata
 } from '$lib/app-infrastructure/collection-app/data/types';
 import type { SvelteMap } from 'svelte/reactivity';
@@ -31,14 +31,20 @@ export type CollectionAppRuntime<
 	get projectedContext(): CollectionAppContext | undefined;
 	get baseUrlPath(): string;
 
-	get allRecordProjections(): TouchMap<
-		string,
-		RecordProjection<T, TProjection, SyncableAppRecordMetadata>
-	>;
+	get allRecordProjections(): TouchMap<string, CollectionAppRecordProjection<T, TProjection>>;
+
+	renameByProjection(
+		recordProjection: CollectionAppRecordProjection<T, TProjection>,
+		newName: string
+	): Promise<CollectionAppBlankResult>;
+
 	save(): Promise<CollectionAppBlankResult>;
 	saveAs(slug: string): Promise<CollectionAppBlankResult>;
 	delete(): Promise<CollectionAppBlankResult>;
 	destroy(): void;
+	deleteByProjection(
+		recordProjection: CollectionAppRecordProjection<T, TProjection>
+	): Promise<CollectionAppBlankResult>;
 
 	get _internal(): {
 		store: SmartStore<T, any>;
@@ -115,7 +121,7 @@ export type AppDataState = { context: CollectionAppContext } & (
 export type CollectionAppEnvironment<
 	T extends Omit<object, 'recordId'>,
 	TProjection extends DataProjection
-> = CollectionAppContext & CollectionAppRuntime<T, DataProjection>;
+> = CollectionAppContext & CollectionAppRuntime<T, TProjection>;
 
 export type DataManagerOptions<T> = {
 	loadNotFoundBehavior: 'error' | 'create-new';

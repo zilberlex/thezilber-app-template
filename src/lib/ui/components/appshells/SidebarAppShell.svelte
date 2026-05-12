@@ -1,6 +1,7 @@
 <script lang="ts">
 	import HamburgerIcon from '$lib/assets/icons/HamburgerIcon.svelte';
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
+	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/types';
 	import IconButton from '$lib/ui/basic-components/IconButton.svelte';
@@ -30,6 +31,7 @@
 	}: Props = $props();
 
 	let isOverlay = $state(false);
+	// svelte-ignore state_referenced_locally
 	let isSidebarOpen = $state(defaultOpen);
 
 	function readStoredDesktopState(): boolean {
@@ -87,8 +89,6 @@
 			mq.removeEventListener('change', onChange);
 		};
 	});
-
-	let refreshNodesSidebar = $state<() => void>();
 </script>
 
 <div
@@ -124,7 +124,7 @@
 						aria-controls="app-shell-sidebar"
 						onclick={toggleSidebar}
 						tabindex={-1}
-						{@attach createClickHotKeyAttachment('Open Sidebar', false, 'o', 'alt')}
+						{@attach createClickHotKeyAttachment('Open Sidebar', false, hotkey('o', 'alt'))}
 					>
 						<HamburgerIcon />
 					</IconButton>
@@ -135,6 +135,7 @@
 							type="button"
 							aria-label="Close sidebar"
 							onclick={closeSidebar}
+							tabindex={-1}
 						>
 							<HamburgerIcon />
 						</IconButton>

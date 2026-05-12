@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
+	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import {
 		loadSessionStorage,
 		saveSessionStorage
@@ -58,14 +59,14 @@
 		<div class="form-controls">
 			<Button
 				onclick={() => onAction(inputField)}
-				{@attach createClickHotKeyAttachment(actionText, false, 'Enter', 'alt')}
+				{@attach createClickHotKeyAttachment(actionText, false, hotkey('Enter', 'alt'))}
 			>
 				{actionText}
 			</Button>
 
 			<Button
 				onclick={onClose}
-				{@attach createClickHotKeyAttachment('Close Dialog', false, 'q', 'alt')}
+				{@attach createClickHotKeyAttachment('Close Dialog', false, hotkey('q', 'alt'))}
 			>
 				Close
 			</Button>

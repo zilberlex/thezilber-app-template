@@ -7,6 +7,7 @@ import type { DynamicForm } from '$lib/app/dynamic-form/dynamic-form-types';
 import type {
 	DataProjection,
 	DbAppRecord,
+	RecordProjection,
 	SyncableAppRecordMetadata
 } from '$lib/app-infrastructure/collection-app/data/types';
 
@@ -20,6 +21,7 @@ export type CbProjection = {
 } & DataProjection;
 
 export type CbRecord = CollectionAppRecord<CbData, CbProjection>;
+export type CbRecordProjection = RecordProjection<CbData, CbProjection, SyncableAppRecordMetadata>;
 
 export type DbCbRecord = DbAppRecord<CbData, CbProjection, SyncableAppRecordMetadata>;
 export type DbCbData = { recordId: string } & CbData;

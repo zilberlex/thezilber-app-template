@@ -11,6 +11,7 @@ import type {
 } from './types';
 import type {
 	CollectionAppDbAdapter,
+	CollectionAppRecordProjection,
 	DataProjection
 } from '$lib/app-infrastructure/collection-app/data/types';
 import { CollectionAppContextualRepo } from './data/collection-app-contextual-repo';
@@ -43,6 +44,40 @@ export function collectionAppInit<
 	let dataStateManager = new DataStateManager(store, contextManager);
 
 	console.log('Collection App Initiated. Context:', $state.snapshot(contextManager.appContext));
+
+	async function deleteInternal(context: CollectionAppContext): Promise<CollectionAppBlankResult> {
+		try {
+			let ret;
+			ret = await store.delete(context);
+
+			if (ret.ok) {
+				console.log('Successfully Deleted Record. [', ret.value.key, ']. Rerouting...');
+
+				if (contextManager.appContext.editMode === 'permanent') {
+					contextManager.replaceContext(context, '');
+				}
+
+				store.reload(
+					contextManager.appContext,
+					dataPlaceholder,
+					generateStoreOptions(contextManager.appContext, fallbackData)
+				);
+			}
+
+			return ret as CollectionAppBlankResult;
+		} catch (e) {
+			console.error('delete Error', e);
+
+			return {
+				ok: false,
+				error: {
+					kind: 'General Error',
+					message: getErrorMessage(e),
+					context
+				}
+			};
+		}
+	}
 
 	let ret: CollectionAppEnvironment<T, TProjection> = {
 		destroy: $effect.root(() => {
@@ -135,6 +170,15 @@ export function collectionAppInit<
 		get baseUrlPath() {
 			return contextManager.baseUrlPath;
 		},
+		renameByProjection: async (
+			recordProjection: CollectionAppRecordProjection<T, TProjection>,
+			newItemName: string
+		) => {
+			throw new Error('not implemented');
+			let res = store.renameItemById(recordId, newItemValue);
+
+			return res;
+		},
 		save: async () => {
 			let res = await store.save();
 
@@ -209,34 +253,18 @@ export function collectionAppInit<
 		},
 		delete: async () => {
 			let contextSnapshot = $state.snapshot(contextManager.appContext);
-			try {
-				let ret = await store.delete(contextSnapshot);
-
-				if (ret.ok) {
-					console.log('Successfully Deleted Record. [', ret.value.key, ']. Rerouting...');
-					if (contextManager.appContext.editMode === 'permanent') {
-						contextManager.replaceContext(contextSnapshot, '');
-					}
-					store.reload(
-						contextManager.appContext,
-						dataPlaceholder,
-						generateStoreOptions(contextManager.appContext, fallbackData)
-					);
-				}
-
-				return ret as CollectionAppBlankResult;
-			} catch (e) {
-				console.error('delete Error', e);
-				return {
-					ok: false,
-					error: { kind: 'General Error', message: getErrorMessage(e), context: contextSnapshot }
-				};
-			}
+			return deleteInternal(contextSnapshot);
+		},
+		deleteByProjection: async (recordProjection: CollectionAppRecordProjection<T, TProjection>) => {
+			let context: CollectionAppContext = {
+				slug: recordProjection.slug,
+				editMode: 'permanent',
+				displayName: recordProjection.projection.displayName
+			};
+			return deleteInternal(context);
 		}
 	};
 
-	// TODO AZ add destroyer and a save on destroy.
-	// let autoSaver = new AutoSaver(ret.data, () => ret.save());
 	return ret;
 }
 

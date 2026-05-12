@@ -5,7 +5,6 @@ import {
 	type DispatchHandler
 } from '$lib/engine/patterns/observer';
 import type {
-	AllRecordsProjections,
 	AppRecord,
 	AppRecordRepo,
 	DataProjection,
@@ -25,7 +24,6 @@ import type {
 	StoreSaveActionResult,
 	WithOpId
 } from './types';
-import { SvelteMap } from 'svelte/reactivity';
 import { TouchMap } from './touch-map.svelte';
 
 type SaveOperationsParams =
@@ -69,9 +67,9 @@ function abortable<T>(p: Promise<T>): { abort: () => void; abortablePromise: Abo
 	};
 }
 
-export class SmartStore<T, TProjection extends DataProjection>
-	implements Dispatcher<WithOpId<AppDataState>>
-{
+export class SmartStore<T, TProjection extends DataProjection> implements Dispatcher<
+	WithOpId<AppDataState>
+> {
 	#context: CollectionAppContext;
 	#record: RecordI<T, TProjection>;
 	#recordProjections: TouchMap<string, RecordProjection<T, TProjection, SyncableAppRecordMetadata>>;
@@ -114,7 +112,7 @@ export class SmartStore<T, TProjection extends DataProjection>
 		if (recordPrjectionsActionResult.ok) {
 			let recordProjectionsFromRepo = recordPrjectionsActionResult.value;
 			recordProjectionsFromRepo.forEach((p) => {
-				this.#recordProjections.set(p.recordId, p);
+				this.#recordProjections.set(p.slug, p);
 			});
 		}
 	}
@@ -254,7 +252,7 @@ export class SmartStore<T, TProjection extends DataProjection>
 			await this.#cache.setOrUpdateKey(slug, record, prevSlug);
 			let { data, ...rest } = record;
 			let recordProjection = rest;
-			this.#recordProjections.set(record.recordId, recordProjection);
+			this.#recordProjections.set(record.slug, recordProjection);
 
 			this.#signalStateChange(
 				{
@@ -317,7 +315,7 @@ export class SmartStore<T, TProjection extends DataProjection>
 			await this.#cache.setOrUpdateKey(slug, newRecord, prevSlug);
 			let { data, ...rest } = newRecord;
 			let recordProjection = rest;
-			this.#recordProjections.set(newRecord.recordId, recordProjection);
+			this.#recordProjections.set(newRecord.slug, recordProjection);
 
 			if (contextSnapshot.slug === this.#context.slug) {
 				// this check is to prevent changing of working record during context changes
@@ -366,28 +364,34 @@ export class SmartStore<T, TProjection extends DataProjection>
 		let ctxSnapshot = $state.snapshot(context);
 
 		// This display name may be wrong udner some conditions, but in general it is good enough
-		let displayName = this.#record.projection.displayName;
+		let { displayName, slug } = context;
 		this.#signalStateChange(
 			{
 				kind: 'deleting',
 				slug: ctxSnapshot.slug,
-				displayName: displayName,
+				displayName: displayName ?? '_draft_',
 				context: ctxSnapshot
 			},
 			opId
 		);
 		console.log('deleting item', ctxSnapshot);
 
-		this.#recordProjections.delete(this.#record.recordId);
-		let res = await this.#repository.delete(ctxSnapshot, this.#record);
+		// TODO AZ probably need to undo this delete on non success
+		let projSnapshot = this.#recordProjections.get(slug);
+		let undoOp = () => {
+			console.log('undo del projection', projSnapshot);
+			if (projSnapshot) this.#recordProjections.set(slug, projSnapshot);
+		};
+		this.#recordProjections.delete(slug);
+		let res = await this.#repository.delete(ctxSnapshot);
 
 		if (res.ok) {
-			await this.#cache.delete(this.#record.slug);
+			await this.#cache.delete(context.slug);
 			this.#signalStateChange(
 				{
 					kind: 'deleted',
-					slug: ctxSnapshot.slug,
-					displayName: displayName,
+					slug,
+					displayName: displayName ?? '_draft_',
 					context: ctxSnapshot
 				},
 				opId
@@ -397,6 +401,50 @@ export class SmartStore<T, TProjection extends DataProjection>
 				value: { kind: 'deleted', key: ctxSnapshot.slug, context: ctxSnapshot }
 			};
 		} else {
+			undoOp();
+			console.warn('Store - Delete Failed for', context);
+			return res;
+		}
+	}
+
+	async rename(context: CollectionAppContext, newName: string) {
+		let opId = this.#nextOpId();
+		let ctxSnapshot = $state.snapshot(context);
+
+		// This display name may be wrong udner some conditions, but in general it is good enough
+		let { displayName, slug } = context;
+		this.#signalStateChange(
+			{
+				kind: 'deleting',
+				slug: ctxSnapshot.slug,
+				displayName: displayName ?? '_draft_',
+				context: ctxSnapshot
+			},
+			opId
+		);
+		console.log('Renaming item', ctxSnapshot, 'new name:', newName);
+
+		// TODO AZ probably need to undo this delete on non success
+		let res = await this.#repository.rename(ctxSnapshot);
+
+		if (res.ok) {
+			await this.#cache.delete(context.slug);
+			this.#signalStateChange(
+				{
+					kind: 'deleted',
+					slug,
+					displayName: displayName ?? '_draft_',
+					context: ctxSnapshot
+				},
+				opId
+			);
+			return {
+				ok: true,
+				value: { kind: 'deleted', key: ctxSnapshot.slug, context: ctxSnapshot }
+			};
+		} else {
+			undoOp();
+			console.warn('Store - Delete Failed for', context);
 			return res;
 		}
 	}
@@ -473,6 +521,7 @@ export class SmartStore<T, TProjection extends DataProjection>
 
 		let record = loadResult.value;
 		if (record) {
+			// TODO AZ check if shit breaks if you remove refreshProjection
 			this.#dbAdapter.refreshProjection(record);
 			this.#record = record;
 			// TODO AZ refactor draft handling and normalization of drafts. - this if this shit is even needed

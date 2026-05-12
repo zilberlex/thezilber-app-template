@@ -6,7 +6,7 @@ import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary
 import { NavigationKeyConsts } from '$lib/engine/hotkeys/consts';
 import { type NavigationKeysConfig, type ScopeInfra } from './types';
 import { HotKey } from '../hotkeys/hotkey-class';
-import { hotkey, hotkeys } from '../hotkeys/hotkey-helpers';
+import { hotkeys } from '../hotkeys/hotkey-helpers';
 
 interface NavigationEvent {
 	targetNode: HTMLElement;

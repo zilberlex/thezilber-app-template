@@ -17,7 +17,7 @@
 		scopeName: string;
 		children?: any;
 		class?: any;
-		escapeMode: ScopeEscapeMode;
+		escapeMode?: ScopeEscapeMode;
 	}
 
 	let {
@@ -39,7 +39,7 @@
 
 	const scopeClass = 'navigation-scope';
 
-	let mergedClasses = mergeProps({ class: scopeClass }, { class: usrCls });
+	let mergedClasses = $derived(mergeProps({ class: scopeClass }, { class: usrCls }));
 
 	onMount(() => {
 		if (!navigationManager) {

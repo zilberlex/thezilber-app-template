@@ -12,8 +12,7 @@
 	import Debug from './Debug.svelte';
 	import type { CbAppEnv } from './command-builder-types';
 	import PreventBrowserHotkeys from '$lib/engine/keyboard-navigation/svelte-components/PreventBrowserHotkeys.svelte';
-	import { HotKey } from '$lib/engine/hotkeys/hotkey-class';
-	import { hotkeys } from '$lib/engine/hotkeys/hotkey-helpers';
+	import { hotkey, hotkeys } from '$lib/engine/hotkeys/hotkey-helpers';
 
 	let { cbAppEnv = $bindable() }: { cbAppEnv: CbAppEnv } = $props();
 
@@ -74,7 +73,7 @@
 			<input
 				bind:value={cbAppEnv.data.commandName}
 				class="input-title"
-				{@attach createFocusHotKeyAttachment('Modify Title', 'i', 'alt')}
+				{@attach createFocusHotKeyAttachment('Modify Title', hotkey('i', 'alt'))}
 			/>
 		{/if}
 
@@ -86,19 +85,19 @@
 		<Button
 			class="button-save"
 			onclick={defaultSaveButtonBehavior}
-			{@attach createClickHotKeyAttachment('Save', false, 's', 'alt')}
+			{@attach createClickHotKeyAttachment('Save', false, hotkey('s', 'alt'))}
 			>{isPermanentCommandPage ? 'Save' : 'Save As'}</Button
 		>
 
 		{#if isPermanentCommandPage}
 			<Button
-				{@attach createClickHotKeyAttachment('Save As', false, 's', 'alt', 'shift')}
+				{@attach createClickHotKeyAttachment('Save As', false, hotkey('s', 'alt', 'shift'))}
 				onclick={openSaveAsPopup}
 			>
 				Save As
 			</Button>
 			<Button
-				{@attach createClickHotKeyAttachment('Delete', false, 'd', 'alt')}
+				{@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))}
 				onclick={deleteItem}
 			>
 				Delete

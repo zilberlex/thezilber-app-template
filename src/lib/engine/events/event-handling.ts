@@ -1,7 +1,3 @@
-/**
- * @param {function} handler
- * @param {{debounceDelay?: number, cooldownDelay?: number, context?: string, shouldPreventDefault?: boolean, shouldExecuteFunction?: (event: Event) => boolean}} options
- */
 export function createSmartHandler(handler, options = {}) {
 	const {
 		debounceDelay = 0,

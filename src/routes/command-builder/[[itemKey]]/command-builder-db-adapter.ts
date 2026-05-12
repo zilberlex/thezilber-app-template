@@ -10,6 +10,17 @@ import { createSyncableRecordMetadata } from '$lib/app-infrastructure/collection
 import { createDbAppRecord } from '$lib/engine/storage/data/data';
 
 class CommandBuilderDbAdapter implements CollectionAppDbAdapter<CbData, CbProjection> {
+	renameData(data: CbData, newName: string): CbData {
+		let ret = { ...data };
+		ret.commandName = newName;
+
+		return ret;
+	}
+
+	getDisplayName(data: CbData): string {
+		return data.commandName;
+	}
+
 	constructRecord(data: CbData, newItemKey?: string) {
 		if (newItemKey) {
 			data.commandName = newItemKey;
@@ -22,7 +33,7 @@ class CommandBuilderDbAdapter implements CollectionAppDbAdapter<CbData, CbProjec
 	projectionFromData(data: CbData): CbProjection {
 		return {
 			commandName: data.commandName,
-			displayName: data.commandName
+			displayName: this.getDisplayName(data)
 		};
 	}
 
