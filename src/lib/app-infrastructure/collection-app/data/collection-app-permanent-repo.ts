@@ -4,7 +4,6 @@ import type {
 	AppRecordRepo,
 	CollectionAppDbRecord,
 	CollectionAppRecord,
-	CollectionAppRecordProjection,
 	DataProjection,
 	DbAdapter,
 	DbItem,
@@ -12,7 +11,12 @@ import type {
 	RecordProjection,
 	SyncableAppRecordMetadata
 } from './types';
-import type { ActionResult, CollectionAppContext, CollectionAppError } from '../types';
+import type {
+	ActionResult,
+	CollectionAppBlankResult,
+	CollectionAppContext,
+	CollectionAppError
+} from '../types';
 import { getNextSlug, slugify } from './slugify';
 import { getErrorMessage } from '$lib/engine/general-js-ts/extract-error-message';
 

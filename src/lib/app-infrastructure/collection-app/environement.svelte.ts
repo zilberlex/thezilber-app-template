@@ -31,7 +31,7 @@ export function collectionAppInit<
 
 	let storeOptions = generateStoreOptions(contextManager.appContext, fallbackData);
 	let permaRepo = new CollectionAppPermanentRepo<T, TProjection>(dbName, dbAdapter);
-	let repo = new CollectionAppContextualRepo(permaRepo, dbName);
+	let repo = new CollectionAppContextualRepo(permaRepo, dbName, dbAdapter);
 
 	store = new SmartStore<T, TProjection>(
 		contextManager.appContext,
@@ -174,8 +174,7 @@ export function collectionAppInit<
 			recordProjection: CollectionAppRecordProjection<T, TProjection>,
 			newItemName: string
 		) => {
-			throw new Error('not implemented');
-			let res = store.renameItemById(recordId, newItemValue);
+			let res = store.rename(recordId, newItemValue);
 
 			return res;
 		},

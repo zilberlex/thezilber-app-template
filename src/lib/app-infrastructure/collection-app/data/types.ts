@@ -107,7 +107,7 @@ export interface AppRecordRepo<TData, TProjection extends DataProjection, TMeta,
 	rename(
 		context: CollectionAppContext,
 		displayName: string
-	): Promise<ActionResult<CollectionAppRecord<TData, TProjection>, TError>>;
+	): Promise<ActionResult<AppRecord<TData, TProjection, TMeta>, TError>>;
 
 	getAllRecordProjections(): Promise<
 		ActionResult<AllRecordsProjections<TData, TProjection, TMeta>, TError>

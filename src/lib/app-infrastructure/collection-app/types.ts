@@ -7,7 +7,7 @@ import type {
 } from '$lib/app-infrastructure/collection-app/data/types';
 import type { SvelteMap } from 'svelte/reactivity';
 import type { SmartStore } from './smart-store.svelte';
-import type { TouchMap } from './touch-map.svelte';
+import type { SvelteTouchMap } from './touch-map.svelte';
 
 export type EditMode = 'permanent' | 'draft';
 export type ItemKey = '_draft_' | string;
@@ -18,10 +18,7 @@ export type CollectionAppRecord<TData, TProjection extends DataProjection> = App
 	SyncableAppRecordMetadata
 >;
 
-export type CollectionAppRuntime<
-	T extends Omit<object, 'recordId'>,
-	TProjection extends DataProjection
-> = {
+export type CollectionAppRuntime<T extends Omit<object, 'recordId'>, TProjection extends DataProjection> = {
 	get data(): T;
 	get dataStates(): SvelteMap<string, AppDataState>;
 	get displayName(): string;
@@ -31,7 +28,7 @@ export type CollectionAppRuntime<
 	get projectedContext(): CollectionAppContext | undefined;
 	get baseUrlPath(): string;
 
-	get allRecordProjections(): TouchMap<string, CollectionAppRecordProjection<T, TProjection>>;
+	get allRecordProjections(): SvelteTouchMap<string, CollectionAppRecordProjection<T, TProjection>>;
 
 	renameByProjection(
 		recordProjection: CollectionAppRecordProjection<T, TProjection>,
@@ -90,6 +87,20 @@ export type AppDataStateOld = 'saving' | 'ready' | 'loading' | 'record-not-found
 export type AppDataState = { context: CollectionAppContext } & (
 	| {
 			kind: 'creating';
+			slug: string;
+			prevSlug: string;
+			displayName: string;
+			prevDisplayName: string;
+	  }
+	| {
+			kind: 'renaming';
+			slug: string;
+			prevSlug: string;
+			displayName: string;
+			prevDisplayName: string;
+	  }
+	| {
+			kind: 'renamed';
 			slug: string;
 			prevSlug: string;
 			displayName: string;

@@ -1,38 +1,38 @@
 import { browser } from '$app/environment';
-import {
-	DispatcherImpl,
-	type Dispatcher,
-	type DispatchHandler
-} from '$lib/engine/patterns/observer';
+import { DispatcherImpl, type Dispatcher, type DispatchHandler } from '$lib/engine/patterns/observer';
 import type {
-	AppRecord,
 	AppRecordRepo,
 	DataProjection,
 	DbAdapter,
-	RecordProjection,
 	SyncableAppRecordMetadata
 } from '$lib/app-infrastructure/collection-app/data/types';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
-import { Cache } from './cache';
 import { stampAppRecord } from './data';
 import type {
 	AppDataState,
 	CollectionAppContext,
 	CollectionAppError,
-	CollectionAppLoadResult,
+	CollectionAppRecord,
 	StoreDeleteActionResult,
 	StoreSaveActionResult,
 	WithOpId
 } from './types';
-import { TouchMap } from './touch-map.svelte';
+import { CollectionAppCache } from './collectionAppCache.svelte';
 
-type SaveOperationsParams =
+type SaveOperationsParams<T, TProjection extends DataProjection> =
 	| {
 			kind: 'update';
 			context: CollectionAppContext;
+			record: CollectionAppRecord<T, TProjection>;
 	  }
 	| {
 			kind: 'create';
+			context: CollectionAppContext;
+			newItemDisplayName: string;
+			record: CollectionAppRecord<T, TProjection>;
+	  }
+	| {
+			kind: 'rename';
 			context: CollectionAppContext;
 			newItemDisplayName: string;
 	  };
@@ -40,13 +40,6 @@ type SaveOperationsParams =
 export type SmartStoreOptions<T> = {
 	loadNotFoundBehavior: { action: 'error' } | { action: 'create-new'; createObj: () => T };
 };
-
-// TODO AZ think of a better name and placement;
-type RecordI<T, TProjection extends DataProjection> = AppRecord<
-	T,
-	TProjection,
-	SyncableAppRecordMetadata
->;
 
 type AbortablePromise<T> = {
 	isAborted: boolean;
@@ -67,16 +60,13 @@ function abortable<T>(p: Promise<T>): { abort: () => void; abortablePromise: Abo
 	};
 }
 
-export class SmartStore<T, TProjection extends DataProjection> implements Dispatcher<
-	WithOpId<AppDataState>
-> {
+export class SmartStore<T, TProjection extends DataProjection> implements Dispatcher<WithOpId<AppDataState>> {
 	#context: CollectionAppContext;
-	#record: RecordI<T, TProjection>;
-	#recordProjections: TouchMap<string, RecordProjection<T, TProjection, SyncableAppRecordMetadata>>;
+	#record: CollectionAppRecord<T, TProjection>;
 
 	#dbAdapter: DbAdapter<T, TProjection, SyncableAppRecordMetadata>;
 	#repository: AppRecordRepo<T, TProjection, SyncableAppRecordMetadata, CollectionAppError>;
-	#cache: Cache<string, RecordI<T, TProjection>>;
+	#collectionAppCache: CollectionAppCache<T, TProjection>;
 
 	#reloadAbort: (() => void) | undefined;
 
@@ -91,12 +81,16 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 		options?: SmartStoreOptions<T>
 	) {
 		this.#context = context;
-		this.#cache = new Cache();
 
 		this.#dbAdapter = dbAdapter;
 		this.#record = $state(this.#dbAdapter.constructRecord(placeHolderValue));
-		this.#recordProjections = $state(new TouchMap('prepend'));
 		this.#repository = repository;
+		this.#collectionAppCache = new CollectionAppCache((slug) =>
+			this.#repository.load({
+				slug,
+				editMode: 'permanent'
+			})
+		);
 
 		// TODO AZ - create repo here instead of injection, or find a better way for testing also.
 		if (browser) {
@@ -112,7 +106,7 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 		if (recordPrjectionsActionResult.ok) {
 			let recordProjectionsFromRepo = recordPrjectionsActionResult.value;
 			recordProjectionsFromRepo.forEach((p) => {
-				this.#recordProjections.set(p.slug, p);
+				this.#collectionAppCache.updateProjection(p.slug, p);
 			});
 		}
 	}
@@ -131,7 +125,7 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 	}
 
 	get allRecordProjections() {
-		return this.#recordProjections;
+		return this.#collectionAppCache.projections;
 	}
 
 	register(handler: DispatchHandler<WithOpId<AppDataState>>): void {
@@ -150,26 +144,24 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 		this.#dataStateDispatacher.signal({ ...dataState, opId });
 	}
 
-	async #saveOperations(saveOperationsParams: SaveOperationsParams) {
-		const { kind: operation, context } = saveOperationsParams;
+	async #saveOperations(saveOperationsParams: SaveOperationsParams<T, TProjection>) {
+		const { kind: operation, context, record } = saveOperationsParams;
 		let opId = this.#nextOpId();
 
-		let contextSnapshot = $state.snapshot(context);
+		let contextSnapshot = context;
 
 		console.log('saveOperations - operation', operation, 'record:', $state.snapshot(this.#record));
 
 		stampAppRecord(getDeviceId(), this.#record.meta);
-		this.#dbAdapter.refreshProjection(this.#record);
+		this.#dbAdapter.refreshProjection(record);
 
-		let saveRecord = $state.snapshot(this.#record) as RecordI<T, TProjection>;
+		let saveRecord = $state.snapshot(record) as RecordI<T, TProjection>;
 
 		let prevItemSlug = contextSnapshot.slug;
 		let prevItemDisplayName = contextSnapshot.displayName;
 
 		let newItemDisplayName =
-			operation === 'update'
-				? saveRecord.projection.displayName
-				: saveOperationsParams.newItemDisplayName;
+			operation === 'update' ? saveRecord.projection.displayName : saveOperationsParams.newItemDisplayName;
 
 		let slug = saveRecord.slug;
 		if (newItemDisplayName !== prevItemDisplayName) {
@@ -178,20 +170,23 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 			console.log('Generated Slug for displayName', newItemDisplayName, 'slug:', slug);
 		}
 
-		let signalKind: 'saving' | 'creating';
+		let signalKind: 'saving' | 'creating' | 'renaming';
 		switch (operation) {
 			case 'update':
 				signalKind = 'saving';
+				console.log(`Saving Data...`, saveRecord.data);
 
 				break;
 			case 'create':
 				signalKind = 'creating';
-		}
+				console.log(`Creating Data...`, saveRecord.data);
 
-		if (operation === 'update') {
-			console.log(`Saving Data...`, saveRecord.data);
-		} else {
-			console.log(`Creating Data...`, saveRecord.data);
+				break;
+			case 'rename':
+				signalKind = 'renaming';
+				console.log(`Renaming Data...`, saveRecord.data);
+
+				break;
 		}
 
 		this.#signalStateChange(
@@ -211,18 +206,37 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 			console.log('update record context:', contextSnapshot, '\nrecord:', saveRecord);
 			saveRecord.slug = slug;
 			res = await this.#repository.update(contextSnapshot, saveRecord);
-		} else {
-			let saveData = saveRecord.data as T;
-			console.log(
-				'create record. slug:',
-				slug,
-				'displayName:',
-				newItemDisplayName,
-				'context:',
-				contextSnapshot
-			);
+		} else if (operation === 'create') {
+			let saveData = saveRecord.data;
+			console.log('create record. slug:', slug, 'displayName:', newItemDisplayName, 'context:', contextSnapshot);
 
 			res = await this.#repository.create(contextSnapshot, saveData, newItemDisplayName, slug);
+		} else {
+			console.log('create record. slug:', slug, 'displayName:', newItemDisplayName, 'context:', contextSnapshot);
+			res = await this.#repository.rename(contextSnapshot, newItemDisplayName);
+		}
+
+		// request success operations
+		if (res.ok) {
+			let record = res.value;
+			this.#collectionAppCache.updateRecordCache(record);
+
+			this.#signalStateChange(
+				{
+					kind: 'ready',
+					context: contextSnapshot,
+					slug,
+					prevSlug: prevItemSlug,
+					displayName: newItemDisplayName,
+					prevDisplayName: prevItemDisplayName
+				},
+				opId
+			);
+
+			if (contextSnapshot.slug === this.#context.slug) {
+				// this check is to prevent changing of working record during context changes
+				this.#record = record;
+			}
 		}
 
 		return {
@@ -245,27 +259,13 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 			displayName,
 			prevDisplayName,
 			contextSnapshot
-		} = await this.#saveOperations({ context: this.#context, kind: 'update' });
+		} = await this.#saveOperations({
+			context: this.#context,
+			kind: 'update',
+			record: this.#record
+		});
 
 		if (res.ok) {
-			let record = res.value;
-			await this.#cache.setOrUpdateKey(slug, record, prevSlug);
-			let { data, ...rest } = record;
-			let recordProjection = rest;
-			this.#recordProjections.set(record.slug, recordProjection);
-
-			this.#signalStateChange(
-				{
-					context: contextSnapshot,
-					kind: 'ready',
-					slug,
-					prevSlug,
-					displayName,
-					prevDisplayName
-				},
-				opId
-			);
-
 			if (slug !== prevSlug) {
 				return {
 					ok: true,
@@ -283,57 +283,26 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 			return { ok: true, value: { kind: 'update', context: contextSnapshot } };
 		} else {
 			// TODO AZ newItemKey here is potential for issues.
-			this.#signalStateChange(
-				{ kind: 'error', slug, context: contextSnapshot, errorData: res.error },
-				opId
-			);
+			this.#signalStateChange({ kind: 'error', slug, context: contextSnapshot, errorData: res.error }, opId);
 			return { ok: false, error: res.error };
 		}
 	}
 
-	async saveAs(
-		context: CollectionAppContext,
-		newItemDisplayName: string
-	): Promise<StoreSaveActionResult> {
+	async saveAs(context: CollectionAppContext, newItemDisplayName: string): Promise<StoreSaveActionResult> {
 		let {
 			repoOpResult: res,
 			opId,
 			slug,
-			prevSlug,
 			displayName,
-			prevDisplayName,
 			contextSnapshot
 		} = await this.#saveOperations({
 			context,
 			kind: 'create',
+			record: this.#record,
 			newItemDisplayName: newItemDisplayName
 		});
 
 		if (res.ok) {
-			//TODO AZ make post save record operations so not code dupe with save
-			let newRecord = res.value;
-			await this.#cache.setOrUpdateKey(slug, newRecord, prevSlug);
-			let { data, ...rest } = newRecord;
-			let recordProjection = rest;
-			this.#recordProjections.set(newRecord.slug, recordProjection);
-
-			if (contextSnapshot.slug === this.#context.slug) {
-				// this check is to prevent changing of working record during context changes
-				this.#record = newRecord;
-			}
-
-			this.#signalStateChange(
-				{
-					kind: 'ready',
-					context: contextSnapshot,
-					slug,
-					prevSlug: prevSlug,
-					displayName,
-					prevDisplayName
-				},
-				opId
-			);
-
 			return {
 				ok: true,
 				value: {
@@ -347,7 +316,6 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 			this.#signalStateChange(
 				{
 					kind: 'error',
-
 					slug,
 					context: contextSnapshot,
 					errorData: res.error
@@ -376,17 +344,10 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 		);
 		console.log('deleting item', ctxSnapshot);
 
-		// TODO AZ probably need to undo this delete on non success
-		let projSnapshot = this.#recordProjections.get(slug);
-		let undoOp = () => {
-			console.log('undo del projection', projSnapshot);
-			if (projSnapshot) this.#recordProjections.set(slug, projSnapshot);
-		};
-		this.#recordProjections.delete(slug);
+		let undoCacheDelte = this.#collectionAppCache.deleteRecord(slug);
 		let res = await this.#repository.delete(ctxSnapshot);
 
 		if (res.ok) {
-			await this.#cache.delete(context.slug);
 			this.#signalStateChange(
 				{
 					kind: 'deleted',
@@ -401,7 +362,7 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 				value: { kind: 'deleted', key: ctxSnapshot.slug, context: ctxSnapshot }
 			};
 		} else {
-			undoOp();
+			undoCacheDelte();
 			console.warn('Store - Delete Failed for', context);
 			return res;
 		}
@@ -412,12 +373,14 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 		let ctxSnapshot = $state.snapshot(context);
 
 		// This display name may be wrong udner some conditions, but in general it is good enough
-		let { displayName, slug } = context;
+		let { displayName: prevDisplayName, slug: prevSlug } = context;
 		this.#signalStateChange(
 			{
-				kind: 'deleting',
-				slug: ctxSnapshot.slug,
-				displayName: displayName ?? '_draft_',
+				kind: 'renaming',
+				slug: 'TBD',
+				prevSlug,
+				displayName: newName,
+				prevDisplayName: prevDisplayName ?? '_draft_',
 				context: ctxSnapshot
 			},
 			opId
@@ -425,15 +388,18 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 		console.log('Renaming item', ctxSnapshot, 'new name:', newName);
 
 		// TODO AZ probably need to undo this delete on non success
-		let res = await this.#repository.rename(ctxSnapshot);
+		let res = await this.#repository.rename(ctxSnapshot, newName);
 
 		if (res.ok) {
-			await this.#cache.delete(context.slug);
+			let updatedRecord = res.value;
+			this.#collectionAppCache.updateRecordCache(updatedRecord, prevSlug);
 			this.#signalStateChange(
 				{
-					kind: 'deleted',
-					slug,
-					displayName: displayName ?? '_draft_',
+					kind: 'renamed',
+					slug: updatedRecord.slug,
+					prevSlug,
+					displayName: updatedRecord.projection.displayName,
+					prevDisplayName: prevDisplayName ?? '_draft_',
 					context: ctxSnapshot
 				},
 				opId
@@ -443,18 +409,13 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 				value: { kind: 'deleted', key: ctxSnapshot.slug, context: ctxSnapshot }
 			};
 		} else {
-			undoOp();
 			console.warn('Store - Delete Failed for', context);
 			return res;
 		}
 	}
 
 	// TODO AZ Return ReloadResult
-	async reload(
-		newContext: CollectionAppContext,
-		placeHolderValue?: T,
-		options?: SmartStoreOptions<T>
-	) {
+	async reload(newContext: CollectionAppContext, placeHolderValue?: T, options?: SmartStoreOptions<T>) {
 		let opId = this.#nextOpId();
 
 		let recordSnapshot = $state.snapshot(this.#record);
@@ -495,7 +456,7 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 			console.log('constructRecord', this.#record);
 		}
 
-		let { abort, abortablePromise } = abortable(this.#getItemWithCaching(newContextSnapshot));
+		let { abort, abortablePromise } = abortable(this.#collectionAppCache.getRecord(newSlug));
 		this.#reloadAbort = abort;
 
 		let loadResult = await abortablePromise.promise;
@@ -521,8 +482,6 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 
 		let record = loadResult.value;
 		if (record) {
-			// TODO AZ check if shit breaks if you remove refreshProjection
-			this.#dbAdapter.refreshProjection(record);
 			this.#record = record;
 			// TODO AZ refactor draft handling and normalization of drafts. - this if this shit is even needed
 			// - technically not needed or maybe needed on save instead of load. or maybe both
@@ -567,27 +526,5 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 				);
 			}
 		}
-	}
-
-	async #getItemWithCaching(
-		context: CollectionAppContext
-	): Promise<CollectionAppLoadResult<RecordI<T, TProjection>>> {
-		let itemKey = context.slug;
-		let record = await this.#cache.get(itemKey);
-
-		if (!record) {
-			let loadFromRepoResult = await this.#repository.load(context);
-
-			if (!loadFromRepoResult.ok) {
-				return { ok: false, error: loadFromRepoResult.error };
-			}
-
-			if (loadFromRepoResult.value) {
-				record = loadFromRepoResult.value;
-				await this.#cache.setOrUpdateKey(itemKey, record as RecordI<T, TProjection>);
-			}
-		}
-
-		return { ok: true, value: record };
 	}
 }

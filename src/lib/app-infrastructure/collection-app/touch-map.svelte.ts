@@ -2,7 +2,7 @@ import { SvelteMap } from 'svelte/reactivity';
 
 export type TouchMapMode = 'append' | 'prepend';
 
-export class TouchMap<K, V> implements Iterable<[K, V]> {
+export class SvelteTouchMap<K, V> implements Iterable<[K, V]> {
 	#map = new SvelteMap<K, V>();
 	#ids = $state<K[]>([]);
 	#mode: TouchMapMode;
@@ -100,7 +100,7 @@ export class TouchMap<K, V> implements Iterable<[K, V]> {
 		return this.#iterateEntries();
 	}
 
-	forEach(callbackfn: (value: V, key: K, map: TouchMap<K, V>) => void, thisArg?: unknown): void {
+	forEach(callbackfn: (value: V, key: K, map: SvelteTouchMap<K, V>) => void, thisArg?: unknown): void {
 		for (const [key, value] of this.entries()) {
 			callbackfn.call(thisArg, value, key, this);
 		}
