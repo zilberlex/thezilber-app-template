@@ -150,7 +150,7 @@ export type CollectionAppBlankResult = ActionResult<void, CollectionAppError>;
 export type StoreSaveResult = { context: CollectionAppContext } & (
 	| { kind: 'create'; newSlug: string; newDisplayName: string }
 	| {
-			kind: 'update-with-key-change';
+			kind: 'update-with-key-change' | 'rename';
 			prevSlug: string;
 			newSlug: string;
 			prevDisplayName: string;

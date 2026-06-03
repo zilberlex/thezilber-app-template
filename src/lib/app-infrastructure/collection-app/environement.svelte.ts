@@ -4,11 +4,7 @@ import { createCollectionAppContextManager, ctxEquals } from './context-manager.
 import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';
 import { track } from '$lib/engine/svelte-helpers/track.svelte';
 import { DataStateManager } from './data-state-manager.svelte';
-import type {
-	CollectionAppBlankResult,
-	CollectionAppContext,
-	CollectionAppEnvironment
-} from './types';
+import type { CollectionAppBlankResult, CollectionAppContext, CollectionAppEnvironment } from './types';
 import type {
 	CollectionAppDbAdapter,
 	CollectionAppRecordProjection,
@@ -17,10 +13,7 @@ import type {
 import { CollectionAppContextualRepo } from './data/collection-app-contextual-repo';
 import { CollectionAppPermanentRepo } from './data/collection-app-permanent-repo';
 
-export function collectionAppInit<
-	T extends Omit<object, 'recordId'>,
-	TProjection extends DataProjection
->(
+export function collectionAppInit<T extends Omit<object, 'recordId'>, TProjection extends DataProjection>(
 	dataPlaceholder: T,
 	fallbackData: T,
 	dbAdapter: CollectionAppDbAdapter<T, TProjection>,
@@ -33,13 +26,7 @@ export function collectionAppInit<
 	let permaRepo = new CollectionAppPermanentRepo<T, TProjection>(dbName, dbAdapter);
 	let repo = new CollectionAppContextualRepo(permaRepo, dbName, dbAdapter);
 
-	store = new SmartStore<T, TProjection>(
-		contextManager.appContext,
-		dataPlaceholder,
-		repo,
-		dbAdapter,
-		storeOptions
-	);
+	store = new SmartStore<T, TProjection>(contextManager.appContext, dataPlaceholder, repo, dbAdapter, storeOptions);
 
 	let dataStateManager = new DataStateManager(store, contextManager);
 
@@ -119,10 +106,7 @@ export function collectionAppInit<
 			});
 
 			return () => {
-				console.log(
-					'destroying CollectionAppEnvironment. CurrentData',
-					$state.snapshot(store.data)
-				);
+				console.log('destroying CollectionAppEnvironment. CurrentData', $state.snapshot(store.data));
 			};
 		}),
 		get data() {
@@ -174,9 +158,24 @@ export function collectionAppInit<
 			recordProjection: CollectionAppRecordProjection<T, TProjection>,
 			newItemName: string
 		) => {
-			let res = store.rename(recordId, newItemValue);
+			let { slug } = recordProjection;
+			let context: CollectionAppContext = {
+				slug: slug,
+				editMode: 'permanent',
+				displayName: recordProjection.projection.displayName
+			};
+			let res = await store.rename(context, newItemName);
 
-			return res;
+			if (res.ok) {
+				let resValue = res.value;
+				if (resValue.kind === 'rename' && ctxEquals(resValue.context, contextManager.appContext)) {
+					console.log('keychange changeContext new slug:', resValue.newSlug, 'old slug:', resValue.prevSlug);
+
+					contextManager.replaceContext(resValue.context, resValue.newSlug, resValue.newDisplayName);
+				}
+			}
+
+			return res as CollectionAppBlankResult;
 		},
 		save: async () => {
 			let res = await store.save();
@@ -194,16 +193,8 @@ export function collectionAppInit<
 					$state.snapshot(contextManager.appContext)
 				);
 
-				if (
-					resValue.kind === 'update-with-key-change' &&
-					ctxEquals(res.value.context, contextManager.appContext)
-				) {
-					console.log(
-						'keychange changeContext new slug:',
-						resValue.newSlug,
-						'old slug:',
-						resValue.prevSlug
-					);
+				if (resValue.kind === 'update-with-key-change' && ctxEquals(res.value.context, contextManager.appContext)) {
+					console.log('keychange changeContext new slug:', resValue.newSlug, 'old slug:', resValue.prevSlug);
 
 					contextManager.replaceContext(resValue.context, resValue.newSlug);
 				}
@@ -230,11 +221,7 @@ export function collectionAppInit<
 								'old key:',
 								res.value.prevSlug ?? 'NoKeyInCreate'
 							);
-							contextManager.replaceContext(
-								res.value.context,
-								res.value.newSlug,
-								res.value.newDisplayName
-							);
+							contextManager.replaceContext(res.value.context, res.value.newSlug, res.value.newDisplayName);
 						}
 					}
 				}
@@ -267,10 +254,7 @@ export function collectionAppInit<
 	return ret;
 }
 
-function generateStoreOptions<T>(
-	appContext: CollectionAppContext,
-	fallbackData: T
-): SmartStoreOptions<T> {
+function generateStoreOptions<T>(appContext: CollectionAppContext, fallbackData: T): SmartStoreOptions<T> {
 	if (appContext.editMode === 'permanent') {
 		return {
 			loadNotFoundBehavior: { action: 'error' }

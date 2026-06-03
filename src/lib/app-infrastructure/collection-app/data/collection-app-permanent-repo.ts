@@ -4,26 +4,20 @@ import type {
 	AppRecordRepo,
 	CollectionAppDbRecord,
 	CollectionAppRecord,
+	CollectionAppSaveOperationResult,
 	DataProjection,
 	DbAdapter,
 	DbItem,
+	GetSlugResult,
 	RecordKeys,
 	RecordProjection,
 	SyncableAppRecordMetadata
 } from './types';
-import type {
-	ActionResult,
-	CollectionAppBlankResult,
-	CollectionAppContext,
-	CollectionAppError
-} from '../types';
+import type { ActionResult, CollectionAppBlankResult, CollectionAppContext, CollectionAppError } from '../types';
 import { getNextSlug, slugify } from './slugify';
 import { getErrorMessage } from '$lib/engine/general-js-ts/extract-error-message';
 
-class CollectionAppDexieRepo<
-	TData extends Omit<object, 'recordId'>,
-	TProjection extends DataProjection
-> extends Dexie {
+class CollectionAppDexieRepo<TData extends Omit<object, 'recordId'>, TProjection extends DataProjection> extends Dexie {
 	data!: EntityTable<DbItem<TData>, 'recordId'>;
 	projection!: EntityTable<DbItem<TProjection>, 'recordId'>;
 	metadata!: EntityTable<DbItem<SyncableAppRecordMetadata>, 'recordId'>;
@@ -53,35 +47,37 @@ export class CollectionAppPermanentRepo<
 		this.#adapter = dbAdapter;
 	}
 
-	async create(
+	create(
 		context: CollectionAppContext,
 		data: TData,
-		newItemDisplayName: string,
-		precalculatedSlug?: string
-	): Promise<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
-		const db = this.#dexieRepo;
+		newItemDisplayName: string
+	): CollectionAppSaveOperationResult<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
+		let { optimisticSlug, actualSlugPromise } = this.getSlug(newItemDisplayName);
 		let record = this.#adapter.constructRecord(data, newItemDisplayName);
 
-		console.log('Repo Create - Assigning New Item Slug. displayName:', newItemDisplayName);
-		let slug: string;
-		if (precalculatedSlug) {
-			slug = precalculatedSlug;
-		} else {
-			slug = await this.getSlug(newItemDisplayName);
-		}
-		console.log(
-			`Repo Create - Created New Item Slug. displayName: [${newItemDisplayName}], slug: [${slug}]`
-		);
-		record.slug = slug;
+		return {
+			optimisticSlug,
+			resultPromise: this.#createInternal(context, record, actualSlugPromise)
+		};
+	}
 
+	async #createInternal(
+		context: CollectionAppContext,
+		record: CollectionAppRecord<TData, TProjection>,
+		actualSlugPromise: Promise<string>
+	): Promise<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
+		const db = this.#dexieRepo;
+
+		let newSlug = await actualSlugPromise;
+		record.slug = newSlug;
 		let dbRecord = this.#adapter.toDbObject(record);
-
-		console.log('create - dbRecord', dbRecord);
-
-		let { recordId } = dbRecord;
 
 		try {
 			await db.transaction('rw', db.data, db.projection, db.metadata, db.keys, async () => {
+				console.log('create - dbRecord', dbRecord);
+
+				let { recordId } = dbRecord;
+
 				Promise.all([
 					db.keys.add({ ...dbRecord.keys, recordId }),
 					db.data.add({ ...dbRecord.data, recordId }),
@@ -109,11 +105,27 @@ export class CollectionAppPermanentRepo<
 		}
 	}
 
-	async update(
+	update(
 		context: CollectionAppContext,
 		record: CollectionAppRecord<TData, TProjection>
+	): CollectionAppSaveOperationResult<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
+		let { optimisticSlug, actualSlugPromise } = this.getSlug(record.projection.displayName, context.slug);
+
+		return {
+			optimisticSlug,
+			resultPromise: this.#updateInternal(context, record, actualSlugPromise)
+		};
+	}
+
+	async #updateInternal(
+		context: CollectionAppContext,
+		record: CollectionAppRecord<TData, TProjection>,
+		actualSlugPromise: Promise<string>
 	): Promise<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
 		const db = this.#dexieRepo;
+
+		let newSlug = await actualSlugPromise;
+		record.slug = newSlug;
 		let dbRecord = this.#adapter.toDbObject(record);
 
 		console.log('Dexie Repo Update:', record);
@@ -121,8 +133,6 @@ export class CollectionAppPermanentRepo<
 		let { recordId } = dbRecord;
 
 		try {
-			// TODO AZ Add slug
-
 			await db.transaction('rw', db.data, db.projection, db.metadata, db.keys, async () => {
 				await Promise.all([
 					db.keys.put({ ...dbRecord.keys, recordId }),
@@ -142,13 +152,30 @@ export class CollectionAppPermanentRepo<
 		}
 	}
 
-	async rename(
+	rename(
 		context: CollectionAppContext,
 		displayName: string
+	): CollectionAppSaveOperationResult<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
+		const { slug } = context;
+		let { optimisticSlug, actualSlugPromise } = this.getSlug(displayName, slug);
+
+		let renameResultExecute = async () => {
+			return await this.#renameInternal(context, displayName, await actualSlugPromise);
+		};
+
+		return {
+			optimisticSlug,
+			resultPromise: renameResultExecute()
+		};
+	}
+
+	async #renameInternal(
+		context: CollectionAppContext,
+		newName: string,
+		newSlug: string
 	): Promise<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
 		const db = this.#dexieRepo;
 		const { slug } = context;
-
 		try {
 			return await db.transaction('rw', db.keys, db.data, db.projection, db.metadata, async () => {
 				const keysRow = await db.keys.where('slug').equals(slug).first();
@@ -166,10 +193,7 @@ export class CollectionAppPermanentRepo<
 
 				const { recordId } = keysRow;
 
-				const [dataRow, metaRow] = await Promise.all([
-					db.data.get(recordId),
-					db.metadata.get(recordId)
-				]);
+				const [dataRow, metaRow] = await Promise.all([db.data.get(recordId), db.metadata.get(recordId)]);
 
 				if (!dataRow || !metaRow) {
 					return {
@@ -186,9 +210,8 @@ export class CollectionAppPermanentRepo<
 				const oldMeta = stripRecordId(metaRow);
 				const oldKeys = stripRecordId(keysRow);
 
-				const newData = this.#adapter.renameData(oldData, displayName);
+				const newData = this.#adapter.renameData(oldData, newName);
 				const newProjection = this.#adapter.projectionFromData(newData);
-				const newSlug = await this.getSlug(displayName, keysRow.slug);
 
 				const dbRecord: CollectionAppDbRecord<TData, TProjection> = {
 					recordId,
@@ -271,9 +294,7 @@ export class CollectionAppPermanentRepo<
 	}
 	async load(
 		context: CollectionAppContext
-	): Promise<
-		ActionResult<CollectionAppRecord<TData, TProjection> | undefined, CollectionAppError>
-	> {
+	): Promise<ActionResult<CollectionAppRecord<TData, TProjection> | undefined, CollectionAppError>> {
 		const db = this.#dexieRepo;
 		const slug = context.slug;
 
@@ -288,9 +309,7 @@ export class CollectionAppPermanentRepo<
 				const { recordId } = keysRow;
 
 				const dataRow = await db.data.get(recordId as DbItem<TData>['recordId']);
-				const metaRow = await db.metadata.get(
-					recordId as DbItem<SyncableAppRecordMetadata>['recordId']
-				);
+				const metaRow = await db.metadata.get(recordId as DbItem<SyncableAppRecordMetadata>['recordId']);
 
 				console.log('metaRow for id', recordId, 'row', metaRow);
 
@@ -336,10 +355,7 @@ export class CollectionAppPermanentRepo<
 	}
 
 	async getAllRecordProjections(): Promise<
-		ActionResult<
-			AllRecordsProjections<TData, TProjection, SyncableAppRecordMetadata>,
-			CollectionAppError
-		>
+		ActionResult<AllRecordsProjections<TData, TProjection, SyncableAppRecordMetadata>, CollectionAppError>
 	> {
 		const db = this.#dexieRepo;
 
@@ -354,41 +370,33 @@ export class CollectionAppPermanentRepo<
 			]);
 
 			const projectionByRecordId = new Map(
-				projectionRows
-					.filter((row): row is DbItem<TProjection> => row !== undefined)
-					.map((row) => [row.recordId, row])
+				projectionRows.filter((row): row is DbItem<TProjection> => row !== undefined).map((row) => [row.recordId, row])
 			);
 
 			const keysByRecordId = new Map(
-				keysRows
-					.filter((row): row is DbItem<RecordKeys> => row !== undefined)
-					.map((row) => [row.recordId, row])
+				keysRows.filter((row): row is DbItem<RecordKeys> => row !== undefined).map((row) => [row.recordId, row])
 			);
 
-			const allProjections: AllRecordsProjections<TData, TProjection, SyncableAppRecordMetadata> =
-				metaRows
-					.map((metaRow) => {
-						const projectionRow = projectionByRecordId.get(metaRow.recordId);
-						const keysRow = keysByRecordId.get(metaRow.recordId);
+			const allProjections: AllRecordsProjections<TData, TProjection, SyncableAppRecordMetadata> = metaRows
+				.map((metaRow) => {
+					const projectionRow = projectionByRecordId.get(metaRow.recordId);
+					const keysRow = keysByRecordId.get(metaRow.recordId);
 
-						if (!projectionRow || !keysRow) {
-							console.error(
-								`Corrupted record: metadata exists for recordId [${metaRow.recordId}] but projection or keys are missing. projection: [${projectionRow}], keys: [${keysRow}]`
-							);
-							return undefined;
-						}
+					if (!projectionRow || !keysRow) {
+						console.error(
+							`Corrupted record: metadata exists for recordId [${metaRow.recordId}] but projection or keys are missing. projection: [${projectionRow}], keys: [${keysRow}]`
+						);
+						return undefined;
+					}
 
-						return {
-							recordId: metaRow.recordId,
-							projection: stripRecordId(projectionRow),
-							slug: keysRow.slug,
-							meta: stripRecordId(metaRow)
-						};
-					})
-					.filter(
-						(item): item is RecordProjection<TData, TProjection, SyncableAppRecordMetadata> =>
-							item !== undefined
-					);
+					return {
+						recordId: metaRow.recordId,
+						projection: stripRecordId(projectionRow),
+						slug: keysRow.slug,
+						meta: stripRecordId(metaRow)
+					};
+				})
+				.filter((item): item is RecordProjection<TData, TProjection, SyncableAppRecordMetadata> => item !== undefined);
 
 			return {
 				ok: true,
@@ -397,10 +405,16 @@ export class CollectionAppPermanentRepo<
 		});
 	}
 
-	async getSlug(displayName: string, prevSlug?: string): Promise<string> {
+	getSlug(displayName: string, prevSlug?: string): GetSlugResult {
 		let baseSlug = slugify(displayName);
 
-		// "baseSlug[-###]"
+		return {
+			optimisticSlug: baseSlug,
+			actualSlugPromise: this.#getFinalSlug(baseSlug, prevSlug)
+		};
+	}
+
+	async #getFinalSlug(baseSlug: string, prevSlug?: string) {
 		const slugPattern = new RegExp(`^${baseSlug}(?:-\\d+)?$`);
 
 		if (prevSlug && slugPattern.test(prevSlug)) {

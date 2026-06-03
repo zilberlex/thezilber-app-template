@@ -6,17 +6,13 @@ import {
 	saveLocalStorage
 } from '$lib/engine/storage/local/local-storage-repository';
 import { stampAppRecord } from '../data';
-import type {
-	ActionResult,
-	CollectionAppBlankResult,
-	CollectionAppContext,
-	CollectionAppError
-} from '../types';
+import type { ActionResult, CollectionAppBlankResult, CollectionAppContext, CollectionAppError } from '../types';
 import type {
 	AllRecordsProjections,
 	AppRecord,
 	AppRecordRepo,
 	CollectionAppRecord,
+	CollectionAppSaveOperationResult,
 	DataProjection,
 	DbAdapter,
 	SyncableAppRecordMetadata
@@ -41,29 +37,29 @@ export class CollectionAppContextualRepo<
 		this.#dbAdapter = dbAdapter;
 	}
 
-	async rename(
+	rename(
 		context: CollectionAppContext,
 		displayName: string
-	): Promise<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
+	): CollectionAppSaveOperationResult<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
 		if (context.editMode === 'permanent') {
-			return await this.#permanentRepo.rename(context, displayName);
+			return this.#permanentRepo.rename(context, displayName);
 		} else {
 			throw new Error('Does not Expect to update item names from local repo');
 		}
 	}
 
-	async create(
+	create(
 		context: CollectionAppContext,
 		data: TData,
 		newItemKey: string
-	): Promise<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
-		return await this.#permanentRepo.create(context, data, newItemKey);
+	): CollectionAppSaveOperationResult<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
+		return this.#permanentRepo.create(context, data, newItemKey);
 	}
 
-	async update(
+	update(
 		context: CollectionAppContext,
 		record: CollectionAppRecord<TData, TProjection>
-	): Promise<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
+	): CollectionAppSaveOperationResult<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
 		const storageType = context.editMode;
 		console.log(
 			`Saving data to repo [${storageType === 'permanent' ? 'IndexDb' : 'Local Storage'}]. slug: [${context.slug}]`
@@ -73,19 +69,25 @@ export class CollectionAppContextualRepo<
 		this.#dbAdapter.refreshProjection(record);
 
 		if (storageType === 'permanent') {
-			return await this.#permanentRepo.update(context, record);
+			return this.#permanentRepo.update(context, record);
 		} else {
 			try {
 				saveLocalStorage(this.#localStorageKey, record);
 
 				return {
-					ok: true,
-					value: record
+					optimisticSlug: '',
+					resultPromise: Promise.resolve({
+						ok: true,
+						value: record
+					})
 				};
 			} catch (e) {
 				return {
-					ok: false,
-					error: { kind: 'General Error', message: getErrorMessage(e), context }
+					optimisticSlug: '',
+					resultPromise: Promise.resolve({
+						ok: false,
+						error: { kind: 'General Error', message: getErrorMessage(e), context }
+					})
 				};
 			}
 		}
@@ -93,9 +95,7 @@ export class CollectionAppContextualRepo<
 
 	async load(
 		context: CollectionAppContext
-	): Promise<
-		ActionResult<CollectionAppRecord<TData, TProjection> | undefined, CollectionAppError>
-	> {
+	): Promise<ActionResult<CollectionAppRecord<TData, TProjection> | undefined, CollectionAppError>> {
 		if (context.editMode === 'permanent') {
 			return await this.#permanentRepo.load(context);
 		} else {
@@ -136,15 +136,8 @@ export class CollectionAppContextualRepo<
 	}
 
 	async getAllRecordProjections(): Promise<
-		ActionResult<
-			AllRecordsProjections<TData, TProjection, SyncableAppRecordMetadata>,
-			CollectionAppError
-		>
+		ActionResult<AllRecordsProjections<TData, TProjection, SyncableAppRecordMetadata>, CollectionAppError>
 	> {
 		return await this.#permanentRepo.getAllRecordProjections();
-	}
-
-	async getSlug(displayName: string, prevSlug?: string): Promise<string> {
-		return await this.#permanentRepo.getSlug(displayName, prevSlug);
 	}
 }

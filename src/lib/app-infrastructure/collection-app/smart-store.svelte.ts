@@ -37,6 +37,16 @@ type SaveOperationsParams<T, TProjection extends DataProjection> =
 			newItemDisplayName: string;
 	  };
 
+type PreparedSaveOperation<T, TProjection extends DataProjection> = {
+	operation: 'update' | 'create' | 'rename';
+	signalKind: 'saving' | 'creating' | 'renaming';
+	contextSnapshot: CollectionAppContext;
+	prevSlug: string;
+	prevDisplayName: string;
+	newItemDisplayName: string;
+	saveRecordSnapshot?: CollectionAppRecord<T, TProjection>;
+};
+
 export type SmartStoreOptions<T> = {
 	loadNotFoundBehavior: { action: 'error' } | { action: 'create-new'; createObj: () => T };
 };
@@ -144,116 +154,143 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 		this.#dataStateDispatacher.signal({ ...dataState, opId });
 	}
 
-	async #saveOperations(saveOperationsParams: SaveOperationsParams<T, TProjection>) {
-		const { kind: operation, context, record } = saveOperationsParams;
-		let opId = this.#nextOpId();
+	async #saveOperations(params: SaveOperationsParams<T, TProjection>) {
+		const opId = this.#nextOpId();
+		const operation = this.#prepareSaveOperation(params);
 
-		let contextSnapshot = context;
+		const saveOperationResult = (() => {
+			switch (operation.operation) {
+				case 'update': {
+					if (!operation.saveRecordSnapshot) {
+						throw new Error('Update operation requires saveRecordSnapshot');
+					}
 
-		console.log('saveOperations - operation', operation, 'record:', $state.snapshot(this.#record));
+					console.log('Updating record', {
+						context: operation.contextSnapshot,
+						record: operation.saveRecordSnapshot
+					});
 
-		stampAppRecord(getDeviceId(), this.#record.meta);
-		this.#dbAdapter.refreshProjection(record);
+					return this.#repository.update(operation.contextSnapshot, operation.saveRecordSnapshot);
+				}
 
-		let saveRecord = $state.snapshot(record) as RecordI<T, TProjection>;
+				case 'create': {
+					if (!operation.saveRecordSnapshot) {
+						throw new Error('Create operation requires saveRecordSnapshot');
+					}
 
-		let prevItemSlug = contextSnapshot.slug;
-		let prevItemDisplayName = contextSnapshot.displayName;
+					console.log('Creating record', {
+						prevSlug: operation.prevSlug,
+						displayName: operation.newItemDisplayName,
+						context: operation.contextSnapshot
+					});
 
-		let newItemDisplayName =
-			operation === 'update' ? saveRecord.projection.displayName : saveOperationsParams.newItemDisplayName;
+					return this.#repository.create(
+						operation.contextSnapshot,
+						operation.saveRecordSnapshot.data,
+						operation.newItemDisplayName
+					);
+				}
 
-		let slug = saveRecord.slug;
-		if (newItemDisplayName !== prevItemDisplayName) {
-			console.log('Requesting new slug for displayName', newItemDisplayName);
-			slug = await this.#repository.getSlug(newItemDisplayName, saveRecord.slug);
-			console.log('Generated Slug for displayName', newItemDisplayName, 'slug:', slug);
-		}
+				case 'rename': {
+					console.log('Renaming record', {
+						prevSlug: operation.prevSlug,
+						prevDisplayName: operation.prevDisplayName,
+						newDisplayName: operation.newItemDisplayName,
+						context: operation.contextSnapshot
+					});
 
-		let signalKind: 'saving' | 'creating' | 'renaming';
-		switch (operation) {
-			case 'update':
-				signalKind = 'saving';
-				console.log(`Saving Data...`, saveRecord.data);
+					return this.#repository.rename(operation.contextSnapshot, operation.newItemDisplayName);
+				}
+				default:
+					throw new Error(`Operation Not Defined: ${JSON.stringify(operation)}`);
+			}
+		})();
 
-				break;
-			case 'create':
-				signalKind = 'creating';
-				console.log(`Creating Data...`, saveRecord.data);
-
-				break;
-			case 'rename':
-				signalKind = 'renaming';
-				console.log(`Renaming Data...`, saveRecord.data);
-
-				break;
-		}
+		const optimisticSlug = saveOperationResult.optimisticSlug;
 
 		this.#signalStateChange(
 			{
-				context: contextSnapshot,
-				kind: signalKind,
-				slug: slug,
-				prevSlug: prevItemSlug,
-				displayName: newItemDisplayName,
-				prevDisplayName: prevItemDisplayName ?? ''
+				kind: operation.signalKind,
+				context: operation.contextSnapshot,
+				slug: optimisticSlug,
+				prevSlug: operation.prevSlug,
+				displayName: operation.newItemDisplayName,
+				prevDisplayName: operation.prevDisplayName
 			},
 			opId
 		);
 
-		let res;
-		if (operation === 'update') {
-			console.log('update record context:', contextSnapshot, '\nrecord:', saveRecord);
-			saveRecord.slug = slug;
-			res = await this.#repository.update(contextSnapshot, saveRecord);
-		} else if (operation === 'create') {
-			let saveData = saveRecord.data;
-			console.log('create record. slug:', slug, 'displayName:', newItemDisplayName, 'context:', contextSnapshot);
+		const dbResult = await saveOperationResult.resultPromise;
 
-			res = await this.#repository.create(contextSnapshot, saveData, newItemDisplayName, slug);
-		} else {
-			console.log('create record. slug:', slug, 'displayName:', newItemDisplayName, 'context:', contextSnapshot);
-			res = await this.#repository.rename(contextSnapshot, newItemDisplayName);
-		}
+		let retRecord: CollectionAppRecord<T, TProjection> | undefined;
 
-		// request success operations
-		if (res.ok) {
-			let record = res.value;
-			this.#collectionAppCache.updateRecordCache(record);
+		if (dbResult.ok) {
+			retRecord = dbResult.value;
+
+			this.#collectionAppCache.updateRecordCache(retRecord, operation.prevSlug);
 
 			this.#signalStateChange(
 				{
 					kind: 'ready',
-					context: contextSnapshot,
-					slug,
-					prevSlug: prevItemSlug,
-					displayName: newItemDisplayName,
-					prevDisplayName: prevItemDisplayName
+					context: operation.contextSnapshot,
+					slug: retRecord.slug,
+					prevSlug: operation.prevSlug,
+					displayName: retRecord.projection.displayName,
+					prevDisplayName: operation.prevDisplayName
 				},
 				opId
 			);
 
-			if (contextSnapshot.slug === this.#context.slug) {
-				// this check is to prevent changing of working record during context changes
-				this.#record = record;
+			if (operation.contextSnapshot.slug === this.#context.slug) {
+				this.#record = retRecord;
 			}
 		}
 
 		return {
-			repoOpResult: res,
+			repoOpResult: dbResult,
 			opId,
-			slug,
-			displayName: newItemDisplayName,
-			prevDisplayName: prevItemDisplayName,
-			prevSlug: prevItemSlug,
-			contextSnapshot
+			slug: retRecord?.slug ?? optimisticSlug,
+			displayName: retRecord?.projection.displayName ?? operation.newItemDisplayName,
+			prevDisplayName: operation.prevDisplayName,
+			prevSlug: operation.prevSlug,
+			contextSnapshot: operation.contextSnapshot
+		};
+	}
+
+	#prepareSaveOperation(params: SaveOperationsParams<T, TProjection>): PreparedSaveOperation<T, TProjection> {
+		const contextSnapshot = $state.snapshot(params.context);
+
+		if (params.kind === 'update' || params.kind === 'create') {
+			const saveRecordSnapshot = $state.snapshot(params.record) as CollectionAppRecord<T, TProjection>;
+			stampAppRecord(getDeviceId(), saveRecordSnapshot.meta);
+
+			const newItemDisplayName =
+				params.kind === 'update' ? saveRecordSnapshot.projection.displayName : params.newItemDisplayName;
+
+			return {
+				operation: params.kind,
+				signalKind: params.kind === 'update' ? 'saving' : 'creating',
+				contextSnapshot,
+				prevSlug: saveRecordSnapshot.slug,
+				prevDisplayName: saveRecordSnapshot.projection.displayName,
+				newItemDisplayName,
+				saveRecordSnapshot
+			};
+		}
+
+		return {
+			operation: 'rename',
+			signalKind: 'renaming',
+			contextSnapshot,
+			prevSlug: contextSnapshot.slug,
+			prevDisplayName: contextSnapshot.displayName ?? '',
+			newItemDisplayName: params.newItemDisplayName
 		};
 	}
 
 	async save(): Promise<StoreSaveActionResult> {
 		let {
 			repoOpResult: res,
-			opId,
 			slug,
 			prevSlug,
 			displayName,
@@ -266,6 +303,13 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 		});
 
 		if (res.ok) {
+			console.log('Saved Record', {
+				slug,
+				prevSlug,
+				contextSnapshot,
+				record: res.value
+			});
+
 			if (slug !== prevSlug) {
 				return {
 					ok: true,
@@ -282,8 +326,6 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 
 			return { ok: true, value: { kind: 'update', context: contextSnapshot } };
 		} else {
-			// TODO AZ newItemKey here is potential for issues.
-			this.#signalStateChange({ kind: 'error', slug, context: contextSnapshot, errorData: res.error }, opId);
 			return { ok: false, error: res.error };
 		}
 	}
@@ -313,16 +355,6 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 				}
 			};
 		} else {
-			this.#signalStateChange(
-				{
-					kind: 'error',
-					slug,
-					context: contextSnapshot,
-					errorData: res.error
-				},
-				opId
-			);
-
 			return { ok: false, error: res.error };
 		}
 	}
@@ -364,53 +396,48 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 		} else {
 			undoCacheDelte();
 			console.warn('Store - Delete Failed for', context);
+			this.#signalStateChange(
+				{
+					kind: 'error',
+					slug,
+					context: ctxSnapshot,
+					errorData: res.error
+				},
+				opId
+			);
+
 			return res;
 		}
 	}
 
-	async rename(context: CollectionAppContext, newName: string) {
-		let opId = this.#nextOpId();
-		let ctxSnapshot = $state.snapshot(context);
-
-		// This display name may be wrong udner some conditions, but in general it is good enough
-		let { displayName: prevDisplayName, slug: prevSlug } = context;
-		this.#signalStateChange(
-			{
-				kind: 'renaming',
-				slug: 'TBD',
-				prevSlug,
-				displayName: newName,
-				prevDisplayName: prevDisplayName ?? '_draft_',
-				context: ctxSnapshot
-			},
-			opId
-		);
-		console.log('Renaming item', ctxSnapshot, 'new name:', newName);
-
-		// TODO AZ probably need to undo this delete on non success
-		let res = await this.#repository.rename(ctxSnapshot, newName);
+	async rename(context: CollectionAppContext, newName: string): Promise<StoreSaveActionResult> {
+		let {
+			repoOpResult: res,
+			slug,
+			prevSlug,
+			displayName,
+			prevDisplayName,
+			contextSnapshot
+		} = await this.#saveOperations({
+			context,
+			kind: 'rename',
+			newItemDisplayName: newName
+		});
 
 		if (res.ok) {
-			let updatedRecord = res.value;
-			this.#collectionAppCache.updateRecordCache(updatedRecord, prevSlug);
-			this.#signalStateChange(
-				{
-					kind: 'renamed',
-					slug: updatedRecord.slug,
-					prevSlug,
-					displayName: updatedRecord.projection.displayName,
-					prevDisplayName: prevDisplayName ?? '_draft_',
-					context: ctxSnapshot
-				},
-				opId
-			);
 			return {
 				ok: true,
-				value: { kind: 'deleted', key: ctxSnapshot.slug, context: ctxSnapshot }
+				value: {
+					kind: 'rename',
+					newSlug: slug,
+					prevSlug,
+					newDisplayName: displayName,
+					prevDisplayName: prevDisplayName ?? '',
+					context: contextSnapshot
+				}
 			};
 		} else {
-			console.warn('Store - Delete Failed for', context);
-			return res;
+			return { ok: false, error: res.error };
 		}
 	}
 

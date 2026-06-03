@@ -21,22 +21,15 @@ export interface DbAppRecord<TData, TProjection, TMeta> {
 	keys: RecordKeys;
 }
 
-export type CollectionAppRecord<TData, TProjection> = AppRecord<
+export type CollectionAppRecord<TData, TProjection> = AppRecord<TData, TProjection, SyncableAppRecordMetadata>;
+
+export type CollectionAppRecordProjection<TData, TProjection extends DataProjection> = RecordProjection<
 	TData,
 	TProjection,
 	SyncableAppRecordMetadata
 >;
 
-export type CollectionAppRecordProjection<
-	TData,
-	TProjection extends DataProjection
-> = RecordProjection<TData, TProjection, SyncableAppRecordMetadata>;
-
-export type CollectionAppDbRecord<TData, TProjection> = DbAppRecord<
-	TData,
-	TProjection,
-	SyncableAppRecordMetadata
->;
+export type CollectionAppDbRecord<TData, TProjection> = DbAppRecord<TData, TProjection, SyncableAppRecordMetadata>;
 
 export type CollectionAppStoreItem<TData, TProjection extends DataProjection> =
 	| CollectionAppRecordProjection<TData, TProjection>
@@ -59,22 +52,23 @@ export type RecordProjection<TData, TProjection extends DataProjection, TMeta> =
 	'data'
 >;
 
-export type AllRecordsProjections<
+export type AllRecordsProjections<TData, TProjection extends DataProjection, TMeta> = RecordProjection<
 	TData,
-	TProjection extends DataProjection,
+	TProjection,
 	TMeta
-> = RecordProjection<TData, TProjection, TMeta>[];
+>[];
+
+export type GetSlugResult = {
+	optimisticSlug: string;
+	actualSlugPromise: Promise<string>;
+};
 
 export interface DbAdapter<TData, TProjection extends DataProjection, TMeta> {
 	constructRecord(data: TData, newItemKey?: string): AppRecord<TData, TProjection, TMeta>;
 	projectionFromData(data: TData): TProjection;
 	toDbObject(record: AppRecord<TData, TProjection, TMeta>): DbAppRecord<TData, TProjection, TMeta>;
-	fromDbObject(
-		dbRecord: DbAppRecord<TData, TProjection, TMeta>
-	): AppRecord<TData, TProjection, TMeta>;
-	refreshProjection(
-		record: AppRecord<TData, TProjection, TMeta>
-	): AppRecord<TData, TProjection, TMeta>;
+	fromDbObject(dbRecord: DbAppRecord<TData, TProjection, TMeta>): AppRecord<TData, TProjection, TMeta>;
+	refreshProjection(record: AppRecord<TData, TProjection, TMeta>): AppRecord<TData, TProjection, TMeta>;
 	renameData(data: TData, displayName: string): TData;
 	getDisplayName(data: TData): string;
 }
@@ -85,35 +79,34 @@ export type CollectionAppDbAdapter<TData, TProjection extends DataProjection> = 
 	SyncableAppRecordMetadata
 >;
 
+export type CollectionAppSaveOperationResult<T> = {
+	optimisticSlug: string;
+	resultPromise: Promise<T>;
+};
+
 export interface AppRecordRepo<TData, TProjection extends DataProjection, TMeta, TError> {
 	create(
 		context: CollectionAppContext,
 		data: TData,
 		newItemKey: string,
 		precalculatedSlug?: string
-	): Promise<ActionResult<AppRecord<TData, TProjection, TMeta>, TError>>;
+	): CollectionAppSaveOperationResult<ActionResult<AppRecord<TData, TProjection, TMeta>, TError>>;
 
 	update(
 		context: CollectionAppContext,
 		record: AppRecord<TData, TProjection, TMeta>
-	): Promise<ActionResult<AppRecord<TData, TProjection, TMeta>, TError>>;
+	): CollectionAppSaveOperationResult<ActionResult<AppRecord<TData, TProjection, TMeta>, TError>>;
 
-	load(
-		context: CollectionAppContext
-	): Promise<ActionResult<AppRecord<TData, TProjection, TMeta> | undefined, TError>>;
+	load(context: CollectionAppContext): Promise<ActionResult<AppRecord<TData, TProjection, TMeta> | undefined, TError>>;
 
 	delete(context: CollectionAppContext): Promise<ActionResult<void, TError>>;
 
 	rename(
 		context: CollectionAppContext,
 		displayName: string
-	): Promise<ActionResult<AppRecord<TData, TProjection, TMeta>, TError>>;
+	): CollectionAppSaveOperationResult<ActionResult<AppRecord<TData, TProjection, TMeta>, TError>>;
 
-	getAllRecordProjections(): Promise<
-		ActionResult<AllRecordsProjections<TData, TProjection, TMeta>, TError>
-	>;
-
-	getSlug(displayName: string, prevSlug?: string): Promise<string>;
+	getAllRecordProjections(): Promise<ActionResult<AllRecordsProjections<TData, TProjection, TMeta>, TError>>;
 }
 
 export type DataProjection = { displayName: string };

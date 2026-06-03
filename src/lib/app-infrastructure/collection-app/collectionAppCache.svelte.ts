@@ -14,6 +14,10 @@ export class CollectionAppCache<T, TProjection extends DataProjection> {
 		this.#fetchFunciton = fetchFunciton;
 	}
 
+	get projections() {
+		return this.#recordProjections;
+	}
+
 	async getRecord(slug: string): Promise<CollectionAppLoadResult<CollectionAppRecord<T, TProjection>>> {
 		let record = this.#cache.get(slug);
 
@@ -73,9 +77,5 @@ export class CollectionAppCache<T, TProjection extends DataProjection> {
 		this.#recordProjections.delete(slug);
 
 		return undoOp;
-	}
-
-	get projections() {
-		return this.#recordProjections;
 	}
 }
