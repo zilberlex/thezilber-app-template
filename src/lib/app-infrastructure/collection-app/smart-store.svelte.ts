@@ -227,7 +227,11 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 		if (dbResult.ok) {
 			retRecord = dbResult.value;
 
-			this.#collectionAppCache.updateRecordCache(retRecord, operation.prevSlug);
+			if (operation.operation === 'rename' || operation.operation === 'update') {
+				this.#collectionAppCache.updateRecordCache(retRecord, operation.prevSlug);
+			} else {
+				this.#collectionAppCache.updateRecordCache(retRecord);
+			}
 
 			this.#signalStateChange(
 				{
