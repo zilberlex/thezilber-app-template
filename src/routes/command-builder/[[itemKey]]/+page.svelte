@@ -36,12 +36,7 @@
 	};
 
 	let cbAppEnv: CbAppEnv = $state(
-		collectionAppInit<CbData, CbProjection>(
-			placeholderData,
-			draftData,
-			cbDbAdapter,
-			'CommandBuilderDataDb'
-		)
+		collectionAppInit<CbData, CbProjection>(placeholderData, draftData, cbDbAdapter, 'CommandBuilderDataDb')
 	);
 
 	onDestroy(() => {

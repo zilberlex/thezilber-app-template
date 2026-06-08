@@ -2,10 +2,7 @@
 	import { fade } from 'svelte/transition';
 	import { activeDialogController, activeDialogState } from './dialog-context.svelte';
 	import { onDestroy, onMount, tick, untrack } from 'svelte';
-	import {
-		engineFocus,
-		getFocusableElementsByNode
-	} from '$lib/engine/keyboard-navigation/navigation-utils';
+	import { engineFocus, getFocusableElementsByNode } from '$lib/engine/keyboard-navigation/navigation-utils';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onNavigate } from '$app/navigation';
 	import { createSmartHandler } from '$lib/engine/events/event-handling';
@@ -52,8 +49,7 @@
 			appRoot.inert = false;
 		}
 
-		if (lastFocusedElement && document.contains(lastFocusedElement))
-			engineFocus(lastFocusedElement);
+		if (lastFocusedElement && document.contains(lastFocusedElement)) engineFocus(lastFocusedElement);
 	}
 
 	$effect(() => {

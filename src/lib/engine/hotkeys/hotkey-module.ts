@@ -58,14 +58,10 @@ class HotkeysModule {
 			}))
 		);
 
-		console.debug(
-			'HotkeysModule - reachedKeydownEvent key:',
-			eventKey.toKey(),
-			'relevantHandlers',
-			handlers?.length
-		);
+		console.debug('HotkeysModule - reachedKeydownEvent key:', eventKey.toKey(), 'relevantHandlers', handlers?.length);
 
-		handlers?.forEach((handler) => handler(event));
+		// Fires Last Handler - Hopefully this is good enough for most cases.
+		handlers?.at(-1)?.(event);
 	}
 
 	init() {

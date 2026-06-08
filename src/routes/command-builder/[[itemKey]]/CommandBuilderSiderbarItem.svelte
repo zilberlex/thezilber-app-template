@@ -4,46 +4,58 @@
 	import IconButton from '$lib/ui/basic-components/IconButton.svelte';
 	import InlineNameEditor, { type EditDetail } from '$lib/ui/components/InlineNameEditor.svelte';
 	import { fade } from 'svelte/transition';
-	import type { CbAppEnv, CbProjection, CbRecordProjection } from './command-builder-types';
+	import type { CbAppEnv, CbRecordProjection } from './command-builder-types';
+	import type { HTMLAttributes } from 'svelte/elements';
+	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
+	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
+	import { tick } from 'svelte';
 
-	type Props = {
+	type Props = HTMLAttributes<HTMLDivElement> & {
 		cbAppEnv: CbAppEnv;
 		recordProjection: CbRecordProjection;
-		recordId: string;
+		currentlySelectedItemSlug?: string;
+		afterDelete: (node: HTMLElement) => Promise<void>;
 	};
 
-	let { cbAppEnv, recordProjection, recordId }: Props = $props();
+	let { cbAppEnv, recordProjection, currentlySelectedItemSlug, afterDelete, ...rest }: Props = $props();
 
-	let active = $state(false);
 	let editingName = $state(false);
+	const isElementPageForThisItem = $derived(recordProjection.slug === cbAppEnv.slug);
+	const showControls = $derived(currentlySelectedItemSlug === recordProjection.slug);
+	let thisFocusablePart = $state<HTMLElement>();
+	let thisElement = $state<HTMLElement>();
 
 	function editItemName() {
 		editingName = true;
 	}
 
+	$effect(() => {
+		if (!editingName) {
+			console.debug('Exiting Edit. Focusable item:', thisFocusablePart);
+
+			// TODO AZ this timeout works better than tick in cases list is reordered. (where the name actually changes)
+			setTimeout(() => thisFocusablePart?.focus(), 30);
+		}
+	});
+
 	function onRenameItem(detail: EditDetail) {
-		const { newValue: newName } = detail;
-		cbAppEnv.renameByProjection(recordProjection, newName);
+		if (detail.prevValue !== detail.newValue) {
+			const { newValue: newName } = detail;
+			cbAppEnv.renameByProjection(recordProjection, newName);
+		}
 	}
 
 	function deleteItem() {
 		cbAppEnv.deleteByProjection(recordProjection);
+		tick().then(() => afterDelete(thisElement as HTMLElement));
 	}
 </script>
 
 <div
+	bind:this={thisElement}
 	transition:fade={{ duration: 200 }}
-	class={['nav-collection-item', recordProjection.slug === cbAppEnv.slug && 'current-item']}
-	onfocusin={() => (active = true)}
-	onfocusout={(e) => {
-		if (editingName) return;
-
-		const nextFocused = e.relatedTarget as Node | null;
-
-		if (!e.currentTarget.contains(nextFocused)) {
-			active = false;
-		}
-	}}
+	class={['nav-collection-item', isElementPageForThisItem && 'current-item']}
+	{...rest}
 >
 	{#if editingName}
 		<div class="nav-collection-item-link">
@@ -55,7 +67,12 @@
 			/>
 		</div>
 	{:else}
-		<a class="nav-collection-item-link" href="/{cbAppEnv.baseUrlPath}/{recordProjection.slug}">
+		<a
+			class="nav-collection-item-link"
+			href="/{cbAppEnv.baseUrlPath}/{recordProjection.slug}"
+			bind:this={thisFocusablePart}
+			data-sveltekit-keepfocus
+		>
 			<InlineNameEditor
 				value={recordProjection.projection.displayName}
 				bind:editing={editingName}
@@ -65,13 +82,21 @@
 		</a>
 	{/if}
 
-	{#if active && !editingName}
+	{#if showControls && !editingName}
 		<div class="nav-collection-item-controls">
-			<IconButton onclick={editItemName} tabindex={-1}>
+			<IconButton
+				onclick={editItemName}
+				tabindex={-1}
+				{@attach createClickHotKeyAttachment('Rename', false, hotkey('r', 'alt'))}
+			>
 				<EditIcon />
 			</IconButton>
 
-			<IconButton tabindex={-1} onclick={deleteItem}>
+			<IconButton
+				onclick={deleteItem}
+				tabindex={-1}
+				{@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))}
+			>
 				<DeleteIcon />
 			</IconButton>
 		</div>
@@ -88,8 +113,12 @@
 		border-radius: 15px;
 		overflow: hidden;
 
-		&:is(.current-item, :focus-within, :hover) {
+		&:is(:focus-within, :hover) {
 			background-color: var(--cl-primary-dimmest);
+		}
+
+		&.current-item {
+			background-color: var(--cl-primary-dimmer);
 		}
 	}
 

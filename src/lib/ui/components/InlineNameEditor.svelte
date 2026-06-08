@@ -26,16 +26,21 @@
 
 	let draftValue = $state('');
 	let inputEl: HTMLInputElement | undefined = $state();
+	let prevActiveElement: HTMLElement | null = null;
 
 	$effect(() => {
-		if (!editing) return;
+		if (editing) {
+			draftValue = value;
 
-		draftValue = value;
+			prevActiveElement = document.activeElement as HTMLElement | null;
 
-		tick().then(() => {
-			inputEl?.focus();
-			inputEl?.select();
-		});
+			console.log('setting element', prevActiveElement);
+
+			tick().then(() => {
+				inputEl?.focus();
+				inputEl?.select();
+			});
+		}
 	});
 
 	function commit() {
@@ -47,8 +52,6 @@
 		editing = false;
 		draftValue = '';
 
-		if (!newValue || newValue === prevValue) return;
-
 		onedit?.({
 			prevValue,
 			newValue
@@ -58,6 +61,7 @@
 	function cancel() {
 		editing = false;
 		draftValue = '';
+
 		oncancel?.();
 	}
 
