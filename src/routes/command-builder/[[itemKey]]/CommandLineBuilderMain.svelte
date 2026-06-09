@@ -1,9 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/ui/basic-components/Button.svelte';
-	import {
-		createClickHotKeyAttachment,
-		createFocusHotKeyAttachment
-	} from '$lib/engine/hotkeys/hotkey-actions';
+	import { createClickHotKeyAttachment, createFocusHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 
 	import CommandBuilder from './CommandBuilder.svelte';
 	import Dialog from '$lib/ui/components/dialog/Dialog.svelte';
@@ -14,7 +11,7 @@
 	import PreventBrowserHotkeys from '$lib/engine/keyboard-navigation/svelte-components/PreventBrowserHotkeys.svelte';
 	import { hotkey, hotkeys } from '$lib/engine/hotkeys/hotkey-helpers';
 
-	let { cbAppEnv = $bindable() }: { cbAppEnv: CbAppEnv } = $props();
+	let { cbAppEnv = $bindable(), ...rest }: { cbAppEnv: CbAppEnv } = $props();
 
 	let isSaveDialogOpen = $state(false);
 
@@ -67,7 +64,7 @@
 <DataStateDisplay appEnv={cbAppEnv} />
 <PreventBrowserHotkeys preventedKeys={preventedBrowserDefaults} />
 
-<div class="main-app-layout">
+<div class="main-app-layout" {...rest}>
 	<main class="command-builder-main-app">
 		{#if isPermanentCommandPage}
 			<input
@@ -77,10 +74,7 @@
 			/>
 		{/if}
 
-		<CommandBuilder
-			bind:commandBuilderState={cbAppEnv.data}
-			disabled={dataState.kind !== 'ready'}
-		/>
+		<CommandBuilder bind:commandBuilderState={cbAppEnv.data} disabled={dataState.kind !== 'ready'} />
 
 		<Button
 			class="button-save"
@@ -96,10 +90,7 @@
 			>
 				Save As
 			</Button>
-			<Button
-				{@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))}
-				onclick={deleteItem}
-			>
+			<Button {@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))} onclick={deleteItem}>
 				Delete
 			</Button>
 		{/if}

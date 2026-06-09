@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { onDestroy, onMount, setContext, untrack } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { NavigationManager } from '../navigation-manager';
 	import type { NavigationKeysConfig } from '../types';
 	import { signalNavigationHotkeyEvent } from '$lib/engine/hotkeys/bl-hotkeys-event-signals';
 	import { browser } from '$app/environment';
-	import { NAVIGATION_MANAGER_CONTEXT } from './consts';
+	import { setNavigationManager } from './navigation-manager-provider';
 
 	interface Props {
 		navigationKeyConfig?: NavigationKeysConfig;
@@ -13,11 +13,9 @@
 
 	let { navigationKeyConfig, children }: Props = $props();
 
-	let navigationManager: NavigationManager = new NavigationManager(
-		untrack(() => navigationKeyConfig)
-	);
+	let navigationManager: NavigationManager = new NavigationManager(untrack(() => navigationKeyConfig));
 
-	setContext(NAVIGATION_MANAGER_CONTEXT, navigationManager);
+	setNavigationManager(navigationManager);
 
 	onMount(() => {
 		if (browser) {

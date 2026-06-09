@@ -38,17 +38,18 @@ export function collectionAppInit<T extends Omit<object, 'recordId'>, TProjectio
 			ret = await store.delete(context);
 
 			if (ret.ok) {
-				console.log('Successfully Deleted Record. [', ret.value.key, ']. Rerouting...');
+				console.log('Successfully Deleted Record. [', ret.value.key, ']');
 
-				if (contextManager.appContext.editMode === 'permanent') {
+				if (ctxEquals(contextManager.appContext, context)) {
+					console.log('Current Record Deleted. [', ret.value.key, ']. Rerouting...');
 					contextManager.replaceContext(context, '');
-				}
 
-				store.reload(
-					contextManager.appContext,
-					dataPlaceholder,
-					generateStoreOptions(contextManager.appContext, fallbackData)
-				);
+					store.reload(
+						contextManager.appContext,
+						dataPlaceholder,
+						generateStoreOptions(contextManager.appContext, fallbackData)
+					);
+				}
 			}
 
 			return ret as CollectionAppBlankResult;

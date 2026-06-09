@@ -18,8 +18,7 @@ export function remap(fromRange: NumberRange, toRange: NumberRange, value: numbe
 export function segmentedRemap(rangeMaps: RangeMaps, value: number): number {
 	const targetMap = rangeMaps.find((rm) => value >= rm.fromRange[0] && value <= rm.fromRange[1]);
 
-	if (!targetMap)
-		throw new Error(`Value [${value}] not found in range maps. ${JSON.stringify(rangeMaps)}`);
+	if (!targetMap) throw new Error(`Value [${value}] not found in range maps. ${JSON.stringify(rangeMaps)}`);
 
 	return remap(targetMap.fromRange, targetMap.toRange, value);
 }
@@ -70,4 +69,16 @@ export function indexOfMsdDiff(a: number, b: number): number {
 	}
 
 	return -1;
+}
+
+export function inverseLerp(v: number, min: number, max: number): number {
+	return (v - min) / (max - min);
+}
+
+export function clippedInverseLerp(v: number, min: number, max: number): number {
+	return clip(inverseLerp(v, min, max), 0, 1);
+}
+
+export function clip(v: number, min: number, max: number): number {
+	return Math.max(min, Math.min(max, v));
 }

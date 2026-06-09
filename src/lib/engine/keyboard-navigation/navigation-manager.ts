@@ -19,10 +19,7 @@ export class NavigationManager {
 	#currentScopeIndex: number = 0;
 	#dispatcher = new DispatcherImpl<NavigationEvent>();
 
-	#allNavigationKeys: OneToManyDictionary<string, ScopeInfra> = new OneToManyDictionary<
-		string,
-		ScopeInfra
-	>();
+	#allNavigationKeys: OneToManyDictionary<string, ScopeInfra> = new OneToManyDictionary<string, ScopeInfra>();
 
 	#nextScopeNavigationKeys = hotkeys(['tab']);
 
@@ -129,10 +126,7 @@ export class NavigationManager {
 				this.#currentScopeIndex = Math.max(this.#currentScopeIndex, 0);
 			}
 		} else
-			console.warn(
-				'NavigationManager - unregisterScope - scope not found in destTargets. scopeName:',
-				scope.scopeName
-			);
+			console.warn('NavigationManager - unregisterScope - scope not found in destTargets. scopeName:', scope.scopeName);
 	}
 
 	#getScopeIndex(scope: ScopeInfra): number {
@@ -180,14 +174,17 @@ export class NavigationManager {
 			const nextScope = this.#scopes[nextScopeIndex];
 			let nodeToFocus = nextScope.currentNode;
 			if (nodeToFocus) {
-				this.#navigateToNodeAndCompleteQuestForKey(
-					nodeToFocus,
-					eventHotkey.key,
-					document.activeElement as HTMLElement
-				);
+				this.#navigateToNodeAndCompleteQuestForKey(nodeToFocus, eventHotkey.key, document.activeElement as HTMLElement);
 			}
 		}
 	}, 'hard');
+
+	refocus() {
+		let target = this.#currentScope.currentNode;
+		console.log('Refocusing', target);
+
+		target?.focus();
+	}
 
 	focusNextScope() {
 		this.#focusScopeInternal(this.#nextScopeIndex());
@@ -242,19 +239,11 @@ export class NavigationManager {
 				let nodeIndex = this.#isNextKey(key) ? 0 : nextScope.navigatiableNodes.length - 1;
 
 				// Navigate to next scope
-				this.#navigateToNodeAndCompleteQuestForKey(
-					nextScope.navigatiableNodes[nodeIndex],
-					key,
-					initatingNode
-				);
+				this.#navigateToNodeAndCompleteQuestForKey(nextScope.navigatiableNodes[nodeIndex], key, initatingNode);
 				this.#currentScopeIndex = nextScopeIndex;
 			} else if (nextNodeInfo.escapeBackupNode) {
 				// Navigate to current scope backup node
-				this.#navigateToNodeAndCompleteQuestForKey(
-					nextNodeInfo.escapeBackupNode,
-					key,
-					initatingNode
-				);
+				this.#navigateToNodeAndCompleteQuestForKey(nextNodeInfo.escapeBackupNode, key, initatingNode);
 			}
 		}
 	});

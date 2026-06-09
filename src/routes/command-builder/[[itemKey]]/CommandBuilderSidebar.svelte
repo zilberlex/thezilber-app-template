@@ -5,7 +5,7 @@
 	import type { CollectionAppRecordProjection } from '$lib/app-infrastructure/collection-app/data/types';
 	import { getFirstFocusable } from '$lib/engine/keyboard-navigation/navigation-utils';
 
-	let { cbAppEnv }: { cbAppEnv: CbAppEnv } = $props();
+	let { cbAppEnv, ...rest }: { cbAppEnv: CbAppEnv } = $props();
 
 	let menuLabel: HTMLHeadingElement;
 	let labelHeight = $state(0);
@@ -72,6 +72,11 @@
 		const nextElem =
 			itemElements.find((el) => getItemIndex(el) >= index) ?? itemElements.findLast((el) => getItemIndex(el) < index);
 
+		console.log('Wow', {
+			nextElem,
+			index
+		});
+
 		if (nextElem) {
 			const nextFocusable = getFirstFocusable(nextElem);
 			nextFocusable?.focus();
@@ -79,7 +84,12 @@
 	}
 </script>
 
-<nav class="command-builder-sidebar" style:--section-label-height={`${labelHeight}px`} bind:this={thisElement}>
+<nav
+	class="command-builder-sidebar"
+	style:--section-label-height={`${labelHeight}px`}
+	bind:this={thisElement}
+	{...rest}
+>
 	<section class="sidebar-section">
 		<h2 bind:this={menuLabel} class="menu-label">Saved Commands:</h2>
 

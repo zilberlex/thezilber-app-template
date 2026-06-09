@@ -48,9 +48,7 @@ export function createCollectionAppContextManager<
 	}) as TContext;
 
 	let _projectedSlug = $state<string | null>(null);
-	let _projectedEditMode = $derived<CollectionAppEditMode>(
-		_projectedSlug === DRAFT_ITEM_KEY ? 'draft' : 'permanent'
-	);
+	let _projectedEditMode = $derived<CollectionAppEditMode>(_projectedSlug === DRAFT_ITEM_KEY ? 'draft' : 'permanent');
 
 	$effect(() => {
 		console.log('_slugItemKey:', _slugItemKey);
@@ -75,6 +73,8 @@ export function createCollectionAppContextManager<
 		prevContext: CollectionAppContext,
 		eventKind: ContextChangeEventKind
 	) => {
+		// TODO AZ wtf this does nothing
+
 		if (prevContext.slug != newContext.slug) {
 			appContextChangeEvent = {
 				kind: eventKind,
@@ -96,6 +96,14 @@ export function createCollectionAppContextManager<
 			emitContextChange(appContext, prevContext, 'browser-navigation');
 		});
 	});
+
+	function _gotoItem(itemSlug: string, replaceState: boolean = false) {
+		goto(getContextPath(_baseUrlPath, itemSlug), {
+			replaceState,
+			keepFocus: true,
+			noScroll: true
+		});
+	}
 
 	return {
 		get appContext() {
@@ -120,17 +128,12 @@ export function createCollectionAppContextManager<
 				_displayName = displayName;
 				emitContextChange(appContext, prevContext, 'browser-navigation');
 
-				goto(getContextPath(_baseUrlPath, _slugItemKey));
+				_gotoItem(_slugItemKey);
 
 				undoChangeContext = () => {
-					console.warn(
-						'Undoing Context Change new Key:',
-						prevContext.slug,
-						'prev itemKey',
-						slugItemKey
-					);
+					console.warn('Undoing Context Change new Key:', prevContext.slug, 'prev itemKey', slugItemKey);
 
-					goto(getContextPath(_baseUrlPath, prevContext.slug), { replaceState: true });
+					_gotoItem(prevContext.slug, true);
 				};
 			}
 
@@ -143,7 +146,7 @@ export function createCollectionAppContextManager<
 		},
 		replaceContext(prevContext: TContext, newItemSlug, newItemDisplayName?: string) {
 			if (ctxEquals(prevContext, appContext)) {
-				goto(getContextPath(_baseUrlPath, newItemSlug), { replaceState: true });
+				_gotoItem(newItemSlug, true);
 			} else {
 				console.warn(
 					'Tried to replace *stale* context Ignoring Replace Context... context for replacement',

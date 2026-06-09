@@ -19,10 +19,7 @@ function set(obj: object, key: PropertyKey, value: unknown) {
 	(obj as Record<PropertyKey, unknown>)[key] = value;
 }
 
-export function deepAssign<T extends object>(
-	target: T,
-	...sources: Array<Partial<T> | null | undefined>
-): T {
+export function deepAssign<T extends object>(target: T, ...sources: Array<Partial<T> | null | undefined>): T {
 	for (const source of sources) {
 		if (!source) continue;
 

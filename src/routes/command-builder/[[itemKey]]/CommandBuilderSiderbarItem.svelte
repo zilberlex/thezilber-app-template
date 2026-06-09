@@ -9,6 +9,7 @@
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import { tick } from 'svelte';
+	import { fadeAndSlide } from '$lib/engine/transitions/fade-and-slide';
 
 	type Props = HTMLAttributes<HTMLDivElement> & {
 		cbAppEnv: CbAppEnv;
@@ -53,7 +54,7 @@
 
 <div
 	bind:this={thisElement}
-	transition:fade={{ duration: 200 }}
+	transition:fadeAndSlide()
 	class={['nav-collection-item', isElementPageForThisItem && 'current-item']}
 	{...rest}
 >
