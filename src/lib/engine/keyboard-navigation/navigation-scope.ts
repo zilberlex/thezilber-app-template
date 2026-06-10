@@ -77,9 +77,7 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 			nextNodeIndex = this.#currentNodeIndex !== undefined ? this.#currentNodeIndex + 1 : 0;
 		} else if (navKeys.prevKeys.includes(key)) {
 			nextNodeIndex =
-				this.#currentNodeIndex !== undefined
-					? this.#currentNodeIndex - 1
-					: this.navigatiableNodes.length - 1;
+				this.#currentNodeIndex !== undefined ? this.#currentNodeIndex - 1 : this.navigatiableNodes.length - 1;
 		}
 
 		let ret: NextNodeInfo = {};
@@ -221,7 +219,6 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 			console.warn('ARROW SCOPE FOCUS_CHANGE: reached unnavigatable node, skipping.');
 			return;
 		}
-
 		if (this.#currentNode === node) {
 			return;
 		}
@@ -233,7 +230,10 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 			return;
 		}
 
-		console.debug('ARROW SCOPE FOCUS_CHANGE: Setting current node/index', node, nodeIndex);
+		console.debug('ARROW SCOPE FOCUS_CHANGE: Setting current node/index', {
+			nodeIndex,
+			node
+		});
 
 		this.#setCurrentNode(node);
 		this.#focusNodeDispatcher.signal({ targetNode: node });
