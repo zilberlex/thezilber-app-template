@@ -1,5 +1,5 @@
 export type Command = {
-	execute: () => boolean;
+	execute: () => void;
 	undo: () => void;
 	readonly executed: boolean;
 };

@@ -8,6 +8,7 @@ import type {
 import type { SvelteMap } from 'svelte/reactivity';
 import type { SmartStore } from './smart-store.svelte';
 import type { SvelteTouchMap } from './touch-map.svelte';
+import type { Command } from '$lib/engine/patterns/command/command';
 
 export type EditMode = 'permanent' | 'draft';
 export type ItemKey = '_draft_' | string;
@@ -46,6 +47,11 @@ export type CollectionAppRuntime<T extends Omit<object, 'recordId'>, TProjection
 	get _internal(): {
 		store: SmartStore<T, any>;
 	};
+};
+
+export type CollectionAppCommandResult<T> = {
+	command: Command;
+	result: CollectionAppResult<T>;
 };
 
 export type CollectionAppContext = {
@@ -144,8 +150,9 @@ export type CollectionAppError = {
 	kind: 'Key Already Exists' | 'Key Not Found' | 'Corrupted Record' | 'General Error';
 	message: string;
 };
-export type CollectionAppLoadResult<T> = ActionResult<T | undefined, CollectionAppError>;
-export type CollectionAppBlankResult = ActionResult<void, CollectionAppError>;
+export type CollectionAppResult<T> = ActionResult<T, CollectionAppError>;
+export type CollectionAppBlankResult = CollectionAppResult<void>;
+export type CollectionAppLoadResult<T> = CollectionAppResult<T | undefined>;
 
 export type StoreSaveResult = { context: CollectionAppContext } & (
 	| { kind: 'create'; newSlug: string; newDisplayName: string }

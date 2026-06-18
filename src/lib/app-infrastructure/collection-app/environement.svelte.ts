@@ -32,7 +32,7 @@ export function collectionAppInit<T extends Omit<object, 'recordId'>, TProjectio
 
 	console.log('Collection App Initiated. Context:', $state.snapshot(contextManager.appContext));
 
-	async function deleteInternal(context: CollectionAppContext): Promise<CollectionAppBlankResult> {
+	async function _deleteInternal(context: CollectionAppContext): Promise<CollectionAppBlankResult> {
 		try {
 			let ret;
 			ret = await store.delete(context);
@@ -240,7 +240,7 @@ export function collectionAppInit<T extends Omit<object, 'recordId'>, TProjectio
 		},
 		delete: async () => {
 			let contextSnapshot = $state.snapshot(contextManager.appContext);
-			return deleteInternal(contextSnapshot);
+			return _deleteInternal(contextSnapshot);
 		},
 		deleteByProjection: async (recordProjection: CollectionAppRecordProjection<T, TProjection>) => {
 			let context: CollectionAppContext = {
@@ -248,7 +248,7 @@ export function collectionAppInit<T extends Omit<object, 'recordId'>, TProjectio
 				editMode: 'permanent',
 				displayName: recordProjection.projection.displayName
 			};
-			return deleteInternal(context);
+			return _deleteInternal(context);
 		}
 	};
 

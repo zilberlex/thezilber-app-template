@@ -9,6 +9,7 @@
 	import ForegroundLayer from './ForegroundLayer.svelte';
 	import EngineHotKeysInit from './EngineHotKeysInit.svelte';
 	import NavigationStateManager from './NavigationStateManager.svelte';
+	import { CommandStack } from '$lib/engine/patterns/command/command-stack/command-stack';
 
 	onMount(() => {
 		if (browser) {
@@ -18,6 +19,7 @@
 			window.appState = appState;
 
 			appState.deviceId = getDeviceId();
+			appState.commandStack = new CommandStack();
 		}
 	});
 </script>

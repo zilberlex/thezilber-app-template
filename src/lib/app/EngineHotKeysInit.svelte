@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { createSoftKeyHandler } from '$lib/engine/hotkeys/bl-events';
 	import { HotKey } from '$lib/engine/hotkeys/hotkey-class';
 	import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
 	import { appState } from '$lib/engine/state/application-state.svelte';
@@ -7,6 +8,18 @@
 
 	let debugHotKey = new HotKey('F12', 'alt');
 	let clearDebugObjectsHotKey = new HotKey('F10', 'alt');
+
+	let undoHotKey = new HotKey('z', 'ctrl|option');
+	let redoHotKey = new HotKey('z', 'ctrl|option', 'shift');
+
+	let globalUndo = createSoftKeyHandler((e) => {
+		appState.commandStack?.undo();
+	});
+
+	let globalRedo = createSoftKeyHandler(() => {
+		appState.commandStack?.redo();
+	});
+
 	let debug = appState.debug;
 
 	function toggleDebug() {
@@ -23,6 +36,9 @@
 		if (browser) {
 			hotKeysModule.assignHotKey(debugHotKey, toggleDebug);
 			hotKeysModule.assignHotKey(clearDebugObjectsHotKey, clearDebugObjects);
+
+			hotKeysModule.assignHotKey(undoHotKey, globalUndo);
+			hotKeysModule.assignHotKey(redoHotKey, globalRedo);
 		}
 	});
 
@@ -30,6 +46,9 @@
 		if (browser) {
 			hotKeysModule.removeHotKey(debugHotKey, toggleDebug);
 			hotKeysModule.removeHotKey(clearDebugObjectsHotKey, clearDebugObjects);
+
+			hotKeysModule.removeHotKey(undoHotKey, globalUndo);
+			hotKeysModule.removeHotKey(redoHotKey, globalRedo);
 		}
 	});
 </script>

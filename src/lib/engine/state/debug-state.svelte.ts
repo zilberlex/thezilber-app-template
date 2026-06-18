@@ -3,8 +3,8 @@ import { SvelteMap } from 'svelte/reactivity';
 export interface DebugState {
 	debugConsole: boolean;
 	debugMode: boolean;
-	viewObjects: SvelteMap<string, object | undefined>;
-	viewObject?: object;
+	viewObjects: SvelteMap<string, any>;
+	viewObject?: any;
 }
 
 export const debugState: DebugState = createDebugState();
@@ -12,7 +12,7 @@ export const debugState: DebugState = createDebugState();
 export function createDebugState(): DebugState {
 	let debugConsole = $state(false);
 	let debugMode = $state(false);
-	let viewObjects = $state(new SvelteMap<string, object | undefined>());
+	let viewObjects = $state(new SvelteMap<string, any>());
 	let viewObject = $state<object | undefined>();
 
 	return {

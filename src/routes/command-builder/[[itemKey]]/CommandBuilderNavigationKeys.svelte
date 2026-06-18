@@ -13,8 +13,8 @@
 
 	let softNextScopeNavKeys = [hotkey(NavigationKeyConsts.ArrowRight)];
 	let softPrevScopeNavKeys = [hotkey(NavigationKeyConsts.ArrowLeft)];
-	let hardNextScopeNavKeys = [hotkey('tab')];
-	let hardPrevScopeNavKeys = [hotkey('tab', 'shift')];
+	let hardNextScopeNavKeys = [hotkey('tab', 'ctrl|option')];
+	let hardPrevScopeNavKeys = [hotkey('tab', 'ctrl|option', 'shift')];
 
 	let nextScopeNavigationKeys = [...softNextScopeNavKeys, ...hardNextScopeNavKeys];
 	let prevScopeNavigationKeys = [...softPrevScopeNavKeys, ...hardPrevScopeNavKeys];
@@ -22,10 +22,7 @@
 	function onScopeChangeKey(keyboardEvent: KeyboardEvent) {
 		let eventHotkey = HotKey.fromEvent(keyboardEvent);
 
-		const matchedSetIndex = eventHotkey.bestMatchingSetIndex([
-			nextScopeNavigationKeys,
-			prevScopeNavigationKeys
-		]);
+		const matchedSetIndex = eventHotkey.bestMatchingSetIndex([nextScopeNavigationKeys, prevScopeNavigationKeys]);
 
 		if (matchedSetIndex === undefined) return;
 

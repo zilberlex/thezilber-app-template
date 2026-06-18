@@ -24,7 +24,7 @@
 		const to = event.relatedTarget as Element | null;
 
 		// If we moved into another tooltip-bearing element, let pointerover handle it.
-		if (to?.closest?.(HotkeyTooltipAttribute)) return;
+		if (to?.closest?.(`[${HotkeyTooltipAttribute}]`)) return;
 
 		setTooltip(null, null);
 	}

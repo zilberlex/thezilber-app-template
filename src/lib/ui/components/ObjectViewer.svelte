@@ -43,6 +43,8 @@
 				<div>
 					{'{'}<br /><ObjectViewer object={value} {recursive} />{'}'}<br />
 				</div>
+			{:else if typeof value === 'object'}
+				<span class="value">{JSON.stringify($state.snapshot(value))}</span>
 			{:else}
 				<span class="value">{value}</span>
 			{/if}
