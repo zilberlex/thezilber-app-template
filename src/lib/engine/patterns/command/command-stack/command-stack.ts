@@ -1,33 +1,34 @@
+import type { AsyncCommandInterface } from '../../../../../routes/async-command-stack/commands/async-command';
 import type { Command } from '../command';
 
 export class CommandStack {
-	#commandsUndo: Command[] = [];
-	#commandsRedo: Command[] = [];
+	#commandsUndo: Array<Command | AsyncCommandInterface<any>> = [];
+	#commandsRedo: Array<Command | AsyncCommandInterface<any>> = [];
 
-	push(command: Command) {
+	push(command: Command | AsyncCommandInterface<any>) {
 		this.#commandsRedo = [];
 
 		this.#commandsUndo.push(command);
 	}
 
-	execute(command: Command) {
+	async execute(command: Command) {
 		command.execute();
 		this.push(command);
 	}
 
-	undo() {
+	async undo() {
 		let command = this.#commandsUndo.pop();
 		if (command) {
 			console.debug('undo command', command);
-			command.undo();
+			await Promise.resolve(command.undo());
 			this.#commandsRedo.push(command);
 		}
 	}
 
-	redo() {
+	async redo() {
 		let command = this.#commandsRedo.pop();
 		if (command) {
-			command.execute();
+			await Promise.resolve(command.execute());
 			this.#commandsUndo.push(command);
 		}
 	}

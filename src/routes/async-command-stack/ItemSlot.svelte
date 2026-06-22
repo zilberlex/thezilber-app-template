@@ -1,14 +1,15 @@
 <script lang="ts">
+	import type { HTMLButtonAttributes } from 'svelte/elements';
+
 	let {
 		key,
 		value,
 		onClickCopy,
 		...rest
-	}: {
+	}: HTMLButtonAttributes & {
 		key: any;
 		value: any;
 		onClickCopy?: (key: any, value: any) => void;
-		rest?: any[];
 	} = $props();
 </script>
 

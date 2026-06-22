@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { sleep } from '$lib/engine/general-js-ts/common';
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
@@ -8,8 +7,8 @@
 	import ItemSlot from './ItemSlot.svelte';
 	import { loadLocalState, saveLocalState } from '$lib/engine/storage/local/simple-state-persistance.svelte';
 	import { copyState } from '$lib/engine/svelte-helpers/copy-state';
-	import { asyncCommand as constructAsyncCommand } from './AsyncCommand';
 	import { appState } from '$lib/engine/state/application-state.svelte';
+	import { constructInsertPipelineCommand, type InsertCtx } from './app-actions/insert-pipline.svelte';
 
 	let farAwayStorage = new SvelteMap<string, string>();
 	let memoryStorage = new SvelteMap<string, string>();
@@ -30,7 +29,7 @@
 		copyState(loaded, {
 			farAwayStorage,
 			memoryStorage,
-			inputKey: (val: any) => (inputValue = val),
+			inputKey: (val: any) => (inputKey = val),
 			inputValue: (val: any) => (inputValue = val)
 		});
 	}
@@ -39,78 +38,71 @@
 		loadAppState();
 	});
 
-	async function insertToFarAwayCommand(key: string, value: string, lazyUndoParams: () => { prevValue?: string }) {
+	function deleteOptimisticUndoPattern(key: string) {
+		let optimisiticDeleteExecuteResult: {
+			executed: boolean;
+			prevValue?: string;
+		} = {
+			executed: false,
+			prevValue: undefined
+		};
+		return {
+			optimisiticDeleteExecuteResult: () => optimisiticDeleteExecuteResult,
+			execute: () => {
+				optimisiticDeleteExecuteResult.prevValue = memoryStorage.get(key);
+
+				if (memoryStorage.delete(key)) {
+					optimisiticDeleteExecuteResult.executed = true;
+				}
+
+				return optimisiticDeleteExecuteResult;
+			},
+			undo: () => {
+				let prevValue = optimisiticDeleteExecuteResult.prevValue;
+				console.log('Undoing Optimistic Delete', { key, prevValue });
+				if (prevValue) {
+					memoryStorage.set(key, prevValue);
+					optimisiticDeleteExecuteResult.executed = false;
+				}
+			}
+		};
+	}
+
+	function deleteToFarAwayUndoPattern(
+		key: string,
+		optimisiticDeleteExecuteResult: () => { executed: boolean; prevValue?: string }
+	) {
 		return {
 			executeAsync: async () => {
-				await sleep(3000);
-				farAwayStorage.set(key, value);
+				let optExecResult = optimisiticDeleteExecuteResult();
 
-				return 'Yay';
+				if (optExecResult.executed) {
+					farAwayStorage.delete(key);
+
+					return 'Deleted ' + { key };
+				}
+
+				return 'Did not Delete';
 			},
 			undoAsync: async () => {
-				let { prevValue } = lazyUndoParams();
-				await sleep(3000);
-				if (!prevValue) {
-					farAwayStorage.delete(key);
-				} else {
+				let { prevValue } = optimisiticDeleteExecuteResult();
+				if (prevValue) {
 					farAwayStorage.set(key, prevValue);
 				}
 			}
 		};
 	}
 
-	async function deleteFromFarAwayStorage(key: string) {
-		await sleep(3000);
-		farAwayStorage.delete(key);
-	}
-
-	function insertOptimisticUndoPattern(key: string, value: string) {
-		let prevValue: string | undefined;
-
-		let lazyUndoPrams = () => {
-			return {
-				prevValue
-			};
-		};
-
-		return {
-			lazyUndoPrams,
-			execute: () => {
-				prevValue = memoryStorage.get(key);
-
-				memoryStorage.set(key, value);
-				return value;
-			},
-			undo: () => {
-				console.log('Undoing Optimistic insert ', { key, value });
-				if (!prevValue) {
-					memoryStorage.delete(key);
-				} else {
-					memoryStorage.set(key, prevValue);
-				}
-			}
-		};
-	}
-
 	async function deleteItem() {
-		memoryStorage.delete(inputKey);
-		await deleteFromFarAwayStorage(inputKey);
-	}
-
-	async function insert() {
-		let [key, val] = [inputKey, inputValue];
-
-		let optimisticUndoPattern = insertOptimisticUndoPattern(key, val);
-		let asyncUndoPattern = await insertToFarAwayCommand(key, val, optimisticUndoPattern.lazyUndoPrams);
-
-		let asyncCommand = constructAsyncCommand(optimisticUndoPattern, asyncUndoPattern);
-		appState.commandStack?.push(asyncCommand);
-
-		return await asyncCommand.execute();
-	}
-
-	async function insertCompleteFlow() {
-		console.log(await insert());
+		// let key = inputKey;
+		//
+		// let optimisticUndoPattern = deleteOptimisticUndoPattern(key);
+		// let asyncUndoPattern = deleteToFarAwayUndoPattern(key, optimisticUndoPattern.optimisiticDeleteExecuteResult);
+		//
+		// let asyncCommand = constructAsyncCommand(optimisticUndoPattern, asyncUndoPattern);
+		// appState.commandStack?.push(asyncCommand);
+		//
+		// return await asyncCommand.execute();
 	}
 
 	function clearSate() {
@@ -124,13 +116,25 @@
 	}
 
 	function undo(): any {
-		console.log('Undo');
 		appState.commandStack?.undo();
 	}
 
 	function redo(): any {
-		console.log('Redo');
 		appState.commandStack?.redo();
+	}
+
+	async function insertNew() {
+		let insertCtx = $state.snapshot<InsertCtx>({
+			key: inputKey,
+			insertValue: inputValue,
+			undoValue: memoryStorage.get(inputKey)
+		});
+
+		let command = constructInsertPipelineCommand(memoryStorage, farAwayStorage, insertCtx);
+		appState.commandStack?.push(command);
+		let commandResult = await command.execute();
+
+		console.log('Insert Command Result', commandResult);
 	}
 </script>
 
@@ -163,7 +167,7 @@
 				}}
 				bind:value={inputValue}>Value</InputCombo
 			>
-			<button onclick={insertCompleteFlow} {@attach createClickHotKeyAttachment('Insert', false, hotkey('a', 'alt'))}
+			<button onclick={insertNew} {@attach createClickHotKeyAttachment('Insert', false, hotkey('a', 'alt'))}
 				>Insert</button
 			>
 			<button onclick={saveState} {@attach createClickHotKeyAttachment('Save', false, hotkey('s', 'alt'))}>Save</button>

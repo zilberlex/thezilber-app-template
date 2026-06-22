@@ -44,3 +44,16 @@ class AsyncCommand<CommandOutput> {
 export function asyncCommand<R>(optimisticUndoPattern: UndoPattern<R>, asyncUndoPattern: AsyncUndoPattern<R>) {
 	return new AsyncCommand(optimisticUndoPattern, asyncUndoPattern);
 }
+
+export function asyncCommandChain<I, O>(
+	asyncCommand: AsyncCommand<I>,
+	asyncUndoPattern: AsyncUndoPattern<I>
+): AsyncCommand<O> {
+	let chainedAsyncUndoPattern = {
+		executeAsync: async () => {
+			await asyncUndoPattern.executeAsync(await asyncCommand.execute());
+		}
+	};
+
+	return asyncCommand(() => {});
+}
