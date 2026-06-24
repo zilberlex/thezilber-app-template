@@ -123,7 +123,7 @@
 		appState.commandStack?.redo();
 	}
 
-	async function insertNew() {
+	async function insertItem() {
 		let insertCtx = $state.snapshot<InsertCtx>({
 			key: inputKey,
 			insertValue: inputValue,
@@ -167,7 +167,7 @@
 				}}
 				bind:value={inputValue}>Value</InputCombo
 			>
-			<button onclick={insertNew} {@attach createClickHotKeyAttachment('Insert', false, hotkey('a', 'alt'))}
+			<button onclick={insertItem} {@attach createClickHotKeyAttachment('Insert', false, hotkey('a', 'alt'))}
 				>Insert</button
 			>
 			<button onclick={saveState} {@attach createClickHotKeyAttachment('Save', false, hotkey('s', 'alt'))}>Save</button>

@@ -1,16 +1,35 @@
 import { type AsyncCommandInterface } from '../commands/async-command';
-import type { ErrorResult, PipelineStep, SuccessResult } from './pipeline-step';
+import { pipelineSuccessResult, type ErrorResult, type PipelineStep, type SuccessResult } from './pipeline-step';
 
 type StepResult<S> = S extends PipelineStep<any, infer R, any> ? Awaited<R> : never;
 
-// TODO Move to typescript file helpers
-type Last<T extends NonEmptyArray<unknown>> = T extends readonly [...unknown[], infer L] ? L : never;
 type NonEmptyArray<T> = [T, ...T[]];
-
-type LastStepReturn<Steps extends NonEmptyArray<PipelineStep<any, any, any>>> = StepResult<Last<Steps>>;
 
 type AnyPipelineStep<Ctx, E extends Error> = PipelineStep<Ctx, any, E>;
 
+type LastNonVoidStepReturn<Steps extends readonly unknown[]> = Steps extends readonly [...infer Rest, infer LastStep]
+	? [StepResult<LastStep>] extends [void]
+		? LastNonVoidStepReturn<Rest>
+		: StepResult<LastStep>
+	: void;
+
+function hasSuccessValue(result: SuccessResult<any>): result is { ok: true; value: unknown } {
+	return 'value' in result;
+}
+
+/**
+ * Ordered, undoable command pipeline.
+ *
+ * execute(): steps in order.
+ * undo(): steps in order, for optimistic rollback.
+ * execute failure: compensate executed steps in reverse with executeError().
+ * undo failure: compensate undone steps in reverse with undoError().
+ *
+ * Returns the last non-void success value.
+ *
+ * ErrorResult = expected failure;
+ * Throw = unexpected failure.
+ */
 export function pipelineCommand<
 	PipelineCtx,
 	Steps extends NonEmptyArray<AnyPipelineStep<PipelineCtx, E>>,
@@ -23,25 +42,25 @@ export class PipelineCommand<
 	PipelineCtx,
 	Steps extends NonEmptyArray<AnyPipelineStep<PipelineCtx, E>>,
 	E extends Error
-> implements AsyncCommandInterface<SuccessResult<LastStepReturn<Steps>> | ErrorResult<E>> {
+> implements AsyncCommandInterface<SuccessResult<LastNonVoidStepReturn<Steps>> | ErrorResult<E>> {
 	#operationStatus: 'initialized' | 'executing' | 'executed' | 'undoing' | 'undone' | 'execute-error' | 'undo-error' =
 		'initialized';
 
-	#executedPipelineCtx: PipelineCtx;
+	#baseCtx: PipelineCtx;
 	#steps: Steps;
 	#lastExecutePipelineCtx?: PipelineCtx;
 
 	constructor(ctx: PipelineCtx, steps: Steps) {
-		this.#executedPipelineCtx = ctx;
+		this.#baseCtx = ctx;
 		this.#steps = steps;
 	}
 
-	async execute(): Promise<SuccessResult<LastStepReturn<Steps>> | ErrorResult<E>> {
-		const currentCtx = structuredClone(this.#executedPipelineCtx);
+	async execute(): Promise<SuccessResult<LastNonVoidStepReturn<Steps>> | ErrorResult<E>> {
+		const currentCtx = structuredClone(this.#baseCtx);
 
 		const executedSteps: AnyPipelineStep<PipelineCtx, E>[] = [];
 
-		let lastStepResult: SuccessResult<any> | ErrorResult<E>;
+		let commandResult: SuccessResult<any> = pipelineSuccessResult();
 
 		if (!(this.#operationStatus == 'initialized' || this.#operationStatus == 'undone')) {
 			throw new Error(
@@ -50,29 +69,37 @@ export class PipelineCommand<
 		}
 
 		this.#operationStatus = 'executing';
-		for (const step of this.#steps) {
-			lastStepResult = await Promise.resolve(step.execute(currentCtx));
+		try {
+			for (const step of this.#steps) {
+				const stepResult = await Promise.resolve(step.execute(currentCtx));
 
-			if (!lastStepResult.ok) {
-				for (const executedStep of executedSteps.reverse()) {
-					await Promise.resolve(executedStep.executeError(currentCtx));
+				if (!stepResult.ok) {
+					for (const executedStep of executedSteps.reverse()) {
+						await Promise.resolve(executedStep.executeError(currentCtx));
+					}
+
+					this.#operationStatus = 'execute-error';
+					return stepResult;
 				}
 
-				this.#operationStatus = 'execute-error';
-				return lastStepResult;
+				if (hasSuccessValue(stepResult)) {
+					commandResult = stepResult;
+				}
+
+				executedSteps.push(step);
 			}
 
-			executedSteps.push(step);
+			this.#operationStatus = 'executed';
+			this.#lastExecutePipelineCtx = currentCtx;
+
+			return commandResult as SuccessResult<LastNonVoidStepReturn<Steps>>;
+		} catch (e) {
+			this.#operationStatus = 'execute-error';
+			throw e;
 		}
-
-		this.#operationStatus = 'executed';
-		this.#lastExecutePipelineCtx = currentCtx;
-
-		// @ts-ignore - This is save because steps is non empty.
-		return lastStepResult as SuccessResult<LastStepReturn<Steps>>;
 	}
 
-	async undo(): Promise<SuccessResult<LastStepReturn<Steps>> | ErrorResult<E>> {
+	async undo(): Promise<SuccessResult<LastNonVoidStepReturn<Steps>> | ErrorResult<E>> {
 		if (this.#operationStatus != 'executed' || this.#lastExecutePipelineCtx === undefined) {
 			throw new Error(
 				`Undo Error on command. Only Executed Commands can be undone. lastOperationStatus: [${this.#operationStatus}]`
@@ -83,29 +110,38 @@ export class PipelineCommand<
 
 		const undoneSteps: AnyPipelineStep<PipelineCtx, E>[] = [];
 
-		let lastUndoStepResult: SuccessResult<any> | ErrorResult<E>;
+		let commandResult: SuccessResult<any> = pipelineSuccessResult();
 
 		this.#operationStatus = 'undoing';
-		for (const step of this.#steps) {
-			lastUndoStepResult = await Promise.resolve(step.undo(currentCtx));
 
-			if (!lastUndoStepResult.ok) {
-				for (const undoneStep of undoneSteps.reverse()) {
-					await Promise.resolve(undoneStep.executeError(currentCtx));
+		try {
+			for (const step of this.#steps) {
+				const stepResult = await Promise.resolve(step.undo(currentCtx));
+
+				if (!stepResult.ok) {
+					for (const undoneStep of undoneSteps.reverse()) {
+						await Promise.resolve(undoneStep.undoError?.(currentCtx));
+					}
+
+					this.#operationStatus = 'undo-error';
+					return stepResult;
 				}
 
-				this.#operationStatus = 'undo-error';
-				return lastUndoStepResult;
+				if (hasSuccessValue(stepResult)) {
+					commandResult = stepResult;
+				}
+
+				undoneSteps.push(step);
 			}
 
-			undoneSteps.push(step);
+			this.#operationStatus = 'undone';
+
+			this.#lastExecutePipelineCtx = undefined;
+
+			return commandResult as SuccessResult<LastNonVoidStepReturn<Steps>>;
+		} catch (e) {
+			this.#operationStatus = 'undo-error';
+			throw e;
 		}
-
-		this.#operationStatus = 'undone';
-
-		this.#lastExecutePipelineCtx = undefined;
-
-		// @ts-ignore - This is save because steps is non empty.
-		return lastUndoStepResult as SuccessResult<LastStepReturn<Steps>>;
 	}
 }
