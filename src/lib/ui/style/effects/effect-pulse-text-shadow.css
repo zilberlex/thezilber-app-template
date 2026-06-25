@@ -1,0 +1,18 @@
+@keyframes pulse-text-shadow {
+	0% {
+		text-shadow: 0 0 0 var(--pulse-shadow-color, rgb(255 0 255 / 1));
+	}
+
+	70% {
+		text-shadow: 0 0 var(--pulse-shadow-size, 14px) rgb(255 0 255 / 1);
+	}
+
+	100% {
+		text-shadow: 0 0 0 rgb(255 0 255 / 1);
+	}
+}
+
+.ef-pulse-shadow {
+	--pulse-shadow-color: var(--color, var(--cl-primary));
+	animation: pulse-text-shadow var(--pulse-shadow-duration, 1s) ease-out infinite;
+}

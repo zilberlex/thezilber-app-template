@@ -1,30 +1,42 @@
 import { sleep } from '$lib/engine/general-js-ts/common';
 import { pipelineCommand } from '../pipeline/pipeline-command';
-import { pipelineStep, pipelineSuccessResult, type SuccessResult } from '../pipeline/pipeline-step';
+import { pipelineStep } from '../pipeline/pipeline-step';
 
-export type InsertCtx = {
+export type DemoPiplineCtx<StepData> = {
+	deps: {
+		memoryStorage: Map<string, string>;
+		farAwayStorage: Map<string, string>;
+	};
+	stepData: StepData;
+};
+
+export type InsertPipelineData = {
 	insertValue: string;
 	undoValue?: string;
 	key: string;
 };
 
-let _memoryStorage: Map<string, string>;
-let _farAwayStorage: Map<string, string>;
+export type InsertCtx = DemoPiplineCtx<InsertPipelineData>;
 
 export function constructInsertPipelineCommand(
 	memoryStorage: Map<string, string>,
 	farAwayStorage: Map<string, string>,
-	insertCtx: InsertCtx
+	insertStepCtx: InsertPipelineData
 ) {
-	_memoryStorage = memoryStorage;
-	_farAwayStorage = farAwayStorage;
-
-	let command = pipelineCommand(insertCtx, [
-		startingStep,
-		optimisticInsertPipelineStep,
-		insertAsyncPiplineStep,
-		endStep
-	]);
+	let command = pipelineCommand(
+		{
+			deps: {
+				memoryStorage,
+				farAwayStorage
+			},
+			stepData: insertStepCtx
+		},
+		[startingStep, optimisticInsertPipelineStep, insertAsyncPiplineStep, endStep],
+		(ctx: InsertCtx) => ({
+			deps: ctx.deps,
+			stepData: structuredClone(ctx.stepData)
+		})
+	);
 
 	return command;
 }
@@ -55,41 +67,47 @@ const endStep = pipelineStep(
 
 const optimisticInsertPipelineStep = pipelineStep<InsertCtx, void, Error>(
 	(ctx: InsertCtx) => {
-		_memoryStorage.set(ctx.key, ctx.insertValue);
+		let { key, insertValue } = ctx.stepData;
+		let { memoryStorage } = ctx.deps;
+
+		memoryStorage.set(key, insertValue);
 	},
 	(ctx: InsertCtx) => {
-		let { undoValue } = ctx;
+		let { undoValue, key } = ctx.stepData;
+		let { memoryStorage } = ctx.deps;
 
 		if (!undoValue) {
-			_memoryStorage.delete(ctx.key);
+			memoryStorage.delete(key);
 		} else {
-			_memoryStorage.set(ctx.key, undoValue);
+			memoryStorage.set(key, undoValue);
 		}
 	}
 );
 
 const insertAsyncPiplineStep = pipelineStep(
 	async (ctx: InsertCtx) => {
-		let { key, insertValue } = ctx;
+		let { key, insertValue } = ctx.stepData;
+		let { farAwayStorage } = ctx.deps;
 
 		// simulate async
 		await sleep(1000);
-		_farAwayStorage.set(key, insertValue);
+		farAwayStorage.set(key, insertValue);
 
 		let retVal = `Inserted [${key}, ${insertValue}]`;
 
 		return retVal;
 	},
 	async (ctx: InsertCtx) => {
-		let { key, undoValue, insertValue } = ctx;
+		let { key, undoValue, insertValue } = ctx.stepData;
+		let { farAwayStorage } = ctx.deps;
 
 		// simulate async
 		await sleep(1000);
 
 		if (!undoValue) {
-			_farAwayStorage.delete(key);
+			farAwayStorage.delete(key);
 		} else {
-			_farAwayStorage.set(key, undoValue);
+			farAwayStorage.set(key, undoValue);
 		}
 
 		let retVal = !undoValue

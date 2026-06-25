@@ -13,6 +13,10 @@ type LastNonVoidStepReturn<Steps extends readonly unknown[]> = Steps extends rea
 		: StepResult<LastStep>
 	: void;
 
+type CloneCtx<Ctx> = (ctx: Ctx) => Ctx;
+
+const defaultCloneCtx = <Ctx>(ctx: Ctx): Ctx => structuredClone(ctx);
+
 function hasSuccessValue(result: SuccessResult<any>): result is { ok: true; value: unknown } {
 	return 'value' in result;
 }
@@ -34,8 +38,8 @@ export function pipelineCommand<
 	PipelineCtx,
 	Steps extends NonEmptyArray<AnyPipelineStep<PipelineCtx, E>>,
 	E extends Error
->(ctx: PipelineCtx, steps: Steps) {
-	return new PipelineCommand(ctx, steps);
+>(ctx: PipelineCtx, steps: Steps, cloneCtx: CloneCtx<PipelineCtx> = defaultCloneCtx) {
+	return new PipelineCommand(ctx, steps, cloneCtx);
 }
 
 export class PipelineCommand<
@@ -49,14 +53,16 @@ export class PipelineCommand<
 	#baseCtx: PipelineCtx;
 	#steps: Steps;
 	#lastExecutePipelineCtx?: PipelineCtx;
+	#cloneCtx: CloneCtx<PipelineCtx>;
 
-	constructor(ctx: PipelineCtx, steps: Steps) {
+	constructor(ctx: PipelineCtx, steps: Steps, cloneCtx: CloneCtx<PipelineCtx> = defaultCloneCtx) {
 		this.#baseCtx = ctx;
 		this.#steps = steps;
+		this.#cloneCtx = cloneCtx;
 	}
 
 	async execute(): Promise<SuccessResult<LastNonVoidStepReturn<Steps>> | ErrorResult<E>> {
-		const currentCtx = structuredClone(this.#baseCtx);
+		const currentCtx = this.#cloneCtx(this.#baseCtx);
 
 		const executedSteps: AnyPipelineStep<PipelineCtx, E>[] = [];
 
@@ -106,7 +112,7 @@ export class PipelineCommand<
 			);
 		}
 
-		let currentCtx = structuredClone(this.#lastExecutePipelineCtx);
+		let currentCtx = this.#cloneCtx(this.#lastExecutePipelineCtx);
 
 		const undoneSteps: AnyPipelineStep<PipelineCtx, E>[] = [];
 

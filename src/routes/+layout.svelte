@@ -10,6 +10,8 @@
 	import { onNavigate } from '$app/navigation';
 	import AppNavigationManager from '$lib/engine/keyboard-navigation/svelte-components/AppNavigationManager.svelte';
 
+	import '$lib/ui/style/effects.scss';
+
 	let { children } = $props();
 	onNavigate(() => {
 		appState.pageContext.title = '';

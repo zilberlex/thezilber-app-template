@@ -7,20 +7,23 @@ interface FadeAndSlideParams {
 	fadeDurationMs?: number;
 	slideDurationMs?: number;
 	easing?: EasingFunction;
+	axis?: 'x' | 'y';
 }
 
 export function fadeAndSlide({
 	delay = 0,
 	fadeDurationMs = 200,
 	slideDurationMs = 200,
-	easing = linear
+	easing = linear,
+	axis = 'y'
 }: FadeAndSlideParams = {}) {
 	const outTransition = composeTransitions([
 		{
 			transition: slide,
 			params: {
 				delay: 0,
-				duration: slideDurationMs
+				duration: slideDurationMs,
+				axis
 			}
 		},
 		{

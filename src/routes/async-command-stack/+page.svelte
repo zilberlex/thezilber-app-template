@@ -8,7 +8,8 @@
 	import { loadLocalState, saveLocalState } from '$lib/engine/storage/local/simple-state-persistance.svelte';
 	import { copyState } from '$lib/engine/svelte-helpers/copy-state';
 	import { appState } from '$lib/engine/state/application-state.svelte';
-	import { constructInsertPipelineCommand, type InsertCtx } from './app-actions/insert-pipline.svelte';
+	import { constructInsertPipelineCommand, type InsertPipelineData } from './app-actions/insert-pipline';
+	import Button from '$lib/ui/basic-components/Button.svelte';
 
 	let farAwayStorage = new SvelteMap<string, string>();
 	let memoryStorage = new SvelteMap<string, string>();
@@ -124,7 +125,7 @@
 	}
 
 	async function insertItem() {
-		let insertCtx = $state.snapshot<InsertCtx>({
+		let insertCtx = $state.snapshot<InsertPipelineData>({
 			key: inputKey,
 			insertValue: inputValue,
 			undoValue: memoryStorage.get(inputKey)
@@ -141,12 +142,12 @@
 <div class="demo ly-center">
 	<div class="main">
 		<div class="remote storage-display">
-			{#each farAwayStorage.entries() as [key, value]}
-				<ItemSlot {key} {value} onClickCopy={copyValues} style="--cl-primary: #FF0000" />
+			{#each farAwayStorage.entries() as [key, value] (key)}
+				<ItemSlot {key} {value} onClickCopy={copyValues} style="--color: #FF0000" />
 			{/each}
 		</div>
 		<div class="local storage-display">
-			{#each memoryStorage.entries() as [key, value]}
+			{#each memoryStorage.entries() as [key, value] (key)}
 				<ItemSlot {key} {value} onClickCopy={copyValues} />
 			{/each}
 		</div>
@@ -167,22 +168,22 @@
 				}}
 				bind:value={inputValue}>Value</InputCombo
 			>
-			<button onclick={insertItem} {@attach createClickHotKeyAttachment('Insert', false, hotkey('a', 'alt'))}
-				>Insert</button
+			<Button onclick={insertItem} {@attach createClickHotKeyAttachment('Insert', false, hotkey('a', 'alt'))}
+				>Insert</Button
 			>
-			<button onclick={saveState} {@attach createClickHotKeyAttachment('Save', false, hotkey('s', 'alt'))}>Save</button>
-			<button onclick={clearSate} {@attach createClickHotKeyAttachment('Clear', false, hotkey('c', 'alt'))}
-				>Clear</button
+			<Button onclick={saveState} {@attach createClickHotKeyAttachment('Save', false, hotkey('s', 'alt'))}>Save</Button>
+			<Button onclick={clearSate} {@attach createClickHotKeyAttachment('Clear', false, hotkey('c', 'alt'))}
+				>Clear</Button
 			>
-			<button onclick={() => deleteItem()} {@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))}
-				>Delete</button
+			<Button onclick={() => deleteItem()} {@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))}
+				>Delete</Button
 			>
-			<button onclick={() => undo()} {@attach createClickHotKeyAttachment('Undo', false, hotkey('z', 'ctrl|option'))}
-				>Undo</button
+			<Button onclick={() => undo()} {@attach createClickHotKeyAttachment('Undo', false, hotkey('z', 'ctrl|option'))}
+				>Undo</Button
 			>
-			<button
+			<Button
 				onclick={() => redo()}
-				{@attach createClickHotKeyAttachment('Redo', false, hotkey('z', 'ctrl|option', 'shift'))}>Redo</button
+				{@attach createClickHotKeyAttachment('Redo', false, hotkey('z', 'ctrl|option', 'shift'))}>Redo</Button
 			>
 		</form>
 	</div>
