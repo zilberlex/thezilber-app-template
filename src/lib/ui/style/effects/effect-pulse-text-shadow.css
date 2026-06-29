@@ -4,7 +4,7 @@
 	}
 
 	70% {
-		text-shadow: 0 0 var(--pulse-shadow-size, 14px) rgb(255 0 255 / 1);
+		text-shadow: 0 0 var(--pulse-shadow-size, 22px) rgb(255 0 255 / 1);
 	}
 
 	100% {

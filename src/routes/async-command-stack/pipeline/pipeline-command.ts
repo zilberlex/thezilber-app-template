@@ -1,11 +1,11 @@
 import { type AsyncCommandInterface } from '../commands/async-command';
 import { pipelineSuccessResult, type ErrorResult, type PipelineStep, type SuccessResult } from './pipeline-step';
 
-type StepResult<S> = S extends PipelineStep<any, infer R, any> ? Awaited<R> : never;
+type StepResult<S> = S extends PipelineStep<any, any, infer R, any> ? Awaited<R> : never;
 
 type NonEmptyArray<T> = [T, ...T[]];
 
-type AnyPipelineStep<Ctx, E extends Error> = PipelineStep<Ctx, any, E>;
+type AnyPipelineStep<Deps, Ctx, E extends Error> = PipelineStep<Deps, Ctx, any, E>;
 
 type LastNonVoidStepReturn<Steps extends readonly unknown[]> = Steps extends readonly [...infer Rest, infer LastStep]
 	? [StepResult<LastStep>] extends [void]
@@ -13,9 +13,14 @@ type LastNonVoidStepReturn<Steps extends readonly unknown[]> = Steps extends rea
 		: StepResult<LastStep>
 	: void;
 
-type CloneCtx<Ctx> = (ctx: Ctx) => Ctx;
+type OperationStatus = 'initialized' | 'executing' | 'executed' | 'undoing' | 'undone' | 'execute-error' | 'undo-error';
 
-const defaultCloneCtx = <Ctx>(ctx: Ctx): Ctx => structuredClone(ctx);
+export type PeristentCommand<PipelineCtx> = {
+	commandType: string;
+	baseCtx: PipelineCtx;
+	lastExecutePipelineCtx?: PipelineCtx;
+	operationStatus: OperationStatus;
+};
 
 function hasSuccessValue(result: SuccessResult<any>): result is { ok: true; value: unknown } {
 	return 'value' in result;
@@ -35,36 +40,60 @@ function hasSuccessValue(result: SuccessResult<any>): result is { ok: true; valu
  * Throw = unexpected failure.
  */
 export function pipelineCommand<
+	Deps,
 	PipelineCtx,
-	Steps extends NonEmptyArray<AnyPipelineStep<PipelineCtx, E>>,
+	Steps extends NonEmptyArray<AnyPipelineStep<Deps, PipelineCtx, E>>,
 	E extends Error
->(ctx: PipelineCtx, steps: Steps, cloneCtx: CloneCtx<PipelineCtx> = defaultCloneCtx) {
-	return new PipelineCommand(ctx, steps, cloneCtx);
+>(type: string, deps: Deps, ctx: PipelineCtx, steps: Steps) {
+	return new PipelineCommand(type, deps, ctx, steps);
 }
 
 export class PipelineCommand<
+	Deps,
 	PipelineCtx,
-	Steps extends NonEmptyArray<AnyPipelineStep<PipelineCtx, E>>,
+	Steps extends NonEmptyArray<AnyPipelineStep<Deps, PipelineCtx, E>>,
 	E extends Error
 > implements AsyncCommandInterface<SuccessResult<LastNonVoidStepReturn<Steps>> | ErrorResult<E>> {
-	#operationStatus: 'initialized' | 'executing' | 'executed' | 'undoing' | 'undone' | 'execute-error' | 'undo-error' =
-		'initialized';
+	#commandType: string;
 
+	#operationStatus: OperationStatus;
+	#deps: Deps;
 	#baseCtx: PipelineCtx;
 	#steps: Steps;
 	#lastExecutePipelineCtx?: PipelineCtx;
-	#cloneCtx: CloneCtx<PipelineCtx>;
 
-	constructor(ctx: PipelineCtx, steps: Steps, cloneCtx: CloneCtx<PipelineCtx> = defaultCloneCtx) {
+	constructor(commandType: string, deps: Deps, ctx: PipelineCtx, steps: Steps) {
+		this.#deps = deps;
 		this.#baseCtx = ctx;
 		this.#steps = steps;
-		this.#cloneCtx = cloneCtx;
+		this.#commandType = commandType;
+		this.#operationStatus = 'initialized';
+	}
+
+	get commandType() {
+		return this.#commandType;
+	}
+
+	persistCommand(): PeristentCommand<PipelineCtx> {
+		return {
+			commandType: this.commandType,
+			baseCtx: this.#baseCtx,
+			operationStatus: this.#operationStatus,
+			lastExecutePipelineCtx: this.#lastExecutePipelineCtx
+		};
+	}
+
+	hydrateCommand(persistantCommand: PeristentCommand<PipelineCtx>) {
+		const { baseCtx: ctx, operationStatus, lastExecutePipelineCtx } = persistantCommand;
+		this.#baseCtx = ctx;
+		this.#operationStatus = operationStatus;
+		this.#lastExecutePipelineCtx = lastExecutePipelineCtx;
 	}
 
 	async execute(): Promise<SuccessResult<LastNonVoidStepReturn<Steps>> | ErrorResult<E>> {
-		const currentCtx = this.#cloneCtx(this.#baseCtx);
+		const currentCtx = structuredClone(this.#baseCtx);
 
-		const executedSteps: AnyPipelineStep<PipelineCtx, E>[] = [];
+		const executedSteps: AnyPipelineStep<Deps, PipelineCtx, E>[] = [];
 
 		let commandResult: SuccessResult<any> = pipelineSuccessResult();
 
@@ -77,11 +106,11 @@ export class PipelineCommand<
 		this.#operationStatus = 'executing';
 		try {
 			for (const step of this.#steps) {
-				const stepResult = await Promise.resolve(step.execute(currentCtx));
+				const stepResult = await Promise.resolve(step.execute(this.#deps, currentCtx));
 
 				if (!stepResult.ok) {
 					for (const executedStep of executedSteps.reverse()) {
-						await Promise.resolve(executedStep.executeError(currentCtx));
+						await Promise.resolve(executedStep.executeError(this.#deps, currentCtx));
 					}
 
 					this.#operationStatus = 'execute-error';
@@ -112,9 +141,9 @@ export class PipelineCommand<
 			);
 		}
 
-		let currentCtx = this.#cloneCtx(this.#lastExecutePipelineCtx);
+		let currentCtx = structuredClone(this.#lastExecutePipelineCtx);
 
-		const undoneSteps: AnyPipelineStep<PipelineCtx, E>[] = [];
+		const undoneSteps: AnyPipelineStep<Deps, PipelineCtx, E>[] = [];
 
 		let commandResult: SuccessResult<any> = pipelineSuccessResult();
 
@@ -122,11 +151,11 @@ export class PipelineCommand<
 
 		try {
 			for (const step of this.#steps) {
-				const stepResult = await Promise.resolve(step.undo(currentCtx));
+				const stepResult = await Promise.resolve(step.undo(this.#deps, currentCtx));
 
 				if (!stepResult.ok) {
 					for (const undoneStep of undoneSteps.reverse()) {
-						await Promise.resolve(undoneStep.undoError?.(currentCtx));
+						await Promise.resolve(undoneStep.undoError?.(this.#deps, currentCtx));
 					}
 
 					this.#operationStatus = 'undo-error';

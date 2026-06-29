@@ -26,13 +26,15 @@ export function pipelineFailResult<E extends Error>(e: E): ErrorResult<E> {
 	return { ok: false, error: e };
 }
 
-type PipelineStepReturn<R, E extends Error> = void | R | SuccessResult<R> | ErrorResult<E>;
+type PipelineStepReturn<R, E extends Error> = [R] extends [void]
+	? void | SuccessResult<void> | ErrorResult<E>
+	: R | SuccessResult<R> | ErrorResult<E>;
 
-export type PipelineStep<Ctx, R = void, E extends Error = Error> = {
-	execute: (ctx: Ctx) => MaybePromise<SuccessResult<R> | ErrorResult<E>>;
-	undo: (ctx: Ctx) => MaybePromise<SuccessResult<R> | ErrorResult<E>>;
-	executeError: (ctx: Ctx) => MaybePromise<SuccessResult<any> | ErrorResult<E>>;
-	undoError?: (ctx: Ctx) => MaybePromise<SuccessResult<any> | ErrorResult<E>>;
+export type PipelineStep<Deps, Ctx, R = void, E extends Error = Error> = {
+	execute: (deps: Deps, ctx: Ctx) => MaybePromise<SuccessResult<R> | ErrorResult<E>>;
+	undo: (deps: Deps, ctx: Ctx) => MaybePromise<SuccessResult<R> | ErrorResult<E>>;
+	executeError: (deps: Deps, ctx: Ctx) => MaybePromise<SuccessResult<any> | ErrorResult<E>>;
+	undoError?: (deps: Deps, ctx: Ctx) => MaybePromise<SuccessResult<any> | ErrorResult<E>>;
 };
 
 /**
@@ -44,25 +46,27 @@ export type PipelineStep<Ctx, R = void, E extends Error = Error> = {
  * executeError defaults to undo.
  * undoError defaults to execute.
  */
-export function pipelineStep<Ctx, R = void, E extends Error = Error>(
-	execute: (ctx: Ctx) => MaybePromise<PipelineStepReturn<R, E>>,
-	undo: (ctx: Ctx) => MaybePromise<PipelineStepReturn<R, E>>,
-	executeError?: (ctx: Ctx) => MaybePromise<PipelineStepReturn<any, E>>,
-	undoError?: (ctx: Ctx) => MaybePromise<PipelineStepReturn<any, E>>
-): PipelineStep<Ctx, R, E> {
-	const normalizedExecute = async (ctx: Ctx) => {
-		return toStepResult<R, E>(await execute(ctx));
+export function pipelineStep<Deps, Ctx, R = void, E extends Error = Error>(
+	execute: (deps: Deps, ctx: Ctx) => MaybePromise<PipelineStepReturn<R, E>>,
+	undo: (deps: Deps, ctx: Ctx) => MaybePromise<PipelineStepReturn<R, E>>,
+	executeError?: (deps: Deps, ctx: Ctx) => MaybePromise<PipelineStepReturn<any, E>>,
+	undoError?: (deps: Deps, ctx: Ctx) => MaybePromise<PipelineStepReturn<any, E>>
+): PipelineStep<Deps, Ctx, R, E> {
+	const normalizedExecute = async (deps: Deps, ctx: Ctx) => {
+		return toStepResult<R, E>(await execute(deps, ctx));
 	};
 
-	const normalizedUndo = async (ctx: Ctx) => {
-		return toStepResult<R, E>(await undo(ctx));
+	const normalizedUndo = async (deps: Deps, ctx: Ctx) => {
+		return toStepResult<R, E>(await undo(deps, ctx));
 	};
 
 	return {
 		execute: normalizedExecute,
 		undo: normalizedUndo,
-		executeError: executeError ? async (ctx) => toStepResult<any, E>(await executeError(ctx)) : normalizedUndo,
-		undoError: undoError ? async (ctx) => toStepResult<any, E>(await undoError(ctx)) : normalizedExecute
+		executeError: executeError
+			? async (deps, ctx) => toStepResult<any, E>(await executeError(deps, ctx))
+			: normalizedUndo,
+		undoError: undoError ? async (deps, ctx) => toStepResult<any, E>(await undoError(deps, ctx)) : normalizedExecute
 	};
 }
 

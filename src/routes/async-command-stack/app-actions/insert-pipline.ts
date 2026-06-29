@@ -1,82 +1,71 @@
 import { sleep } from '$lib/engine/general-js-ts/common';
 import { pipelineCommand } from '../pipeline/pipeline-command';
 import { pipelineStep } from '../pipeline/pipeline-step';
+import type { DemoCommandDeps, DemoCommandType } from './demo-command-factory';
 
-export type DemoPiplineCtx<StepData> = {
-	deps: {
-		memoryStorage: Map<string, string>;
-		farAwayStorage: Map<string, string>;
-	};
-	stepData: StepData;
-};
-
-export type InsertPipelineData = {
+export type InsertCtx = {
 	insertValue: string;
 	undoValue?: string;
 	key: string;
 };
 
-export type InsertCtx = DemoPiplineCtx<InsertPipelineData>;
+export type InsertPipelineDeps = DemoCommandDeps;
 
 export function constructInsertPipelineCommand(
+	commandType: DemoCommandType,
 	memoryStorage: Map<string, string>,
 	farAwayStorage: Map<string, string>,
-	insertStepCtx: InsertPipelineData
+	insertCtx: InsertCtx
 ) {
 	let command = pipelineCommand(
+		commandType,
 		{
-			deps: {
-				memoryStorage,
-				farAwayStorage
-			},
-			stepData: insertStepCtx
+			memoryStorage,
+			farAwayStorage
 		},
-		[startingStep, optimisticInsertPipelineStep, insertAsyncPiplineStep, endStep],
-		(ctx: InsertCtx) => ({
-			deps: ctx.deps,
-			stepData: structuredClone(ctx.stepData)
-		})
+		insertCtx,
+		[startingStep, optimisticInsertPipelineStep, insertAsyncPiplineStep, endStep]
 	);
 
 	return command;
 }
 
 const startingStep = pipelineStep(
-	(ctx: InsertCtx) => {
+	(_deps: InsertPipelineDeps, ctx: InsertCtx) => {
 		console.log('Inserting Item', ctx);
 	},
-	(ctx: InsertCtx) => {
+	(_deps: InsertPipelineDeps, ctx: InsertCtx) => {
 		console.log('Undoing Item', ctx);
 	},
-	(ctx: InsertCtx) => {
+	(_deps: InsertPipelineDeps, ctx: InsertCtx) => {
 		console.log('Insert Failed', ctx);
 	},
-	(ctx: InsertCtx) => {
+	(_deps: InsertPipelineDeps, ctx: InsertCtx) => {
 		console.log('Undo Failed', ctx);
 	}
 );
 
 const endStep = pipelineStep(
-	(ctx: InsertCtx) => {
+	(_deps: InsertPipelineDeps, ctx: InsertCtx) => {
 		console.log('Successfully Inserted Item', ctx);
 	},
-	(ctx: InsertCtx) => {
+	(_deps: InsertPipelineDeps, ctx: InsertCtx) => {
 		console.log('Successfully Undone Insertion', ctx);
 	}
 );
 
-const optimisticInsertPipelineStep = pipelineStep<InsertCtx, void, Error>(
-	(ctx: InsertCtx) => {
-		let { key, insertValue } = ctx.stepData;
-		let { memoryStorage } = ctx.deps;
+const optimisticInsertPipelineStep = pipelineStep(
+	(deps: InsertPipelineDeps, ctx: InsertCtx) => {
+		let { key, insertValue } = ctx;
+		let { memoryStorage } = deps;
 
 		memoryStorage.set(key, insertValue);
 	},
-	(ctx: InsertCtx) => {
-		let { undoValue, key } = ctx.stepData;
-		let { memoryStorage } = ctx.deps;
+	(deps: InsertPipelineDeps, ctx: InsertCtx) => {
+		let { undoValue, key } = ctx;
+		let { memoryStorage } = deps;
 
-		if (!undoValue) {
+		if (undoValue === undefined) {
 			memoryStorage.delete(key);
 		} else {
 			memoryStorage.set(key, undoValue);
@@ -85,9 +74,9 @@ const optimisticInsertPipelineStep = pipelineStep<InsertCtx, void, Error>(
 );
 
 const insertAsyncPiplineStep = pipelineStep(
-	async (ctx: InsertCtx) => {
-		let { key, insertValue } = ctx.stepData;
-		let { farAwayStorage } = ctx.deps;
+	async (deps: InsertPipelineDeps, ctx: InsertCtx) => {
+		let { key, insertValue } = ctx;
+		let { farAwayStorage } = deps;
 
 		// simulate async
 		await sleep(1000);
@@ -97,22 +86,23 @@ const insertAsyncPiplineStep = pipelineStep(
 
 		return retVal;
 	},
-	async (ctx: InsertCtx) => {
-		let { key, undoValue, insertValue } = ctx.stepData;
-		let { farAwayStorage } = ctx.deps;
+	async (deps: InsertPipelineDeps, ctx: InsertCtx) => {
+		let { key, undoValue, insertValue } = ctx;
+		let { farAwayStorage } = deps;
 
 		// simulate async
 		await sleep(1000);
 
-		if (!undoValue) {
+		if (undoValue === undefined) {
 			farAwayStorage.delete(key);
 		} else {
 			farAwayStorage.set(key, undoValue);
 		}
 
-		let retVal = !undoValue
-			? `Undone Insertion, deleting - [${key}]`
-			: `Undone Insertion key: [${key}], value: [${insertValue}] -> [${undoValue}]`;
+		let retVal =
+			undoValue === undefined
+				? `Undone Insertion, deleting - [${key}]`
+				: `Undone Insertion key: [${key}], value: [${insertValue}] -> [${undoValue}]`;
 
 		return retVal;
 	}

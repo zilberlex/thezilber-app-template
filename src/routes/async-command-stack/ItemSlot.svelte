@@ -64,7 +64,7 @@
 	<div class={['key', animationClassHelperKey.active && 'item-change']}>
 		{key}
 	</div>
-	<div class={['value', 'ef-pulse-shadow']}>
+	<div class={['value']}>
 		{value}
 	</div>
 </button>
