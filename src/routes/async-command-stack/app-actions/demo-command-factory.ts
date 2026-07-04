@@ -1,94 +1,52 @@
-import type { CommandRegistry } from '$lib/engine/patterns/command/persistency/commandRegistry';
-import type { PeristentCommand } from '../pipeline/pipeline-command';
-import { constructDeletePipelineCommand, type DeleteCtx } from './delete-pipeline';
-import { constructInsertPipelineCommand, type InsertCtx } from './insert-pipline';
+import type { CommandRegistry } from '../pipeline/command-registry';
+import { definePipelineSpecs, PipelineCommandFactory } from '../pipeline/pipeline-command-factory';
+import { clearSteps, type ClearCtx } from './clear-pipeline';
+import { deleteSteps, type DeleteCtx } from './delete-pipeline';
+import { insertSteps, type InsertCtx } from './insert-pipline';
+import type { DemoCommandDeps } from './pipeline-common';
 
-type PersistentCommandOf<CommandType extends string, Ctx> = Omit<PeristentCommand<Ctx>, 'commandType'> & {
-	commandType: CommandType;
-};
-
-export type DemoCommandDeps = {
-	memoryStorage: Map<string, string>;
-	farAwayStorage: Map<string, string>;
-};
-
-function definePersistantCommandHandlers<
-	const T extends Record<string, (deps: DemoCommandDeps, persistentCommand: any) => any>
->(handlers: T) {
-	return handlers;
-}
-
-const persitentCommandHandlers = definePersistantCommandHandlers({
-	'demo-insert-command': (
-		deps: DemoCommandDeps,
-		persistentCommand: PersistentCommandOf<'demo-insert-command', InsertCtx>
-	) => {
-		const command = constructInsertPipelineCommand(
-			'demo-insert-command',
-			deps.memoryStorage,
-			deps.farAwayStorage,
-			persistentCommand.baseCtx
-		);
-
-		command.hydrateCommand(persistentCommand);
-
-		return command;
+const demoCommandSpecs = definePipelineSpecs<DemoCommandDeps>()({
+	'demo-insert-command': {
+		steps: insertSteps
 	},
-	'demo-delete-command': (
-		deps: DemoCommandDeps,
-		persistentCommand: PersistentCommandOf<'demo-delete-command', DeleteCtx>
-	) => {}
+	'demo-delete-command': {
+		steps: deleteSteps
+	},
+	'demo-clear-command': {
+		steps: clearSteps
+	}
 });
 
-export type DemoCommandType = keyof typeof persitentCommandHandlers;
-
-type DemoPersistentCommand<K extends DemoCommandType = DemoCommandType> = {
-	[T in K]: Parameters<(typeof persitentCommandHandlers)[T]>[1];
-}[K];
-
-function typedKeys<T extends object>(obj: T) {
-	return Object.keys(obj) as Array<keyof T>;
-}
+export type DemoCommandType = keyof typeof demoCommandSpecs;
 
 export class DemoCommandFactory {
-	#commandRegistry: CommandRegistry;
-	#farAwayStorage: Map<string, string>;
-	#memoryStorage: Map<string, string>;
+	#factory: PipelineCommandFactory<DemoCommandDeps, typeof demoCommandSpecs>;
 
 	constructor(
 		commandRegistry: CommandRegistry,
 		memoryStorage: Map<string, string>,
 		farAwayStorage: Map<string, string>
 	) {
-		this.#commandRegistry = commandRegistry;
-		this.#memoryStorage = memoryStorage;
-		this.#farAwayStorage = farAwayStorage;
+		this.#factory = new PipelineCommandFactory(
+			{
+				memoryStorage,
+				farAwayStorage
+			},
+			demoCommandSpecs
+		);
 
-		for (const commandType of typedKeys(persitentCommandHandlers)) {
-			this.#commandRegistry.register(commandType, (persistentCommand) =>
-				this.fromPersistentCommand(persistentCommand as DemoPersistentCommand<typeof commandType>)
-			);
-		}
+		this.#factory.registerInto(commandRegistry);
 	}
 
 	insertCommand(ctx: InsertCtx) {
-		return constructInsertPipelineCommand('demo-insert-command', this.#memoryStorage, this.#farAwayStorage, ctx);
+		return this.#factory.create('demo-insert-command', ctx);
 	}
 
 	deleteCommand(ctx: DeleteCtx) {
-		return constructDeletePipelineCommand('demo-delete-command', this.#memoryStorage, this.#farAwayStorage, ctx);
+		return this.#factory.create('demo-delete-command', ctx);
 	}
 
-	#deps(): DemoCommandDeps {
-		return {
-			memoryStorage: this.#memoryStorage,
-			farAwayStorage: this.#farAwayStorage
-		};
-	}
-
-	fromPersistentCommand<K extends DemoCommandType>(persistentCommand: DemoPersistentCommand<K>) {
-		const handler = persitentCommandHandlers[persistentCommand.commandType];
-
-		return handler(this.#deps(), persistentCommand);
+	clearCommand(ctx: ClearCtx) {
+		return this.#factory.create('demo-clear-command', ctx);
 	}
 }

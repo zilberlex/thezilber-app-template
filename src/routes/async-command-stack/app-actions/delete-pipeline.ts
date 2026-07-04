@@ -1,7 +1,7 @@
 import { sleep } from '$lib/engine/general-js-ts/common';
-import { pipelineCommand } from '../pipeline/pipeline-command';
+import { type PipelineSteps } from '../pipeline/pipeline-command';
 import { pipelineStep } from '../pipeline/pipeline-step';
-import type { DemoCommandDeps, DemoCommandType } from './demo-command-factory';
+import type { DemoCommandDeps } from './pipeline-common';
 
 export type DeleteCtx = {
 	key: string;
@@ -87,21 +87,9 @@ const endStep = pipelineStep<DemoCommandDeps, DeleteCtx>(
 	}
 );
 
-export function constructDeletePipelineCommand(
-	commandType: DemoCommandType,
-	memoryStorage: Map<string, string>,
-	farAwayStorage: Map<string, string>,
-	deleteCtx: DeleteCtx
-) {
-	let command = pipelineCommand(
-		commandType,
-		{
-			memoryStorage,
-			farAwayStorage
-		},
-		deleteCtx,
-		[startingStep, optimisticDeletePipelineStep, deleteAsyncPiplineStep, endStep]
-	);
-
-	return command;
-}
+export const deleteSteps = [
+	startingStep,
+	optimisticDeletePipelineStep,
+	deleteAsyncPiplineStep,
+	endStep
+] satisfies PipelineSteps<DemoCommandDeps, DeleteCtx>;

@@ -7,6 +7,8 @@ type NonEmptyArray<T> = [T, ...T[]];
 
 type AnyPipelineStep<Deps, Ctx, E extends Error> = PipelineStep<Deps, Ctx, any, E>;
 
+export type PipelineSteps<Deps, Ctx, E extends Error = Error> = NonEmptyArray<PipelineStep<Deps, Ctx, any, E>>;
+
 type LastNonVoidStepReturn<Steps extends readonly unknown[]> = Steps extends readonly [...infer Rest, infer LastStep]
 	? [StepResult<LastStep>] extends [void]
 		? LastNonVoidStepReturn<Rest>
@@ -15,8 +17,8 @@ type LastNonVoidStepReturn<Steps extends readonly unknown[]> = Steps extends rea
 
 type OperationStatus = 'initialized' | 'executing' | 'executed' | 'undoing' | 'undone' | 'execute-error' | 'undo-error';
 
-export type PeristentCommand<PipelineCtx> = {
-	commandType: string;
+export type PersistentCommand<CommandType extends string = string, PipelineCtx = unknown> = {
+	commandType: CommandType;
 	baseCtx: PipelineCtx;
 	lastExecutePipelineCtx?: PipelineCtx;
 	operationStatus: OperationStatus;
@@ -40,41 +42,51 @@ function hasSuccessValue(result: SuccessResult<any>): result is { ok: true; valu
  * Throw = unexpected failure.
  */
 export function pipelineCommand<
+	KCommandType extends string,
 	Deps,
 	PipelineCtx,
-	Steps extends NonEmptyArray<AnyPipelineStep<Deps, PipelineCtx, E>>,
+	Steps extends PipelineSteps<Deps, PipelineCtx, E>,
 	E extends Error
->(type: string, deps: Deps, ctx: PipelineCtx, steps: Steps) {
+>(type: KCommandType, deps: Deps, ctx: PipelineCtx, steps: Steps) {
 	return new PipelineCommand(type, deps, ctx, steps);
 }
 
 export class PipelineCommand<
+	KCommandType extends string,
 	Deps,
 	PipelineCtx,
 	Steps extends NonEmptyArray<AnyPipelineStep<Deps, PipelineCtx, E>>,
 	E extends Error
 > implements AsyncCommandInterface<SuccessResult<LastNonVoidStepReturn<Steps>> | ErrorResult<E>> {
-	#commandType: string;
+	#commandType: KCommandType;
 
 	#operationStatus: OperationStatus;
 	#deps: Deps;
 	#baseCtx: PipelineCtx;
 	#steps: Steps;
 	#lastExecutePipelineCtx?: PipelineCtx;
+	#hydrateFunc: (ctx: PipelineCtx) => void;
 
-	constructor(commandType: string, deps: Deps, ctx: PipelineCtx, steps: Steps) {
+	constructor(
+		commandType: KCommandType,
+		deps: Deps,
+		ctx: PipelineCtx,
+		steps: Steps,
+		hydrateFunc: (ctx: PipelineCtx) => void = (_ctx) => {}
+	) {
 		this.#deps = deps;
 		this.#baseCtx = ctx;
 		this.#steps = steps;
 		this.#commandType = commandType;
 		this.#operationStatus = 'initialized';
+		this.#hydrateFunc = hydrateFunc;
 	}
 
 	get commandType() {
 		return this.#commandType;
 	}
 
-	persistCommand(): PeristentCommand<PipelineCtx> {
+	persistCommand(): PersistentCommand<KCommandType, PipelineCtx> {
 		return {
 			commandType: this.commandType,
 			baseCtx: this.#baseCtx,
@@ -83,11 +95,13 @@ export class PipelineCommand<
 		};
 	}
 
-	hydrateCommand(persistantCommand: PeristentCommand<PipelineCtx>) {
+	hydrateCommand(persistantCommand: PersistentCommand<KCommandType, PipelineCtx>) {
 		const { baseCtx: ctx, operationStatus, lastExecutePipelineCtx } = persistantCommand;
 		this.#baseCtx = ctx;
 		this.#operationStatus = operationStatus;
 		this.#lastExecutePipelineCtx = lastExecutePipelineCtx;
+
+		this.#hydrateFunc(persistantCommand.baseCtx);
 	}
 
 	async execute(): Promise<SuccessResult<LastNonVoidStepReturn<Steps>> | ErrorResult<E>> {

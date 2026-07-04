@@ -1,7 +1,9 @@
+export type DemoCommandDeps = {
+	memoryStorage: Map<string, string>;
+	farAwayStorage: Map<string, string>;
+};
+
 export type DemoPiplineCtx<StepData> = {
-	deps: {
-		memoryStorage: Map<string, string>;
-		farAwayStorage: Map<string, string>;
-	};
+	deps: DemoCommandDeps;
 	stepData: StepData;
 };

@@ -1,11 +1,11 @@
 import type { AsyncCommandInterface } from '../../../../../routes/async-command-stack/commands/async-command';
-import type { PeristentCommand } from '../../../../../routes/async-command-stack/pipeline/pipeline-command';
+import type { CommandRegistry } from '../../../../../routes/async-command-stack/pipeline/command-registry';
+import type { PersistentCommand } from '../../../../../routes/async-command-stack/pipeline/pipeline-command';
 import type { Command } from '../command';
-import type { CommandRegistry } from '../persistency/commandRegistry';
 
 export type PersistentCommandStack = {
-	persistentCommandsUndo: Array<PeristentCommand<any>>;
-	persistentCommandsRedo: Array<PeristentCommand<any>>;
+	persistentCommandsUndo: Array<PersistentCommand<any>>;
+	persistentCommandsRedo: Array<PersistentCommand<any>>;
 };
 
 export type CommandItem = Command | AsyncCommandInterface<any>;
@@ -54,10 +54,10 @@ export class CommandStack {
 		this.#commandsRedo = this.#loadCommands(persistStack.persistentCommandsRedo, commandRegistry);
 	}
 
-	#loadCommands(persistentCommands: Array<PeristentCommand<any>>, commandRegistry: CommandRegistry) {
+	#loadCommands(persistentCommands: Array<PersistentCommand<any>>, commandRegistry: CommandRegistry) {
 		return persistentCommands
 			.map((x) => {
-				let ret = commandRegistry.createCommand(x);
+				let ret = commandRegistry.create(x);
 
 				if (!ret) {
 					console.log('No persistent mapping for command type', x.commandType);

@@ -1,3 +1,5 @@
+import type { MaybePromise } from '$lib/engine/general-js-ts/typescript/type-helpers';
+
 export type ResultLike = {
 	ok: boolean;
 };
@@ -15,8 +17,6 @@ export type SuccessResult<T = void> = [T] extends [void]
 			ok: true;
 			value: T;
 		};
-
-export type MaybePromise<T> = T | Promise<T>;
 
 export function pipelineSuccessResult<T = void>(value?: T): SuccessResult<T> {
 	return (arguments.length === 0 ? { ok: true } : { ok: true, value }) as SuccessResult<T>;

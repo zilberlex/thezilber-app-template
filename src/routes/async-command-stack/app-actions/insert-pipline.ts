@@ -1,7 +1,7 @@
 import { sleep } from '$lib/engine/general-js-ts/common';
-import { pipelineCommand } from '../pipeline/pipeline-command';
+import type { PipelineSteps } from '../pipeline/pipeline-command';
 import { pipelineStep } from '../pipeline/pipeline-step';
-import type { DemoCommandDeps, DemoCommandType } from './demo-command-factory';
+import type { DemoCommandDeps } from './pipeline-common';
 
 export type InsertCtx = {
 	insertValue: string;
@@ -9,61 +9,40 @@ export type InsertCtx = {
 	key: string;
 };
 
-export type InsertPipelineDeps = DemoCommandDeps;
-
-export function constructInsertPipelineCommand(
-	commandType: DemoCommandType,
-	memoryStorage: Map<string, string>,
-	farAwayStorage: Map<string, string>,
-	insertCtx: InsertCtx
-) {
-	let command = pipelineCommand(
-		commandType,
-		{
-			memoryStorage,
-			farAwayStorage
-		},
-		insertCtx,
-		[startingStep, optimisticInsertPipelineStep, insertAsyncPiplineStep, endStep]
-	);
-
-	return command;
-}
-
 const startingStep = pipelineStep(
-	(_deps: InsertPipelineDeps, ctx: InsertCtx) => {
+	(_deps: DemoCommandDeps, ctx: InsertCtx) => {
 		console.log('Inserting Item', ctx);
 	},
-	(_deps: InsertPipelineDeps, ctx: InsertCtx) => {
+	(_deps: DemoCommandDeps, ctx: InsertCtx) => {
 		console.log('Undoing Item', ctx);
 	},
-	(_deps: InsertPipelineDeps, ctx: InsertCtx) => {
+	(_deps: DemoCommandDeps, ctx: InsertCtx) => {
 		console.log('Insert Failed', ctx);
 	},
-	(_deps: InsertPipelineDeps, ctx: InsertCtx) => {
+	(_deps: DemoCommandDeps, ctx: InsertCtx) => {
 		console.log('Undo Failed', ctx);
 	}
 );
 
 const endStep = pipelineStep(
-	(_deps: InsertPipelineDeps, ctx: InsertCtx) => {
+	(_deps: DemoCommandDeps, ctx: InsertCtx) => {
 		console.log('Successfully Inserted Item', ctx);
 	},
-	(_deps: InsertPipelineDeps, ctx: InsertCtx) => {
+	(_deps: DemoCommandDeps, ctx: InsertCtx) => {
 		console.log('Successfully Undone Insertion', ctx);
 	}
 );
 
 const optimisticInsertPipelineStep = pipelineStep(
-	(deps: InsertPipelineDeps, ctx: InsertCtx) => {
-		let { key, insertValue } = ctx;
-		let { memoryStorage } = deps;
+	(deps: DemoCommandDeps, ctx: InsertCtx) => {
+		const { key, insertValue } = ctx;
+		const { memoryStorage } = deps;
 
 		memoryStorage.set(key, insertValue);
 	},
-	(deps: InsertPipelineDeps, ctx: InsertCtx) => {
-		let { undoValue, key } = ctx;
-		let { memoryStorage } = deps;
+	(deps: DemoCommandDeps, ctx: InsertCtx) => {
+		const { undoValue, key } = ctx;
+		const { memoryStorage } = deps;
 
 		if (undoValue === undefined) {
 			memoryStorage.delete(key);
@@ -74,23 +53,20 @@ const optimisticInsertPipelineStep = pipelineStep(
 );
 
 const insertAsyncPiplineStep = pipelineStep(
-	async (deps: InsertPipelineDeps, ctx: InsertCtx) => {
-		let { key, insertValue } = ctx;
-		let { farAwayStorage } = deps;
+	async (deps: DemoCommandDeps, ctx: InsertCtx) => {
+		const { key, insertValue } = ctx;
+		const { farAwayStorage } = deps;
 
-		// simulate async
 		await sleep(1000);
+
 		farAwayStorage.set(key, insertValue);
 
-		let retVal = `Inserted [${key}, ${insertValue}]`;
-
-		return retVal;
+		return `Inserted [${key}, ${insertValue}]`;
 	},
-	async (deps: InsertPipelineDeps, ctx: InsertCtx) => {
-		let { key, undoValue, insertValue } = ctx;
-		let { farAwayStorage } = deps;
+	async (deps: DemoCommandDeps, ctx: InsertCtx) => {
+		const { key, undoValue, insertValue } = ctx;
+		const { farAwayStorage } = deps;
 
-		// simulate async
 		await sleep(1000);
 
 		if (undoValue === undefined) {
@@ -99,11 +75,15 @@ const insertAsyncPiplineStep = pipelineStep(
 			farAwayStorage.set(key, undoValue);
 		}
 
-		let retVal =
-			undoValue === undefined
-				? `Undone Insertion, deleting - [${key}]`
-				: `Undone Insertion key: [${key}], value: [${insertValue}] -> [${undoValue}]`;
-
-		return retVal;
+		return undoValue === undefined
+			? `Undone Insertion, deleting - [${key}]`
+			: `Undone Insertion key: [${key}], value: [${insertValue}] -> [${undoValue}]`;
 	}
 );
+
+export const insertSteps = [
+	startingStep,
+	optimisticInsertPipelineStep,
+	insertAsyncPiplineStep,
+	endStep
+] satisfies PipelineSteps<DemoCommandDeps, InsertCtx>;

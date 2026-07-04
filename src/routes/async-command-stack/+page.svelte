@@ -8,20 +8,22 @@
 	import { loadLocalState, saveLocalState } from '$lib/engine/storage/local/simple-state-persistance.svelte';
 	import { copyState } from '$lib/engine/svelte-helpers/copy-state';
 	import { appState } from '$lib/engine/state/application-state.svelte';
-	import { constructInsertPipelineCommand, type InsertCtx } from './app-actions/insert-pipline';
+	import { type InsertCtx } from './app-actions/insert-pipline';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import type { PersistentCommandStack } from '$lib/engine/patterns/command/command-stack/command-stack';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/types';
-	import { CommandRegistry } from '$lib/engine/patterns/command/persistency/commandRegistry';
 	import { DemoCommandFactory } from './app-actions/demo-command-factory';
+	import { createCommandRegistry } from './pipeline/command-registry';
+	import type { DeleteCtx } from './app-actions/delete-pipeline';
+	import type { ClearCtx } from './app-actions/clear-pipeline';
 
 	let memoryStorage = new SvelteMap<string, string>();
 	let farAwayStorage = new SvelteMap<string, string>();
 	let inputKey = $state('');
 	let inputValue = $state('');
 
-	let commandRegistry = new CommandRegistry();
+	let commandRegistry = createCommandRegistry();
 	let demoCommandFacotry = new DemoCommandFactory(commandRegistry, memoryStorage, farAwayStorage);
 
 	const STORAGE_KEY = 'ASYNC_COMMAND_PAGE_STATE';
@@ -47,76 +49,16 @@
 		loadCommandStack();
 	});
 
-	function deleteOptimisticUndoPattern(key: string) {
-		let optimisiticDeleteExecuteResult: {
-			executed: boolean;
-			prevValue?: string;
-		} = {
-			executed: false,
-			prevValue: undefined
-		};
-		return {
-			optimisiticDeleteExecuteResult: () => optimisiticDeleteExecuteResult,
-			execute: () => {
-				optimisiticDeleteExecuteResult.prevValue = memoryStorage.get(key);
+	async function clearState() {
+		let clearCtx = $state.snapshot<ClearCtx>({
+			storageState: memoryStorage
+		});
 
-				if (memoryStorage.delete(key)) {
-					optimisiticDeleteExecuteResult.executed = true;
-				}
+		let command = demoCommandFacotry.clearCommand(clearCtx);
+		appState.commandStack?.push(command);
+		let commandResult = await command.execute();
 
-				return optimisiticDeleteExecuteResult;
-			},
-			undo: () => {
-				let prevValue = optimisiticDeleteExecuteResult.prevValue;
-				console.log('Undoing Optimistic Delete', { key, prevValue });
-				if (prevValue) {
-					memoryStorage.set(key, prevValue);
-					optimisiticDeleteExecuteResult.executed = false;
-				}
-			}
-		};
-	}
-
-	function deleteToFarAwayUndoPattern(
-		key: string,
-		optimisiticDeleteExecuteResult: () => { executed: boolean; prevValue?: string }
-	) {
-		return {
-			executeAsync: async () => {
-				let optExecResult = optimisiticDeleteExecuteResult();
-
-				if (optExecResult.executed) {
-					farAwayStorage.delete(key);
-
-					return 'Deleted ' + { key };
-				}
-
-				return 'Did not Delete';
-			},
-			undoAsync: async () => {
-				let { prevValue } = optimisiticDeleteExecuteResult();
-				if (prevValue) {
-					farAwayStorage.set(key, prevValue);
-				}
-			}
-		};
-	}
-
-	async function deleteItem() {
-		// let key = inputKey;
-		//
-		// let optimisticUndoPattern = deleteOptimisticUndoPattern(key);
-		// let asyncUndoPattern = deleteToFarAwayUndoPattern(key, optimisticUndoPattern.optimisiticDeleteExecuteResult);
-		//
-		// let asyncCommand = constructAsyncCommand(optimisticUndoPattern, asyncUndoPattern);
-		// appState.commandStack?.push(asyncCommand);
-		//
-		// return await asyncCommand.execute();
-	}
-
-	function clearSate() {
-		memoryStorage.clear();
-		farAwayStorage.clear();
+		console.log('Delete Command Result', commandResult);
 	}
 
 	function copyValues(key: any, value: any): void {
@@ -133,10 +75,14 @@
 	}
 
 	async function insertItem() {
+		let prevValue = memoryStorage.get(inputKey);
+
+		if (prevValue === inputValue) return;
+
 		let insertCtx = $state.snapshot<InsertCtx>({
 			key: inputKey,
 			insertValue: inputValue,
-			undoValue: memoryStorage.get(inputKey)
+			undoValue: prevValue
 		});
 
 		let command = demoCommandFacotry.insertCommand(insertCtx);
@@ -144,6 +90,24 @@
 		let commandResult = await command.execute();
 
 		console.log('Insert Command Result', commandResult);
+	}
+
+	async function deleteItem() {
+		let originalValue = memoryStorage.get(inputKey);
+
+		if (originalValue === undefined) {
+			return;
+		}
+		let deleteCtx = $state.snapshot<DeleteCtx>({
+			key: inputKey,
+			originalValue
+		});
+
+		let command = demoCommandFacotry.deleteCommand(deleteCtx);
+		appState.commandStack?.push(command);
+		let commandResult = await command.execute();
+
+		console.log('Clear Command Result', commandResult);
 	}
 
 	function saveCommandStack() {
@@ -171,7 +135,7 @@
 		<div class="main">
 			<div class="remote storage-display">
 				{#each farAwayStorage.entries() as [key, value] (key)}
-					<ItemSlot {key} {value} onClickCopy={copyValues} style="--color: #FF0000" />
+					<ItemSlot {key} {value} onClickCopy={copyValues} style="--color: red" />
 				{/each}
 			</div>
 			<div class="local storage-display">
@@ -202,7 +166,7 @@
 				<Button onclick={saveState} {@attach createClickHotKeyAttachment('Save', false, hotkey('s', 'alt'))}
 					>Save</Button
 				>
-				<Button onclick={clearSate} {@attach createClickHotKeyAttachment('Clear', false, hotkey('c', 'alt'))}
+				<Button onclick={clearState} {@attach createClickHotKeyAttachment('Clear', false, hotkey('r', 'alt'))}
 					>Clear</Button
 				>
 				<Button onclick={() => deleteItem()} {@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))}
