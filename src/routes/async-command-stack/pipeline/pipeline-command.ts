@@ -1,4 +1,4 @@
-import { type AsyncCommandInterface } from '../commands/async-command';
+import { type AsyncCommandInterface } from '../../../lib/engine/patterns/command/async-command';
 import { pipelineSuccessResult, type ErrorResult, type PipelineStep, type SuccessResult } from './pipeline-step';
 
 type StepResult<S> = S extends PipelineStep<any, any, infer R, any> ? Awaited<R> : never;
@@ -80,6 +80,10 @@ export class PipelineCommand<
 		this.#commandType = commandType;
 		this.#operationStatus = 'initialized';
 		this.#hydrateFunc = hydrateFunc;
+	}
+
+	get executed() {
+		return this.#operationStatus === 'executed';
 	}
 
 	get commandType() {

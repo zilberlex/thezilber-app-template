@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
-	import { createCommand } from '$lib/engine/patterns/command/command-impl/create-command';
+	import { createSimpleCommand } from '$lib/engine/patterns/command/command-impl/create-command';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 
 	let rngNumbers = Array.from({ length: 10 }, () => Math.floor(Math.random() * 100) + 1);
@@ -25,7 +25,7 @@
 	let commandStack = $derived(appState.commandStack);
 
 	function createCommandForNumberPush() {
-		return createCommand(
+		return createSimpleCommand(
 			() => {
 				let randomNum = numberProvider.generateNumber();
 				numbers.push(randomNum);

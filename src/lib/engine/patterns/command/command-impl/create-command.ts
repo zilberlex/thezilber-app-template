@@ -1,6 +1,6 @@
-import type { Command } from '../command';
+import type { CommandInterface } from '../command';
 
-export function createCommand(execute: () => void, undo: () => void): Command {
+export function createSimpleCommand(execute: () => void, undo: () => void): CommandInterface<boolean> {
 	let wasExecuted = false;
 	return {
 		get executed() {
@@ -16,7 +16,11 @@ export function createCommand(execute: () => void, undo: () => void): Command {
 			if (wasExecuted) {
 				wasExecuted = false;
 				undo();
+
+				return true;
 			}
+
+			return false;
 		}
 	};
 }

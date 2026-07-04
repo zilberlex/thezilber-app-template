@@ -1,14 +1,14 @@
 import { createSmartHandler } from '../events/event-handling';
 import { isKeyboardGoEvent } from './bl-events';
 import { engineHotkeysConfig, type TriggerType } from './hotkey-module-config';
-import type { Command } from '$lib/engine/patterns/command/command';
+import type { CommandInterface } from '$lib/engine/patterns/command/command';
 import { TTLMap } from '$lib/engine/patterns/cache';
 import { createAddTempCssClassCommand } from '$lib/engine/patterns/command/command-impl/add-css-class-command';
 
 const BUTTON_RAPID_FIRE_COOLDOWN = engineHotkeysConfig.buttonRapidFireCooldownMs;
 const BUTTON_PRESSED_DURATION = engineHotkeysConfig.buttonClickPressedCssDurationMs;
 
-const allBtnCommands = new TTLMap<HTMLButtonElement, Command[]>(1000 * 60 * 5);
+const allBtnCommands = new TTLMap<HTMLButtonElement, CommandInterface[]>(1000 * 60 * 5);
 
 export const createEngineButtonClickOnKeyDownHandler = () =>
 	createSmartHandler(
@@ -43,18 +43,10 @@ function btnClickCssFlow(btn: HTMLButtonElement, triggerType: TriggerType = 'KEY
 	if (!btnCommands) {
 		console.debug('Creating New CssCommands For Button', btn);
 		btnCommands = [];
-		let startWorkClassCommand = createAddTempCssClassCommand(
-			btn,
-			'btn-start-work',
-			BUTTON_RAPID_FIRE_COOLDOWN
-		);
+		let startWorkClassCommand = createAddTempCssClassCommand(btn, 'btn-start-work', BUTTON_RAPID_FIRE_COOLDOWN);
 		btnCommands.push(startWorkClassCommand);
 		if (triggerType == 'KEY_DOWN') {
-			let btnPressedClassCommand = createAddTempCssClassCommand(
-				btn,
-				'btn-pressed',
-				BUTTON_PRESSED_DURATION
-			);
+			let btnPressedClassCommand = createAddTempCssClassCommand(btn, 'btn-pressed', BUTTON_PRESSED_DURATION);
 
 			btnCommands.push(btnPressedClassCommand);
 		}

@@ -1,14 +1,14 @@
-import type { AsyncCommandInterface } from '../../../../../routes/async-command-stack/commands/async-command';
+import type { AsyncCommandInterface } from '../async-command';
 import type { CommandRegistry } from '../../../../../routes/async-command-stack/pipeline/command-registry';
 import type { PersistentCommand } from '../../../../../routes/async-command-stack/pipeline/pipeline-command';
-import type { Command } from '../command';
+import type { CommandInterface } from '../command';
 
 export type PersistentCommandStack = {
 	persistentCommandsUndo: Array<PersistentCommand<any>>;
 	persistentCommandsRedo: Array<PersistentCommand<any>>;
 };
 
-export type CommandItem = Command | AsyncCommandInterface<any>;
+export type CommandItem = CommandInterface | AsyncCommandInterface<any>;
 
 export class CommandStack {
 	#commandsUndo: Array<CommandItem> = [];

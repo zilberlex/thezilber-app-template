@@ -8,7 +8,7 @@ import type {
 import type { SvelteMap } from 'svelte/reactivity';
 import type { SmartStore } from './smart-store.svelte';
 import type { SvelteTouchMap } from './touch-map.svelte';
-import type { Command } from '$lib/engine/patterns/command/command';
+import type { CommandInterface } from '$lib/engine/patterns/command/command';
 
 export type EditMode = 'permanent' | 'draft';
 export type ItemKey = '_draft_' | string;
@@ -50,7 +50,7 @@ export type CollectionAppRuntime<T extends Omit<object, 'recordId'>, TProjection
 };
 
 export type CollectionAppCommandResult<T> = {
-	command: Command;
+	command: CommandInterface;
 	result: CollectionAppResult<T>;
 };
 

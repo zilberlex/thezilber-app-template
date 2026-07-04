@@ -1,6 +1,6 @@
 <script lang="ts">
 	import CopyIcon from '$lib/assets/icons/CopyIcon.svelte';
-	import type { Command } from '$lib/engine/patterns/command/command';
+	import type { CommandInterface } from '$lib/engine/patterns/command/command';
 	import { createChangeElementTextContentTemporaryCommand } from '$lib/engine/patterns/command/command-impl/change-element-content-command';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 
@@ -13,7 +13,7 @@
 	} = $props();
 
 	let thisNode = $state() as Element;
-	let copyTextReplaceCommand: Command;
+	let copyTextReplaceCommand: CommandInterface;
 	$effect(() => {
 		if (thisNode) {
 			copyTextReplaceCommand = createChangeElementTextContentTemporaryCommand(
