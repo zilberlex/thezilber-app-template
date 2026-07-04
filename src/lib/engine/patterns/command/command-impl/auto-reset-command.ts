@@ -1,6 +1,6 @@
-import type { CommandInterface } from '../command';
+import type { Command } from '../command';
 
-export function wrapAutoResetCommand(command: CommandInterface<boolean>, timeoutMs: number): CommandInterface<boolean> {
+export function wrapAutoResetCommand(command: Command<boolean>, timeoutMs: number): Command<boolean> {
 	let timeout: number;
 	let wasExecuted: boolean;
 	return {

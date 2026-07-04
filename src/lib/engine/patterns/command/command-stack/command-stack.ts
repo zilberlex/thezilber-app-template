@@ -1,14 +1,15 @@
 import type { AsyncCommandInterface } from '../async-command';
 import type { CommandRegistry } from '../../../../../routes/async-command-stack/pipeline/command-registry';
-import type { PersistentCommand } from '../../../../../routes/async-command-stack/pipeline/pipeline-command';
-import type { CommandInterface } from '../command';
+import type { PersistedCommand } from '../persistent-command';
+import type { PersistableItem } from '../../persistancy/persistent-item';
 
-export type PersistentCommandStack = {
-	persistentCommandsUndo: Array<PersistentCommand<any>>;
-	persistentCommandsRedo: Array<PersistentCommand<any>>;
+export type PersistedCommandStack = {
+	persistedCommandsUndo: Array<PersistedCommand>;
+	persistentCommandsRedo: Array<PersistedCommand>;
 };
 
-export type CommandItem = CommandInterface | AsyncCommandInterface<any>;
+// TODO AZ Use CommandInterface
+export type CommandItem = AsyncCommandInterface<any> & PersistableItem<any>;
 
 export class CommandStack {
 	#commandsUndo: Array<CommandItem> = [];
@@ -21,8 +22,7 @@ export class CommandStack {
 	}
 
 	async execute(command: CommandItem) {
-		command.execute();
-		this.push(command);
+		throw Error('implement');
 	}
 
 	async undo() {
@@ -42,25 +42,25 @@ export class CommandStack {
 		}
 	}
 
-	persistStack(): PersistentCommandStack {
+	persistStack(): PersistedCommandStack {
 		return {
-			persistentCommandsUndo: this.#commandsUndo.map((x) => x.persistCommand()),
-			persistentCommandsRedo: this.#commandsRedo.map((x) => x.persistCommand())
+			persistedCommandsUndo: this.#commandsUndo.map((x) => x.persist()),
+			persistentCommandsRedo: this.#commandsRedo.map((x) => x.persist())
 		};
 	}
 
-	hydrate(persistStack: PersistentCommandStack, commandRegistry: CommandRegistry) {
-		this.#commandsUndo = this.#loadCommands(persistStack.persistentCommandsUndo, commandRegistry);
+	hydrate(persistStack: PersistedCommandStack, commandRegistry: CommandRegistry) {
+		this.#commandsUndo = this.#loadCommands(persistStack.persistedCommandsUndo, commandRegistry);
 		this.#commandsRedo = this.#loadCommands(persistStack.persistentCommandsRedo, commandRegistry);
 	}
 
-	#loadCommands(persistentCommands: Array<PersistentCommand<any>>, commandRegistry: CommandRegistry) {
+	#loadCommands(persistentCommands: Array<PersistedCommand<any>>, commandRegistry: CommandRegistry) {
 		return persistentCommands
 			.map((x) => {
 				let ret = commandRegistry.create(x);
 
 				if (!ret) {
-					console.log('No persistent mapping for command type', x.commandType);
+					console.log('No persistent mapping for command type', x.itemType);
 				}
 
 				return ret;

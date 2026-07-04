@@ -1,14 +1,14 @@
 import { createSmartHandler } from '../events/event-handling';
 import { isKeyboardGoEvent } from './bl-events';
 import { engineHotkeysConfig, type TriggerType } from './hotkey-module-config';
-import type { CommandInterface } from '$lib/engine/patterns/command/command';
+import type { Command } from '$lib/engine/patterns/command/command';
 import { TTLMap } from '$lib/engine/patterns/cache';
 import { createAddTempCssClassCommand } from '$lib/engine/patterns/command/command-impl/add-css-class-command';
 
 const BUTTON_RAPID_FIRE_COOLDOWN = engineHotkeysConfig.buttonRapidFireCooldownMs;
 const BUTTON_PRESSED_DURATION = engineHotkeysConfig.buttonClickPressedCssDurationMs;
 
-const allBtnCommands = new TTLMap<HTMLButtonElement, CommandInterface[]>(1000 * 60 * 5);
+const allBtnCommands = new TTLMap<HTMLButtonElement, Command[]>(1000 * 60 * 5);
 
 export const createEngineButtonClickOnKeyDownHandler = () =>
 	createSmartHandler(

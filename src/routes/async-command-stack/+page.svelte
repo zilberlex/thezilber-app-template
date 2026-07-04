@@ -10,7 +10,7 @@
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { type InsertCtx } from './app-actions/insert-pipline';
 	import Button from '$lib/ui/basic-components/Button.svelte';
-	import type { PersistentCommandStack } from '$lib/engine/patterns/command/command-stack/command-stack';
+	import type { PersistedCommandStack } from '$lib/engine/patterns/command/command-stack/command-stack';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/types';
 	import { DemoCommandFactory } from './app-actions/demo-command-factory';
@@ -120,7 +120,7 @@
 	}
 
 	function loadCommandStack() {
-		let persistentStack = loadLocalState<PersistentCommandStack>('COMMANDS');
+		let persistentStack = loadLocalState<PersistedCommandStack>('COMMANDS');
 		if (!persistentStack) {
 			console.warn('LOAD no Command Stack Present');
 			return;

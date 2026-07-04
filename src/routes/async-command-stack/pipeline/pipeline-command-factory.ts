@@ -1,5 +1,5 @@
 import type { CommandRegistry } from './command-registry';
-import { pipelineCommand, type PersistentCommand, type PipelineSteps } from './pipeline-command';
+import { pipelineCommand, type PersistedPipelineCommand, type PipelineSteps } from './pipeline-command';
 
 export type PipelineSpec<Deps, Ctx, E extends Error = Error> = {
 	steps: PipelineSteps<Deps, Ctx, E>;
@@ -11,14 +11,14 @@ type CtxOf<Spec> = Spec extends PipelineSpec<any, infer Ctx, any> ? Ctx : never;
 
 export type PipelineCommandTypeOf<Specs> = Extract<keyof Specs, string>;
 
-export type AnyPersistentCommandForSpecs<Specs extends PipelineSpecs<any>> = {
-	[KCommandType in PipelineCommandTypeOf<Specs>]: PersistentCommandForSpec<Specs, KCommandType>;
+export type AnyPersistedCommandForSpecs<Specs extends PipelineSpecs<any>> = {
+	[KCommandType in PipelineCommandTypeOf<Specs>]: PersistedCommandForSpec<Specs, KCommandType>;
 }[PipelineCommandTypeOf<Specs>];
 
-export type PersistentCommandForSpec<
+export type PersistedCommandForSpec<
 	Specs extends PipelineSpecs<any>,
 	KCommandType extends PipelineCommandTypeOf<Specs>
-> = PersistentCommand<KCommandType, CtxOf<Specs[KCommandType]>>;
+> = PersistedPipelineCommand<KCommandType, CtxOf<Specs[KCommandType]>>;
 
 export function definePipelineSpecs<Deps>() {
 	return <const Specs extends PipelineSpecs<Deps>>(specs: Specs) => specs;
@@ -26,7 +26,7 @@ export function definePipelineSpecs<Deps>() {
 
 export type PipelineCommandRegistrySpec<Deps, Specs extends PipelineSpecs<Deps>> = {
 	[KCommandType in PipelineCommandTypeOf<Specs>]: {
-		input: PersistentCommandForSpec<Specs, KCommandType>;
+		input: PersistedCommandForSpec<Specs, KCommandType>;
 		output: ReturnType<PipelineCommandFactory<Deps, Specs>['restore']>;
 	};
 };
@@ -46,18 +46,18 @@ export class PipelineCommandFactory<Deps, Specs extends PipelineSpecs<Deps>> {
 		return pipelineCommand(commandType, this.#deps, ctx, spec.steps);
 	}
 
-	restore(persistentCommand: AnyPersistentCommandForSpecs<Specs>) {
-		const command = this.create(persistentCommand.commandType, persistentCommand.baseCtx);
+	restore(persistedCommand: AnyPersistedCommandForSpecs<Specs>) {
+		const command = this.create(persistedCommand.itemType, persistedCommand.baseCtx);
 
-		command.hydrateCommand(persistentCommand);
+		command.hydrateCommand(persistedCommand);
 
 		return command;
 	}
 
 	registerInto(commandRegistry: CommandRegistry) {
 		for (const commandType of Object.keys(this.#specs) as Array<PipelineCommandTypeOf<Specs>>) {
-			commandRegistry.register(commandType, (persistentCommand) =>
-				this.restore(persistentCommand as AnyPersistentCommandForSpecs<Specs>)
+			commandRegistry.register(commandType, (persistedCommand) =>
+				this.restore(persistedCommand as AnyPersistedCommandForSpecs<Specs>)
 			);
 		}
 	}

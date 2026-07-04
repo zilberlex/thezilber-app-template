@@ -1,3 +1,5 @@
+import type { PersistedCommand } from '$lib/engine/patterns/command/persistent-command';
+import type { PersistableItem } from '$lib/engine/patterns/persistancy/persistent-item';
 import { type AsyncCommandInterface } from '../../../lib/engine/patterns/command/async-command';
 import { pipelineSuccessResult, type ErrorResult, type PipelineStep, type SuccessResult } from './pipeline-step';
 
@@ -17,8 +19,10 @@ type LastNonVoidStepReturn<Steps extends readonly unknown[]> = Steps extends rea
 
 type OperationStatus = 'initialized' | 'executing' | 'executed' | 'undoing' | 'undone' | 'execute-error' | 'undo-error';
 
-export type PersistentCommand<CommandType extends string = string, PipelineCtx = unknown> = {
-	commandType: CommandType;
+export type PersistedPipelineCommand<
+	CommandType extends string = string,
+	PipelineCtx = unknown
+> = PersistedCommand<CommandType> & {
 	baseCtx: PipelineCtx;
 	lastExecutePipelineCtx?: PipelineCtx;
 	operationStatus: OperationStatus;
@@ -57,8 +61,12 @@ export class PipelineCommand<
 	PipelineCtx,
 	Steps extends NonEmptyArray<AnyPipelineStep<Deps, PipelineCtx, E>>,
 	E extends Error
-> implements AsyncCommandInterface<SuccessResult<LastNonVoidStepReturn<Steps>> | ErrorResult<E>> {
-	#commandType: KCommandType;
+>
+	implements
+		AsyncCommandInterface<SuccessResult<LastNonVoidStepReturn<Steps>> | ErrorResult<E>>,
+		PersistableItem<PersistedPipelineCommand>
+{
+	#itemType: KCommandType;
 
 	#operationStatus: OperationStatus;
 	#deps: Deps;
@@ -77,7 +85,7 @@ export class PipelineCommand<
 		this.#deps = deps;
 		this.#baseCtx = ctx;
 		this.#steps = steps;
-		this.#commandType = commandType;
+		this.#itemType = commandType;
 		this.#operationStatus = 'initialized';
 		this.#hydrateFunc = hydrateFunc;
 	}
@@ -86,26 +94,26 @@ export class PipelineCommand<
 		return this.#operationStatus === 'executed';
 	}
 
-	get commandType() {
-		return this.#commandType;
+	get itemType() {
+		return this.#itemType;
 	}
 
-	persistCommand(): PersistentCommand<KCommandType, PipelineCtx> {
+	persist(): PersistedPipelineCommand<KCommandType, PipelineCtx> {
 		return {
-			commandType: this.commandType,
+			itemType: this.itemType,
 			baseCtx: this.#baseCtx,
 			operationStatus: this.#operationStatus,
 			lastExecutePipelineCtx: this.#lastExecutePipelineCtx
 		};
 	}
 
-	hydrateCommand(persistantCommand: PersistentCommand<KCommandType, PipelineCtx>) {
-		const { baseCtx: ctx, operationStatus, lastExecutePipelineCtx } = persistantCommand;
+	hydrateCommand(persistedCommand: PersistedPipelineCommand<KCommandType, PipelineCtx>) {
+		const { baseCtx: ctx, operationStatus, lastExecutePipelineCtx } = persistedCommand;
 		this.#baseCtx = ctx;
 		this.#operationStatus = operationStatus;
 		this.#lastExecutePipelineCtx = lastExecutePipelineCtx;
 
-		this.#hydrateFunc(persistantCommand.baseCtx);
+		this.#hydrateFunc(persistedCommand.baseCtx);
 	}
 
 	async execute(): Promise<SuccessResult<LastNonVoidStepReturn<Steps>> | ErrorResult<E>> {

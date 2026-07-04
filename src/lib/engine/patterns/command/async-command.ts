@@ -1,3 +1,3 @@
-import type { CommandInterface } from './command';
+import type { Command } from './command';
 
-export interface AsyncCommandInterface<R = void> extends CommandInterface<Promise<R>> {}
+export interface AsyncCommandInterface<R = void> extends Command<Promise<R>> {}

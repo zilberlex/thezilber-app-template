@@ -1,4 +1,4 @@
-import type { CommandInterface } from '../command';
+import type { Command } from '../command';
 import { wrapAutoResetCommand } from './auto-reset-command';
 
 /**
@@ -6,7 +6,7 @@ import { wrapAutoResetCommand } from './auto-reset-command';
  * Execute: Adds the specified class to the target Element.
  * Undo: will remove the cssClass.
  *  * the class will be removed only if the class was added due to command execution. */
-export function createAddCssClassCommand(target: Element, cssClass: string): CommandInterface<boolean> {
+export function createAddCssClassCommand(target: Element, cssClass: string): Command<boolean> {
 	let wasExecuted = false;
 	return {
 		execute: () => {
