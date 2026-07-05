@@ -6,7 +6,7 @@ import { wrapAutoResetCommand } from './auto-reset-command';
  * Execute: Changes the textContent of the element with replacedText.
  * Undo: Will revert back to original textContent.
  *  * The revert will happen only of the element contains at the time of revert the replacedText. */
-export function createChangeElementTextContentCommand(target: Element, replacedText: string): Command {
+export function createChangeElementTextContentCommand(target: Element, replacedText: string): Command<boolean> {
 	let orgText = '';
 	let wasExecuted = false;
 	return {
@@ -22,14 +22,18 @@ export function createChangeElementTextContentCommand(target: Element, replacedT
 			return true;
 		},
 		undo: () => {
+			let ret = false;
 			if (wasExecuted) {
 				// To protect against conditions where the element had it's content changed after the execution of this command
 				if (target.innerHTML === replacedText) {
 					target.innerHTML = orgText;
+
+					ret = true;
 				}
 
 				wasExecuted = false;
 			}
+			return ret;
 		},
 		get executed() {
 			return wasExecuted;

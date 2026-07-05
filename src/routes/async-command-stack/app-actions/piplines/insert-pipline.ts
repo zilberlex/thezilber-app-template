@@ -1,13 +1,7 @@
 import { sleep } from '$lib/engine/general-js-ts/common';
-import type { PipelineSteps } from '../pipeline/pipeline-command';
-import { pipelineStep } from '../pipeline/pipeline-step';
-import type { DemoCommandDeps } from './pipeline-common';
-
-export type InsertCtx = {
-	insertValue: string;
-	undoValue?: string;
-	key: string;
-};
+import type { PipelineSteps } from '../../../../lib/engine/patterns/command/pipeline/pipeline-command';
+import { pipelineStep } from '../../../../lib/engine/patterns/command/pipeline/pipeline-step';
+import type { DemoCommandDeps, InsertCtx } from './types';
 
 const startingStep = pipelineStep(
 	(_deps: DemoCommandDeps, ctx: InsertCtx) => {
@@ -33,14 +27,14 @@ const endStep = pipelineStep(
 	}
 );
 
-const optimisticInsertPipelineStep = pipelineStep(
-	(deps: DemoCommandDeps, ctx: InsertCtx) => {
+const optimisticInsertPipelineStep = pipelineStep<DemoCommandDeps, InsertCtx>(
+	(deps, ctx) => {
 		const { key, insertValue } = ctx;
 		const { memoryStorage } = deps;
 
 		memoryStorage.set(key, insertValue);
 	},
-	(deps: DemoCommandDeps, ctx: InsertCtx) => {
+	(deps, ctx) => {
 		const { undoValue, key } = ctx;
 		const { memoryStorage } = deps;
 
@@ -52,8 +46,8 @@ const optimisticInsertPipelineStep = pipelineStep(
 	}
 );
 
-const insertAsyncPiplineStep = pipelineStep(
-	async (deps: DemoCommandDeps, ctx: InsertCtx) => {
+const insertAsyncPiplineStep = pipelineStep<DemoCommandDeps, InsertCtx, string>(
+	async (deps, ctx) => {
 		const { key, insertValue } = ctx;
 		const { farAwayStorage } = deps;
 
@@ -63,7 +57,7 @@ const insertAsyncPiplineStep = pipelineStep(
 
 		return `Inserted [${key}, ${insertValue}]`;
 	},
-	async (deps: DemoCommandDeps, ctx: InsertCtx) => {
+	async (deps, ctx) => {
 		const { key, undoValue, insertValue } = ctx;
 		const { farAwayStorage } = deps;
 

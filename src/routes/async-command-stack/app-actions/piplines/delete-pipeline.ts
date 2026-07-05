@@ -1,12 +1,7 @@
 import { sleep } from '$lib/engine/general-js-ts/common';
-import { type PipelineSteps } from '../pipeline/pipeline-command';
-import { pipelineStep } from '../pipeline/pipeline-step';
-import type { DemoCommandDeps } from './pipeline-common';
-
-export type DeleteCtx = {
-	key: string;
-	originalValue: string;
-};
+import { type PipelineSteps } from '../../../../lib/engine/patterns/command/pipeline/pipeline-command';
+import { pipelineStep } from '../../../../lib/engine/patterns/command/pipeline/pipeline-step';
+import type { DeleteCtx, DemoCommandDeps } from './types';
 
 const startingStep = pipelineStep<DemoCommandDeps, DeleteCtx>(
 	(_deps, ctx) => {
@@ -23,14 +18,14 @@ const startingStep = pipelineStep<DemoCommandDeps, DeleteCtx>(
 	}
 );
 
-const optimisticDeletePipelineStep = pipelineStep(
-	(deps: DemoCommandDeps, ctx: DeleteCtx) => {
+const optimisticDeletePipelineStep = pipelineStep<DemoCommandDeps, DeleteCtx>(
+	(deps, ctx) => {
 		let { key } = ctx;
 		let { memoryStorage } = deps;
 
 		memoryStorage.delete(key);
 	},
-	(deps: DemoCommandDeps, ctx: DeleteCtx) => {
+	(deps, ctx) => {
 		let { key, originalValue } = ctx;
 		let { memoryStorage } = deps;
 
@@ -42,8 +37,8 @@ const optimisticDeletePipelineStep = pipelineStep(
 	}
 );
 
-const deleteAsyncPiplineStep = pipelineStep(
-	async (deps: DemoCommandDeps, ctx: DeleteCtx) => {
+const deleteAsyncPiplineStep = pipelineStep<DemoCommandDeps, DeleteCtx, string | undefined>(
+	async (deps, ctx) => {
 		let { key, originalValue } = ctx;
 		let { farAwayStorage } = deps;
 
@@ -58,7 +53,7 @@ const deleteAsyncPiplineStep = pipelineStep(
 
 		return retVal;
 	},
-	async (deps: DemoCommandDeps, ctx: DeleteCtx) => {
+	async (deps, ctx) => {
 		let { key, originalValue } = ctx;
 		let { farAwayStorage } = deps;
 

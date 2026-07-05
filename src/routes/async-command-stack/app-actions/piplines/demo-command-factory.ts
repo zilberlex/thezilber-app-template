@@ -1,9 +1,12 @@
-import type { CommandRegistry } from '../pipeline/command-registry';
-import { definePipelineSpecs, PipelineCommandFactory } from '../pipeline/pipeline-command-factory';
-import { clearSteps, type ClearCtx } from './clear-pipeline';
-import { deleteSteps, type DeleteCtx } from './delete-pipeline';
-import { insertSteps, type InsertCtx } from './insert-pipline';
-import type { DemoCommandDeps } from './pipeline-common';
+import type { CommandRegistry } from '$lib/engine/patterns/command/persistancy/command-registry';
+import {
+	definePipelineSpecs,
+	PipelineCommandFactory
+} from '$lib/engine/patterns/command/pipeline/pipeline-command-factory';
+import { clearSteps } from './clear-pipeline';
+import { deleteSteps } from './delete-pipeline';
+import { insertSteps } from './insert-pipline';
+import type { ClearCtx, DeleteCtx, DemoCommandDeps, InsertCtx } from './types';
 
 const demoCommandSpecs = definePipelineSpecs<DemoCommandDeps>()({
 	'demo-insert-command': {

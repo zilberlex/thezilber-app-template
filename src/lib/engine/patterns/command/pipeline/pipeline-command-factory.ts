@@ -1,4 +1,4 @@
-import type { CommandRegistry } from './command-registry';
+import type { CommandRegistry } from '../persistancy/command-registry';
 import { pipelineCommand, type PersistedPipelineCommand, type PipelineSteps } from './pipeline-command';
 
 export type PipelineSpec<Deps, Ctx, E extends Error = Error> = {

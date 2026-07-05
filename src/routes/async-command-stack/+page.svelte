@@ -1,22 +1,20 @@
 <script lang="ts">
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
-	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
 	import { onMount } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
-	import ItemSlot from './ItemSlot.svelte';
 	import { loadLocalState, saveLocalState } from '$lib/engine/storage/local/simple-state-persistance.svelte';
 	import { copyState } from '$lib/engine/svelte-helpers/copy-state';
 	import { appState } from '$lib/engine/state/application-state.svelte';
-	import { type InsertCtx } from './app-actions/insert-pipline';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import type { PersistedCommandStack } from '$lib/engine/patterns/command/command-stack/command-stack';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/types';
-	import { DemoCommandFactory } from './app-actions/demo-command-factory';
-	import { createCommandRegistry } from './pipeline/command-registry';
-	import type { DeleteCtx } from './app-actions/delete-pipeline';
-	import type { ClearCtx } from './app-actions/clear-pipeline';
+	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
+	import ItemSlot from './ItemSlot.svelte';
+	import { createCommandRegistry } from '$lib/engine/patterns/command/persistancy/command-registry';
+	import { DemoCommandFactory } from './app-actions/piplines/demo-command-factory';
+	import type { ClearCtx, DeleteCtx, InsertCtx } from './app-actions/piplines/types';
 
 	let memoryStorage = new SvelteMap<string, string>();
 	let farAwayStorage = new SvelteMap<string, string>();
@@ -48,18 +46,6 @@
 		loadAppState();
 		loadCommandStack();
 	});
-
-	async function clearState() {
-		let clearCtx = $state.snapshot<ClearCtx>({
-			storageState: memoryStorage
-		});
-
-		let command = demoCommandFacotry.clearCommand(clearCtx);
-		appState.commandStack?.push(command);
-		let commandResult = await command.execute();
-
-		console.log('Delete Command Result', commandResult);
-	}
 
 	function copyValues(key: any, value: any): void {
 		inputKey = key;
@@ -108,6 +94,18 @@
 		let commandResult = await command.execute();
 
 		console.log('Clear Command Result', commandResult);
+	}
+
+	async function clearState() {
+		let clearCtx = $state.snapshot<ClearCtx>({
+			storageState: memoryStorage
+		});
+
+		let command = demoCommandFacotry.clearCommand(clearCtx);
+		appState.commandStack?.push(command);
+		let commandResult = await command.execute();
+
+		console.log('Delete Command Result', commandResult);
 	}
 
 	function saveCommandStack() {

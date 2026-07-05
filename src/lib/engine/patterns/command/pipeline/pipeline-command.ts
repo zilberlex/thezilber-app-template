@@ -1,6 +1,6 @@
 import type { PersistedCommand } from '$lib/engine/patterns/command/persistent-command';
-import type { PersistableItem } from '$lib/engine/patterns/persistancy/persistent-item';
-import { type AsyncCommandInterface } from '../../../lib/engine/patterns/command/async-command';
+import type { PersistableItem } from '$lib/engine/patterns/command/persistancy/persistent-item';
+import { type AsyncCommandInterface } from '../async-command';
 import { pipelineSuccessResult, type ErrorResult, type PipelineStep, type SuccessResult } from './pipeline-step';
 
 type StepResult<S> = S extends PipelineStep<any, any, infer R, any> ? Awaited<R> : never;

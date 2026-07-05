@@ -1,11 +1,7 @@
 import { sleep } from '$lib/engine/general-js-ts/common';
-import { type PipelineSteps } from '../pipeline/pipeline-command';
-import { pipelineStep } from '../pipeline/pipeline-step';
-import type { DemoCommandDeps } from './pipeline-common';
-
-export type ClearCtx = {
-	storageState: Map<string, string>;
-};
+import type { PipelineSteps } from '$lib/engine/patterns/command/pipeline/pipeline-command';
+import { pipelineStep } from '$lib/engine/patterns/command/pipeline/pipeline-step';
+import type { ClearCtx, DemoCommandDeps } from './types';
 
 const startingStep = pipelineStep<DemoCommandDeps, ClearCtx>(
 	(_deps, ctx) => {
@@ -36,8 +32,8 @@ const optimisticClearPipelineStep = pipelineStep<DemoCommandDeps, ClearCtx>(
 	}
 );
 
-const clearAsyncPiplineStep = pipelineStep(
-	async (deps: DemoCommandDeps, _ctx: ClearCtx) => {
+const clearAsyncPiplineStep = pipelineStep<DemoCommandDeps, ClearCtx, string>(
+	async (deps, _ctx) => {
 		let { farAwayStorage } = deps;
 
 		await sleep(1000);
