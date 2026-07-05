@@ -1,22 +1,9 @@
 import type { MaybePromise } from '$lib/engine/general-js-ts/typescript/type-helpers';
+import type { ErrorResult, PipelineStep, ResultLike, SuccessResult } from './types';
 
-export type ResultLike = {
-	ok: boolean;
-};
-
-export type ErrorResult<E extends Error> = {
-	ok: false;
-	error: E;
-};
-
-export type SuccessResult<T = void> = [T] extends [void]
-	? {
-			ok: true;
-		}
-	: {
-			ok: true;
-			value: T;
-		};
+type PipelineStepReturn<R, E extends Error> = [R] extends [void]
+	? void | SuccessResult<void> | ErrorResult<E>
+	: R | SuccessResult<R> | ErrorResult<E>;
 
 export function pipelineSuccessResult<T = void>(value?: T): SuccessResult<T> {
 	return (arguments.length === 0 ? { ok: true } : { ok: true, value }) as SuccessResult<T>;
@@ -25,17 +12,6 @@ export function pipelineSuccessResult<T = void>(value?: T): SuccessResult<T> {
 export function pipelineFailResult<E extends Error>(e: E): ErrorResult<E> {
 	return { ok: false, error: e };
 }
-
-type PipelineStepReturn<R, E extends Error> = [R] extends [void]
-	? void | SuccessResult<void> | ErrorResult<E>
-	: R | SuccessResult<R> | ErrorResult<E>;
-
-export type PipelineStep<Deps, Ctx, R = void, E extends Error = Error> = {
-	execute: (deps: Deps, ctx: Ctx) => MaybePromise<SuccessResult<R> | ErrorResult<E>>;
-	undo: (deps: Deps, ctx: Ctx) => MaybePromise<SuccessResult<R> | ErrorResult<E>>;
-	executeError: (deps: Deps, ctx: Ctx) => MaybePromise<SuccessResult<any> | ErrorResult<E>>;
-	undoError?: (deps: Deps, ctx: Ctx) => MaybePromise<SuccessResult<any> | ErrorResult<E>>;
-};
 
 /**
  * Creates a normalized pipeline step.

@@ -1,7 +1,15 @@
-import type { PersistedCommand } from '$lib/engine/patterns/command/persistent-command';
+import type { PersistedCommand } from '$lib/engine/patterns/command/persistancy/persistent-command';
 import type { PersistableItem } from '$lib/engine/patterns/command/persistancy/persistent-item';
 import { type AsyncCommandInterface } from '../async-command';
-import { pipelineSuccessResult, type ErrorResult, type PipelineStep, type SuccessResult } from './pipeline-step';
+import { pipelineSuccessResult } from './pipeline-step';
+import type {
+	ErrorResult,
+	PersistedPipelineCommand,
+	PipelineCommandOperationStatus,
+	PipelineStep,
+	PipelineSteps,
+	SuccessResult
+} from './types';
 
 type StepResult<S> = S extends PipelineStep<any, any, infer R, any> ? Awaited<R> : never;
 
@@ -9,24 +17,11 @@ type NonEmptyArray<T> = [T, ...T[]];
 
 type AnyPipelineStep<Deps, Ctx, E extends Error> = PipelineStep<Deps, Ctx, any, E>;
 
-export type PipelineSteps<Deps, Ctx, E extends Error = Error> = NonEmptyArray<PipelineStep<Deps, Ctx, any, E>>;
-
 type LastNonVoidStepReturn<Steps extends readonly unknown[]> = Steps extends readonly [...infer Rest, infer LastStep]
 	? [StepResult<LastStep>] extends [void]
 		? LastNonVoidStepReturn<Rest>
 		: StepResult<LastStep>
 	: void;
-
-type OperationStatus = 'initialized' | 'executing' | 'executed' | 'undoing' | 'undone' | 'execute-error' | 'undo-error';
-
-export type PersistedPipelineCommand<
-	CommandType extends string = string,
-	PipelineCtx = unknown
-> = PersistedCommand<CommandType> & {
-	baseCtx: PipelineCtx;
-	lastExecutePipelineCtx?: PipelineCtx;
-	operationStatus: OperationStatus;
-};
 
 function hasSuccessValue(result: SuccessResult<any>): result is { ok: true; value: unknown } {
 	return 'value' in result;
@@ -68,7 +63,7 @@ export class PipelineCommand<
 {
 	#itemType: KCommandType;
 
-	#operationStatus: OperationStatus;
+	#operationStatus: PipelineCommandOperationStatus;
 	#deps: Deps;
 	#baseCtx: PipelineCtx;
 	#steps: Steps;

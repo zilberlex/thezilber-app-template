@@ -1,6 +1,6 @@
 import type { AsyncCommandInterface } from '../async-command';
 import type { CommandRegistry } from '../persistancy/command-registry';
-import type { PersistedCommand } from '../persistent-command';
+import type { PersistedCommand } from '../persistancy/persistent-command';
 import type { PersistableItem } from '../persistancy/persistent-item';
 
 export type PersistedCommandStack = {
