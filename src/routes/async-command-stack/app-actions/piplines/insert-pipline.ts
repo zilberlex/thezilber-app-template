@@ -1,5 +1,5 @@
 import { sleep } from '$lib/engine/general-js-ts/common';
-import type { PipelineSteps } from '../../../../lib/engine/patterns/command/pipeline/pipeline-command';
+import type { PipelineSteps } from '$lib/engine/patterns/command/pipeline/types';
 import { pipelineStep } from '../../../../lib/engine/patterns/command/pipeline/pipeline-step';
 import type { DemoCommandDeps, InsertCtx } from './types';
 
@@ -48,30 +48,38 @@ const optimisticInsertPipelineStep = pipelineStep<DemoCommandDeps, InsertCtx>(
 
 const insertAsyncPiplineStep = pipelineStep<DemoCommandDeps, InsertCtx, string>(
 	async (deps, ctx) => {
-		const { key, insertValue } = ctx;
-		const { farAwayStorage } = deps;
+		let { farAwayStorageAsyncSerialQueue } = deps;
 
-		await sleep(1000);
+		return await farAwayStorageAsyncSerialQueue.enqueue(async () => {
+			const { key, insertValue } = ctx;
+			const { farAwayStorage } = deps;
 
-		farAwayStorage.set(key, insertValue);
+			await sleep(1000);
 
-		return `Inserted [${key}, ${insertValue}]`;
+			farAwayStorage.set(key, insertValue);
+
+			return `Inserted [${key}, ${insertValue}]`;
+		});
 	},
 	async (deps, ctx) => {
-		const { key, undoValue, insertValue } = ctx;
-		const { farAwayStorage } = deps;
+		let { farAwayStorageAsyncSerialQueue } = deps;
 
-		await sleep(1000);
+		return await farAwayStorageAsyncSerialQueue.enqueue(async () => {
+			const { key, undoValue, insertValue } = ctx;
+			const { farAwayStorage } = deps;
 
-		if (undoValue === undefined) {
-			farAwayStorage.delete(key);
-		} else {
-			farAwayStorage.set(key, undoValue);
-		}
+			await sleep(1000);
 
-		return undoValue === undefined
-			? `Undone Insertion, deleting - [${key}]`
-			: `Undone Insertion key: [${key}], value: [${insertValue}] -> [${undoValue}]`;
+			if (undoValue === undefined) {
+				farAwayStorage.delete(key);
+			} else {
+				farAwayStorage.set(key, undoValue);
+			}
+
+			return undoValue === undefined
+				? `Undone Insertion, deleting - [${key}]`
+				: `Undone Insertion key: [${key}], value: [${insertValue}] -> [${undoValue}]`;
+		});
 	}
 );
 

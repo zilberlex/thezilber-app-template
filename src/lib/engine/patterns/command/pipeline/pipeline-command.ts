@@ -1,9 +1,11 @@
 import type { PersistedCommand } from '$lib/engine/patterns/command/persistancy/persistent-command';
 import type { PersistableItem } from '$lib/engine/patterns/command/persistancy/persistent-item';
+import { RecentItemsCache } from '../../recent-items-cache';
 import { type AsyncCommandInterface } from '../async-command';
 import { pipelineSuccessResult } from './pipeline-step';
 import type {
 	ErrorResult,
+	FullPipelineCtx,
 	PersistedPipelineCommand,
 	PipelineCommandOperationStatus,
 	PipelineStep,
@@ -63,11 +65,11 @@ export class PipelineCommand<
 {
 	#itemType: KCommandType;
 
-	#operationStatus: PipelineCommandOperationStatus;
+	#recentOperationCache = new RecentItemsCache<FullPipelineCtx<PipelineCtx>>();
+
 	#deps: Deps;
 	#baseCtx: PipelineCtx;
 	#steps: Steps;
-	#lastExecutePipelineCtx?: PipelineCtx;
 	#hydrateFunc: (ctx: PipelineCtx) => void;
 
 	constructor(
@@ -81,12 +83,17 @@ export class PipelineCommand<
 		this.#baseCtx = ctx;
 		this.#steps = steps;
 		this.#itemType = commandType;
-		this.#operationStatus = 'initialized';
 		this.#hydrateFunc = hydrateFunc;
+
+		this.#recentOperationCache.add({
+			opId: 0,
+			operationStatus: 'initialized',
+			ctx: structuredClone(ctx)
+		});
 	}
 
 	get executed() {
-		return this.#operationStatus === 'executed';
+		return this.#recentOperationCache.getLatest()?.operationStatus === 'executed';
 	}
 
 	get itemType() {
@@ -97,44 +104,72 @@ export class PipelineCommand<
 		return {
 			itemType: this.itemType,
 			baseCtx: this.#baseCtx,
-			operationStatus: this.#operationStatus,
-			lastExecutePipelineCtx: this.#lastExecutePipelineCtx
+			operationStatusHistory: structuredClone(this.#recentOperationCache.persist())
 		};
 	}
 
 	hydrateCommand(persistedCommand: PersistedPipelineCommand<KCommandType, PipelineCtx>) {
-		const { baseCtx: ctx, operationStatus, lastExecutePipelineCtx } = persistedCommand;
+		const { baseCtx: ctx, operationStatusHistory } = persistedCommand;
 		this.#baseCtx = ctx;
-		this.#operationStatus = operationStatus;
-		this.#lastExecutePipelineCtx = lastExecutePipelineCtx;
+
+		this.#recentOperationCache.hydrate(operationStatusHistory);
 
 		this.#hydrateFunc(persistedCommand.baseCtx);
 	}
 
 	async execute(): Promise<SuccessResult<LastNonVoidStepReturn<Steps>> | ErrorResult<E>> {
-		const currentCtx = structuredClone(this.#baseCtx);
+		console.log('[PipelineCommand] Executing Command', {
+			commandType: this.#itemType,
+			baseCtx: this.#baseCtx
+		});
+
+		let lastFullCtx = this.#recentOperationCache.getLatest();
+
+		if (lastFullCtx === undefined) {
+			throw new Error(
+				'[PipelineCommand] improper initialization of PipelineCommand, lastOperationStatus to be initialized'
+			);
+		}
+
+		if (
+			lastFullCtx.operationStatus !== 'initialized' &&
+			lastFullCtx.operationStatus !== 'undoing' &&
+			lastFullCtx.operationStatus !== 'undone'
+		) {
+			throw new Error(
+				`[PipelineCommand] Can not Execute non Undoing, Undone, or Initialized Commands. lastOperationStatus: [${lastFullCtx.operationStatus}]`
+			);
+		}
+
+		const fullPipelineCtx: FullPipelineCtx<PipelineCtx> = {
+			opId: lastFullCtx.opId++,
+			operationStatus: 'executing',
+			ctx: structuredClone(this.#baseCtx)
+		};
+
+		this.#recentOperationCache.add(fullPipelineCtx);
+
+		console.log('[PipelineCommand] Executing Command', {
+			commandType: this.#itemType,
+			baseCtx: this.#baseCtx,
+			fullPipelineCtx,
+			lastFullCtx: lastFullCtx
+		});
 
 		const executedSteps: AnyPipelineStep<Deps, PipelineCtx, E>[] = [];
 
 		let commandResult: SuccessResult<any> = pipelineSuccessResult();
 
-		if (!(this.#operationStatus == 'initialized' || this.#operationStatus == 'undone')) {
-			throw new Error(
-				`Execute Error on command. Only Undone or initialized Commands can be Executed. lastOperationStatus: [${this.#operationStatus}]`
-			);
-		}
-
-		this.#operationStatus = 'executing';
 		try {
 			for (const step of this.#steps) {
-				const stepResult = await Promise.resolve(step.execute(this.#deps, currentCtx));
+				const stepResult = await Promise.resolve(step.execute(this.#deps, fullPipelineCtx.ctx));
 
 				if (!stepResult.ok) {
 					for (const executedStep of executedSteps.reverse()) {
-						await Promise.resolve(executedStep.executeError(this.#deps, currentCtx));
+						await Promise.resolve(executedStep.executeError(this.#deps, fullPipelineCtx.ctx));
 					}
 
-					this.#operationStatus = 'execute-error';
+					fullPipelineCtx.operationStatus = 'execute-error';
 					return stepResult;
 				}
 
@@ -145,30 +180,52 @@ export class PipelineCommand<
 				executedSteps.push(step);
 			}
 
-			this.#operationStatus = 'executed';
-			this.#lastExecutePipelineCtx = currentCtx;
+			fullPipelineCtx.operationStatus = 'executed';
 
 			return commandResult as SuccessResult<LastNonVoidStepReturn<Steps>>;
 		} catch (e) {
-			this.#operationStatus = 'execute-error';
+			fullPipelineCtx.operationStatus = 'execute-error';
 			throw e;
 		}
 	}
 
 	async undo(): Promise<SuccessResult<LastNonVoidStepReturn<Steps>> | ErrorResult<E>> {
-		if (this.#operationStatus != 'executed' || this.#lastExecutePipelineCtx === undefined) {
+		let lastFullCtx = structuredClone(this.#recentOperationCache.getLatest());
+
+		if (lastFullCtx === undefined) {
 			throw new Error(
-				`Undo Error on command. Only Executed Commands can be undone. lastOperationStatus: [${this.#operationStatus}]`
+				'[PipelineCommand] Undo improper initialization of PipelineCommand, lastOperationStatus to be initialized, but no lastOperation found'
 			);
 		}
 
-		let currentCtx = structuredClone(this.#lastExecutePipelineCtx);
+		if (lastFullCtx.operationStatus !== 'executing' && lastFullCtx.operationStatus !== 'executed') {
+			throw new Error(
+				`[PipelineCommand] Can not Undo non Executed or Executing Commands. lastOperationStatus: [${lastFullCtx.operationStatus}]`
+			);
+		}
+
+		const fullPipelineCtx: FullPipelineCtx<PipelineCtx> = {
+			opId: lastFullCtx.opId++,
+			operationStatus: 'executing',
+			ctx: structuredClone(lastFullCtx.ctx)
+		};
+
+		this.#recentOperationCache.add(fullPipelineCtx);
+
+		console.log('[PipelineCommand] Undoing Command', {
+			commandType: this.#itemType,
+			baseCtx: this.#baseCtx,
+			fullPipelineCtx,
+			lastFullCtx: lastFullCtx
+		});
+
+		let currentCtx = fullPipelineCtx.ctx;
 
 		const undoneSteps: AnyPipelineStep<Deps, PipelineCtx, E>[] = [];
 
 		let commandResult: SuccessResult<any> = pipelineSuccessResult();
 
-		this.#operationStatus = 'undoing';
+		fullPipelineCtx.operationStatus = 'undoing';
 
 		try {
 			for (const step of this.#steps) {
@@ -179,7 +236,7 @@ export class PipelineCommand<
 						await Promise.resolve(undoneStep.undoError?.(this.#deps, currentCtx));
 					}
 
-					this.#operationStatus = 'undo-error';
+					fullPipelineCtx.operationStatus = 'undo-error';
 					return stepResult;
 				}
 
@@ -190,13 +247,11 @@ export class PipelineCommand<
 				undoneSteps.push(step);
 			}
 
-			this.#operationStatus = 'undone';
-
-			this.#lastExecutePipelineCtx = undefined;
+			fullPipelineCtx.operationStatus = 'undone';
 
 			return commandResult as SuccessResult<LastNonVoidStepReturn<Steps>>;
 		} catch (e) {
-			this.#operationStatus = 'undo-error';
+			fullPipelineCtx.operationStatus = 'undo-error';
 			throw e;
 		}
 	}

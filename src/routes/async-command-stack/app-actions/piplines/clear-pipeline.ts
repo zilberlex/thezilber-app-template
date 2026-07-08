@@ -1,6 +1,6 @@
 import { sleep } from '$lib/engine/general-js-ts/common';
-import type { PipelineSteps } from '$lib/engine/patterns/command/pipeline/pipeline-command';
 import { pipelineStep } from '$lib/engine/patterns/command/pipeline/pipeline-step';
+import type { PipelineSteps } from '$lib/engine/patterns/command/pipeline/types';
 import type { ClearCtx, DemoCommandDeps } from './types';
 
 const startingStep = pipelineStep<DemoCommandDeps, ClearCtx>(
@@ -34,25 +34,33 @@ const optimisticClearPipelineStep = pipelineStep<DemoCommandDeps, ClearCtx>(
 
 const clearAsyncPiplineStep = pipelineStep<DemoCommandDeps, ClearCtx, string>(
 	async (deps, _ctx) => {
-		let { farAwayStorage } = deps;
+		let { farAwayStorageAsyncSerialQueue } = deps;
 
-		await sleep(1000);
-		farAwayStorage.clear();
+		return await farAwayStorageAsyncSerialQueue.enqueue(async () => {
+			let { farAwayStorage } = deps;
 
-		let retVal = `Clear farAwayStorage ${Array(farAwayStorage.entries().map(([key, val]) => key + ' - ' + val)).join(',')}`;
+			await sleep(1000);
+			farAwayStorage.clear();
 
-		return retVal;
+			let retVal = `Clear farAwayStorage ${Array(farAwayStorage.entries().map(([key, val]) => key + ' - ' + val)).join(',')}`;
+
+			return retVal;
+		});
 	},
 	async (deps, ctx) => {
-		let { storageState } = ctx;
-		let { farAwayStorage } = deps;
+		let { farAwayStorageAsyncSerialQueue } = deps;
 
-		await sleep(1000);
+		return await farAwayStorageAsyncSerialQueue.enqueue(async () => {
+			let { storageState } = ctx;
+			let { farAwayStorage } = deps;
 
-		storageState.forEach((val, key) => farAwayStorage.set(key, val));
-		let retVal = `Undo Clear farAwayStorage ${Array(farAwayStorage.entries().map(([key, val]) => key + ' - ' + val)).join(',')}`;
+			await sleep(1000);
 
-		return retVal;
+			storageState.forEach((val, key) => farAwayStorage.set(key, val));
+			let retVal = `Undo Clear farAwayStorage ${Array(farAwayStorage.entries().map(([key, val]) => key + ' - ' + val)).join(',')}`;
+
+			return retVal;
+		});
 	}
 );
 

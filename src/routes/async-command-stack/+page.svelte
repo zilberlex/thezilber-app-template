@@ -72,8 +72,7 @@
 		});
 
 		let command = demoCommandFacotry.insertCommand(insertCtx);
-		appState.commandStack?.push(command);
-		let commandResult = await command.execute();
+		let commandResult = appState.commandStack?.executeAndPush(command);
 
 		console.log('Insert Command Result', commandResult);
 	}
@@ -90,8 +89,7 @@
 		});
 
 		let command = demoCommandFacotry.deleteCommand(deleteCtx);
-		appState.commandStack?.push(command);
-		let commandResult = await command.execute();
+		let commandResult = appState.commandStack?.executeAndPush(command);
 
 		console.log('Clear Command Result', commandResult);
 	}
@@ -102,8 +100,7 @@
 		});
 
 		let command = demoCommandFacotry.clearCommand(clearCtx);
-		appState.commandStack?.push(command);
-		let commandResult = await command.execute();
+		let commandResult = appState.commandStack?.executeAndPush(command);
 
 		console.log('Delete Command Result', commandResult);
 	}

@@ -1,3 +1,5 @@
+import type { AsyncSerialQueue } from '$lib/engine/patterns/async-serial-queue';
+
 export type InsertCtx = {
 	insertValue: string;
 	undoValue?: string;
@@ -16,6 +18,7 @@ export type ClearCtx = {
 export type DemoCommandDeps = {
 	memoryStorage: Map<string, string>;
 	farAwayStorage: Map<string, string>;
+	farAwayStorageAsyncSerialQueue: AsyncSerialQueue;
 };
 
 export type DemoPiplineCtx<StepData> = {

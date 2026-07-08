@@ -40,13 +40,18 @@ export type PipelineCommandOperationStatus =
 
 export type PipelineSteps<Deps, Ctx, E extends Error = Error> = NonEmptyArray<PipelineStep<Deps, Ctx, any, E>>;
 
+export type FullPipelineCtx<PipelineCtx> = {
+	opId: number;
+	operationStatus: PipelineCommandOperationStatus;
+	ctx: PipelineCtx;
+};
+
 export type PersistedPipelineCommand<
 	CommandType extends string = string,
 	PipelineCtx = unknown
 > = PersistedCommand<CommandType> & {
 	baseCtx: PipelineCtx;
-	lastExecutePipelineCtx?: PipelineCtx;
-	operationStatus: PipelineCommandOperationStatus;
+	operationStatusHistory: FullPipelineCtx<PipelineCtx>[];
 };
 
 // Factory, Registry, and Command Specs

@@ -1,5 +1,5 @@
 import { sleep } from '$lib/engine/general-js-ts/common';
-import { type PipelineSteps } from '../../../../lib/engine/patterns/command/pipeline/pipeline-command';
+import type { PipelineSteps } from '$lib/engine/patterns/command/pipeline/types';
 import { pipelineStep } from '../../../../lib/engine/patterns/command/pipeline/pipeline-step';
 import type { DeleteCtx, DemoCommandDeps } from './types';
 
@@ -39,36 +39,44 @@ const optimisticDeletePipelineStep = pipelineStep<DemoCommandDeps, DeleteCtx>(
 
 const deleteAsyncPiplineStep = pipelineStep<DemoCommandDeps, DeleteCtx, string | undefined>(
 	async (deps, ctx) => {
-		let { key, originalValue } = ctx;
-		let { farAwayStorage } = deps;
+		let { farAwayStorageAsyncSerialQueue } = deps;
 
-		if (originalValue === undefined) {
-			return undefined;
-		}
+		return await farAwayStorageAsyncSerialQueue.enqueue(async () => {
+			let { key, originalValue } = ctx;
+			let { farAwayStorage } = deps;
 
-		await sleep(1000);
-		farAwayStorage.delete(key);
+			if (originalValue === undefined) {
+				return undefined;
+			}
 
-		let retVal = `Deleted [${key}] Value: [${originalValue}]`;
+			await sleep(1000);
+			farAwayStorage.delete(key);
 
-		return retVal;
+			let retVal = `Deleted [${key}] Value: [${originalValue}]`;
+
+			return retVal;
+		});
 	},
 	async (deps, ctx) => {
-		let { key, originalValue } = ctx;
-		let { farAwayStorage } = deps;
+		let { farAwayStorageAsyncSerialQueue } = deps;
 
-		// simulate async
+		return await farAwayStorageAsyncSerialQueue.enqueue(async () => {
+			let { key, originalValue } = ctx;
+			let { farAwayStorage } = deps;
 
-		if (originalValue === undefined) {
-			return undefined;
-		}
+			// simulate async
 
-		farAwayStorage.set(key, originalValue);
-		await sleep(1000);
+			if (originalValue === undefined) {
+				return undefined;
+			}
 
-		let retVal = `Deleted [${key}] Value: [${originalValue}]`;
+			farAwayStorage.set(key, originalValue);
+			await sleep(1000);
 
-		return retVal;
+			let retVal = `Deleted [${key}] Value: [${originalValue}]`;
+
+			return retVal;
+		});
 	}
 );
 

@@ -1,4 +1,5 @@
-import type { AsyncCommandInterface } from '../async-command';
+import type { MaybePromise } from '$lib/engine/general-js-ts/typescript/type-helpers';
+import type { Command } from '../command';
 import type { CommandRegistry } from '../persistancy/command-registry';
 import type { PersistedCommand } from '../persistancy/persistent-command';
 import type { PersistableItem } from '../persistancy/persistent-item';
@@ -8,36 +9,33 @@ export type PersistedCommandStack = {
 	persistentCommandsRedo: Array<PersistedCommand>;
 };
 
-export type CommandItem = AsyncCommandInterface<any> & PersistableItem<any>;
+export type CommandItem = Command<MaybePromise<any>> & PersistableItem<any>;
 
 export class CommandStack {
 	#commandsUndo: Array<CommandItem> = [];
 	#commandsRedo: Array<CommandItem> = [];
 
-	push(command: CommandItem) {
+	async executeAndPush(command: CommandItem) {
 		this.#commandsRedo = [];
-
 		this.#commandsUndo.push(command);
-	}
-
-	async execute(command: CommandItem) {
-		throw Error('implement');
+		// todo az none happy flow handling.
+		return await command.execute();
 	}
 
 	async undo() {
 		let command = this.#commandsUndo.pop();
 		if (command) {
 			console.debug('undo command', command);
-			await Promise.resolve(command.undo());
 			this.#commandsRedo.push(command);
+			return await command.undo();
 		}
 	}
 
 	async redo() {
 		let command = this.#commandsRedo.pop();
 		if (command) {
-			await Promise.resolve(command.execute());
 			this.#commandsUndo.push(command);
+			return await command.execute();
 		}
 	}
 

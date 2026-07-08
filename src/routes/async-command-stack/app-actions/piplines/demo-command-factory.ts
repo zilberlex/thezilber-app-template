@@ -1,3 +1,4 @@
+import { AsyncSerialQueue } from '$lib/engine/patterns/async-serial-queue';
 import type { CommandRegistry } from '$lib/engine/patterns/command/persistancy/command-registry';
 import {
 	definePipelineSpecs,
@@ -30,10 +31,12 @@ export class DemoCommandFactory {
 		memoryStorage: Map<string, string>,
 		farAwayStorage: Map<string, string>
 	) {
+		let serialQueue = new AsyncSerialQueue();
 		this.#factory = new PipelineCommandFactory(
 			{
 				memoryStorage,
-				farAwayStorage
+				farAwayStorage,
+				farAwayStorageAsyncSerialQueue: serialQueue
 			},
 			demoCommandSpecs
 		);
