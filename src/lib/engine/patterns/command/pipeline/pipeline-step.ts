@@ -1,17 +1,11 @@
 import type { MaybePromise } from '$lib/engine/general-js-ts/typescript/type-helpers';
-import type { ErrorResult, PipelineStep, ResultLike, SuccessResult } from './types';
+import { successResult } from '../../result/common';
+import type { ErrorResult, ResultLike, SuccessResult } from '../../result/types';
+import type { PipelineStep } from './types';
 
 type PipelineStepReturn<R, E extends Error> = [R] extends [void]
 	? void | SuccessResult<void> | ErrorResult<E>
 	: R | SuccessResult<R> | ErrorResult<E>;
-
-export function pipelineSuccessResult<T = void>(value?: T): SuccessResult<T> {
-	return (arguments.length === 0 ? { ok: true } : { ok: true, value }) as SuccessResult<T>;
-}
-
-export function pipelineFailResult<E extends Error>(e: E): ErrorResult<E> {
-	return { ok: false, error: e };
-}
 
 /**
  * Creates a normalized pipeline step.
@@ -25,8 +19,8 @@ export function pipelineFailResult<E extends Error>(e: E): ErrorResult<E> {
 export function pipelineStep<Deps, Ctx, R = void, E extends Error = Error>(
 	execute: (deps: Deps, ctx: Ctx) => MaybePromise<PipelineStepReturn<R, E>>,
 	undo: (deps: Deps, ctx: Ctx) => MaybePromise<PipelineStepReturn<R, E>>,
-	executeError?: (deps: Deps, ctx: Ctx) => MaybePromise<PipelineStepReturn<any, E>>,
-	undoError?: (deps: Deps, ctx: Ctx) => MaybePromise<PipelineStepReturn<any, E>>
+	executeError?: (deps: Deps, ctx: Ctx, e: E) => MaybePromise<PipelineStepReturn<any, E>>,
+	undoError?: (deps: Deps, ctx: Ctx, e: E) => MaybePromise<PipelineStepReturn<any, E>>
 ): PipelineStep<Deps, Ctx, R, E> {
 	const normalizedExecute = async (deps: Deps, ctx: Ctx) => {
 		return toStepResult<R, E>(await execute(deps, ctx));
@@ -40,9 +34,11 @@ export function pipelineStep<Deps, Ctx, R = void, E extends Error = Error>(
 		execute: normalizedExecute,
 		undo: normalizedUndo,
 		executeError: executeError
-			? async (deps, ctx) => toStepResult<any, E>(await executeError(deps, ctx))
+			? async (deps, ctx, e) => toStepResult<any, E>(await executeError(deps, ctx, e))
 			: normalizedUndo,
-		undoError: undoError ? async (deps, ctx) => toStepResult<any, E>(await undoError(deps, ctx)) : normalizedExecute
+		undoError: undoError
+			? async (deps, ctx, e) => toStepResult<any, E>(await undoError(deps, ctx, e))
+			: normalizedExecute
 	};
 }
 
@@ -56,8 +52,8 @@ function toStepResult<R, E extends Error>(value: PipelineStepReturn<R, E>): Succ
 	}
 
 	if (value === undefined) {
-		return pipelineSuccessResult() as SuccessResult<R>;
+		return successResult();
 	}
 
-	return pipelineSuccessResult(value) as SuccessResult<R>;
+	return successResult(value) as SuccessResult<R>;
 }

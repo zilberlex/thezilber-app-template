@@ -1,17 +1,9 @@
-import type { PersistedCommand } from '$lib/engine/patterns/command/persistancy/persistent-command';
 import type { PersistableItem } from '$lib/engine/patterns/command/persistancy/persistent-item';
 import { RecentItemsCache } from '../../recent-items-cache';
+import { successResult } from '../../result/common';
+import type { ErrorResult, SuccessResult } from '../../result/types';
 import { type AsyncCommandInterface } from '../async-command';
-import { pipelineSuccessResult } from './pipeline-step';
-import type {
-	ErrorResult,
-	FullPipelineCtx,
-	PersistedPipelineCommand,
-	PipelineCommandOperationStatus,
-	PipelineStep,
-	PipelineSteps,
-	SuccessResult
-} from './types';
+import type { FullPipelineCtx, PersistedPipelineCommand, PipelineStep, PipelineSteps } from './types';
 
 type StepResult<S> = S extends PipelineStep<any, any, infer R, any> ? Awaited<R> : never;
 
@@ -46,18 +38,18 @@ export function pipelineCommand<
 	KCommandType extends string,
 	Deps,
 	PipelineCtx,
-	Steps extends PipelineSteps<Deps, PipelineCtx, E>,
-	E extends Error
+	E extends Error,
+	Steps extends PipelineSteps<Deps, PipelineCtx, E>
 >(type: KCommandType, deps: Deps, ctx: PipelineCtx, steps: Steps) {
-	return new PipelineCommand(type, deps, ctx, steps);
+	return new PipelineCommand<KCommandType, Deps, PipelineCtx, E, Steps>(type, deps, ctx, steps);
 }
 
 export class PipelineCommand<
 	KCommandType extends string,
 	Deps,
 	PipelineCtx,
-	Steps extends NonEmptyArray<AnyPipelineStep<Deps, PipelineCtx, E>>,
-	E extends Error
+	E extends Error,
+	Steps extends NonEmptyArray<AnyPipelineStep<Deps, PipelineCtx, E>>
 >
 	implements
 		AsyncCommandInterface<SuccessResult<LastNonVoidStepReturn<Steps>> | ErrorResult<E>>,
@@ -158,7 +150,7 @@ export class PipelineCommand<
 
 		const executedSteps: AnyPipelineStep<Deps, PipelineCtx, E>[] = [];
 
-		let commandResult: SuccessResult<any> = pipelineSuccessResult();
+		let commandResult: SuccessResult<any> = successResult();
 
 		try {
 			for (const step of this.#steps) {
@@ -166,7 +158,7 @@ export class PipelineCommand<
 
 				if (!stepResult.ok) {
 					for (const executedStep of executedSteps.reverse()) {
-						await Promise.resolve(executedStep.executeError(this.#deps, fullPipelineCtx.ctx));
+						await Promise.resolve(executedStep.executeError(this.#deps, fullPipelineCtx.ctx, stepResult.error));
 					}
 
 					fullPipelineCtx.operationStatus = 'execute-error';
@@ -223,7 +215,7 @@ export class PipelineCommand<
 
 		const undoneSteps: AnyPipelineStep<Deps, PipelineCtx, E>[] = [];
 
-		let commandResult: SuccessResult<any> = pipelineSuccessResult();
+		let commandResult: SuccessResult<any> = successResult();
 
 		fullPipelineCtx.operationStatus = 'undoing';
 
@@ -233,7 +225,7 @@ export class PipelineCommand<
 
 				if (!stepResult.ok) {
 					for (const undoneStep of undoneSteps.reverse()) {
-						await Promise.resolve(undoneStep.undoError?.(this.#deps, currentCtx));
+						await Promise.resolve(undoneStep.undoError?.(this.#deps, currentCtx, stepResult.error));
 					}
 
 					fullPipelineCtx.operationStatus = 'undo-error';

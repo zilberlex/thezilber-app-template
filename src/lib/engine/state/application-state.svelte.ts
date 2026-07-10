@@ -16,7 +16,7 @@ export interface AppState {
 	deviceId: string | undefined;
 	debug: DebugState;
 	appRoot: HTMLElement | undefined;
-	commandStack: CommandStack | undefined;
+	commandStack: CommandStack;
 	get navigationMode(): NavigationMode;
 }
 
@@ -33,7 +33,7 @@ function createAppState(): AppState {
 	let appRoot = $state<HTMLElement | undefined>(undefined);
 	let navigationMode = $derived(navigationStateManager.navigationMode);
 
-	let commandStack = $state<CommandStack | undefined>();
+	let commandStack = $state<CommandStack>(new CommandStack());
 
 	return {
 		get isAppLoaded() {
@@ -108,9 +108,6 @@ function createAppState(): AppState {
 		},
 		get commandStack() {
 			return commandStack;
-		},
-		set commandStack(value: CommandStack | undefined) {
-			commandStack = value;
 		}
 	};
 }

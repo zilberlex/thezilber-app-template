@@ -1,31 +1,13 @@
 import type { MaybePromise, NonEmptyArray } from '$lib/engine/general-js-ts/typescript/type-helpers';
+import type { ErrorResult, SuccessResult } from '$lib/engine/patterns/result/types';
 import type { PersistedCommand } from '../persistancy/persistent-command';
 import type { PipelineCommandFactory } from './pipeline-command-factory';
-
-// Pipeline, and Pipeline Steps
-export type ResultLike = {
-	ok: boolean;
-};
-
-export type ErrorResult<E extends Error> = {
-	ok: false;
-	error: E;
-};
-
-export type SuccessResult<T = void> = [T] extends [void]
-	? {
-			ok: true;
-		}
-	: {
-			ok: true;
-			value: T;
-		};
 
 export type PipelineStep<Deps, Ctx, R = void, E extends Error = Error> = {
 	execute: (deps: Deps, ctx: Ctx) => MaybePromise<SuccessResult<R> | ErrorResult<E>>;
 	undo: (deps: Deps, ctx: Ctx) => MaybePromise<SuccessResult<R> | ErrorResult<E>>;
-	executeError: (deps: Deps, ctx: Ctx) => MaybePromise<SuccessResult<any> | ErrorResult<E>>;
-	undoError?: (deps: Deps, ctx: Ctx) => MaybePromise<SuccessResult<any> | ErrorResult<E>>;
+	executeError: (deps: Deps, ctx: Ctx, e: E) => MaybePromise<SuccessResult<any> | ErrorResult<E>>;
+	undoError?: (deps: Deps, ctx: Ctx, e: E) => MaybePromise<SuccessResult<any> | ErrorResult<E>>;
 };
 
 // Pipeline Command
@@ -65,6 +47,8 @@ export type PipelineSpec<Deps, Ctx, E extends Error = Error> = {
 export type PipelineSpecs<Deps> = Record<string, PipelineSpec<Deps, any, any>>;
 
 export type PipelineCommandTypeOf<Specs> = Extract<keyof Specs, string>;
+
+export type StepsOf<Spec> = Spec extends { steps: infer Steps } ? Steps : never;
 
 export type AnyPersistedCommandForSpecs<Specs extends PipelineSpecs<any>> = {
 	[KCommandType in PipelineCommandTypeOf<Specs>]: PersistedCommandForSpec<Specs, KCommandType>;

@@ -1,6 +1,12 @@
 import type { CommandRegistry } from '../persistancy/command-registry';
 import { pipelineCommand } from './pipeline-command';
-import type { AnyPersistedCommandForSpecs, PipelineCommandTypeOf, PipelineCtxOf, PipelineSpecs } from './types';
+import type {
+	AnyPersistedCommandForSpecs,
+	PipelineCommandTypeOf,
+	PipelineCtxOf,
+	PipelineSpecs,
+	StepsOf
+} from './types';
 
 export function definePipelineSpecs<Deps>() {
 	return <const Specs extends PipelineSpecs<Deps>>(specs: Specs) => specs;
@@ -18,7 +24,8 @@ export class PipelineCommandFactory<Deps, Specs extends PipelineSpecs<Deps>> {
 	create<K extends PipelineCommandTypeOf<Specs>>(commandType: K, ctx: PipelineCtxOf<Specs[K]>) {
 		const spec = this.#specs[commandType];
 
-		return pipelineCommand(commandType, this.#deps, ctx, spec.steps);
+		const steps = spec.steps as StepsOf<Specs[K]>;
+		return pipelineCommand(commandType, this.#deps, ctx, steps);
 	}
 
 	restore(persistedCommand: AnyPersistedCommandForSpecs<Specs>) {

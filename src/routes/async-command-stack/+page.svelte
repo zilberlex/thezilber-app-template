@@ -14,7 +14,8 @@
 	import ItemSlot from './ItemSlot.svelte';
 	import { createCommandRegistry } from '$lib/engine/patterns/command/persistancy/command-registry';
 	import { DemoCommandFactory } from './app-actions/piplines/demo-command-factory';
-	import type { ClearCtx, DeleteCtx, InsertCtx } from './app-actions/piplines/types';
+	import type { ClearCtx, DeleteCtx, InsertCtx, UpdateCtx } from './app-actions/piplines/types';
+	import { temporaryMessageState } from '$lib/engine/application/temp-messages/temporary-message-state.svelte';
 
 	let memoryStorage = new SvelteMap<string, string>();
 	let farAwayStorage = new SvelteMap<string, string>();
@@ -53,28 +54,56 @@
 	}
 
 	function undo(): any {
-		appState.commandStack?.undo();
+		appState.commandStack.undo();
 	}
 
 	function redo(): any {
-		appState.commandStack?.redo();
+		appState.commandStack.redo();
 	}
 
 	async function insertItem() {
+		try {
+			let prevValue = memoryStorage.get(inputKey);
+
+			if (prevValue === inputValue) return;
+
+			let insertCtx = $state.snapshot<InsertCtx>({
+				key: inputKey,
+				insertValue: inputValue
+			});
+
+			let command = demoCommandFacotry.insertCommand(insertCtx);
+			let commandResult = await appState.commandStack.executeAndPush(command);
+
+			if (!commandResult.ok) {
+				console.error(commandResult.error);
+				temporaryMessageState.setMessageWithTimout(`${commandResult.error.message}`);
+			}
+
+			console.log('Insert Command Result', commandResult);
+		} catch {}
+	}
+
+	async function updateItem() {
 		let prevValue = memoryStorage.get(inputKey);
 
 		if (prevValue === inputValue) return;
 
-		let insertCtx = $state.snapshot<InsertCtx>({
+		let updateCtx = $state.snapshot<UpdateCtx>({
 			key: inputKey,
-			insertValue: inputValue,
-			undoValue: prevValue
+			undoValue: prevValue ?? 'NOValue',
+			insertValue: inputValue
 		});
 
-		let command = demoCommandFacotry.insertCommand(insertCtx);
-		let commandResult = appState.commandStack?.executeAndPush(command);
+		let command = demoCommandFacotry.updateCommand(updateCtx);
+		let commandResult = await appState.commandStack.executeAndPush(command);
 
-		console.log('Insert Command Result', commandResult);
+		if (!commandResult.ok) {
+			console.error(commandResult.error);
+			temporaryMessageState.setMessageWithTimout(`${commandResult.error.message}`);
+		}
+
+		console.log('Update Command Result', commandResult);
 	}
 
 	async function deleteItem() {
@@ -89,7 +118,7 @@
 		});
 
 		let command = demoCommandFacotry.deleteCommand(deleteCtx);
-		let commandResult = appState.commandStack?.executeAndPush(command);
+		let commandResult = appState.commandStack.executeAndPush(command);
 
 		console.log('Clear Command Result', commandResult);
 	}
@@ -100,13 +129,13 @@
 		});
 
 		let command = demoCommandFacotry.clearCommand(clearCtx);
-		let commandResult = appState.commandStack?.executeAndPush(command);
+		let commandResult = appState.commandStack.executeAndPush(command);
 
 		console.log('Delete Command Result', commandResult);
 	}
 
 	function saveCommandStack() {
-		let persistentStack = appState.commandStack?.persistStack();
+		let persistentStack = appState.commandStack.persistStack();
 		if (persistentStack) {
 			saveLocalState('COMMANDS', persistentStack);
 		} else {
@@ -121,7 +150,7 @@
 			return;
 		}
 
-		appState.commandStack?.hydrate(persistentStack, commandRegistry);
+		appState.commandStack.hydrate(persistentStack, commandRegistry);
 	}
 </script>
 
@@ -145,35 +174,44 @@
 					hotkey={{
 						hotkey: '1',
 						tooltip: 'Focus Key'
-					}}>Key</InputCombo
+					}}
 				>
+					Key
+				</InputCombo>
 				<InputCombo
 					type="text"
 					hotkey={{
 						hotkey: '2',
 						tooltip: 'Focus Value'
 					}}
-					bind:value={inputValue}>Value</InputCombo
+					bind:value={inputValue}
 				>
-				<Button onclick={insertItem} {@attach createClickHotKeyAttachment('Insert', false, hotkey('a', 'alt'))}
-					>Insert</Button
-				>
-				<Button onclick={saveState} {@attach createClickHotKeyAttachment('Save', false, hotkey('s', 'alt'))}
-					>Save</Button
-				>
-				<Button onclick={clearState} {@attach createClickHotKeyAttachment('Clear', false, hotkey('r', 'alt'))}
-					>Clear</Button
-				>
-				<Button onclick={() => deleteItem()} {@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))}
-					>Delete</Button
-				>
-				<Button onclick={() => undo()} {@attach createClickHotKeyAttachment('Undo', false, hotkey('z', 'ctrl|option'))}
-					>Undo</Button
-				>
+					Value
+				</InputCombo>
+				<Button onclick={insertItem} {@attach createClickHotKeyAttachment('Insert', false, hotkey('a', 'alt'))}>
+					Insert
+				</Button>
+				<Button onclick={updateItem} {@attach createClickHotKeyAttachment('Update', false, hotkey('u', 'alt'))}>
+					Update
+				</Button>
+				<Button onclick={saveState} {@attach createClickHotKeyAttachment('Save', false, hotkey('s', 'alt'))}>
+					Save
+				</Button>
+				<Button onclick={clearState} {@attach createClickHotKeyAttachment('Clear', false, hotkey('r', 'alt'))}>
+					Clear
+				</Button>
+				<Button onclick={() => deleteItem()} {@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))}>
+					Delete
+				</Button>
+				<Button onclick={() => undo()} {@attach createClickHotKeyAttachment('Undo', false, hotkey('z', 'ctrl|option'))}>
+					Undo
+				</Button>
 				<Button
 					onclick={() => redo()}
-					{@attach createClickHotKeyAttachment('Redo', false, hotkey('z', 'ctrl|option', 'shift'))}>Redo</Button
+					{@attach createClickHotKeyAttachment('Redo', false, hotkey('z', 'ctrl|option', 'shift'))}
 				>
+					Redo
+				</Button>
 			</form>
 		</div>
 	</NavigationScope>

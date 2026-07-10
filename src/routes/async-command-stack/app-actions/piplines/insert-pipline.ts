@@ -1,20 +1,27 @@
 import { sleep } from '$lib/engine/general-js-ts/common';
 import type { PipelineSteps } from '$lib/engine/patterns/command/pipeline/types';
+import { errorResult } from '$lib/engine/patterns/result/common';
 import { pipelineStep } from '../../../../lib/engine/patterns/command/pipeline/pipeline-step';
 import type { DemoCommandDeps, InsertCtx } from './types';
 
-const startingStep = pipelineStep(
-	(_deps: DemoCommandDeps, ctx: InsertCtx) => {
+const startingStep = pipelineStep<DemoCommandDeps, InsertCtx>(
+	(_deps, ctx) => {
 		console.log('Inserting Item', ctx);
 	},
-	(_deps: DemoCommandDeps, ctx: InsertCtx) => {
+	(_deps, ctx) => {
 		console.log('Undoing Item', ctx);
 	},
-	(_deps: DemoCommandDeps, ctx: InsertCtx) => {
-		console.log('Insert Failed', ctx);
+	(_deps, ctx, e) => {
+		console.error('Insert Failed', {
+			ctx,
+			error: e
+		});
 	},
-	(_deps: DemoCommandDeps, ctx: InsertCtx) => {
-		console.log('Undo Failed', ctx);
+	(_deps, ctx, e) => {
+		console.error('Insert Undo Failed', {
+			ctx,
+			error: e
+		});
 	}
 );
 
@@ -27,22 +34,29 @@ const endStep = pipelineStep(
 	}
 );
 
-const optimisticInsertPipelineStep = pipelineStep<DemoCommandDeps, InsertCtx>(
+const optimisticInsertpipelinestep = pipelineStep<DemoCommandDeps, InsertCtx>(
 	(deps, ctx) => {
 		const { key, insertValue } = ctx;
 		const { memoryStorage } = deps;
 
+		if (memoryStorage.has(key)) {
+			return errorResult(new Error(`[Insert] Key Already Exists: [${key}]`));
+		}
+
 		memoryStorage.set(key, insertValue);
 	},
 	(deps, ctx) => {
-		const { undoValue, key } = ctx;
+		const { insertValue, key } = ctx;
 		const { memoryStorage } = deps;
 
-		if (undoValue === undefined) {
-			memoryStorage.delete(key);
-		} else {
-			memoryStorage.set(key, undoValue);
+		const currentValue = memoryStorage.get(key);
+		if (currentValue !== insertValue) {
+			return errorResult(
+				new Error(`[Insert Undo] Expected Value for key [${key}] to be [${insertValue}], but was: [${currentValue}]`)
+			);
 		}
+
+		memoryStorage.delete(key);
 	}
 );
 
@@ -55,6 +69,9 @@ const insertAsyncPiplineStep = pipelineStep<DemoCommandDeps, InsertCtx, string>(
 			const { farAwayStorage } = deps;
 
 			await sleep(1000);
+			if (farAwayStorage.has(key)) {
+				return errorResult(new Error(`[Insert] Key already exists: [${key}]`));
+			}
 
 			farAwayStorage.set(key, insertValue);
 
@@ -65,27 +82,28 @@ const insertAsyncPiplineStep = pipelineStep<DemoCommandDeps, InsertCtx, string>(
 		let { farAwayStorageAsyncSerialQueue } = deps;
 
 		return await farAwayStorageAsyncSerialQueue.enqueue(async () => {
-			const { key, undoValue, insertValue } = ctx;
+			const { key, insertValue } = ctx;
 			const { farAwayStorage } = deps;
 
 			await sleep(1000);
 
-			if (undoValue === undefined) {
-				farAwayStorage.delete(key);
-			} else {
-				farAwayStorage.set(key, undoValue);
+			const currentValue = farAwayStorage.get(key);
+			if (currentValue !== insertValue) {
+				return errorResult(
+					new Error(`[Insert Undo] Expected Value for key [${key}] to be [${insertValue}], but was: [${currentValue}]`)
+				);
 			}
 
-			return undoValue === undefined
-				? `Undone Insertion, deleting - [${key}]`
-				: `Undone Insertion key: [${key}], value: [${insertValue}] -> [${undoValue}]`;
+			farAwayStorage.delete(key);
+
+			return `Undone Insertion, deleting - [${key}]`;
 		});
 	}
 );
 
 export const insertSteps = [
 	startingStep,
-	optimisticInsertPipelineStep,
+	optimisticInsertpipelinestep,
 	insertAsyncPiplineStep,
 	endStep
 ] satisfies PipelineSteps<DemoCommandDeps, InsertCtx>;
