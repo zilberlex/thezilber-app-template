@@ -14,12 +14,19 @@ export type PersistedCommandStack = {
 	persistentCommandsRedo: Array<PersistedCommand>;
 };
 
-export type CommandItem<T, E extends Error = Error> = Command<MaybePromise<MaybeResult<T, E>>> & PersistableItem<any>;
+type CommandReturn<T, E extends Error> = MaybePromise<MaybeResult<T, E>>;
+
+export type CommandItem<T, E extends Error = Error> = Command<CommandReturn<T, E>> & PersistableItem<any>;
 
 export class CommandStack {
 	#commandsUndo: Array<CommandItem<unknown>> = [];
 	#commandsRedo: Array<CommandItem<unknown>> = [];
 
+	// This has Error Handling while others don't because i assume any -
+	// 1. errors fixed at this stage are consistent errors
+	// 2. Errors during undo/redo will be recoverable. so i rather keep them on stack
+	// This may be not a best way to do things, but assuming I don't encounter errors in the future
+	// the comment will remain, and the api would prove itself stable enough
 	async executeAndPush<T, E extends Error>(command: CommandItem<T, E>) {
 		this.#commandsRedo = [];
 		this.#commandsUndo.push(command);
@@ -91,8 +98,10 @@ export class CommandStack {
 		switch (type) {
 			case 'undo':
 				op = 'Undo';
+				break;
 			case 'redo':
 				op = 'Redo';
+				break;
 		}
 		console.warn(`[Command Stack ${op}] command Execution threw an error, removing from stack`);
 		removeFromArrayLast(this.#commandsUndo, command);

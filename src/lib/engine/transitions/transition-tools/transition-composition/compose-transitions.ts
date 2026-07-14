@@ -4,20 +4,26 @@ import type { ComposedTransitionParams } from './compose-transitions-common';
 import type { Transition, TransitionParamsCommon } from '../transitions-common';
 import { inverseLerp } from '$lib/engine/animation/math-utils';
 
-export interface TransitionItem<P extends TransitionParamsCommon> {
-	transition: Transition<P>;
-	params: P;
-}
+type TransitionParamsOf<T> = T extends Transition<infer P> ? P : never;
+
+export type TransitionItem<T extends Transition<any>> = {
+	transition: T;
+	params: NoInfer<TransitionParamsOf<T>>;
+};
+
+type TransitionItems<Ts extends Transition<any>[]> = {
+	[I in keyof Ts]: TransitionItem<Ts[I]>;
+};
 
 /**
  * Resizes an image client-side.
  *
  * @param params – {@link ComposedTransitionParams} describing how to resize.
- * @param transitionFuncAndParams: An array of transition functions and their params.
+ * @param transitionParams: An array of transition functions and their params.
  * @returns A composed transition function.
  */
-export function composeTransitions(
-	transitionFuncAndParams: TransitionItem<TransitionParamsCommon>[]
+export function composeTransitions<Ts extends Transition<any>[]>(
+	transitionParams: TransitionItems<Ts>
 ): (node: Element, params?: ComposedTransitionParams) => TransitionConfig {
 	return (
 		node: Element,
@@ -29,7 +35,7 @@ export function composeTransitions(
 			easing = linear
 		}: ComposedTransitionParams = {}
 	): TransitionConfig => {
-		const transitionsData = transitionFuncAndParams.map((transitionFuncAndParams) =>
+		const transitionsData = transitionParams.map((transitionFuncAndParams) =>
 			createTransitionData(transitionFuncAndParams.transition, transitionFuncAndParams.params, node)
 		);
 
@@ -150,9 +156,9 @@ function getLocalLocalTandUWithBl(tGlobal, normalizedStart, normalizedEnd, easin
 
 function createTranstionCss(
 	transitionCssFunc: (t: number, u: number) => string | undefined,
-	normalizedStart,
-	normalizedEnd,
-	easing,
+	normalizedStart: number,
+	normalizedEnd: number,
+	easing: EasingFunction,
 	transitionReverse: boolean
 ) {
 	if (!transitionCssFunc) return undefined;
@@ -184,8 +190,6 @@ function createTranstionJs(
 	let didRunJsStart = false;
 	let didRunJsEnd = false;
 
-	const OUT_OF_BOUNDS_THRESHOLD = 0.2;
-
 	return (tGlobal: number) => {
 		const { tLocal, uLocal, originalTLocal } = getLocalLocalTandUWithBl(
 			tGlobal,
@@ -211,7 +215,7 @@ function createTranstionJs(
 	};
 }
 
-function createFullCss(transitionRunData, reverse): (tGlobal: number) => string {
+function createFullCss(transitionRunData, reverse: boolean): (tGlobal: number) => string {
 	return (tGlobal) => {
 		if (reverse) tGlobal = 1 - tGlobal;
 
@@ -225,7 +229,7 @@ function createFullCss(transitionRunData, reverse): (tGlobal: number) => string 
 	};
 }
 
-function createFullJs(transitionRunData, globalReverse): (tGlobal: number) => void {
+function createFullJs(transitionRunData, globalReverse: boolean): (tGlobal: number) => void {
 	return (tGlobal: number) => {
 		if (globalReverse) tGlobal = 1 - tGlobal;
 

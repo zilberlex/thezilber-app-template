@@ -16,11 +16,16 @@
 	import { DemoCommandFactory } from './app-actions/piplines/demo-command-factory';
 	import type { ClearCtx, DeleteCtx, InsertCtx, UpdateCtx } from './app-actions/piplines/types';
 	import { temporaryMessageState } from '$lib/engine/application/temp-messages/temporary-message-state.svelte';
+	import Portal from '$lib/ui/components/portal/Portal.svelte';
+	import type { EngineLogger } from '$lib/ui/components/logging/LogViewer.svelte';
+	import LogViewer from '$lib/ui/components/logging/LogViewer.svelte';
 
 	let memoryStorage = new SvelteMap<string, string>();
 	let farAwayStorage = new SvelteMap<string, string>();
 	let inputKey = $state('');
 	let inputValue = $state('');
+
+	let logger = $state<EngineLogger>();
 
 	let commandRegistry = createCommandRegistry();
 	let demoCommandFacotry = new DemoCommandFactory(commandRegistry, memoryStorage, farAwayStorage);
@@ -78,6 +83,10 @@
 			if (!commandResult.ok) {
 				console.error(commandResult.error);
 				temporaryMessageState.setMessageWithTimout(`${commandResult.error.message}`);
+				logger?.error(commandResult.error.message, {
+					scope: 'Insert',
+					error: commandResult.error
+				});
 			}
 
 			console.log('Insert Command Result', commandResult);
@@ -217,7 +226,13 @@
 	</NavigationScope>
 </div>
 
-<style>
+<Portal targetLayer="application-layer">
+	<div class="log-view-wrapper">
+		<LogViewer bind:logger />
+	</div>
+</Portal>
+
+<style lang="scss">
 	.main {
 		display: flex;
 		flex-direction: column;
@@ -236,5 +251,20 @@
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
+	}
+
+	.log-view-wrapper {
+		position: absolute;
+		right: var(--space-2);
+		top: var(--space-2);
+		bottom: var(--space-2);
+
+		width: 300px;
+		pointer-events: auto;
+
+		overflow: scroll;
+		scrollbar-width: none;
+
+		@include bottom-scroll-anchor;
 	}
 </style>

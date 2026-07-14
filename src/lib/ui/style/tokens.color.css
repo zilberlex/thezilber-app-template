@@ -8,6 +8,7 @@
 	--color-3: oklch(0% 0 0);
 	--color-4: red;
 	--color-5: oklch(0.8775 0.1495 195.24);
+	--color-6: oklch(0.8736 0.1929 98.76);
 
 	--color-1-transparent: oklch(var(--color-1-values) / 0);
 
@@ -36,7 +37,7 @@
 	--accent: var(--color-1);
 	--fg: var(--color-2);
 	--bg: var(--color-3);
-	--accent-strong: var(--color-4);
+	--accent-strong: var(--color-5);
 
 	/* Color System */
 	--cl-primary: var(--color-1);
@@ -65,4 +66,7 @@
 
 	--cl-background: var(--color-3);
 	--cl-on-background: var(--color-2);
+
+	--cl-error: var(--color-4);
+	--cl-warn: var(--color-6);
 }

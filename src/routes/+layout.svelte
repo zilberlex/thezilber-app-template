@@ -5,6 +5,7 @@
 	import '@fontsource/audiowide';
 	import '$lib/ui/style/reset.css';
 	import '$lib/ui/style/theme/theme.scss';
+
 	import AppInit from '$lib/app/AppInit.svelte';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onNavigate } from '$app/navigation';
@@ -17,10 +18,6 @@
 		appState.pageContext.title = '';
 	});
 </script>
-
-<svelte:head>
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-</svelte:head>
 
 <AppInit />
 
@@ -41,8 +38,6 @@
 </AppNavigationManager>
 
 <style lang="scss">
-	@use '$lib/ui/style/utility/utility.scss' as *;
-
 	.app-container {
 		height: 100dvh;
 		width: 100%;

@@ -1,0 +1,7 @@
+:root {
+	--shape-element-width: var(--border-thick);
+
+	--shape-element-radius: 8px;
+	--shape-element-clip: none;
+	--shape-element-mask: none;
+}

@@ -40,7 +40,7 @@ const optimisticInsertpipelinestep = pipelineStep<DemoCommandDeps, InsertCtx>(
 		const { memoryStorage } = deps;
 
 		if (memoryStorage.has(key)) {
-			return errorResult(new Error(`[Insert] Key Already Exists: [${key}]`));
+			return errorResult(new Error(`Key Already Exists: [${key}]`));
 		}
 
 		memoryStorage.set(key, insertValue);
@@ -52,7 +52,7 @@ const optimisticInsertpipelinestep = pipelineStep<DemoCommandDeps, InsertCtx>(
 		const currentValue = memoryStorage.get(key);
 		if (currentValue !== insertValue) {
 			return errorResult(
-				new Error(`[Insert Undo] Expected Value for key [${key}] to be [${insertValue}], but was: [${currentValue}]`)
+				new Error(`Expected Value for key [${key}] to be [${insertValue}], but was: [${currentValue}]`)
 			);
 		}
 
@@ -70,7 +70,7 @@ const insertAsyncPiplineStep = pipelineStep<DemoCommandDeps, InsertCtx, string>(
 
 			await sleep(1000);
 			if (farAwayStorage.has(key)) {
-				return errorResult(new Error(`[Insert] Key already exists: [${key}]`));
+				return errorResult(new Error(`Key already exists: [${key}]`));
 			}
 
 			farAwayStorage.set(key, insertValue);
@@ -90,7 +90,7 @@ const insertAsyncPiplineStep = pipelineStep<DemoCommandDeps, InsertCtx, string>(
 			const currentValue = farAwayStorage.get(key);
 			if (currentValue !== insertValue) {
 				return errorResult(
-					new Error(`[Insert Undo] Expected Value for key [${key}] to be [${insertValue}], but was: [${currentValue}]`)
+					new Error(`Expected Value for key [${key}] to be [${insertValue}], but was: [${currentValue}]`)
 				);
 			}
 

@@ -1,5 +1,18 @@
 $emit-default: false !default;
 
-@forward '$lib/ui/style/utility/utility.layout.scss' with (
+@forward './utility.layout' with (
 	$emit-default: $emit-default
 );
+
+@mixin bottom-scroll-anchor {
+	scroll-snap-type: y proximity;
+	align-content: end;
+
+	&::after {
+		content: '';
+		display: block;
+		height: 1px;
+
+		scroll-snap-align: end;
+	}
+}

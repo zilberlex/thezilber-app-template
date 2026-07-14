@@ -9,16 +9,12 @@
 </script>
 
 <div class="home-button-container">
-	<a
-		href={resolve('/')}
-		class="home-button left"
-		{@attach createFocusHotKeyAttachment('Home ', hotkey('h', 'alt'))}>Home</a
+	<a href={resolve('/')} class="home-button left" {@attach createFocusHotKeyAttachment('Home ', hotkey('h', 'alt'))}
+		>Home</a
 	>
 </div>
 
 <style lang="scss">
-	@use '$lib/ui/style/utility/utility.scss' as *;
-
 	.home-button-container {
 		padding-block: 10px;
 		display: inline-block;
