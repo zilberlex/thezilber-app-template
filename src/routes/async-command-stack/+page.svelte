@@ -19,6 +19,7 @@
 	import Portal from '$lib/ui/components/portal/Portal.svelte';
 	import type { EngineLogger } from '$lib/ui/components/logging/LogViewer.svelte';
 	import LogViewer from '$lib/ui/components/logging/LogViewer.svelte';
+	import AnchoredRegion from '$lib/ui/components/layout/AnchoredRegion.svelte';
 
 	let memoryStorage = new SvelteMap<string, string>();
 	let farAwayStorage = new SvelteMap<string, string>();
@@ -227,9 +228,16 @@
 </div>
 
 <Portal targetLayer="application-layer">
-	<div class="log-view-wrapper">
-		<LogViewer bind:logger />
-	</div>
+	<AnchoredRegion
+		top="var(--space-2)"
+		right="var(--space-2)"
+		bottom="var(--space-2)"
+		width={300}
+		alignX="stretch"
+		alignY="bottom"
+	>
+		<LogViewer bind:logger direction="forward" />
+	</AnchoredRegion>
 </Portal>
 
 <style lang="scss">
@@ -251,20 +259,5 @@
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-	}
-
-	.log-view-wrapper {
-		position: absolute;
-		right: var(--space-2);
-		top: var(--space-2);
-		bottom: var(--space-2);
-
-		width: 300px;
-		pointer-events: auto;
-
-		overflow: scroll;
-		scrollbar-width: none;
-
-		@include bottom-scroll-anchor;
 	}
 </style>
