@@ -228,14 +228,7 @@
 </div>
 
 <Portal targetLayer="application-layer">
-	<AnchoredRegion
-		top="var(--space-2)"
-		right="var(--space-2)"
-		bottom="var(--space-2)"
-		width={300}
-		alignX="stretch"
-		alignY="bottom"
-	>
+	<AnchoredRegion top="var(--space-2)" right="var(--space-2)" bottom="var(--space-2)" alignX="stretch" alignY="bottom">
 		<LogViewer bind:logger direction="forward" />
 	</AnchoredRegion>
 </Portal>
@@ -248,11 +241,11 @@
 	}
 
 	.storage-display {
-		height: 75px;
 		border: var(--base-border-thick);
 		display: flex;
 		flex-direction: row;
 		align-items: center;
+		padding: var(--space-1);
 	}
 
 	.controls {

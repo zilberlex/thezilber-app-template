@@ -14,9 +14,6 @@
 		bottom?: CSSValue;
 		left?: CSSValue;
 
-		width?: CSSValue;
-		height?: CSSValue;
-
 		minWidth?: CSSValue;
 		maxWidth?: CSSValue;
 		minHeight?: CSSValue;
@@ -39,9 +36,6 @@
 		bottom,
 		left,
 
-		width,
-		height,
-
 		minWidth,
 		maxWidth,
 		minHeight,
@@ -50,10 +44,7 @@
 		alignX = 'stretch',
 		alignY = 'stretch',
 
-		zIndex,
-
-		pointerEvents = 'none',
-		contentPointerEvents = 'auto'
+		zIndex
 	}: Props = $props();
 
 	function cssValue(value: CSSValue | undefined): string | undefined {
@@ -67,20 +58,12 @@
 		bottom: ${cssValue(bottom) ?? 'auto'};
 		left: ${cssValue(left) ?? 'auto'};
 
-		width: ${cssValue(width) ?? 'auto'};
-		height: ${cssValue(height) ?? 'auto'};
-
 		min-width: ${cssValue(minWidth) ?? 'auto'};
 		max-width: ${cssValue(maxWidth) ?? 'none'};
 		min-height: ${cssValue(minHeight) ?? 'auto'};
 		max-height: ${cssValue(maxHeight) ?? 'none'};
 
 		z-index: ${zIndex ?? 'auto'};
-		pointer-events: ${pointerEvents};
-	`);
-
-	const contentStyle = $derived(`
-		pointer-events: ${contentPointerEvents};
 	`);
 </script>
 
@@ -96,7 +79,7 @@
 	class:align-y-stretch={alignY === 'stretch'}
 	style={regionStyle}
 >
-	<div class="anchored-region-content" style={contentStyle}>
+	<div class="anchored-region-content">
 		{@render children()}
 	</div>
 </div>

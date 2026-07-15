@@ -4,6 +4,7 @@
 	import { typewriter } from '$lib/engine/transitions/typewriter';
 	import { cubicIn, cubicOut, linear, sineIn, sineInOut, sineOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
+	import ScrollIndicator from '../ui-tricks/ScrollIndicator.svelte';
 	type LogSeverity = 'debug' | 'info' | 'warn' | 'error';
 	type LogContext = Record<string, unknown> & { scope: string };
 	type LogLine = {
@@ -112,19 +113,24 @@
 </script>
 
 <div class="log-viewer">
-	<div class={['log-viewer-logs', direction]}>
-		{#each logs as logLine (logLine.id)}
-			<div class={['log-line', 'box', logLine.severity]} in:composedTransitionIn out:composedTransitionOut>
-				<span class="log-line-scope"><em>[</em>{logLine.context.scope}<em>]</em>:</span>
-				{logLine.message}
-			</div>
-		{/each}
-	</div>
+	<ScrollIndicator>
+		<div class={['log-viewer-logs', direction]}>
+			{#each logs as logLine (logLine.id)}
+				<div class={['log-line', 'box', logLine.severity]} in:composedTransitionIn out:composedTransitionOut>
+					<span class="log-line-scope"><em>[</em>{logLine.context.scope}<em>]</em>:</span>
+					{logLine.message}
+				</div>
+			{/each}
+		</div>
+	</ScrollIndicator>
 </div>
 
 <style lang="scss">
 	.log-viewer {
+		container-type: scroll-state;
 		max-height: 100%;
+
+		width: 300px;
 		pointer-events: auto;
 
 		overflow: scroll;
@@ -149,8 +155,6 @@
 			clip-path: (--shape-element-clip);
 			mask: var(--shape-element-mask);
 
-			margin-block-end: var(--space-2);
-
 			font-style: italic;
 
 			.log-line-scope {
@@ -159,6 +163,10 @@
 				& * {
 					font-style: normal !important;
 				}
+			}
+
+			&:not(:last-child) {
+				margin-block-end: var(--space-2);
 			}
 		}
 
