@@ -138,6 +138,8 @@
 		flex-direction: column;
 		justify-content: flex-end;
 
+		font-size: var(--font-size-sm);
+
 		&.reverse {
 			flex-direction: column-reverse;
 		}
