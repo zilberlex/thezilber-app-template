@@ -1,5 +1,6 @@
 import { sleep } from '$lib/engine/general-js-ts/common';
 import type { PipelineSteps } from '$lib/engine/patterns/command/pipeline/types';
+import { errorResult } from '$lib/engine/patterns/result/common';
 import { pipelineStep } from '../../../../lib/engine/patterns/command/pipeline/pipeline-step';
 import type { DeleteCtx, DemoCommandDeps } from './types';
 
@@ -37,7 +38,7 @@ const optimisticDeletePipelineStep = pipelineStep<DemoCommandDeps, DeleteCtx>(
 	}
 );
 
-const deleteAsyncPiplineStep = pipelineStep<DemoCommandDeps, DeleteCtx, string | undefined>(
+const deleteAsyncPiplineStep = pipelineStep<DemoCommandDeps, DeleteCtx, string>(
 	async (deps, ctx) => {
 		let { farAwayStorageAsyncSerialQueue } = deps;
 
@@ -45,12 +46,11 @@ const deleteAsyncPiplineStep = pipelineStep<DemoCommandDeps, DeleteCtx, string |
 			let { key, originalValue } = ctx;
 			let { farAwayStorage } = deps;
 
-			if (originalValue === undefined) {
-				return undefined;
-			}
-
 			await sleep(1000);
-			farAwayStorage.delete(key);
+			let deleted = farAwayStorage.delete(key);
+			if (!deleted) {
+				return errorResult(new Error(`Key Does not Exist: [${key}]`));
+			}
 
 			let retVal = `Deleted [${key}] Value: [${originalValue}]`;
 
@@ -63,12 +63,6 @@ const deleteAsyncPiplineStep = pipelineStep<DemoCommandDeps, DeleteCtx, string |
 		return await farAwayStorageAsyncSerialQueue.enqueue(async () => {
 			let { key, originalValue } = ctx;
 			let { farAwayStorage } = deps;
-
-			// simulate async
-
-			if (originalValue === undefined) {
-				return undefined;
-			}
 
 			farAwayStorage.set(key, originalValue);
 			await sleep(1000);

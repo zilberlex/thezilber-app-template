@@ -39,8 +39,9 @@ const optimisticInsertpipelinestep = pipelineStep<DemoCommandDeps, InsertCtx>(
 		const { key, insertValue } = ctx;
 		const { memoryStorage } = deps;
 
+		let prevValue = memoryStorage.get(key);
 		if (memoryStorage.has(key)) {
-			return errorResult(new Error(`Key Already Exists: [${key}]`));
+			return errorResult(new Error(`Key already exists: [${key}], value: [${prevValue}]`));
 		}
 
 		memoryStorage.set(key, insertValue);
@@ -69,8 +70,9 @@ const insertAsyncPiplineStep = pipelineStep<DemoCommandDeps, InsertCtx, string>(
 			const { farAwayStorage } = deps;
 
 			await sleep(1000);
+			let prevValue = farAwayStorage.get(key);
 			if (farAwayStorage.has(key)) {
-				return errorResult(new Error(`Key already exists: [${key}]`));
+				return errorResult(new Error(`Key already exists: [${key}], value: [${prevValue}]`));
 			}
 
 			farAwayStorage.set(key, insertValue);

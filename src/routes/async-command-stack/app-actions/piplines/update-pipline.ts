@@ -34,7 +34,7 @@ const optimisticUpdatePipelineStep = pipelineStep<DemoCommandDeps, UpdateCtx>(
 		const { memoryStorage } = deps;
 
 		if (!memoryStorage.has(key)) {
-			return errorResult(new Error(`[Update] Key does not exist: [${key}]`));
+			return errorResult(new Error(`Key does not exist: [${key}]`));
 		}
 
 		memoryStorage.set(key, insertValue);
@@ -61,7 +61,7 @@ const updateAsyncPiplineStep = pipelineStep<DemoCommandDeps, UpdateCtx, string>(
 
 			await sleep(1000);
 			if (!farAwayStorage.has(key)) {
-				return errorResult(new Error(`[Update] Key does not exist: [${key}]`));
+				return errorResult(new Error(`Key does not exist: [${key}]`));
 			}
 
 			farAwayStorage.set(key, insertValue);

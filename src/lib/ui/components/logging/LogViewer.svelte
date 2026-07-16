@@ -5,8 +5,9 @@
 	import { cubicIn, cubicOut, linear, sineIn, sineInOut, sineOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 	import ScrollIndicator from '../ui-tricks/ScrollIndicator.svelte';
-	type LogSeverity = 'debug' | 'info' | 'warn' | 'error';
-	type LogContext = Record<string, unknown> & { scope: string };
+	import type { EngineLogger, LogContext, LogEvent, LogSeverity } from '$lib/engine/logging/engine-logger';
+	import { ActionQueue } from '$lib/engine/patterns/action-queue';
+
 	type LogLine = {
 		severity: LogSeverity;
 		message: string;
@@ -15,54 +16,53 @@
 
 	type LogLineWithId = LogLine & { id: number };
 
-	export interface EngineLogger {
-		log: (message: string, context: LogContext) => void;
-		debug: (message: string, context: LogContext) => void;
-		warn: (message: string, context: LogContext) => void;
-		error: (message: string, context: LogContext) => void;
-	}
-
-	let { logger = $bindable(), direction = 'forward' }: { logger?: EngineLogger; direction: 'forward' | 'reverse' } =
-		$props();
+	let { logger, direction = 'forward' }: { logger: EngineLogger; direction: 'forward' | 'reverse' } = $props();
 
 	const logs = $state(new Array<LogLineWithId>());
 
-	let lineId = 0;
+	let logRemovalQueue = new ActionQueue();
+
+	function freeze() {
+		logRemovalQueue.freeze();
+	}
+
+	function unfreeze() {
+		logRemovalQueue.unfreeze();
+	}
+
+	let trackingId = 0;
 	const logInternal = (severity: LogSeverity, message: string, context: LogContext) => {
-		const logId = ++lineId;
-		logs.push({
+		const logId = ++trackingId;
+
+		const logLineWithId = {
 			id: logId,
 			severity,
 			message,
 			context
-		});
+		};
+
+		logs.push(logLineWithId);
 
 		setTimeout(() => {
-			let logLine = removeFromArrayPredicate(logs, (item) => item.id === logId);
+			logRemovalQueue.queueAction(() => {
+				removeFromArrayPredicate(logs, (item) => item.id === logId);
 
-			console.log('Removed Log', {
-				logId,
-				logLIne: logLine
+				console.log('Removed Log', {
+					logId,
+					logLIne: logLineWithId
+				});
 			});
 		}, 5000);
 
 		console[severity](message, context);
 	};
 
-	logger = {
-		log: (message: string, context: LogContext) => {
-			logInternal('info', message, context);
-		},
-		debug: (message: string, context: LogContext) => {
-			logInternal('debug', message, context);
-		},
-		warn: (message: string, context: LogContext) => {
-			logInternal('warn', message, context);
-		},
-		error: (message: string, context: LogContext) => {
-			logInternal('error', message, context);
-		}
-	};
+	$effect(() => {
+		const logLine = ({ severity, message, context }: LogEvent) => logInternal(severity, message, context);
+		let unregister = logger.register(logLine);
+
+		return () => unregister();
+	});
 
 	const composedTransitionIn = composeTransitions([
 		{
@@ -112,7 +112,7 @@
 	]);
 </script>
 
-<div class="log-viewer">
+<div class="log-viewer" onmouseenter={freeze} onmouseleave={unfreeze} role="region" aria-label="Log viewer">
 	<ScrollIndicator>
 		<div class={['log-viewer-logs', direction]}>
 			{#each logs as logLine (logLine.id)}
@@ -174,6 +174,13 @@
 			border-color: var(--cl-error);
 			& em {
 				color: var(--cl-error);
+			}
+		}
+
+		& .warn {
+			border-color: var(--cl-warn);
+			& em {
+				color: var(--cl-warn);
 			}
 		}
 	}

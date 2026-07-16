@@ -2,7 +2,6 @@
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import { onMount } from 'svelte';
-	import { SvelteMap } from 'svelte/reactivity';
 	import { loadLocalState, saveLocalState } from '$lib/engine/storage/local/simple-state-persistance.svelte';
 	import { copyState } from '$lib/engine/svelte-helpers/copy-state';
 	import { appState } from '$lib/engine/state/application-state.svelte';
@@ -12,29 +11,27 @@
 	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/types';
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
 	import ItemSlot from './ItemSlot.svelte';
-	import { createCommandRegistry } from '$lib/engine/patterns/command/persistancy/command-registry';
-	import { DemoCommandFactory } from './app-actions/piplines/demo-command-factory';
-	import type { ClearCtx, DeleteCtx, InsertCtx, UpdateCtx } from './app-actions/piplines/types';
-	import { temporaryMessageState } from '$lib/engine/application/temp-messages/temporary-message-state.svelte';
 	import Portal from '$lib/ui/components/portal/Portal.svelte';
-	import type { EngineLogger } from '$lib/ui/components/logging/LogViewer.svelte';
 	import LogViewer from '$lib/ui/components/logging/LogViewer.svelte';
 	import AnchoredRegion from '$lib/ui/components/layout/AnchoredRegion.svelte';
+	import { createCommandRegistry } from '$lib/engine/patterns/command/persistancy/command-registry';
+	import { DemoManager } from './demo-manager.svelte';
 
-	let memoryStorage = new SvelteMap<string, string>();
-	let farAwayStorage = new SvelteMap<string, string>();
 	let inputKey = $state('');
 	let inputValue = $state('');
 
-	let logger = $state<EngineLogger>();
-
 	let commandRegistry = createCommandRegistry();
-	let demoCommandFacotry = new DemoCommandFactory(commandRegistry, memoryStorage, farAwayStorage);
+	let demoAppManager = new DemoManager(appState.logger, commandRegistry);
 
 	const STORAGE_KEY = 'ASYNC_COMMAND_PAGE_STATE';
 
 	async function saveState() {
-		saveLocalState(STORAGE_KEY, { farAwayStorage, memoryStorage, inputKey, inputValue });
+		saveLocalState(STORAGE_KEY, {
+			farAwayStorage: demoAppManager?.farAwayStorage,
+			memoryStorage: demoAppManager?.memoryStorage,
+			inputKey,
+			inputValue
+		});
 		saveCommandStack();
 	}
 
@@ -42,16 +39,17 @@
 		const loaded = loadLocalState(STORAGE_KEY);
 
 		copyState(loaded, {
-			farAwayStorage,
-			memoryStorage,
+			farAwayStorage: demoAppManager.farAwayStorage,
+			memoryStorage: demoAppManager.memoryStorage,
 			inputKey: (val: any) => (inputKey = val),
 			inputValue: (val: any) => (inputValue = val)
 		});
 	}
 
 	onMount(() => {
-		loadAppState();
 		loadCommandStack();
+
+		loadAppState();
 	});
 
 	function copyValues(key: any, value: any): void {
@@ -65,83 +63,6 @@
 
 	function redo(): any {
 		appState.commandStack.redo();
-	}
-
-	async function insertItem() {
-		try {
-			let prevValue = memoryStorage.get(inputKey);
-
-			if (prevValue === inputValue) return;
-
-			let insertCtx = $state.snapshot<InsertCtx>({
-				key: inputKey,
-				insertValue: inputValue
-			});
-
-			let command = demoCommandFacotry.insertCommand(insertCtx);
-			let commandResult = await appState.commandStack.executeAndPush(command);
-
-			if (!commandResult.ok) {
-				console.error(commandResult.error);
-				temporaryMessageState.setMessageWithTimout(`${commandResult.error.message}`);
-				logger?.error(commandResult.error.message, {
-					scope: 'Insert',
-					error: commandResult.error
-				});
-			}
-
-			console.log('Insert Command Result', commandResult);
-		} catch {}
-	}
-
-	async function updateItem() {
-		let prevValue = memoryStorage.get(inputKey);
-
-		if (prevValue === inputValue) return;
-
-		let updateCtx = $state.snapshot<UpdateCtx>({
-			key: inputKey,
-			undoValue: prevValue ?? 'NOValue',
-			insertValue: inputValue
-		});
-
-		let command = demoCommandFacotry.updateCommand(updateCtx);
-		let commandResult = await appState.commandStack.executeAndPush(command);
-
-		if (!commandResult.ok) {
-			console.error(commandResult.error);
-			temporaryMessageState.setMessageWithTimout(`${commandResult.error.message}`);
-		}
-
-		console.log('Update Command Result', commandResult);
-	}
-
-	async function deleteItem() {
-		let originalValue = memoryStorage.get(inputKey);
-
-		if (originalValue === undefined) {
-			return;
-		}
-		let deleteCtx = $state.snapshot<DeleteCtx>({
-			key: inputKey,
-			originalValue
-		});
-
-		let command = demoCommandFacotry.deleteCommand(deleteCtx);
-		let commandResult = appState.commandStack.executeAndPush(command);
-
-		console.log('Clear Command Result', commandResult);
-	}
-
-	async function clearState() {
-		let clearCtx = $state.snapshot<ClearCtx>({
-			storageState: memoryStorage
-		});
-
-		let command = demoCommandFacotry.clearCommand(clearCtx);
-		let commandResult = appState.commandStack.executeAndPush(command);
-
-		console.log('Delete Command Result', commandResult);
 	}
 
 	function saveCommandStack() {
@@ -162,18 +83,31 @@
 
 		appState.commandStack.hydrate(persistentStack, commandRegistry);
 	}
+
+	function insertItem() {
+		demoAppManager.insertItem(inputKey, inputValue);
+	}
+	function updateItem() {
+		demoAppManager.updateItem(inputKey, inputValue);
+	}
+	function deleteItem() {
+		demoAppManager.deleteItem(inputKey);
+	}
+	function clearState() {
+		demoAppManager.clearState();
+	}
 </script>
 
 <div class="demo ly-center">
 	<NavigationScope scopeName="asyncApp" navigationKeys={NavigationKeysConfigSets.Vertical}>
 		<div class="main">
 			<div class="remote storage-display">
-				{#each farAwayStorage.entries() as [key, value] (key)}
+				{#each demoAppManager.farAwayStorage.entries() as [key, value] (key)}
 					<ItemSlot {key} {value} onClickCopy={copyValues} style="--color: red" />
 				{/each}
 			</div>
 			<div class="local storage-display">
-				{#each memoryStorage.entries() as [key, value] (key)}
+				{#each demoAppManager.memoryStorage.entries() as [key, value] (key)}
 					<ItemSlot {key} {value} onClickCopy={copyValues} />
 				{/each}
 			</div>
@@ -210,7 +144,7 @@
 				<Button onclick={clearState} {@attach createClickHotKeyAttachment('Clear', false, hotkey('r', 'alt'))}>
 					Clear
 				</Button>
-				<Button onclick={() => deleteItem()} {@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))}>
+				<Button onclick={deleteItem} {@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))}>
 					Delete
 				</Button>
 				<Button onclick={() => undo()} {@attach createClickHotKeyAttachment('Undo', false, hotkey('z', 'ctrl|option'))}>
@@ -229,7 +163,7 @@
 
 <Portal targetLayer="application-layer">
 	<AnchoredRegion top="var(--space-2)" right="var(--space-2)" bottom="var(--space-2)" alignX="stretch" alignY="bottom">
-		<LogViewer bind:logger direction="forward" />
+		<LogViewer logger={appState.logger} direction="forward" />
 	</AnchoredRegion>
 </Portal>
 

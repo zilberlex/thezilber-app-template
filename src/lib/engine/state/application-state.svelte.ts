@@ -3,6 +3,7 @@ import { debugState, type DebugState } from './debug-state.svelte';
 import { tooltipState, type TooltipState } from '../hotkey-tooltip/tooltip-state.svelte';
 import { navigationStateManager, type NavigationMode } from './navigation-state.svelte';
 import { CommandStack } from '../patterns/command/command-stack/command-stack';
+import { EngineLogger } from '../logging/engine-logger';
 
 export interface AppState {
 	isAppLoaded: boolean;
@@ -18,6 +19,7 @@ export interface AppState {
 	appRoot: HTMLElement | undefined;
 	commandStack: CommandStack;
 	get navigationMode(): NavigationMode;
+	get logger(): EngineLogger;
 }
 
 export const appState: AppState = createAppState();
@@ -32,6 +34,7 @@ function createAppState(): AppState {
 	let deviceId = $state<string | undefined>(undefined);
 	let appRoot = $state<HTMLElement | undefined>(undefined);
 	let navigationMode = $derived(navigationStateManager.navigationMode);
+	let logger = new EngineLogger();
 
 	let commandStack = $state<CommandStack>(new CommandStack());
 
@@ -108,6 +111,10 @@ function createAppState(): AppState {
 		},
 		get commandStack() {
 			return commandStack;
+		},
+
+		get logger() {
+			return logger;
 		}
 	};
 }
