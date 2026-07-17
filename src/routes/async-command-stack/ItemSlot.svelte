@@ -98,6 +98,7 @@
 			animation: 300ms ease-in-out highlight-anim;
 		}
 	}
+
 	@keyframes highlight-anim {
 		0% {
 			border-color: var(--_color);
@@ -110,8 +111,5 @@
 		100% {
 			border-color: var(--_color);
 		}
-	}
-
-	@keyframes shadow-highlight {
 	}
 </style>

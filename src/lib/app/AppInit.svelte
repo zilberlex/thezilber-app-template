@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { browser } from '$app/environment';
 	import { getAgentType } from '$lib/engine/agent/agent-utils';
 	import { appState } from '$lib/engine/state/application-state.svelte';
@@ -20,7 +20,16 @@
 			appState.deviceId = getDeviceId();
 		}
 	});
+
+	function handleMouseMove(event: MouseEvent) {
+		appState.mousePos = {
+			x: event.clientX,
+			y: event.clientY
+		};
+	}
 </script>
+
+<svelte:window on:mousemove={handleMouseMove} />
 
 <HotKeysInitialization />
 <NavigationStateManager />

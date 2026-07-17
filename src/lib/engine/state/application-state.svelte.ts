@@ -4,6 +4,7 @@ import { tooltipState, type TooltipState } from '../hotkey-tooltip/tooltip-state
 import { navigationStateManager, type NavigationMode } from './navigation-state.svelte';
 import { CommandStack } from '../patterns/command/command-stack/command-stack';
 import { EngineLogger } from '../logging/engine-logger';
+import type { MousePos } from '../types/types';
 
 export interface AppState {
 	isAppLoaded: boolean;
@@ -20,6 +21,8 @@ export interface AppState {
 	commandStack: CommandStack;
 	get navigationMode(): NavigationMode;
 	get logger(): EngineLogger;
+	get mousePos(): MousePos;
+	set mousePos(pos: MousePos);
 }
 
 export const appState: AppState = createAppState();
@@ -35,6 +38,7 @@ function createAppState(): AppState {
 	let appRoot = $state<HTMLElement | undefined>(undefined);
 	let navigationMode = $derived(navigationStateManager.navigationMode);
 	let logger = new EngineLogger();
+	let mousePos = $state({ x: 0, y: 0 });
 
 	let commandStack = $state<CommandStack>(new CommandStack());
 
@@ -115,6 +119,12 @@ function createAppState(): AppState {
 
 		get logger() {
 			return logger;
+		},
+		get mousePos() {
+			return mousePos;
+		},
+		set mousePos(pos) {
+			mousePos = pos;
 		}
 	};
 }

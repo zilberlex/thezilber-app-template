@@ -21,25 +21,23 @@ export class DemoManager {
 	}
 
 	async insertItem(key: string, value: string) {
-		try {
-			let insertCtx = $state.snapshot<InsertCtx>({
-				key: key,
-				insertValue: value
+		let insertCtx = $state.snapshot<InsertCtx>({
+			key: key,
+			insertValue: value
+		});
+
+		let command = this.demoCommandFacotry.insertCommand(insertCtx);
+		let commandResult = await appState.commandStack.executeAndPush(command);
+
+		if (!commandResult.ok) {
+			console.error(commandResult.error);
+			this.logger.error(commandResult.error.message, {
+				scope: 'Insert',
+				error: commandResult.error
 			});
+		}
 
-			let command = this.demoCommandFacotry.insertCommand(insertCtx);
-			let commandResult = await appState.commandStack.executeAndPush(command);
-
-			if (!commandResult.ok) {
-				console.error(commandResult.error);
-				this.logger.error(commandResult.error.message, {
-					scope: 'Insert',
-					error: commandResult.error
-				});
-			}
-
-			console.log('Insert Command Result', commandResult);
-		} catch {}
+		console.log('Insert Command Result', commandResult);
 	}
 
 	async updateItem(key: string, value: string) {
