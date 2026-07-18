@@ -7,11 +7,13 @@
 
 	let {
 		front,
+		surface,
 		trackingConfig = {
 			mode: 'sphere-hyperbolic'
 		}
 	}: {
 		front: Snippet;
+		surface?: Snippet<[content: Snippet]>;
 		trackingConfig?: TrackingConfig;
 	} = $props();
 
@@ -61,7 +63,7 @@
 	}}
 >
 	<div class="tracking-visual">
-		<RotatableElement3D {rotateX} {rotateY} {front} />
+		<RotatableElement3D {rotateX} {rotateY} {front} {surface} />
 	</div>
 </div>
 

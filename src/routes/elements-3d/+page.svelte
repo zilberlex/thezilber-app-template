@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { TRACKING_MODES } from '$lib/engine/math-utils/trackball-algorithms';
+	import Button from '$lib/ui/basic-components/Button.svelte';
 	import FlippableElement3D from './FlippableElement3D.svelte';
 	import TrackingElement3D from './TrackingElement3D.svelte';
 
@@ -29,7 +30,16 @@
 			</TrackingElement3D>
 		{/each}
 
-		<button>Flip</button>
+		<TrackingElement3D>
+			{#snippet surface(content)}
+				<Button class="surface-3d">
+					{@render content()}
+				</Button>
+			{/snippet}
+			{#snippet front()}
+				Tracking Button
+			{/snippet}
+		</TrackingElement3D>
 	</main>
 </div>
 

@@ -68,9 +68,8 @@
 button,
 a.link-button {
 	position: relative;
-	isolation: isolate;
 
-  --_hover-offset: -4px;
+	--_hover-offset: -4px;
 
 	color: var(--cl-on-primary);
 	background-color: var(--cl-background);
@@ -82,17 +81,17 @@ a.link-button {
 
 	padding: var(--space-2) var(--space-4);
 
-	filter: drop-shadow(0px 0px 4px var(--color-1-transparent));
-
 	line-height: var(--sp-line-height);
+
+box-shadow:
+		0 0 4px var(--color-1-transparent),
+		0 0 8px transparent;
 
 	&,
 	&::before,
 	&::after,
 	& span {
-		transition:
-			all,
-			0.25s linear;
+		transition: all 0.25s linear;
 	}
 
 	span {
@@ -101,55 +100,58 @@ a.link-button {
 		padding-inline: 2px;
 	}
 
-	&:is(:focus-visible, :hover), &.btn-pressed {
+	&:is(:focus-visible, :hover),
+	&.btn-pressed {
 		border-color: var(--color-1-brightest);
-		filter: drop-shadow(0px 0px 4px var(--color-1));
+box-shadow:
+			0 0 4px var(--color-1),
+			0 0 8px color-mix(in srgb, var(--color-1) 60%, transparent);
 
 		&::after {
 			@include rings();
 
 			position: absolute;
 			inset: 0;
+			z-index: -1;
+
 			content: '';
 
 			border-radius: inherit;
-
-			z-index: -1;
-
 			box-shadow: none;
 		}
 
-		& {
-			transform: translate(0, calc(-4px)) scale(1);
-		}
+		transform: translateY(-4px);
 
 		& span {
-			transform: translate(0, calc(0.5px)) scale(1);
+			transform: translateY(0.5px);
 		}
 	}
-  
+
 	&:active,
-  &.btn-start-work {
+	&.btn-start-work {
 		&,
 		& * {
 			transition: all 0s;
 		}
-  }
+	}
 
 	&:active,
-  &.btn-pressed {
-
-		& {
-			transform: translate(0, 0) scale(1);
-		}
+	&.btn-pressed {
+		transform: translateY(0);
 
 		& span {
-			transform: translate(0, 0) scale(1);
+			transform: translateY(0);
 		}
 	}
 
-  &.btn-pressed {
-    border-color: var(--cl-primary-brightest);
-		filter: drop-shadow(0px 0px 12px var(--cl-primary));
-  }
+	&.btn-pressed {
+		border-color: var(--cl-primary-brightest);
+		box-shadow:
+			0 0 8px var(--cl-primary),
+			0 0 16px color-mix(in srgb, var(--cl-primary) 70%, transparent);
+	}
+
+	&.surface-3d {
+		transform-style: preserve-3d;
+	}
 }

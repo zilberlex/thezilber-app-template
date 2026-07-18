@@ -4,10 +4,12 @@
 
 	let {
 		front,
-		back
+		back,
+		surface
 	}: {
 		front: Snippet;
 		back?: Snippet;
+		surface?: Snippet<[content: Snippet]>;
 	} = $props();
 
 	let rotation = $state(0);
@@ -16,4 +18,4 @@
 	}
 </script>
 
-<RotatableElement3D rotateX={rotation} onmouseenter={flip} onmouseleave={flip} {front} {back} />
+<RotatableElement3D rotateX={rotation} onmouseenter={flip} onmouseleave={flip} {front} {back} {surface} />
