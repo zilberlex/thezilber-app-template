@@ -2,14 +2,8 @@
 	import { getContext, onDestroy, onMount } from 'svelte';
 	import { NavigationManager } from '../navigation-manager';
 	import { browser } from '$app/environment';
-	import {
-		type NavigationKeysConfig,
-		type ScopeEscapeMode,
-		type ScopeInfra,
-		NavigationKeysConfigSets
-	} from '../types';
+	import { type NavigationKeysConfig, type ScopeEscapeMode, type ScopeInfra, NavigationKeysConfigSets } from '../types';
 	import NavigationScopeInfraImpl from '../navigation-scope';
-	import { mergeProps } from 'svelte-toolbelt';
 	import { NAVIGATION_MANAGER_CONTEXT } from './consts';
 
 	interface Props {
@@ -20,13 +14,7 @@
 		escapeMode?: ScopeEscapeMode;
 	}
 
-	let {
-		navigationKeys,
-		scopeName,
-		children,
-		class: usrCls,
-		escapeMode = 'circular'
-	}: Props = $props();
+	let { navigationKeys, scopeName, children, class: usrCls, escapeMode = 'circular' }: Props = $props();
 
 	let thisElement: HTMLElement;
 
@@ -36,10 +24,6 @@
 	let mutationObserver: MutationObserver;
 
 	navigationManager = getContext(NAVIGATION_MANAGER_CONTEXT);
-
-	const scopeClass = 'navigation-scope';
-
-	let mergedClasses = $derived(mergeProps({ class: scopeClass }, { class: usrCls }));
 
 	onMount(() => {
 		if (!navigationManager) {
@@ -73,7 +57,7 @@
 	});
 </script>
 
-<div {...mergedClasses} bind:this={thisElement}>
+<div class={['navigation-scope', usrCls]} bind:this={thisElement}>
 	<div class="outline"></div>
 	{@render children?.()}
 </div>

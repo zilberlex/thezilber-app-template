@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import ObjectViewer from './ObjectViewer.svelte';
-	import { mergeProps } from 'svelte-toolbelt';
 
 	type Props = {
 		objectName?: string;
@@ -28,11 +27,9 @@
 
 		return [[typeof object, object]];
 	});
-
-	const mergedProps = $derived(mergeProps({ class: 'object-viewer' }, rest));
 </script>
 
-<div {...mergedProps}>
+<div {...rest} class="object-viewer">
 	{#if objectName}
 		<strong>{objectName}:</strong>
 	{/if}

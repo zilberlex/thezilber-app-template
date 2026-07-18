@@ -9,10 +9,8 @@
 	}
 
 	const { layer, children, ...rest }: Props = $props();
-
-	let mergedProps = $derived(mergeProps({ class: layer }, rest));
 </script>
 
-<div {...mergedProps}>
+<div {...rest} class={layer}>
 	{@render children?.()}
 </div>

@@ -3,7 +3,14 @@
 		createEngineButtonClickOnKeyDownHandler,
 		createEngineButtonOnClickHandler
 	} from '$lib/engine/hotkeys/hotkey-handlers';
+	import type { Snippet } from 'svelte';
 	import { mergeProps } from 'svelte-toolbelt';
+	import type { HTMLButtonAttributes } from 'svelte/elements';
+
+	type Props = {
+		children: Snippet;
+		thisNode?: HTMLButtonElement;
+	} & HTMLButtonAttributes;
 
 	let {
 		children,
@@ -12,22 +19,17 @@
 		onclick: userOnClick = undefined,
 		class: userClass = undefined,
 		...rest
-	} = $props();
+	}: Props = $props();
 
 	const onkeyDown = createEngineButtonClickOnKeyDownHandler();
 	const onClick = createEngineButtonOnClickHandler();
-	const cls = 'icon-button';
 
 	const mergedProps = $derived(
-		mergeProps(
-			{ onkeydown: userOnKeydown, onclick: userOnClick, class: userClass },
-			{ onkeydown: onkeyDown, onclick: onClick, class: cls },
-			rest
-		)
+		mergeProps({ onkeydown: userOnKeydown, onclick: userOnClick }, { onkeydown: onkeyDown, onclick: onClick }, rest)
 	);
 </script>
 
-<button {...mergedProps} bind:this={thisNode}>
+<button {...mergedProps} bind:this={thisNode} class={['icon-button', userClass]}>
 	{@render children()}
 </button>
 

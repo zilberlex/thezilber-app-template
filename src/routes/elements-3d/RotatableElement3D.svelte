@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import ElementSurface from './ElementSurface.svelte';
+	import { elementSurface } from './Snippets3DSurfaces.svelte';
 
 	let {
 		rotateX = 0,
@@ -9,7 +9,7 @@
 		thisElement = $bindable(),
 		front,
 		back,
-		surface,
+		surface = elementSurface,
 		...rest
 	}: {
 		rotateX?: number;
@@ -37,12 +37,6 @@
 	</div>
 {/snippet}
 
-{#snippet defaultSurface(content: Snippet)}
-	<ElementSurface>
-		{@render content()}
-	</ElementSurface>
-{/snippet}
-
 <div
 	class="three-d-rotator"
 	style:--rotate-x={`${rotateX}deg`}
@@ -50,11 +44,7 @@
 	{...rest}
 	bind:this={thisElement}
 >
-	{#if surface}
-		{@render surface(faceContent)}
-	{:else}
-		{@render defaultSurface(faceContent)}
-	{/if}
+	{@render surface(faceContent)}
 </div>
 
 <style>
@@ -69,7 +59,7 @@
 		transform: perspective(300px) rotateY(var(--rotate-y)) rotateX(var(--rotate-x));
 		transition: transform var(--transform-time) ease-out;
 
-		& > :global(*) {
+		& > :global(*.surface-3d) {
 			width: 100%;
 			box-sizing: border-box;
 

@@ -103,7 +103,7 @@ box-shadow:
 	&:is(:focus-visible, :hover),
 	&.btn-pressed {
 		border-color: var(--color-1-brightest);
-box-shadow:
+    box-shadow:
 			0 0 4px var(--color-1),
 			0 0 8px color-mix(in srgb, var(--color-1) 60%, transparent);
 
@@ -149,9 +149,5 @@ box-shadow:
 		box-shadow:
 			0 0 8px var(--cl-primary),
 			0 0 16px color-mix(in srgb, var(--cl-primary) 70%, transparent);
-	}
-
-	&.surface-3d {
-		transform-style: preserve-3d;
 	}
 }

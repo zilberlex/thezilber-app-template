@@ -4,13 +4,14 @@
 
 	let {
 		children,
+		class: classProps,
 		...rest
 	}: {
 		children: Snippet;
 	} & HTMLAttributes<HTMLDivElement> = $props();
 </script>
 
-<div class="element-surface" {...rest}>
+<div class={['element-surface', classProps]} {...rest}>
 	{@render children()}
 </div>
 
