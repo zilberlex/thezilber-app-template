@@ -76,9 +76,15 @@ export function inverseLerp(v: number, min: number, max: number): number {
 }
 
 export function clippedInverseLerp(v: number, min: number, max: number): number {
-	return clip(inverseLerp(v, min, max), 0, 1);
+	return clamp(inverseLerp(v, min, max), 0, 1);
 }
 
-export function clip(v: number, min: number, max: number): number {
+export function clamp(v: number, min: number, max: number): number {
 	return Math.max(min, Math.min(max, v));
+}
+
+export function smoothstep(t: number) {
+	const clamped = clamp(t, 0, 1);
+
+	return clamped * clamped * (3 - 2 * clamped);
 }

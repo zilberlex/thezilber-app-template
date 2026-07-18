@@ -40,7 +40,7 @@
 		--rotate-x: 0deg;
 		--rotate-y: 0deg;
 
-		display: inline-grid;
+		display: grid;
 
 		padding: var(--space-2) var(--space-4);
 

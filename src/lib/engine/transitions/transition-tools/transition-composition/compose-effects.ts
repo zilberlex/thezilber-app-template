@@ -1,7 +1,7 @@
 import { linear } from 'svelte/easing';
 import type { ComposedTransitionParams } from './compose-transitions-common';
 import { type TransitionConfig } from 'svelte/transition';
-import { clippedInverseLerp } from '$lib/engine/animation/math-utils';
+import { clippedInverseLerp } from '$lib/engine/math-utils/math-utils';
 import { makeFilterFunction } from '../effects';
 import type { FilterEffectTransitionParams } from '../transitions-common';
 
