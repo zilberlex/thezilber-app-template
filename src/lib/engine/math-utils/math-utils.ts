@@ -75,7 +75,7 @@ export function inverseLerp(v: number, min: number, max: number): number {
 	return (v - min) / (max - min);
 }
 
-export function clippedInverseLerp(v: number, min: number, max: number): number {
+export function clampedInverseLerp(v: number, min: number, max: number): number {
 	return clamp(inverseLerp(v, min, max), 0, 1);
 }
 

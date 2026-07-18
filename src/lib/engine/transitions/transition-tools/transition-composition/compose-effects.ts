@@ -1,7 +1,7 @@
 import { linear } from 'svelte/easing';
 import type { ComposedTransitionParams } from './compose-transitions-common';
 import { type TransitionConfig } from 'svelte/transition';
-import { clippedInverseLerp } from '$lib/engine/math-utils/math-utils';
+import { clampedInverseLerp } from '$lib/engine/math-utils/math-utils';
 import { makeFilterFunction } from '../effects';
 import type { FilterEffectTransitionParams } from '../transitions-common';
 
@@ -74,7 +74,7 @@ export function composeFilterEffectsTransition(
 				}
 
 				if (alwaysRunCss || (global_t_linear >= globalStartTLinear && global_t_linear <= globalEndTLinear)) {
-					const local_t_linear = clippedInverseLerp(global_t_linear, globalStartTLinear, globalEndTLinear);
+					const local_t_linear = clampedInverseLerp(global_t_linear, globalStartTLinear, globalEndTLinear);
 
 					return filterFunc(local_t_linear);
 				}
