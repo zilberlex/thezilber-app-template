@@ -8,7 +8,7 @@
 	let {
 		front,
 		trackingConfig = {
-			mode: 'virtual-trackball'
+			mode: 'sphere-hyperbolic'
 		}
 	}: {
 		front: Snippet;

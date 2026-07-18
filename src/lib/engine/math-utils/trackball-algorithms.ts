@@ -1,12 +1,13 @@
 import type { MousePos } from '$lib/engine/types/types';
+import type { EasingFunction } from 'svelte/transition';
 import { clamp, smoothstep } from './math-utils';
+
+export const TRACKING_MODES = ['linear', 'plane', 'hemisphere', 'radial', 'sphere-hyperbolic'] as const;
 
 export type TrackingRotation = Readonly<{
 	rotateX: number;
 	rotateY: number;
 }>;
-
-type EasingFunction = (t: number) => number;
 
 /* -------------------------------------------------------------------------- */
 /* Public options                                                             */
@@ -26,7 +27,7 @@ export type BaseTrackingOptions = Readonly<{
 	maxRotationY?: number;
 }>;
 
-type LinearModeOptions = Readonly<{
+export type LinearModeOptions = Readonly<{
 	/**
 	 * Rotation reached when the pointer reaches an element edge.
 	 */
@@ -34,7 +35,7 @@ type LinearModeOptions = Readonly<{
 	edgeRotationY?: number;
 }>;
 
-type PlaneModeOptions = Readonly<{
+export type PlaneModeOptions = Readonly<{
 	/**
 	 * Distance between the element plane and virtual mouse plane.
 	 */
@@ -47,7 +48,7 @@ type PlaneModeOptions = Readonly<{
 	pointerScaleY?: number;
 }>;
 
-type HemisphereModeOptions = Readonly<{
+export type HemisphereModeOptions = Readonly<{
 	/**
 	 * Size of the virtual ellipse relative to the element.
 	 *
@@ -58,7 +59,7 @@ type HemisphereModeOptions = Readonly<{
 	radiusScaleY?: number;
 }>;
 
-type RadialModeOptions = Readonly<{
+export type RadialModeOptions = Readonly<{
 	radiusScaleX?: number;
 	radiusScaleY?: number;
 
@@ -73,7 +74,7 @@ type RadialModeOptions = Readonly<{
 	easing?: EasingFunction;
 }>;
 
-type VirtualTrackballModeOptions = Readonly<{
+export type VirtualTrackballModeOptions = Readonly<{
 	radiusScaleX?: number;
 	radiusScaleY?: number;
 }>;
@@ -83,10 +84,8 @@ type ModeOptionsByMode = {
 	plane: PlaneModeOptions;
 	hemisphere: HemisphereModeOptions;
 	radial: RadialModeOptions;
-	'virtual-trackball': VirtualTrackballModeOptions;
+	'sphere-hyperbolic': VirtualTrackballModeOptions;
 };
-
-export const TRACKING_MODES = ['linear', 'plane', 'hemisphere', 'radial', 'virtual-trackball'] as const;
 
 export type TrackingMode = (typeof TRACKING_MODES)[number];
 
@@ -98,7 +97,7 @@ export type LinearTrackingOptions = TrackingOptionsByMode['linear'];
 export type PlaneTrackingOptions = TrackingOptionsByMode['plane'];
 export type HemisphereTrackingOptions = TrackingOptionsByMode['hemisphere'];
 export type RadialTrackingOptions = TrackingOptionsByMode['radial'];
-export type VirtualTrackballTrackingOptions = TrackingOptionsByMode['virtual-trackball'];
+export type VirtualTrackballTrackingOptions = TrackingOptionsByMode['sphere-hyperbolic'];
 
 export type TrackingConfig = {
 	[Mode in TrackingMode]: {
@@ -143,7 +142,7 @@ type ResolvedModeOptionsByMode = {
 		easing: EasingFunction;
 	}>;
 
-	'virtual-trackball': Readonly<{
+	'sphere-hyperbolic': Readonly<{
 		radiusScaleX: number;
 		radiusScaleY: number;
 	}>;
@@ -191,7 +190,7 @@ export const TRACKING_MODE_DEFAULTS = {
 		easing: smoothstep
 	},
 
-	'virtual-trackball': {
+	'sphere-hyperbolic': {
 		radiusScaleX: 5,
 		radiusScaleY: 2
 	}
@@ -216,7 +215,7 @@ export const TRACKING_DEFAULTS = {
 
 	radial: withBaseDefaults(TRACKING_MODE_DEFAULTS.radial),
 
-	'virtual-trackball': withBaseDefaults(TRACKING_MODE_DEFAULTS['virtual-trackball'])
+	'sphere-hyperbolic': withBaseDefaults(TRACKING_MODE_DEFAULTS['sphere-hyperbolic'])
 } satisfies ResolvedTrackingOptionsByMode;
 
 /**
@@ -481,12 +480,12 @@ export function trackModeRadial(
 /* Virtual trackball                                                          */
 /* -------------------------------------------------------------------------- */
 
-export function trackModeVirtualTrackball(
+export function trackModeSphereHyperbolic(
 	mousePosition: MousePos,
 	rect: DOMRectReadOnly,
 	options: VirtualTrackballTrackingOptions = {}
 ): TrackingRotation {
-	const resolved = resolveTrackingOptions('virtual-trackball', options);
+	const resolved = resolveTrackingOptions('sphere-hyperbolic', options);
 
 	const {
 		x: normalX,
@@ -522,7 +521,7 @@ export function calculateTrackingRotation(
 		case 'radial':
 			return trackModeRadial(mousePosition, rect, config.options);
 
-		case 'virtual-trackball':
-			return trackModeVirtualTrackball(mousePosition, rect, config.options);
+		case 'sphere-hyperbolic':
+			return trackModeSphereHyperbolic(mousePosition, rect, config.options);
 	}
 }
