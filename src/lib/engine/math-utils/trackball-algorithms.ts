@@ -4,6 +4,44 @@ import { clamp, smoothstep } from './math-utils';
 
 export const TRACKING_MODES = ['linear', 'plane', 'hemisphere', 'radial', 'sphere-hyperbolic'] as const;
 
+export const BASE_TRACKING_DEFAULTS = {
+	rotationScaleX: 1,
+	rotationScaleY: 1,
+
+	maxRotationX: undefined,
+	maxRotationY: undefined
+} satisfies ResolvedBaseTrackingOptions;
+
+export const TRACKING_MODE_DEFAULTS = {
+	linear: {
+		edgeRotationX: 20,
+		edgeRotationY: 20
+	},
+
+	plane: {
+		planeDistance: 100,
+		pointerScaleX: 1,
+		pointerScaleY: 1
+	},
+
+	hemisphere: {
+		radiusScaleX: 2,
+		radiusScaleY: 2
+	},
+
+	radial: {
+		radiusScaleX: 1,
+		radiusScaleY: 1,
+		maxTilt: 25,
+		easing: smoothstep
+	},
+
+	'sphere-hyperbolic': {
+		radiusScaleX: 5,
+		radiusScaleY: 2
+	}
+} satisfies ResolvedModeOptionsByMode;
+
 export type TrackingRotation = Readonly<{
 	rotateX: number;
 	rotateY: number;
@@ -153,48 +191,6 @@ type ResolvedTrackingOptionsByMode = {
 };
 
 type ResolvedTrackingOptions<Mode extends TrackingMode> = ResolvedTrackingOptionsByMode[Mode];
-
-/* -------------------------------------------------------------------------- */
-/* Defaults                                                                   */
-/* -------------------------------------------------------------------------- */
-
-export const BASE_TRACKING_DEFAULTS = {
-	rotationScaleX: 1,
-	rotationScaleY: 1,
-
-	maxRotationX: undefined,
-	maxRotationY: undefined
-} satisfies ResolvedBaseTrackingOptions;
-
-export const TRACKING_MODE_DEFAULTS = {
-	linear: {
-		edgeRotationX: 20,
-		edgeRotationY: 20
-	},
-
-	plane: {
-		planeDistance: 1000,
-		pointerScaleX: 1,
-		pointerScaleY: 20
-	},
-
-	hemisphere: {
-		radiusScaleX: 2,
-		radiusScaleY: 2
-	},
-
-	radial: {
-		radiusScaleX: 1,
-		radiusScaleY: 1,
-		maxTilt: 25,
-		easing: smoothstep
-	},
-
-	'sphere-hyperbolic': {
-		radiusScaleX: 5,
-		radiusScaleY: 2
-	}
-} satisfies ResolvedModeOptionsByMode;
 
 function withBaseDefaults<T extends object>(modeDefaults: T): ResolvedBaseTrackingOptions & T {
 	return {

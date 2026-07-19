@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import RotatableElement3D from './RotatableElement3D.svelte';
+	import Element3D from './Element3D.svelte';
 
 	let {
 		front,
@@ -18,4 +18,4 @@
 	}
 </script>
 
-<RotatableElement3D rotateX={rotation} onmouseenter={flip} onmouseleave={flip} {front} {back} {surface} />
+<Element3D rotateX={rotation} onmouseenter={flip} onmouseleave={flip} {front} {back} {surface} />
