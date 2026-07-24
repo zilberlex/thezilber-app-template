@@ -12,6 +12,7 @@
 	$emit-default: true
 );
 @use '$lib/ui/style/theme/theme.caret.scss';
+@import '$lib/engine/elements-3d/three-d.css';
 @import '$lib/ui/style/tokens.color.css';
 @import '$lib/ui/style/tokens.typography.css';
 @import '$lib/ui/style/tokens.misc.css';

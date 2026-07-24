@@ -1,8 +1,10 @@
 <script lang="ts">
+	import FlippableElement3D from '$lib/engine/elements-3d/FlippableElement3D.svelte';
+	import { buttonSurface3d } from '$lib/engine/elements-3d/Snippets3DSurfaces.svelte';
+	import TrackingElement3D from '$lib/engine/elements-3d/TrackingElement3D.svelte';
 	import { TRACKING_MODES } from '$lib/engine/math-utils/trackball-algorithms';
+	import { componentSurface } from '$lib/engine/ui-infra/composable-renderable/composable-renderable-factories';
 	import Button from '$lib/ui/basic-components/Button.svelte';
-	import FlippableElement3D from './FlippableElement3D.svelte';
-	import TrackingElement3D from './TrackingElement3D.svelte';
 
 	let items = $state(['Apple', 'Bannana', 'Orange']);
 
@@ -13,33 +15,30 @@
 
 <div class="ly-center">
 	<main>
-		<FlippableElement3D>
-			{#snippet front()}
-				Flipper
-			{/snippet}
-			{#snippet back()}
-				Back of Flipper
-			{/snippet}
-		</FlippableElement3D>
+		<!-- <FlippableElement3D> -->
+		<!-- 	{#snippet front()} -->
+		<!-- 		Flipper -->
+		<!-- 	{/snippet} -->
+		<!-- 	{#snippet back()} -->
+		<!-- 		Back of Flipper -->
+		<!-- 	{/snippet} -->
+		<!-- </FlippableElement3D> -->
 
 		{#each trackBallAlgorithsm as trackingMode}
-			<TrackingElement3D trackingConfig={{ mode: trackingMode }}>
-				{#snippet front()}
-					Mouse Tracker {trackingMode}
-				{/snippet}
+			<TrackingElement3D trackingConfig={{ mode: trackingMode }} compensateFaceScale={false}>
+				Mouse Tracker {trackingMode}
 			</TrackingElement3D>
 		{/each}
 
-		<TrackingElement3D>
-			{#snippet surface(content)}
-				<Button class="surface-3d">
-					{@render content()}
-				</Button>
-			{/snippet}
+		<TrackingElement3D surface={componentSurface(Button)} compensateFaceScale={false}>
+			Tracking Button Not Compensated
+		</TrackingElement3D>
+		<TrackingElement3D surface={componentSurface(Button)} compensateFaceScale={true}>
 			{#snippet front()}
-				Tracking Button
+				Tracking Button Compensated
 			{/snippet}
 		</TrackingElement3D>
+		<Button>Normal Button</Button>
 	</main>
 </div>
 

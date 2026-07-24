@@ -18,4 +18,12 @@
 	}
 </script>
 
-<Element3D rotateX={rotation} onmouseenter={flip} onmouseleave={flip} {front} {back} {surface} />
+<Element3D
+	rotateX={rotation}
+	onmouseenter={flip}
+	onmouseleave={flip}
+	{front}
+	{back}
+	{surface}
+	style="--td-transform-time: 700ms;"
+/>

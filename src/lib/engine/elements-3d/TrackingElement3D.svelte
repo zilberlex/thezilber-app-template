@@ -1,24 +1,37 @@
-<script lang="ts">
-	import { untrack, type Snippet } from 'svelte';
-	import { appState } from '$lib/engine/state/application-state.svelte';
+<script
+	lang="ts"
+	generics="
+		TSurface extends Surface = Surface,
+		TFace extends Face = Face,
+		TBackFace extends Face = Face
+	"
+>
+	import { untrack } from 'svelte';
 
+	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { calculateTrackingRotation, type TrackingConfig } from '$lib/engine/math-utils/trackball-algorithms';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
+	import type { Surface, Face } from '../ui-infra/composable-renderable/types';
+	import type { DistributiveOmit } from '$lib/engine/types/utility-types';
+	import type { Element3DProps } from './types';
 	import Element3D from './Element3D.svelte';
 
+	export type TrackingElement3DProps<
+		TSurface extends Surface = Surface,
+		TFace extends Face = Face,
+		TBackFace extends Face = Face
+	> = DistributiveOmit<Element3DProps<TSurface, TFace, TBackFace>, 'rotateX' | 'rotateY'> & {
+		trackingConfig?: TrackingConfig;
+		trackingAreaElement?: HTMLElement;
+	};
+
 	let {
-		front,
-		surface,
 		trackingAreaElement,
 		trackingConfig = {
 			mode: 'sphere-hyperbolic'
-		}
-	}: {
-		front: Snippet;
-		surface?: Snippet<[content: Snippet]>;
-		trackingConfig?: TrackingConfig;
-		trackingAreaElement?: HTMLElement;
-	} = $props();
+		},
+		...element3DProps
+	}: TrackingElement3DProps<TSurface, TFace, TBackFace> = $props();
 
 	let rotateX = $state(0);
 	let rotateY = $state(0);
@@ -71,7 +84,7 @@
 
 <div class="tracking-area" bind:this={trackingAreaElementDefault}>
 	<div class="tracking-visual">
-		<Element3D {rotateX} {rotateY} {front} {surface} />
+		<Element3D {rotateX} {rotateY} {...element3DProps} />
 	</div>
 </div>
 
