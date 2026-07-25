@@ -1,38 +1,32 @@
 <script
 	lang="ts"
 	generics="
-		TSurface extends Surface = Surface,
-		TFace extends Face = Face,
-		TBackFace extends Face = Face
+		TSurface extends ChildCapableRenderable,
+		TFace extends AnyRenderable,
+		TBackFace extends AnyRenderable
 	"
 >
-	import { componentSurface } from '$lib/engine/ui-infra/composable-renderable/composable-renderable-factories';
-	import { renderRenderable } from '$lib/engine/ui-infra/composable-renderable/composable-renderable-renderer.svelte';
+	import { mergeProps } from 'svelte-toolbelt';
 
-	import type {
-		AnyRenderable,
-		AnyRenderableProps,
-		Face,
-		Surface
-	} from '$lib/engine/ui-infra/composable-renderable/types';
+	import {
+		ComposedComponent,
+		componentRenderable,
+		type AnyRenderable,
+		type ChildCapableRenderable,
+		type RenderableProps
+	} from '$lib/engine/ui-infra/composable-renderable';
 
 	import ElementSurface from './ElementSurface.svelte';
 	import type { Element3DProps } from './types';
 
-	type ResolvedFace = {
-		renderable: AnyRenderable;
-		renderableProps: AnyRenderableProps;
-	};
-
-	const defaultSurface = componentSurface(ElementSurface);
+	const defaultSurface = componentRenderable(ElementSurface);
 
 	let {
 		rotateX = 0,
 		rotateY = 0,
 		rotateZ = 0,
-
+		depth = 8,
 		compensateFaceScale = true,
-
 		thisElement = $bindable(),
 
 		surface,
@@ -46,86 +40,78 @@
 		backFaceProps,
 
 		class: userClass,
+		style: userStyle,
 		...rest
 	}: Element3DProps<TSurface, TFace, TBackFace> = $props();
 
-	const resolvedSurface = $derived((surface ?? defaultSurface) as Surface);
+	const resolvedSurface = $derived(surface ?? defaultSurface);
 
-	const resolvedFace: ResolvedFace = $derived.by(() => {
-		if (face !== undefined) {
-			return {
-				renderable: face,
-				renderableProps: (faceProps ?? {}) as AnyRenderableProps
-			};
-		}
-
-		if (children !== undefined) {
-			return {
-				renderable: children,
-				renderableProps: {}
-			};
-		}
-
-		throw new TypeError('Element3D requires either "face" or children.');
-	});
-
-	const resolvedBackFace: ResolvedFace | undefined = $derived.by(() => {
-		if (backFace === undefined) {
-			if (backFaceProps !== undefined) {
-				throw new TypeError('"backFaceProps" requires "backFace".');
-			}
-
-			return undefined;
-		}
-
-		return {
-			renderable: backFace,
-			renderableProps: (backFaceProps ?? {}) as AnyRenderableProps
-		};
-	});
-
-	const resolvedSurfaceProps = $derived.by(() => {
-		const props = (surfaceProps ?? {}) as AnyRenderableProps;
-
-		return {
-			...props,
-			class: ['td-surface', props.class]
-		};
-	});
+	const resolvedSurfaceProps = $derived(
+		mergeProps((surfaceProps ?? {}) as RenderableProps, {
+			class: 'td-surface'
+		})
+	);
 </script>
 
-{#snippet faceStack3D()}
+{#snippet faceStack()}
 	<div class="td-face-stack">
 		<div class="td-face td-face--front">
-			{@render renderRenderable({
-				renderable: resolvedFace.renderable,
-				renderableProps: resolvedFace.renderableProps
-			})}
+			{#if face}
+				<ComposedComponent renderable={face} props={faceProps!} />
+			{:else}
+				{@render children?.()}
+			{/if}
 		</div>
 
-		{#if resolvedBackFace}
-			<div class="td-face td-face--back">
-				{@render renderRenderable({
-					renderable: resolvedBackFace.renderable,
-					renderableProps: resolvedBackFace.renderableProps
-				})}
-			</div>
+		{#if backFace}
+			{#if backFace}
+				<div class="td-face td-face--back">
+					<ComposedComponent renderable={backFace} props={backFaceProps!} />
+				</div>
+			{/if}
 		{/if}
 	</div>
 {/snippet}
 
 <div
 	{...rest}
+	bind:this={thisElement}
 	class={['td-element', userClass]}
+	style={userStyle}
 	style:--td-rotate-x={`${rotateX}deg`}
 	style:--td-rotate-y={`${rotateY}deg`}
 	style:--td-rotate-z={`${rotateZ}deg`}
-	style:--td-face-scale-compensation={compensateFaceScale ? 1 : 0}
-	bind:this={thisElement}
+	style:--td-depth={`${depth}px`}
+	style:--td-face-scale-compensation={compensateFaceScale ? 'var(--td-face-scale)' : '1'}
 >
-	{@render renderRenderable({
-		renderable: resolvedSurface,
-		renderableProps: resolvedSurfaceProps,
-		content: faceStack3D
-	})}
+	<ComposedComponent renderable={resolvedSurface} props={resolvedSurfaceProps} content={faceStack} />
 </div>
+
+<style>
+	.td-element {
+		--td-rotate-x: 0deg;
+		--td-rotate-y: 0deg;
+		--td-rotate-z: 0deg;
+		--td-depth: 0px;
+		--td-face-scale: 1;
+		--td-face-scale-compensation: var(--td-face-scale);
+
+		display: inline-grid;
+		transform-style: preserve-3d;
+	}
+
+	.td-face {
+		grid-area: 1 / 1;
+		backface-visibility: hidden;
+		transform-style: preserve-3d;
+		scale: var(--td-face-scale-compensation);
+	}
+
+	.td-face--front {
+		transform: translateZ(var(--td-depth));
+	}
+
+	.td-face--back {
+		transform: rotateY(180deg) translateZ(var(--td-depth));
+	}
+</style>

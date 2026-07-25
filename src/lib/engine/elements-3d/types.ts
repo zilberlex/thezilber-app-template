@@ -1,24 +1,46 @@
-import type {
-	Face,
-	FaceChildrenProps,
-	NamedFaceProps,
-	Surface,
-	SurfaceProps
-} from '$lib/engine/ui-infra/composable-renderable/types';
+import type { Snippet } from 'svelte';
 import type { HTMLAttributes } from 'svelte/elements';
 
-type Control3DProps = Omit<HTMLAttributes<HTMLDivElement>, 'children'> & {
+import type { AnyRenderable, ChildCapableRenderable, PropsOf } from '$lib/engine/ui-infra/composable-renderable';
+
+export type Control3DProps = {
 	rotateX?: number;
 	rotateY?: number;
 	rotateZ?: number;
-
+	depth?: number;
 	compensateFaceScale?: boolean;
+};
 
-	thisElement?: HTMLDivElement;
+export type SurfaceProps<TSurface extends ChildCapableRenderable> = {
+	surface?: TSurface;
+	surfaceProps?: PropsOf<TSurface>;
+};
+
+export type PrimaryFaceProps<TFace extends AnyRenderable> =
+	| {
+			face: TFace;
+			faceProps: PropsOf<TFace>;
+			children?: never;
+	  }
+	| {
+			face?: never;
+			faceProps?: never;
+			children: Snippet;
+	  };
+
+export type BackFaceProps<TBackFace extends AnyRenderable> = {
+	backFace?: TBackFace;
+	backFaceProps?: PropsOf<TBackFace>;
 };
 
 export type Element3DProps<
-	TSurface extends Surface = Surface,
-	TFace extends Face = Face,
-	TBackFace extends Face = Face
-> = Control3DProps & SurfaceProps<TSurface, false> & FaceChildrenProps<TFace> & NamedFaceProps<'backFace', TBackFace>;
+	TSurface extends ChildCapableRenderable,
+	TFace extends AnyRenderable,
+	TBackFace extends AnyRenderable
+> = Omit<HTMLAttributes<HTMLDivElement>, 'children'> &
+	Control3DProps &
+	SurfaceProps<TSurface> &
+	PrimaryFaceProps<TFace> &
+	BackFaceProps<TBackFace> & {
+		thisElement?: HTMLDivElement;
+	};

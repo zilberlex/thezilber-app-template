@@ -1,0 +1,14 @@
+{
+	"extends": "../../../../.svelte-kit/tsconfig.json",
+	"include": [
+		"./+page.svelte",
+		"./StatefulFace.svelte",
+
+		"../../../lib/engine/elements-3d/Element3D.svelte",
+		"../../../lib/engine/elements-3d/ElementSurface.svelte",
+		"../../../lib/engine/elements-3d/types.ts",
+
+		"../../../lib/engine/ui-infra/composable-renderable/**/*.ts",
+		"../../../lib/engine/ui-infra/composable-renderable/**/*.svelte"
+	]
+}

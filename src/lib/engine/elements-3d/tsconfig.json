@@ -1,0 +1,9 @@
+{
+	"extends": "../../../../.svelte-kit/tsconfig.json",
+	"include": [
+		"./**/*.ts",
+		"./**/*.svelte",
+		"../ui-infra/composable-renderable/**/*.ts",
+		"../ui-infra/composable-renderable/**/*.svelte"
+	]
+}

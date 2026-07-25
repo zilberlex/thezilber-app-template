@@ -1,26 +1,34 @@
-import type { Component, Snippet } from 'svelte';
+import type { AnyRenderable, RenderableProps } from './types';
 
-export type RuntimeHTMLRenderable = {
-	kind: 'html';
-	htmlContentMode: 'void' | 'children';
-	tag: string;
-};
+export function assertRenderableProps(
+	props: unknown
+): asserts props is RenderableProps {
+	if (
+		typeof props !== 'object' ||
+		props === null ||
+		Array.isArray(props)
+	) {
+		throw new Error('Composable renderable props must be an object.');
+	}
 
-export type RuntimeComponentRenderable = {
-	kind: 'component';
-	component: Component<any>;
-};
+	if ('children' in props) {
+		throw new Error(
+			'Renderable props must not contain "children". Pass injected content through the content prop.'
+		);
+	}
+}
 
-export type RuntimeSnippetRenderable = {
-	kind: 'snippet';
-	snippet: Snippet<any>;
-};
-
-export type RuntimeRenderable = RuntimeHTMLRenderable | RuntimeComponentRenderable | RuntimeSnippetRenderable;
-
-export type RuntimeComposedComponent = {
-	kind: 'composed-component' | 'void-composed-component' | 'childed-composed-component';
-	renderable: RuntimeRenderable;
-	props: unknown;
-	content?: Snippet;
-};
+export function assertRenderableContent(
+	renderable: AnyRenderable,
+	content: unknown
+): void {
+	if (
+		renderable.kind === 'html' &&
+		renderable.htmlContentMode === 'void' &&
+		content !== undefined
+	) {
+		throw new Error(
+			`Cannot provide content to void HTML element <${renderable.tag}>.`
+		);
+	}
+}

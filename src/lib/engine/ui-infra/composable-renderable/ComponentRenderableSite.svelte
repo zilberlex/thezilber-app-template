@@ -1,14 +1,22 @@
 <script lang="ts">
-	import type { Component, Snippet } from 'svelte';
-	let { component: CurrentComponent, componentProps, content }: {
-		component: Component<any>;
-		componentProps: Record<string, any>;
+	import type { Snippet } from 'svelte';
+	import type { ComponentRenderable, RenderableProps } from './types';
+
+	let {
+		renderable,
+		props,
+		content
+	}: {
+		renderable: ComponentRenderable<any>;
+		props: RenderableProps;
 		content?: Snippet;
 	} = $props();
+
+	const Component = $derived(renderable.component);
 </script>
 
 {#if content}
-	<CurrentComponent {...componentProps} children={content} />
+	<Component {...props} children={content} />
 {:else}
-	<CurrentComponent {...componentProps} />
+	<Component {...props} />
 {/if}

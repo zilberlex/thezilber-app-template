@@ -1,14 +1,24 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	let { tag, elementProps, content }: {
-		tag: string;
-		elementProps: Record<string, any>;
+	import type { AnyHTMLRenderable, RenderableProps } from './types';
+
+	let {
+		renderable,
+		props,
+		content
+	}: {
+		renderable: AnyHTMLRenderable;
+		props: RenderableProps;
 		content?: Snippet;
 	} = $props();
 </script>
 
-{#if content}
-	<svelte:element this={tag} {...elementProps}>{@render content()}</svelte:element>
+{#if renderable.htmlContentMode === 'void'}
+	<svelte:element this={renderable.tag} {...props} />
 {:else}
-	<svelte:element this={tag} {...elementProps} />
+	<svelte:element this={renderable.tag} {...props}>
+		{#if content}
+			{@render content()}
+		{/if}
+	</svelte:element>
 {/if}
