@@ -2,151 +2,238 @@
 	import { componentRenderable, htmlRenderable, snippetRenderable } from '$lib/engine/ui-infra/composable-renderable';
 
 	import Element3D from '$lib/engine/elements-3d/Element3D.svelte';
-	import ElementSurface from '$lib/engine/elements-3d/ElementSurface.svelte';
 
 	import StatefulFace from './StatefulFace.svelte';
+	import Button from '$lib/ui/basic-components/Button.svelte';
 
-	const buttonFace = htmlRenderable('button');
-	const divBackFace = htmlRenderable('div');
+	const visibleSurface = htmlRenderable('div');
 	const statefulFace = componentRenderable(StatefulFace);
-	const customSurface = componentRenderable(ElementSurface);
 
 	let rotateX = $state(20);
-
-	let rotateY = $state(30);
+	let rotateY = $state(-25);
 	let rotateZ = $state(0);
-	let depth = $state(8);
+	let depth = $state(14);
 
+	let buttonSurfaceState = $state(0);
+
+	let compensateFaceScale = $state(true);
 	let label = $state('Stateful face');
-	let useCustomSurface = $state(false);
 </script>
 
-{#snippet snippetFace(props: { label: string })}
+{#snippet frontFace(props: { label: string })}
 	<div class="face-content">
 		{props.label}
 	</div>
 {/snippet}
 
+{#snippet backFace()}
+	<div class="face-content">Back face</div>
+{/snippet}
+
 <main>
-	<div class="controls">
+	<section class="controls">
+		<h1>Element3D sanity</h1>
+
 		<label>
-			Rotate X
-			<input type="range" min="-180" max="180" bind:value={rotateX} />
+			<span>Rotate X: {rotateX}°</span>
+			<input type="range" min="-180" max="180" step="1" bind:value={rotateX} />
 		</label>
 
 		<label>
-			Rotate Y
-			<input type="range" min="-180" max="180" bind:value={rotateY} />
+			<span>Rotate Y: {rotateY}°</span>
+			<input type="range" min="-180" max="180" step="1" bind:value={rotateY} />
 		</label>
 
 		<label>
-			Rotate Z
-			<input type="range" min="-180" max="180" bind:value={rotateZ} />
+			<span>Rotate Z: {rotateZ}°</span>
+			<input type="range" min="-180" max="180" step="1" bind:value={rotateZ} />
 		</label>
 
 		<label>
-			Depth
-			<input type="range" min="-20" max="20" bind:value={depth} />
+			<span>Depth: {depth}px</span>
+			<input type="range" min="0" max="50" step="1" bind:value={depth} />
 		</label>
 
-		<button type="button" onclick={() => (label += '!')}> Update face props </button>
+		<label class="checkbox">
+			<input type="checkbox" bind:checked={compensateFaceScale} />
 
-		<button type="button" onclick={() => (useCustomSurface = !useCustomSurface)}> Toggle explicit surface </button>
-	</div>
+			<span>Compensate face scale</span>
+		</label>
 
-	<section>
-		<h2>Direct children</h2>
-
-		<Element3D {depth} {rotateX} {rotateY} {rotateZ}>
-			<div class="face-content">Direct children face</div>
-		</Element3D>
+		<button type="button" onclick={() => (label += '!')}> Update component props </button>
 	</section>
 
-	<section>
-		<h2>HTML face and back face</h2>
+	<section class="examples">
+		<article>
+			<h2>Button component surface with direct children</h2>
 
-		<Element3D
-			{rotateX}
-			{rotateY}
-			{rotateZ}
-			{depth}
-			face={buttonFace}
-			faceProps={{
-				type: 'button',
-				class: 'face-content'
-			}}
-			backFace={divBackFace}
-			backFaceProps={{
-				class: 'face-content'
-			}}
-		/>
-	</section>
+			<div class="preview">
+				<Element3D
+					surface={componentRenderable(Button)}
+					surfaceProps={{ onclick: () => buttonSurfaceState++ }}
+					{rotateX}
+					{rotateY}
+					{rotateZ}
+					{depth}
+					{compensateFaceScale}
+				>
+					Button Clicks: {buttonSurfaceState}
+				</Element3D>
+			</div>
+		</article>
+		<article>
+			<h2>Direct children face</h2>
 
-	<section>
-		<h2>Snippet face</h2>
+			<div class="preview">
+				<Element3D
+					surface={visibleSurface}
+					surfaceProps={{
+						class: 'sanity-surface'
+					}}
+					{rotateX}
+					{rotateY}
+					{rotateZ}
+					{depth}
+					{compensateFaceScale}
+				>
+					Button-like surface
+				</Element3D>
+			</div>
+		</article>
 
-		<Element3D
-			{rotateX}
-			{rotateY}
-			{rotateZ}
-			{depth}
-			face={snippetRenderable(snippetFace)}
-			faceProps={{
-				label: 'Snippet face'
-			}}
-		/>
-	</section>
+		<article>
+			<h2>Snippet front and back faces</h2>
 
-	<section>
-		<h2>Stateful component face</h2>
+			<div class="preview">
+				<Element3D
+					surface={visibleSurface}
+					surfaceProps={{
+						class: 'sanity-surface'
+					}}
+					{rotateX}
+					{rotateY}
+					{rotateZ}
+					{depth}
+					{compensateFaceScale}
+					face={snippetRenderable(frontFace)}
+					faceProps={{
+						label: 'Front face'
+					}}
+					backFace={snippetRenderable(backFace)}
+					backFaceProps={{}}
+				/>
+			</div>
+		</article>
 
-		{#if useCustomSurface}
-			<Element3D
-				{rotateX}
-				{rotateY}
-				{rotateZ}
-				{depth}
-				surface={customSurface}
-				surfaceProps={{
-					'data-custom-surface': true
-				}}
-				face={statefulFace}
-				faceProps={{ label }}
-			/>
-		{:else}
-			<Element3D {depth} {rotateX} {rotateY} {rotateZ} face={statefulFace} faceProps={{ label }} />
-		{/if}
+		<article>
+			<h2>Stateful component face</h2>
+
+			<div class="preview">
+				<Element3D
+					surface={visibleSurface}
+					surfaceProps={{
+						class: 'sanity-surface'
+					}}
+					{rotateX}
+					{rotateY}
+					{rotateZ}
+					{depth}
+					{compensateFaceScale}
+					face={statefulFace}
+					faceProps={{ label }}
+				/>
+			</div>
+		</article>
 	</section>
 </main>
 
 <style>
 	main {
+		isolation: isolate;
+
 		display: grid;
-		gap: 2rem;
+		grid-template-columns: minmax(16rem, 24rem) minmax(0, 1fr);
+		gap: 3rem;
+
+		min-block-size: 100vh;
 		padding: 2rem;
 	}
 
 	.controls {
-		display: grid;
-		gap: 0.75rem;
-		max-width: 28rem;
-	}
+		position: relative;
+		z-index: 1;
 
-	label {
-		display: grid;
-		gap: 0.25rem;
-	}
+		align-self: start;
 
-	section {
 		display: grid;
 		gap: 1rem;
-		justify-items: start;
-	}
 
-	.face-content,
-	:global(.face-content) {
-		padding: 1rem 1.25rem;
+		padding: 1.25rem;
 		border: 1px solid currentColor;
 		border-radius: 0.75rem;
+	}
+
+	.controls label {
+		display: grid;
+		gap: 0.4rem;
+	}
+
+	.controls input[type='range'] {
+		inline-size: 100%;
+	}
+
+	.controls .checkbox {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.examples {
+		display: grid;
+		gap: 3rem;
+	}
+
+	article {
+		display: grid;
+		gap: 1rem;
+
+		min-block-size: 12rem;
+	}
+
+	.preview {
+		display: grid;
+		place-items: center;
+
+		min-block-size: 12rem;
+		padding: 4rem;
+
+		border: 1px dashed currentColor;
+		border-radius: 0.75rem;
+	}
+
+	:global(.sanity-surface) {
+		display: inline-grid;
+
+		border: 2px solid currentColor;
+		border-radius: 0.6rem;
+
+		transform-style: preserve-3d;
+	}
+
+	.face-content {
+		display: grid;
+		place-items: center;
+
+		min-inline-size: 10rem;
+		min-block-size: 4rem;
+
+		padding: 1rem 1.5rem;
+		border-radius: 0.5rem;
+	}
+
+	@media (max-width: 800px) {
+		main {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>

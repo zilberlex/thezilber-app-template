@@ -25,7 +25,7 @@
 		rotateX = 0,
 		rotateY = 0,
 		rotateZ = 0,
-		depth = 8,
+		depth = 7,
 		compensateFaceScale = true,
 		thisElement = $bindable(),
 
@@ -64,11 +64,9 @@
 		</div>
 
 		{#if backFace}
-			{#if backFace}
-				<div class="td-face td-face--back">
-					<ComposedComponent renderable={backFace} props={backFaceProps!} />
-				</div>
-			{/if}
+			<div class="td-face td-face--back">
+				<ComposedComponent renderable={backFace} props={backFaceProps!} />
+			</div>
 		{/if}
 	</div>
 {/snippet}
@@ -82,36 +80,7 @@
 	style:--td-rotate-y={`${rotateY}deg`}
 	style:--td-rotate-z={`${rotateZ}deg`}
 	style:--td-depth={`${depth}px`}
-	style:--td-face-scale-compensation={compensateFaceScale ? 'var(--td-face-scale)' : '1'}
+	style:--td-face-scale-compensation={compensateFaceScale ? '1' : '0'}
 >
 	<ComposedComponent renderable={resolvedSurface} props={resolvedSurfaceProps} content={faceStack} />
 </div>
-
-<style>
-	.td-element {
-		--td-rotate-x: 0deg;
-		--td-rotate-y: 0deg;
-		--td-rotate-z: 0deg;
-		--td-depth: 0px;
-		--td-face-scale: 1;
-		--td-face-scale-compensation: var(--td-face-scale);
-
-		display: inline-grid;
-		transform-style: preserve-3d;
-	}
-
-	.td-face {
-		grid-area: 1 / 1;
-		backface-visibility: hidden;
-		transform-style: preserve-3d;
-		scale: var(--td-face-scale-compensation);
-	}
-
-	.td-face--front {
-		transform: translateZ(var(--td-depth));
-	}
-
-	.td-face--back {
-		transform: rotateY(180deg) translateZ(var(--td-depth));
-	}
-</style>

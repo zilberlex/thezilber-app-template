@@ -1,13 +1,3 @@
-/*
- * Public 3D property contract
- *
- * @property gives each custom property:
- * - a known type;
- * - validation;
- * - an initial value;
- * - predictable interpolation when transitioned directly.
- */
-
 @property --td-perspective {
 	syntax: '<length>';
 	inherits: true;
@@ -80,15 +70,7 @@
 	initial-value: 250ms;
 }
 
-/*
- * 3D component root
- */
-
 .td-element {
-	/*
-	 * Public geometry defaults
-	 */
-
 	--td-perspective: 300px;
 	--td-depth: 7px;
 
@@ -101,14 +83,10 @@
 	--td-translate-z: 0px;
 
 	--td-scale: 1;
-
-
 	--td-face-scale-compensation: 1;
-
 
 	--td-transform-time: 200ms;
 	--td-transform-easing: ease-out;
-
 
 	--td-depth-transition-time: 50ms;
 	--td-depth-transition-easing: ease-out;
@@ -121,7 +99,6 @@
 	transform-style: preserve-3d;
 }
 
-
 .td-face-stack {
 	display: inline-grid;
 
@@ -131,7 +108,6 @@
 
 	transform-style: preserve-3d;
 }
-
 
 .td-face {
 	grid-area: 1 / 1;
@@ -148,22 +124,13 @@
 	backface-visibility: hidden;
 	-webkit-backface-visibility: hidden;
 
-
-	transition:
-		transform
-		var(--td-depth-transition-time)
-		var(--td-depth-transition-easing);
+	transition: transform var(--td-depth-transition-time) var(--td-depth-transition-easing);
 }
 
 .td-face--front {
-	transform:
-		translateZ(var(--td-depth))
-		scale(var(--_td-front-face-scale, 1));
+	transform: translateZ(var(--td-depth)) scale(var(--_td-front-face-scale, 1));
 }
 
 .td-face--back {
-	transform:
-		translateZ(calc(-1 * var(--td-depth)))
-		rotateX(180deg)
-		scale(var(--_td-back-face-scale, 1));
+	transform: translateZ(calc(-1 * var(--td-depth))) rotateX(180deg) scale(var(--_td-back-face-scale, 1));
 }
