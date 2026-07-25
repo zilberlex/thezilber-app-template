@@ -1,29 +1,34 @@
-<script lang="ts">
-	import type { Snippet } from 'svelte';
+<script
+	lang="ts"
+	generics="
+		TSurface extends ChildCapableRenderable = ChildCapableRenderable,
+		TFace extends AnyRenderable = AnyRenderable,
+		TBackFace extends AnyRenderable = AnyRenderable
+	"
+>
+	import { mergeProps } from 'svelte-toolbelt';
+
+	import type { AnyRenderable, ChildCapableRenderable } from '$lib/engine/ui-infra/composable-renderable';
+
 	import Element3D from './Element3D.svelte';
+	import type { Element3DProps, FlippableElement3DProps } from './types';
 
-	let {
-		front,
-		back,
-		surface
-	}: {
-		front: Snippet;
-		back?: Snippet;
-		surface?: Snippet<[content: Snippet]>;
-	} = $props();
+	let { thisElement = $bindable(), ...element3DProps }: FlippableElement3DProps<TSurface, TFace, TBackFace> = $props();
 
-	let rotation = $state(0);
+	let rotateX = $state(0);
+
 	function flip() {
-		rotation += 180;
+		rotateX += 180;
 	}
+
+	const resolvedProps = $derived(
+		mergeProps(element3DProps, {
+			rotateX,
+			onmouseenter: flip,
+			onmouseleave: flip,
+			style: '--td-transform-time: 700ms;'
+		}) as Element3DProps<TSurface, TFace, TBackFace>
+	);
 </script>
 
-<Element3D
-	rotateX={rotation}
-	onmouseenter={flip}
-	onmouseleave={flip}
-	{front}
-	{back}
-	{surface}
-	style="--td-transform-time: 700ms;"
-/>
+<Element3D {...resolvedProps} bind:thisElement />

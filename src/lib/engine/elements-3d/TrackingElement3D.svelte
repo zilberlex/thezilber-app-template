@@ -1,31 +1,23 @@
 <script
 	lang="ts"
 	generics="
-		TSurface extends Surface = Surface,
-		TFace extends Face = Face,
-		TBackFace extends Face = Face
+		TSurface extends ChildCapableRenderable = ChildCapableRenderable,
+		TFace extends AnyRenderable = AnyRenderable,
+		TBackFace extends AnyRenderable = AnyRenderable
 	"
 >
 	import { untrack } from 'svelte';
 
+	import { calculateTrackingRotation } from '$lib/engine/math-utils/trackball-algorithms';
 	import { appState } from '$lib/engine/state/application-state.svelte';
-	import { calculateTrackingRotation, type TrackingConfig } from '$lib/engine/math-utils/trackball-algorithms';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
-	import type { Surface, Face } from '../ui-infra/composable-renderable/types';
-	import type { DistributiveOmit } from '$lib/engine/types/utility-types';
-	import type { Element3DProps } from './types';
-	import Element3D from './Element3D.svelte';
+	import type { AnyRenderable, ChildCapableRenderable } from '$lib/engine/ui-infra/composable-renderable';
 
-	export type TrackingElement3DProps<
-		TSurface extends Surface = Surface,
-		TFace extends Face = Face,
-		TBackFace extends Face = Face
-	> = DistributiveOmit<Element3DProps<TSurface, TFace, TBackFace>, 'rotateX' | 'rotateY'> & {
-		trackingConfig?: TrackingConfig;
-		trackingAreaElement?: HTMLElement;
-	};
+	import Element3D from './Element3D.svelte';
+	import type { TrackingElement3DProps } from './types';
 
 	let {
+		thisElement = $bindable(),
 		trackingAreaElement,
 		trackingConfig = {
 			mode: 'sphere-hyperbolic'
@@ -37,7 +29,6 @@
 	let rotateY = $state(0);
 
 	let shouldTrack = $state(false);
-
 	let trackingAreaElementDefault = $state<HTMLElement>();
 
 	$effect(() => {
@@ -48,9 +39,11 @@
 				trackingAreaElement = trackingAreaElementDefault;
 			}
 
-			let abortController = new AbortController();
-			let { signal } = abortController;
+			const abortController = new AbortController();
+			const { signal } = abortController;
+
 			trackingAreaElement?.addEventListener('pointerenter', () => (shouldTrack = true), { signal });
+
 			trackingAreaElement?.addEventListener('pointerleave', () => (shouldTrack = false), { signal });
 
 			return () => abortController.abort();
@@ -60,9 +53,7 @@
 	$effect(() => {
 		const element = trackingAreaElement;
 		const active = shouldTrack;
-
 		const mousePosition = appState.mousePos;
-
 		const currentTracking = trackingConfig;
 
 		untrack(() => {
@@ -73,7 +64,6 @@
 			}
 
 			const rect = element.getBoundingClientRect();
-
 			const rotation = calculateTrackingRotation(mousePosition, rect, currentTracking);
 
 			rotateX = rotation.rotateX;
@@ -84,7 +74,7 @@
 
 <div class="tracking-area" bind:this={trackingAreaElementDefault}>
 	<div class="tracking-visual">
-		<Element3D {rotateX} {rotateY} {...element3DProps} />
+		<Element3D {...element3DProps} {rotateX} {rotateY} bind:thisElement />
 	</div>
 </div>
 

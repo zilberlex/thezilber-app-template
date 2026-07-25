@@ -1,15 +1,14 @@
 import type { Component, Snippet } from 'svelte';
-import type { SvelteHTMLElements } from 'svelte/elements';
-
-export type RenderableProps = Record<string, any>;
 
 declare const RENDERABLE_PROPS: unique symbol;
 
-type RenderablePropsCarrier<Props extends RenderableProps> = {
-	readonly [RENDERABLE_PROPS]?: Props;
-};
+export type RenderableProps = Record<string, any>;
 
-export type HTMLTag = Extract<keyof SvelteHTMLElements, string>;
+export type RenderableSnippet<Props extends RenderableProps = RenderableProps> = Snippet<
+	[props: Props, content?: Snippet]
+>;
+
+export type HTMLTag = keyof HTMLElementTagNameMap | 'param';
 
 export type VoidHTMLTag =
 	| 'area'
@@ -29,57 +28,78 @@ export type VoidHTMLTag =
 
 export type ChildedHTMLTag = Exclude<HTMLTag, VoidHTMLTag>;
 
-export type HTMLRenderable<
-	Tag extends ChildedHTMLTag = ChildedHTMLTag,
-	Props extends RenderableProps = RenderableProps
-> = {
-	kind: 'html';
-	htmlContentMode: 'children';
-	tag: Tag;
-} & RenderablePropsCarrier<Props>;
+type ExternalProps<Props extends RenderableProps> = Props extends unknown ? Omit<Props, 'children'> : never;
 
-export type VoidHTMLRenderable<
-	Tag extends VoidHTMLTag = VoidHTMLTag,
-	Props extends RenderableProps = RenderableProps
-> = {
+type RenderablePropsCarrier<Props> = {
+	readonly [RENDERABLE_PROPS]?: Props;
+};
+
+export type VoidHTMLRenderable<Tag extends VoidHTMLTag = VoidHTMLTag> = {
 	kind: 'html';
 	htmlContentMode: 'void';
 	tag: Tag;
-} & RenderablePropsCarrier<Props>;
+} & RenderablePropsCarrier<RenderableProps>;
+
+export type ChildedHTMLRenderable<Tag extends ChildedHTMLTag = ChildedHTMLTag> = {
+	kind: 'html';
+	htmlContentMode: 'children';
+	tag: Tag;
+} & RenderablePropsCarrier<RenderableProps>;
+
+export type HTMLRenderable<Tag extends HTMLTag = HTMLTag> = Tag extends VoidHTMLTag
+	? VoidHTMLRenderable<Tag>
+	: Tag extends ChildedHTMLTag
+		? ChildedHTMLRenderable<Tag>
+		: never;
 
 export type ComponentRenderable<Props extends RenderableProps = RenderableProps> = {
 	kind: 'component';
 	component: Component<Props>;
-} & RenderablePropsCarrier<Omit<Props, 'children'>>;
-
-export type RenderableSnippet<Props extends RenderableProps = RenderableProps> = Snippet<
-	[props: Props, content?: Snippet]
->;
+} & RenderablePropsCarrier<ExternalProps<Props>>;
 
 export type SnippetRenderable<Props extends RenderableProps = RenderableProps> = {
 	kind: 'snippet';
 	snippet: RenderableSnippet<Props>;
-} & RenderablePropsCarrier<Omit<Props, 'children'>>;
+} & RenderablePropsCarrier<ExternalProps<Props>>;
 
-export type AnyHTMLRenderable = HTMLRenderable<any, any> | VoidHTMLRenderable<any, any>;
+export type AnyHTMLRenderable = VoidHTMLRenderable | ChildedHTMLRenderable;
 
 export type AnyRenderable = AnyHTMLRenderable | ComponentRenderable<any> | SnippetRenderable<any>;
 
-export type ChildCapableRenderable = HTMLRenderable<any, any> | ComponentRenderable<any> | SnippetRenderable<any>;
+export type ChildCapableRenderable = ChildedHTMLRenderable | ComponentRenderable<any> | SnippetRenderable<any>;
 
-export type PropsOf<TRenderable extends AnyRenderable> =
-	TRenderable extends RenderablePropsCarrier<infer Props> ? Props : never;
+export type VoidCapableRenderable = VoidHTMLRenderable | ComponentRenderable<any> | SnippetRenderable<any>;
 
-type RenderableContentProps<TRenderable extends AnyRenderable> =
-	TRenderable extends VoidHTMLRenderable<any, any>
+export type PropsOf<Renderable extends AnyRenderable> =
+	Renderable extends RenderablePropsCarrier<infer Props> ? Props : never;
+
+export type ComposedComponentProps<Renderable extends AnyRenderable = AnyRenderable> = {
+	renderable: Renderable;
+	props: NoInfer<PropsOf<Renderable>>;
+	content?: Renderable extends ChildCapableRenderable ? Snippet : never;
+};
+
+type RenderableSlotPropsField<Renderable extends AnyRenderable, Name extends string> =
+	{} extends PropsOf<Renderable>
 		? {
-				content?: never;
+				[Key in `${Name}Props`]?: NoInfer<PropsOf<Renderable>>;
 			}
 		: {
-				content?: Snippet;
+				[Key in `${Name}Props`]: NoInfer<PropsOf<Renderable>>;
 			};
 
-export type ComposedComponentProps<TRenderable extends AnyRenderable> = {
-	renderable: TRenderable;
-	props: PropsOf<TRenderable>;
-} & RenderableContentProps<TRenderable>;
+type PresentRenderableSlotProps<Renderable extends AnyRenderable, Name extends string> = {
+	[Key in Name]: Renderable;
+} & RenderableSlotPropsField<Renderable, Name>;
+
+type AbsentRenderableSlotProps<Name extends string> = {
+	[Key in Name | `${Name}Props`]?: never;
+};
+
+export type RenderableSlotProps<
+	Renderable extends AnyRenderable,
+	Name extends string = 'renderable',
+	Required extends boolean = true
+> = Required extends true
+	? PresentRenderableSlotProps<Renderable, Name>
+	: PresentRenderableSlotProps<Renderable, Name> | AbsentRenderableSlotProps<Name>;
