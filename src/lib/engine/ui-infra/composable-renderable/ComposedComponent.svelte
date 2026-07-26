@@ -1,7 +1,13 @@
 <script lang="ts" generics="TRenderable extends AnyRenderable">
 	import type { Snippet } from 'svelte';
 
-	import type { AnyRenderable, ComposedComponentProps, RenderableProps } from './types';
+	import type {
+		AnyRenderable,
+		ComposedComponentProps,
+		ExplicitRenderable,
+		RenderableProps,
+		RenderableSnippet
+	} from './types';
 
 	import { assertRenderableContent, assertRenderableProps } from './composable-renderable-runtime';
 
@@ -14,23 +20,38 @@
 	const runtimeProps = $derived(
 		publicProps as unknown as {
 			renderable: AnyRenderable;
-			props: RenderableProps;
+			props?: RenderableProps;
 			content?: Snippet;
 		}
 	);
 
 	const validatedProps = $derived.by(() => {
-		assertRenderableProps(runtimeProps.props);
-		assertRenderableContent(runtimeProps.renderable, runtimeProps.content);
+		const props = runtimeProps.props ?? {};
 
-		return runtimeProps.props;
+		assertRenderableProps(props);
+
+		if (typeof runtimeProps.renderable !== 'function') {
+			assertRenderableContent(runtimeProps.renderable, runtimeProps.content);
+		}
+
+		return props;
 	});
+
+	const directSnippet = $derived(
+		typeof runtimeProps.renderable === 'function' ? (runtimeProps.renderable as RenderableSnippet) : undefined
+	);
+
+	const explicitRenderable = $derived(
+		typeof runtimeProps.renderable === 'function' ? undefined : (runtimeProps.renderable as ExplicitRenderable)
+	);
 </script>
 
-{#if runtimeProps.renderable.kind === 'html'}
-	<HTMLRenderableSite renderable={runtimeProps.renderable} props={validatedProps} content={runtimeProps.content} />
-{:else if runtimeProps.renderable.kind === 'component'}
-	<ComponentRenderableSite renderable={runtimeProps.renderable} props={validatedProps} content={runtimeProps.content} />
-{:else}
-	<SnippetRenderableSite renderable={runtimeProps.renderable} props={validatedProps} content={runtimeProps.content} />
+{#if directSnippet}
+	{@render directSnippet(validatedProps, runtimeProps.content)}
+{:else if explicitRenderable?.kind === 'html'}
+	<HTMLRenderableSite renderable={explicitRenderable} props={validatedProps} content={runtimeProps.content} />
+{:else if explicitRenderable?.kind === 'component'}
+	<ComponentRenderableSite renderable={explicitRenderable} props={validatedProps} content={runtimeProps.content} />
+{:else if explicitRenderable}
+	<SnippetRenderableSite renderable={explicitRenderable} props={validatedProps} content={runtimeProps.content} />
 {/if}

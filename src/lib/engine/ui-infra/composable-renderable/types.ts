@@ -30,6 +30,15 @@ export type ChildedHTMLTag = Exclude<HTMLTag, VoidHTMLTag>;
 
 type ExternalProps<Props extends RenderableProps> = Props extends unknown ? Omit<Props, 'children'> : never;
 
+type SnippetFirstArgument<RenderableSnippet extends Snippet<any>> =
+	RenderableSnippet extends Snippet<infer Arguments>
+		? Arguments extends [infer Props, ...unknown[]]
+			? Props extends RenderableProps
+				? Props
+				: never
+			: Record<string, never>
+		: never;
+
 type RenderablePropsCarrier<Props> = {
 	readonly [RENDERABLE_PROPS]?: Props;
 };
@@ -64,20 +73,39 @@ export type SnippetRenderable<Props extends RenderableProps = RenderableProps> =
 
 export type AnyHTMLRenderable = VoidHTMLRenderable | ChildedHTMLRenderable;
 
-export type AnyRenderable = AnyHTMLRenderable | ComponentRenderable<any> | SnippetRenderable<any>;
+export type ExplicitRenderable = AnyHTMLRenderable | ComponentRenderable<any> | SnippetRenderable<any>;
 
-export type ChildCapableRenderable = ChildedHTMLRenderable | ComponentRenderable<any> | SnippetRenderable<any>;
+export type ExplicitChildCapableRenderable = ChildedHTMLRenderable | ComponentRenderable<any> | SnippetRenderable<any>;
 
-export type VoidCapableRenderable = VoidHTMLRenderable | ComponentRenderable<any> | SnippetRenderable<any>;
+export type ExplicitVoidCapableRenderable = VoidHTMLRenderable | ComponentRenderable<any> | SnippetRenderable<any>;
 
-export type PropsOf<Renderable extends AnyRenderable> =
-	Renderable extends RenderablePropsCarrier<infer Props> ? Props : never;
+export type AnyRenderable = ExplicitRenderable | Snippet<any>;
+
+export type ChildCapableRenderable = ExplicitChildCapableRenderable | Snippet<any>;
+
+export type VoidCapableRenderable = ExplicitVoidCapableRenderable | Snippet<any>;
+
+export type PropsOf<Renderable extends AnyRenderable> = Renderable extends ExplicitRenderable
+	? Renderable extends RenderablePropsCarrier<infer Props>
+		? Props
+		: never
+	: Renderable extends Snippet<any>
+		? ExternalProps<SnippetFirstArgument<Renderable>>
+		: never;
+
+type ComposedComponentPropsField<Renderable extends AnyRenderable> =
+	{} extends PropsOf<Renderable>
+		? {
+				props?: NoInfer<PropsOf<Renderable>>;
+			}
+		: {
+				props: NoInfer<PropsOf<Renderable>>;
+			};
 
 export type ComposedComponentProps<Renderable extends AnyRenderable = AnyRenderable> = {
 	renderable: Renderable;
-	props: NoInfer<PropsOf<Renderable>>;
-	content?: Renderable extends ChildCapableRenderable ? Snippet : never;
-};
+	content?: Renderable extends VoidHTMLRenderable ? never : Snippet;
+} & ComposedComponentPropsField<Renderable>;
 
 type RenderableSlotPropsField<Renderable extends AnyRenderable, Name extends string> =
 	{} extends PropsOf<Renderable>

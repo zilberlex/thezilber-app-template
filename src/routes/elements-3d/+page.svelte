@@ -1,4 +1,5 @@
 <script lang="ts">
+	import FlippableElement3D from '$lib/engine/elements-3d/FlippableElement3D.svelte';
 	import TrackingElement3D from '$lib/engine/elements-3d/TrackingElement3D.svelte';
 	import { TRACKING_MODES } from '$lib/engine/math-utils/trackball-algorithms';
 	import { componentRenderable, snippetRenderable } from '$lib/engine/ui-infra/composable-renderable';
@@ -13,14 +14,14 @@
 
 <div class="ly-center">
 	<main>
-		<!-- <FlippableElement3D> -->
-		<!-- 	{#snippet front()} -->
-		<!-- 		Flipper -->
-		<!-- 	{/snippet} -->
-		<!-- 	{#snippet back()} -->
-		<!-- 		Back of Flipper -->
-		<!-- 	{/snippet} -->
-		<!-- </FlippableElement3D> -->
+		<FlippableElement3D>
+			{#snippet face()}
+				Flipper
+			{/snippet}
+			{#snippet backFace()}
+				Back of Flipper
+			{/snippet}
+		</FlippableElement3D>
 
 		{#each trackBallAlgorithsm as trackingMode}
 			<TrackingElement3D trackingConfig={{ mode: trackingMode }} compensateFaceScale={false}>
