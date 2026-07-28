@@ -61,15 +61,14 @@
 			inset var(--ring5),
 			inset var(--ring6);
 
-      // No background works better with 3d Effects.
+		// No background works better with 3d Effects.
 		//background: var(--rings-end-bg);
 	}
 }
 
 button,
 a.link-button {
-
- cursor: pointer; 
+	cursor: pointer;
 
 	position: relative;
 
@@ -87,7 +86,7 @@ a.link-button {
 
 	line-height: var(--sp-line-height);
 
-box-shadow:
+	box-shadow:
 		0 0 4px var(--color-1-transparent),
 		0 0 8px transparent;
 
@@ -107,7 +106,7 @@ box-shadow:
 	&:is(:focus-visible, :hover),
 	&.btn-pressed {
 		border-color: var(--color-1-brightest);
-    box-shadow:
+		box-shadow:
 			0 0 4px var(--color-1),
 			0 0 8px color-mix(in srgb, var(--color-1) 60%, transparent);
 
@@ -124,13 +123,13 @@ box-shadow:
 			box-shadow: none;
 		}
 
-    &:not(.td-surface) {
-	   transform: translateY(var(--_hover-offset));
-    }
+		&:not(.td-surface) {
+			transform: translateY(var(--_hover-offset));
+		}
 
-    &.td-surface {
-	    --td-translate-y: var(--_hover-offset);
-    }
+		&.td-surface {
+			--td-translate-y: var(--_hover-offset);
+		}
 
 		& span {
 			transform: translateY(0.5px);
@@ -139,29 +138,27 @@ box-shadow:
 
 	&:active,
 	&.btn-start-work {
-&,
-	& *:not(.td-face) {
-		transition: all 0s;
-	}
+		&,
+		& *:not(.td-face) {
+			transition: all 0s;
+		}
 	}
 
 	&:active,
 	&.btn-pressed {
-&:not(.td-surface) {
-	transform: translateY(0);
-
-
-		& span {
+		&:not(.td-surface) {
 			transform: translateY(0);
+
+			& span {
+				transform: translateY(0);
+			}
 		}
-}
 
-&.td-surface {
-	--td-translate-y: 0px;
---td-depth: 0px;
---td-depth-transition-time: 0ms;
-}
-
+		&.td-surface {
+			--td-translate-y: 0px;
+			--td-depth: 0px;
+			--td-depth-transition-time: 0ms;
+		}
 	}
 
 	&.btn-pressed {
@@ -170,5 +167,4 @@ box-shadow:
 			0 0 8px var(--cl-primary),
 			0 0 16px color-mix(in srgb, var(--cl-primary) 70%, transparent);
 	}
-
 }
