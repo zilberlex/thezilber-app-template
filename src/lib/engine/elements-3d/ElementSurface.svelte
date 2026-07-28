@@ -18,9 +18,10 @@
 <style>
 	.td-default-surface {
 		--td-default-surface-radius: 0.45rem;
+		--td-surface-background-color: var(--cl-background);
 
 		color: var(--cl-on-primary);
-		background-color: var(--cl-background);
+		background-color: var(--td-surface-background-color);
 
 		border: var(--border-thick) solid var(--cl-primary);
 		border-radius: var(--td-default-surface-radius);

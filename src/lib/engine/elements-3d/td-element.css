@@ -83,7 +83,7 @@
 	--td-translate-z: 0px;
 
 	--td-scale: 1;
-	--td-face-scale-compensation: 1;
+	--td-face-scale-compensation: 0;
 
 	--td-transform-time: 200ms;
 	--td-transform-easing: ease-out;
@@ -97,6 +97,10 @@
 	min-block-size: 0;
 
 	transform-style: preserve-3d;
+
+	&.td-elment--negative-depth .td-surface {
+		background-color: transparent;
+	}
 }
 
 .td-face-stack {

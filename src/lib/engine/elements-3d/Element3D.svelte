@@ -26,7 +26,7 @@
 		rotateY = 0,
 		rotateZ = 0,
 		depth = 7,
-		compensateFaceScale = true,
+		compensateFaceScale = false,
 		thisElement = $bindable(),
 
 		surface,
@@ -74,7 +74,7 @@
 <div
 	{...rest}
 	bind:this={thisElement}
-	class={['td-element', userClass]}
+	class={['td-element', depth < 0 && 'td-element--negative-depth', userClass]}
 	style={userStyle}
 	style:--td-rotate-x={`${rotateX}deg`}
 	style:--td-rotate-y={`${rotateY}deg`}

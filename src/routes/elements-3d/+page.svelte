@@ -12,8 +12,9 @@
 	let trackBallAlgorithsm = TRACKING_MODES;
 </script>
 
-<div class="ly-center">
-	<main>
+<main class="ly-center">
+	<section>
+		<h3>Flipper</h3>
 		<FlippableElement3D>
 			{#snippet face()}
 				Flipper
@@ -22,13 +23,28 @@
 				Back of Flipper
 			{/snippet}
 		</FlippableElement3D>
+	</section>
 
+	<section>
+		<h3>Positive Depth</h3>
 		{#each trackBallAlgorithsm as trackingMode}
-			<TrackingElement3D trackingConfig={{ mode: trackingMode }} compensateFaceScale={false}>
+			<TrackingElement3D trackingConfig={{ mode: trackingMode }} compensateFaceScale={true}>
 				Mouse Tracker {trackingMode}
 			</TrackingElement3D>
 		{/each}
+	</section>
 
+	<section>
+		<h3>Negative Depth (Surface Color Transparent by design)</h3>
+		{#each trackBallAlgorithsm as trackingMode}
+			<TrackingElement3D trackingConfig={{ mode: trackingMode }} compensateFaceScale={true}>
+				Mouse Tracker {trackingMode}
+			</TrackingElement3D>
+		{/each}
+	</section>
+
+	<section>
+		<h3>Buttons</h3>
 		{#snippet trackingFace()}
 			Tracking Button Compensated
 		{/snippet}
@@ -42,12 +58,22 @@
 			face={snippetRenderable(trackingFace)}
 			faceProps={{}}
 		></TrackingElement3D>
+
+		<TrackingElement3D surface={componentRenderable(Button)} compensateFaceScale={true} depth={-40}>
+			Tracking Button Compensated Negative Depth
+		</TrackingElement3D>
 		<Button>Normal Button</Button>
-	</main>
-</div>
+	</section>
+</main>
 
 <style>
 	main {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-8);
+	}
+
+	section {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-2);

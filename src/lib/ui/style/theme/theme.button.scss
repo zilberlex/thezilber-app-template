@@ -61,12 +61,16 @@
 			inset var(--ring5),
 			inset var(--ring6);
 
-		background: var(--rings-end-bg);
+      // No background works better with 3d Effects.
+		//background: var(--rings-end-bg);
 	}
 }
 
 button,
 a.link-button {
+
+ cursor: pointer; 
+
 	position: relative;
 
 	--_hover-offset: -4px;
@@ -126,7 +130,6 @@ box-shadow:
 
     &.td-surface {
 	    --td-translate-y: var(--_hover-offset);
---td-rotate-x: 20deg;
     }
 
 		& span {
@@ -157,7 +160,6 @@ box-shadow:
 	--td-translate-y: 0px;
 --td-depth: 0px;
 --td-depth-transition-time: 0ms;
-
 }
 
 	}
