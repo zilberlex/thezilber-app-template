@@ -1,4 +1,6 @@
-@use '$lib/ui/style/effects.scss' as * with ($emit-default: true);
+@use '$lib/ui/style/effects.scss' as * with (
+	$emit-default: true
+);
 @use '$lib/ui/style/utility.color.scss' as *;
 @use '$lib/ui/style/theme/theme.button.scss' as tButton;
 @use '$lib/ui/style/theme/theme.box.scss' as tBox;
@@ -12,6 +14,7 @@
 	$emit-default: true
 );
 @use '$lib/ui/style/theme/theme.caret.scss';
+@use '$lib/ui/style/theme/theme.content-surface.scss' as tContentSurface;
 @import '$lib/engine/elements-3d/three-d.css';
 @import '$lib/ui/style/tokens.color.css';
 @import '$lib/ui/style/tokens.typography.css';

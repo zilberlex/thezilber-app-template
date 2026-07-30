@@ -1,6 +1,5 @@
 <script lang="ts" generics="T extends string">
 	import type { Snippet } from 'svelte';
-	import { mergeProps } from 'svelte-toolbelt';
 	import type { HTMLAttributes } from 'svelte/elements';
 
 	interface Props extends HTMLAttributes<HTMLDivElement> {

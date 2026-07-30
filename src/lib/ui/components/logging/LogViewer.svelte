@@ -7,6 +7,7 @@
 	import ScrollIndicator from '../ui-tricks/ScrollIndicator.svelte';
 	import type { EngineLogger, LogContext, LogEvent, LogSeverity } from '$lib/engine/logging/engine-logger';
 	import { ActionQueue } from '$lib/engine/patterns/action-queue';
+	import TrackingElement3D from '$lib/engine/elements-3d/TrackingElement3D.svelte';
 
 	type LogLine = {
 		severity: LogSeverity;
@@ -116,8 +117,12 @@
 	<ScrollIndicator>
 		<div class={['log-viewer-logs', direction]}>
 			{#each logs as logLine (logLine.id)}
-				<div class={['log-line', 'box', logLine.severity]} in:composedTransitionIn out:composedTransitionOut>
-					<span class="log-line-scope"><em>[</em>{logLine.context.scope}<em>]</em>:</span>
+				<div
+					class={['log-line', 'content-surface', logLine.severity]}
+					in:composedTransitionIn
+					out:composedTransitionOut
+				>
+					<span class="log-line-scope"><em>[</em>{logLine.context.scope}<em>]</em></span>
 					{logLine.message}
 				</div>
 			{/each}
@@ -151,10 +156,6 @@
 		}
 
 		.log-line {
-			border-radius: var(--shape-element-radius);
-			clip-path: (--shape-element-clip);
-			mask: var(--shape-element-mask);
-
 			font-style: italic;
 
 			.log-line-scope {

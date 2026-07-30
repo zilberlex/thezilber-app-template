@@ -1,0 +1,13 @@
+@import '$lib/ui/style/tokens.misc.css';
+
+.content-surface {
+	background-color: var(--cl-surface);
+
+	border: var(--border-thick) solid var(--cl-primary);
+	border-radius: var(--shape-element-radius);
+	clip-path: var(--shape-element-clip);
+	mask: var(--shape-element-mask);
+
+	padding: var(--space-2) var(--space-2);
+	color: var(--cl-on-surface);
+}

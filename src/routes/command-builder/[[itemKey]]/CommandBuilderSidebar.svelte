@@ -122,7 +122,7 @@
 
 	.menu-label {
 		color: var(--cl-on-surface-dimmer);
-		padding: var(--space-1) var(--space-2);
+		padding: var(--space-3) var(--space-4);
 		font-size: var(--font-size-3);
 		font-weight: normal;
 		width: var(--sidebar-item-width);
