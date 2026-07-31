@@ -15,15 +15,15 @@
 
 	let isSaveDialogOpen = $state(false);
 
-	let editMode = $derived(cbAppEnv.editMode);
-	let dataState = $derived(cbAppEnv.currentDataState);
+	let editMode = $derived(cbAppEnv?.editMode ?? 'draft');
+	let dataState = $derived(cbAppEnv?.currentDataState);
 	let isPermanentCommandPage = $derived(editMode === 'permanent');
 
 	let saveAsErrorMessage = $state('');
 
 	function defaultSaveButtonBehavior() {
 		if (isPermanentCommandPage) {
-			cbAppEnv.save();
+			cbAppEnv?.save();
 		} else {
 			openSaveAsPopup();
 		}
@@ -60,56 +60,58 @@
 	const preventedBrowserDefaults = hotkeys([...Array(10).keys()].map(String), 'alt');
 </script>
 
-<Debug appEnv={cbAppEnv} />
-<DataStateDisplay appEnv={cbAppEnv} />
-<PreventBrowserHotkeys preventedKeys={preventedBrowserDefaults} />
+{#if cbAppEnv}
+	<Debug appEnv={cbAppEnv} />
+	<DataStateDisplay appEnv={cbAppEnv} />
+	<PreventBrowserHotkeys preventedKeys={preventedBrowserDefaults} />
 
-<div class="main-app-layout" {...rest}>
-	<main class="command-builder-main-app">
-		{#if isPermanentCommandPage}
-			<input
-				bind:value={cbAppEnv.data.commandName}
-				class="input-title"
-				{@attach createFocusHotKeyAttachment('Modify Title', hotkey('i', 'alt'))}
-			/>
-		{/if}
+	<div class="main-app-layout" {...rest}>
+		<main class="command-builder-main-app">
+			{#if isPermanentCommandPage}
+				<input
+					bind:value={cbAppEnv.data.commandName}
+					class="input-title"
+					{@attach createFocusHotKeyAttachment('Modify Title', hotkey('i', 'alt'))}
+				/>
+			{/if}
 
-		<CommandBuilder bind:commandBuilderState={cbAppEnv.data} disabled={dataState.kind !== 'ready'} />
+			<CommandBuilder bind:commandBuilderState={cbAppEnv.data} disabled={dataState.kind !== 'ready'} />
 
-		<Button
-			class="button-save"
-			onclick={defaultSaveButtonBehavior}
-			{@attach createClickHotKeyAttachment('Save', false, hotkey('s', 'alt'))}
-			>{isPermanentCommandPage ? 'Save' : 'Save As'}</Button
-		>
-
-		{#if isPermanentCommandPage}
 			<Button
-				{@attach createClickHotKeyAttachment('Save As', false, hotkey('s', 'alt', 'shift'))}
-				onclick={openSaveAsPopup}
+				class="button-save"
+				onclick={defaultSaveButtonBehavior}
+				{@attach createClickHotKeyAttachment('Save', false, hotkey('s', 'alt'))}
+				>{isPermanentCommandPage ? 'Save' : 'Save As'}</Button
 			>
-				Save As
-			</Button>
-			<Button {@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))} onclick={deleteItem}>
-				Delete
-			</Button>
-		{/if}
-	</main>
-</div>
 
-<Dialog bind:open={isSaveDialogOpen}>
-	<OneLineForm
-		title="Save New Command"
-		defaultInput="New Command"
-		onAction={async (newCommandName) => {
-			await saveAsHandler(newCommandName);
-		}}
-		actionText="Save"
-		onClose={() => (isSaveDialogOpen = false)}
-		id="save-as-form"
-		errorMessage={saveAsErrorMessage}
-	/>
-</Dialog>
+			{#if isPermanentCommandPage}
+				<Button
+					{@attach createClickHotKeyAttachment('Save As', false, hotkey('s', 'alt', 'shift'))}
+					onclick={openSaveAsPopup}
+				>
+					Save As
+				</Button>
+				<Button {@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))} onclick={deleteItem}>
+					Delete
+				</Button>
+			{/if}
+		</main>
+	</div>
+
+	<Dialog bind:open={isSaveDialogOpen}>
+		<OneLineForm
+			title="Save New Command"
+			defaultInput="New Command"
+			onAction={async (newCommandName) => {
+				await saveAsHandler(newCommandName);
+			}}
+			actionText="Save"
+			onClose={() => (isSaveDialogOpen = false)}
+			id="save-as-form"
+			errorMessage={saveAsErrorMessage}
+		/>
+	</Dialog>
+{/if}
 
 <style lang="scss">
 	.main-app-layout {

@@ -7,11 +7,8 @@
 	import { collectionAppInit } from '$lib/app-infrastructure/collection-app/environement.svelte';
 	import CommandBuilderSidebar from './CommandBuilderSidebar.svelte';
 	import CommandBuilderNavigationKeys from './CommandBuilderNavigationKeys.svelte';
-	import { afterNavigate } from '$app/navigation';
-	import { onDestroy } from 'svelte';
-	import { getNavigationManager } from '$lib/engine/keyboard-navigation/svelte-components/navigation-manager-provider';
-
-	const navigationManager = getNavigationManager();
+	import { onDestroy, onMount } from 'svelte';
+	import { beforeNavigate } from '$app/navigation';
 
 	let placeholderData = {
 		commandName: '',
@@ -28,27 +25,43 @@
 		}
 	};
 
-	let cbAppEnv: CbAppEnv = $state(
-		collectionAppInit<CbData, CbProjection>(placeholderData, draftData, cbDbAdapter, 'CommandBuilderDataDb')
-	);
+	let cbAppEnv = $state<CbAppEnv>();
 
-	onDestroy(() => {
-		cbAppEnv.destroy();
+	onMount(() => {
+		appState.pageContext.title = 'Command Builder';
+
+		appState.loadApp('CommandBuilder');
+		cbAppEnv = collectionAppInit<CbData, CbProjection>(placeholderData, draftData, cbDbAdapter, 'CommandBuilderDataDb');
 	});
 
-	appState.pageContext.title = 'Command Builder';
+	beforeNavigate(() => {
+		cleanup();
+	});
+
+	onDestroy(() => {
+		cleanup();
+	});
+
+	function cleanup() {
+		appState.unloadApp();
+		cbAppEnv?.destroy();
+	}
 </script>
 
 <CommandBuilderNavigationKeys />
 
-<SidebarAppShell>
-	{#snippet title()}
-		<h2>CommandBuilder</h2>
-	{/snippet}
-	{#snippet sidebar()}
-		<CommandBuilderSidebar {cbAppEnv} />
-	{/snippet}
-	{#snippet main()}
-		<CommandLineBuilderMain bind:cbAppEnv />
-	{/snippet}
-</SidebarAppShell>
+{#if cbAppEnv !== undefined}
+	<SidebarAppShell>
+		{#snippet title()}
+			<h2>CommandBuilder</h2>
+		{/snippet}
+		{#snippet sidebar()}
+			<CommandBuilderSidebar cbAppEnv={cbAppEnv as CbAppEnv} />
+		{/snippet}
+		{#snippet main()}
+			<CommandLineBuilderMain bind:cbAppEnv={cbAppEnv as CbAppEnv} />
+		{/snippet}
+	</SidebarAppShell>
+{:else}
+	cbAppEnv Undefined
+{/if}

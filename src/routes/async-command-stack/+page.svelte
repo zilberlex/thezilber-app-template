@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { loadLocalState, saveLocalState } from '$lib/engine/storage/local/simple-state-persistance.svelte';
 	import { copyState } from '$lib/engine/svelte-helpers/copy-state';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
-	import type { PersistedCommandStack } from '$lib/engine/patterns/command/command-stack/command-stack';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/types';
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
@@ -14,14 +13,14 @@
 	import Portal from '$lib/ui/components/portal/Portal.svelte';
 	import LogViewer from '$lib/ui/components/logging/LogViewer.svelte';
 	import AnchoredRegion from '$lib/ui/components/layout/AnchoredRegion.svelte';
-	import { createCommandRegistry } from '$lib/engine/patterns/command/persistancy/command-registry';
 	import { DemoManager } from './demo-manager.svelte';
+	import { loadCommandStack, saveCommandStack } from '$lib/engine/state/command-state';
+	import { beforeNavigate } from '$app/navigation';
 
 	let inputKey = $state('');
 	let inputValue = $state('');
 
-	let commandRegistry = createCommandRegistry();
-	let demoAppManager = new DemoManager(appState.logger, commandRegistry);
+	let demoAppManager = new DemoManager(appState.logger, appState.commandRegistry);
 
 	const STORAGE_KEY = 'ASYNC_COMMAND_PAGE_STATE';
 
@@ -32,7 +31,6 @@
 			inputKey,
 			inputValue
 		});
-		saveCommandStack();
 	}
 
 	async function loadAppState() {
@@ -47,9 +45,13 @@
 	}
 
 	onMount(() => {
-		loadCommandStack();
-
+		appState.loadApp('AsyncCommandStackDemo');
 		loadAppState();
+	});
+
+	beforeNavigate(() => {
+		saveState();
+		appState.unloadApp();
 	});
 
 	function copyValues(key: any, value: any): void {
@@ -63,25 +65,6 @@
 
 	function redo(): any {
 		appState.commandStack.redo();
-	}
-
-	function saveCommandStack() {
-		let persistentStack = appState.commandStack.persistStack();
-		if (persistentStack) {
-			saveLocalState('COMMANDS', persistentStack);
-		} else {
-			console.warn('SAVE No Command Stack Present');
-		}
-	}
-
-	function loadCommandStack() {
-		let persistentStack = loadLocalState<PersistedCommandStack>('COMMANDS');
-		if (!persistentStack) {
-			console.warn('LOAD no Command Stack Present');
-			return;
-		}
-
-		appState.commandStack.hydrate(persistentStack, commandRegistry);
 	}
 
 	function insertItem() {
@@ -101,12 +84,12 @@
 <div class="demo ly-center">
 	<NavigationScope scopeName="asyncApp" navigationKeys={NavigationKeysConfigSets.Vertical}>
 		<div class="main">
-			<div class="remote storage-display">
+			<div class="remote storage-display content-surface">
 				{#each demoAppManager.farAwayStorage.entries() as [key, value] (key)}
 					<ItemSlot {key} {value} onClickCopy={copyValues} style="--color: red" />
 				{/each}
 			</div>
-			<div class="local storage-display">
+			<div class="local storage-display content-surface">
 				{#each demoAppManager.memoryStorage.entries() as [key, value] (key)}
 					<ItemSlot {key} {value} onClickCopy={copyValues} />
 				{/each}
@@ -137,9 +120,6 @@
 				</Button>
 				<Button onclick={updateItem} {@attach createClickHotKeyAttachment('Update', false, hotkey('u', 'alt'))}>
 					Update
-				</Button>
-				<Button onclick={saveState} {@attach createClickHotKeyAttachment('Save', false, hotkey('s', 'alt'))}>
-					Save
 				</Button>
 				<Button onclick={clearState} {@attach createClickHotKeyAttachment('Clear', false, hotkey('r', 'alt'))}>
 					Clear
@@ -175,7 +155,6 @@
 	}
 
 	.storage-display {
-		border: var(--base-border-thick);
 		display: flex;
 		flex-direction: row;
 		align-items: center;

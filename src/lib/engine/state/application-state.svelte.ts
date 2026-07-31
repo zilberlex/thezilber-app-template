@@ -5,6 +5,9 @@ import { navigationStateManager, type NavigationMode } from './navigation-state.
 import { CommandStack } from '../patterns/command/command-stack/command-stack';
 import { EngineLogger } from '../logging/engine-logger';
 import type { MousePos } from '../types/types';
+import { createCommandRegistry, type CommandRegistry } from '../patterns/command/persistancy/command-registry';
+import { loadCommandStack, saveCommandStack } from './command-state';
+import { browser } from '$app/environment';
 
 export interface AppState {
 	isAppLoaded: boolean;
@@ -19,10 +22,16 @@ export interface AppState {
 	debug: DebugState;
 	appRoot: HTMLElement | undefined;
 	commandStack: CommandStack;
+
 	get navigationMode(): NavigationMode;
 	get logger(): EngineLogger;
 	get mousePos(): MousePos;
 	set mousePos(pos: MousePos);
+	get appContext(): string;
+	get commandRegistry(): CommandRegistry;
+
+	loadApp(appContext: string): void;
+	unloadApp(): void;
 }
 
 export const appState: AppState = createAppState();
@@ -39,8 +48,10 @@ function createAppState(): AppState {
 	let navigationMode = $derived(navigationStateManager.navigationMode);
 	let logger = new EngineLogger();
 	let mousePos = $state({ x: 0, y: 0 });
+	let _appContext = $state<string>('');
 
 	let commandStack = $state<CommandStack>(new CommandStack());
+	let commandRegistry = createCommandRegistry();
 
 	return {
 		get isAppLoaded() {
@@ -125,6 +136,25 @@ function createAppState(): AppState {
 		},
 		set mousePos(pos) {
 			mousePos = pos;
+		},
+		get commandRegistry() {
+			return commandRegistry;
+		},
+		loadApp(appContext) {
+			if (browser) {
+				_appContext = appContext;
+
+				loadCommandStack(appState);
+			}
+		},
+		unloadApp() {
+			if (browser) {
+				saveCommandStack(appState);
+				_appContext = '';
+			}
+		},
+		get appContext() {
+			return _appContext;
 		}
 	};
 }
