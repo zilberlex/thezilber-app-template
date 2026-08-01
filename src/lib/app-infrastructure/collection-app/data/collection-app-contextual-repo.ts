@@ -51,9 +51,9 @@ export class CollectionAppContextualRepo<
 	create(
 		context: CollectionAppContext,
 		data: TData,
-		newItemKey: string
+		newItemDisplayName: string
 	): CollectionAppSaveOperationResult<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
-		return this.#permanentRepo.create(context, data, newItemKey);
+		return this.#permanentRepo.create(context, data, newItemDisplayName);
 	}
 
 	update(

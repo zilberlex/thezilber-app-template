@@ -2,10 +2,7 @@
 	import { browser } from '$app/environment';
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
-	import {
-		loadSessionStorage,
-		saveSessionStorage
-	} from '$lib/engine/storage/session/session-storage';
+	import { loadSessionStorage, saveSessionStorage } from '$lib/engine/storage/session/session-storage';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
 	import TooltipElement from '$lib/ui/basic-components/TooltipElement.svelte';
@@ -49,12 +46,10 @@
 </script>
 
 <div class="form-container">
-	<form class="form box" {id} bind:this={inputComboElement}>
+	<form class="form content-surface" {id} bind:this={inputComboElement}>
 		<h3 class="form-title">{title}</h3>
 		<div class="form-content">
-			<InputCombo bind:value={inputField} hotkey={{ hotkey: '1', tooltip: 'Input' }}
-				>Command Name</InputCombo
-			>
+			<InputCombo bind:value={inputField} hotkey={{ hotkey: '1', tooltip: 'Input' }}>Command Name</InputCombo>
 		</div>
 		<div class="form-controls">
 			<Button
@@ -64,10 +59,7 @@
 				{actionText}
 			</Button>
 
-			<Button
-				onclick={onClose}
-				{@attach createClickHotKeyAttachment('Close Dialog', false, hotkey('q', 'alt'))}
-			>
+			<Button onclick={onClose} {@attach createClickHotKeyAttachment('Close Dialog', false, hotkey('q', 'alt'))}>
 				Close
 			</Button>
 		</div>

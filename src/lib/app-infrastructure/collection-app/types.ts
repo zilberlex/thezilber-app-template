@@ -1,6 +1,7 @@
 import type {
 	AllRecordsProjections,
 	AppRecord,
+	AppRecordRepo,
 	CollectionAppRecordProjection,
 	DataProjection,
 	SyncableAppRecordMetadata
@@ -9,6 +10,7 @@ import type { SvelteMap } from 'svelte/reactivity';
 import type { SmartStore } from './smart-store.svelte';
 import type { SvelteTouchMap } from './touch-map.svelte';
 import type { Command } from '$lib/engine/patterns/command/command';
+import type { DispatcherImpl } from '$lib/engine/patterns/observer';
 
 export type EditMode = 'permanent' | 'draft';
 export type ItemKey = '_draft_' | string;
@@ -21,11 +23,11 @@ export type CollectionAppRecord<TData, TProjection extends DataProjection> = App
 
 export type CollectionAppRuntime<T extends Omit<object, 'recordId'>, TProjection extends DataProjection> = {
 	get data(): T;
-	get dataStates(): SvelteMap<string, AppDataState>;
+	get dataStates(): SvelteMap<string, CollectionAppDataState>;
 	get displayName(): string;
 
-	get currentDataState(): AppDataState;
-	get projectedDataState(): AppDataState | undefined;
+	get currentDataState(): CollectionAppDataState;
+	get projectedDataState(): CollectionAppDataState | undefined;
 	get projectedContext(): CollectionAppContext | undefined;
 	get baseUrlPath(): string;
 
@@ -90,7 +92,7 @@ export type WithOpId<T> = T & { opId: number };
 
 export type AppDataStateOld = 'saving' | 'ready' | 'loading' | 'record-not-found' | 'error';
 
-export type AppDataState = { context: CollectionAppContext } & (
+export type CollectionAppDataState = { context: CollectionAppContext } & (
 	| {
 			kind: 'creating';
 			slug: string;
@@ -164,7 +166,7 @@ export type StoreSaveResult = { context: CollectionAppContext } & (
 			newDisplayName: string;
 	  }
 	| { kind: 'update' }
-	| { kind: 'another-operation-in-progress'; currentOperation: AppDataState }
+	| { kind: 'another-operation-in-progress'; currentOperation: CollectionAppDataState }
 );
 
 export type StoreDeleteResult = { context: CollectionAppContext } & {
@@ -174,3 +176,12 @@ export type StoreDeleteResult = { context: CollectionAppContext } & {
 
 export type StoreSaveActionResult = ActionResult<StoreSaveResult, CollectionAppError>;
 export type StoreDeleteActionResult = ActionResult<StoreDeleteResult, CollectionAppError>;
+
+export type CollectionAppRepo<T, TProjection extends DataProjection> = AppRecordRepo<
+	T,
+	TProjection,
+	SyncableAppRecordMetadata,
+	CollectionAppError
+>;
+
+export type CollectionAppDataStateDispatcher = DispatcherImpl<WithOpId<CollectionAppDataState>>();

@@ -52,11 +52,10 @@ export class CollectionAppPermanentRepo<
 		data: TData,
 		newItemDisplayName: string
 	): CollectionAppSaveOperationResult<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
-		let { optimisticSlug, actualSlugPromise } = this.getSlug(newItemDisplayName);
+		let { actualSlugPromise } = this.getSlug(newItemDisplayName);
 		let record = this.#adapter.constructRecord(data, newItemDisplayName);
 
 		return {
-			optimisticSlug,
 			resultPromise: this.#createInternal(context, record, actualSlugPromise)
 		};
 	}
@@ -109,10 +108,9 @@ export class CollectionAppPermanentRepo<
 		context: CollectionAppContext,
 		record: CollectionAppRecord<TData, TProjection>
 	): CollectionAppSaveOperationResult<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
-		let { optimisticSlug, actualSlugPromise } = this.getSlug(record.projection.displayName, context.slug);
+		let { actualSlugPromise } = this.getSlug(record.projection.displayName, context.slug);
 
 		return {
-			optimisticSlug,
 			resultPromise: this.#updateInternal(context, record, actualSlugPromise)
 		};
 	}
@@ -156,15 +154,14 @@ export class CollectionAppPermanentRepo<
 		context: CollectionAppContext,
 		displayName: string
 	): CollectionAppSaveOperationResult<ActionResult<CollectionAppRecord<TData, TProjection>, CollectionAppError>> {
-		const { slug } = context;
-		let { optimisticSlug, actualSlugPromise } = this.getSlug(displayName, slug);
+		const { slug: prevSlug } = context;
+		let { actualSlugPromise } = this.getSlug(displayName, prevSlug);
 
 		let renameResultExecute = async () => {
 			return await this.#renameInternal(context, displayName, await actualSlugPromise);
 		};
 
 		return {
-			optimisticSlug,
 			resultPromise: renameResultExecute()
 		};
 	}
@@ -406,15 +403,13 @@ export class CollectionAppPermanentRepo<
 	}
 
 	getSlug(displayName: string, prevSlug?: string): GetSlugResult {
-		let baseSlug = slugify(displayName);
-
 		return {
-			optimisticSlug: baseSlug,
-			actualSlugPromise: this.#getFinalSlug(baseSlug, prevSlug)
+			actualSlugPromise: this.#getFinalSlug(displayName, prevSlug)
 		};
 	}
 
-	async #getFinalSlug(baseSlug: string, prevSlug?: string) {
+	async #getFinalSlug(displayName: string, prevSlug?: string) {
+		let baseSlug = slugify(displayName);
 		const slugPattern = new RegExp(`^${baseSlug}(?:-\\d+)?$`);
 
 		if (prevSlug && slugPattern.test(prevSlug)) {

@@ -1,9 +1,9 @@
 import type { Dispatcher } from '$lib/engine/patterns/observer';
 import { SvelteMap } from 'svelte/reactivity';
-import type { AppDataState, CollectionAppContextManager, WithOpId } from './types';
+import type { CollectionAppDataState, CollectionAppContextManager, WithOpId } from './types';
 
 export class DataStateManager {
-	#dataStates = new SvelteMap<string, AppDataState>();
+	#dataStates = new SvelteMap<string, CollectionAppDataState>();
 	#dataStateOpIdTracking = new Map<string, number>();
 	#currentDataState;
 	#projectedDataState;
@@ -20,7 +20,7 @@ export class DataStateManager {
 	}
 
 	constructor(
-		dataStateDispatcher: Dispatcher<WithOpId<AppDataState>>,
+		dataStateDispatcher: Dispatcher<WithOpId<CollectionAppDataState>>,
 		contextManager: CollectionAppContextManager<any>
 	) {
 		this.#currentDataState = $derived.by(() => {
@@ -79,7 +79,7 @@ export class DataStateManager {
 			}
 		});
 	}
-	#updateDataState(ds: WithOpId<AppDataState>) {
+	#updateDataState(ds: WithOpId<CollectionAppDataState>) {
 		this.#dataStates.set(ds.slug, ds);
 		this.#dataStateOpIdTracking.set(ds.slug, ds.opId);
 	}

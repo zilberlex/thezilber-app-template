@@ -14,7 +14,6 @@
 	import LogViewer from '$lib/ui/components/logging/LogViewer.svelte';
 	import AnchoredRegion from '$lib/ui/components/layout/AnchoredRegion.svelte';
 	import { DemoManager } from './demo-manager.svelte';
-	import { loadCommandStack, saveCommandStack } from '$lib/engine/state/command-state';
 	import { beforeNavigate } from '$app/navigation';
 
 	let inputKey = $state('');

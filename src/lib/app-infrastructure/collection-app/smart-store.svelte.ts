@@ -9,15 +9,17 @@ import type {
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
 import { stampAppRecord } from './data';
 import type {
-	AppDataState,
+	CollectionAppDataState as CollectionAppDataState,
 	CollectionAppContext,
 	CollectionAppError,
 	CollectionAppRecord,
+	CollectionAppRepo,
 	StoreDeleteActionResult,
 	StoreSaveActionResult,
 	WithOpId
 } from './types';
 import { CollectionAppCache } from './collectionAppCache.svelte';
+import { slugify } from './data/slugify';
 
 type SaveOperationsParams<T, TProjection extends DataProjection> =
 	| {
@@ -45,6 +47,7 @@ type PreparedSaveOperation<T, TProjection extends DataProjection> = {
 	prevDisplayName: string;
 	newItemDisplayName: string;
 	saveRecordSnapshot?: CollectionAppRecord<T, TProjection>;
+	optimisticSlug: string;
 };
 
 export type SmartStoreOptions<T> = {
@@ -70,17 +73,17 @@ function abortable<T>(p: Promise<T>): { abort: () => void; abortablePromise: Abo
 	};
 }
 
-export class SmartStore<T, TProjection extends DataProjection> implements Dispatcher<WithOpId<AppDataState>> {
+export class SmartStore<T, TProjection extends DataProjection> implements Dispatcher<WithOpId<CollectionAppDataState>> {
 	#context: CollectionAppContext;
 	#record: CollectionAppRecord<T, TProjection>;
 
 	#dbAdapter: DbAdapter<T, TProjection, SyncableAppRecordMetadata>;
-	#repository: AppRecordRepo<T, TProjection, SyncableAppRecordMetadata, CollectionAppError>;
+	#repository: CollectionAppRepo<T, TProjection>;
 	#collectionAppCache: CollectionAppCache<T, TProjection>;
 
 	#reloadAbort: (() => void) | undefined;
 
-	#dataStateDispatacher = new DispatcherImpl<WithOpId<AppDataState>>();
+	#dataStateDispatacher = new DispatcherImpl<WithOpId<CollectionAppDataState>>();
 	#runningOpId = 0;
 
 	constructor(
@@ -138,11 +141,11 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 		return this.#collectionAppCache.projections;
 	}
 
-	register(handler: DispatchHandler<WithOpId<AppDataState>>): void {
+	register(handler: DispatchHandler<WithOpId<CollectionAppDataState>>): void {
 		this.#dataStateDispatacher.register(handler);
 	}
 
-	unregister(handler: DispatchHandler<WithOpId<AppDataState>>): boolean {
+	unregister(handler: DispatchHandler<WithOpId<CollectionAppDataState>>): boolean {
 		return this.#dataStateDispatacher.unregister(handler);
 	}
 
@@ -150,7 +153,7 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 		return ++this.#runningOpId;
 	}
 
-	#signalStateChange(dataState: AppDataState, opId: number) {
+	#signalStateChange(dataState: CollectionAppDataState, opId: number) {
 		this.#dataStateDispatacher.signal({ ...dataState, opId });
 	}
 
@@ -206,13 +209,11 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 			}
 		})();
 
-		const optimisticSlug = saveOperationResult.optimisticSlug;
-
 		this.#signalStateChange(
 			{
 				kind: operation.signalKind,
 				context: operation.contextSnapshot,
-				slug: optimisticSlug,
+				slug: operation.optimisticSlug,
 				prevSlug: operation.prevSlug,
 				displayName: operation.newItemDisplayName,
 				prevDisplayName: operation.prevDisplayName
@@ -253,7 +254,7 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 		return {
 			repoOpResult: dbResult,
 			opId,
-			slug: retRecord?.slug ?? optimisticSlug,
+			slug: retRecord?.slug ?? operation.optimisticSlug,
 			displayName: retRecord?.projection.displayName ?? operation.newItemDisplayName,
 			prevDisplayName: operation.prevDisplayName,
 			prevSlug: operation.prevSlug,
@@ -271,6 +272,8 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 			const newItemDisplayName =
 				params.kind === 'update' ? saveRecordSnapshot.projection.displayName : params.newItemDisplayName;
 
+			const optimisticSlug = slugify(newItemDisplayName);
+
 			return {
 				operation: params.kind,
 				signalKind: params.kind === 'update' ? 'saving' : 'creating',
@@ -278,7 +281,8 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 				prevSlug: saveRecordSnapshot.slug,
 				prevDisplayName: saveRecordSnapshot.projection.displayName,
 				newItemDisplayName,
-				saveRecordSnapshot
+				saveRecordSnapshot,
+				optimisticSlug
 			};
 		}
 
@@ -288,7 +292,8 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 			contextSnapshot,
 			prevSlug: contextSnapshot.slug,
 			prevDisplayName: contextSnapshot.displayName ?? '',
-			newItemDisplayName: params.newItemDisplayName
+			newItemDisplayName: params.newItemDisplayName,
+			optimisticSlug: slugify(params.newItemDisplayName)
 		};
 	}
 
@@ -337,7 +342,6 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 	async saveAs(context: CollectionAppContext, newItemDisplayName: string): Promise<StoreSaveActionResult> {
 		let {
 			repoOpResult: res,
-			opId,
 			slug,
 			displayName,
 			contextSnapshot

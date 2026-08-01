@@ -59,7 +59,6 @@ export type AllRecordsProjections<TData, TProjection extends DataProjection, TMe
 >[];
 
 export type GetSlugResult = {
-	optimisticSlug: string;
 	actualSlugPromise: Promise<string>;
 };
 
@@ -80,7 +79,6 @@ export type CollectionAppDbAdapter<TData, TProjection extends DataProjection> = 
 >;
 
 export type CollectionAppSaveOperationResult<T> = {
-	optimisticSlug: string;
 	resultPromise: Promise<T>;
 };
 
@@ -88,7 +86,7 @@ export interface AppRecordRepo<TData, TProjection extends DataProjection, TMeta,
 	create(
 		context: CollectionAppContext,
 		data: TData,
-		newItemKey: string,
+		newDisplayName: string,
 		precalculatedSlug?: string
 	): CollectionAppSaveOperationResult<ActionResult<AppRecord<TData, TProjection, TMeta>, TError>>;
 
