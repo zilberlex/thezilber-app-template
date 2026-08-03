@@ -113,7 +113,6 @@
 	.command-builder-sidebar {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-1);
 
 		& > * {
 			width: 100%;
@@ -122,7 +121,7 @@
 
 	.menu-label {
 		color: var(--cl-on-surface-dimmer);
-		padding: var(--space-3) var(--space-4);
+		padding: var(--space-3) var(--space-2);
 		font-size: var(--font-size-3);
 		font-weight: normal;
 		width: var(--sidebar-item-width);
@@ -140,6 +139,5 @@
 	.sidebar-section {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-1);
 	}
 </style>

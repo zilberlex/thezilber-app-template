@@ -165,7 +165,7 @@
 <style>
 	.shell {
 		--current-sidebar-width: var(--sidebar-width);
-		--sidebar-pad-inline: 12px;
+		--sidebar-pad-inline: var(--space-2);
 		--sidebar-pad-block: 12px;
 		--sidebar-header-height: 64px;
 
@@ -224,7 +224,7 @@
 		gap: 8px;
 		min-block-size: var(--sidebar-header-height);
 		padding-block: var(--sidebar-pad-block);
-		padding-inline: var(--sidebar-pad-inline);
+		padding-inline: calc(var(--sidebar-pad-inline) + var(--space-2));
 		box-sizing: border-box;
 		flex: 0 0 auto;
 	}

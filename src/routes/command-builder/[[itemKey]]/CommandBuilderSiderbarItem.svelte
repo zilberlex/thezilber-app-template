@@ -3,7 +3,6 @@
 	import EditIcon from '$lib/assets/icons/EditIcon.svelte';
 	import IconButton from '$lib/ui/basic-components/IconButton.svelte';
 	import InlineNameEditor, { type EditDetail } from '$lib/ui/components/InlineNameEditor.svelte';
-	import { fade } from 'svelte/transition';
 	import type { CbAppEnv, CbRecordProjection } from './command-builder-types';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
@@ -111,7 +110,7 @@
 		inline-size: var(--sidebar-item-width, 100%);
 		min-block-size: 36px;
 
-		border-radius: 15px;
+		border-radius: 10px;
 		overflow: hidden;
 
 		&:is(:focus-within, :hover) {
@@ -131,7 +130,7 @@
 		min-block-size: 36px;
 		box-sizing: border-box;
 
-		padding: var(--space-1) var(--space-2);
+		padding: var(--space-2) var(--space-2);
 		padding-inline-end: 64px;
 
 		text-decoration: none;
