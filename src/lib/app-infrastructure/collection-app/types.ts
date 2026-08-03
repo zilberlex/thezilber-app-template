@@ -147,11 +147,11 @@ export type DataManagerOptions<T> = {
 	loadNotFoundNewObject?: () => T;
 };
 
-export type CollectionAppError = {
+export type CollectionAppError = Error & {
 	context: CollectionAppContext;
 	kind: 'Key Already Exists' | 'Key Not Found' | 'Corrupted Record' | 'General Error';
-	message: string;
 };
+
 export type CollectionAppResult<T> = ActionResult<T, CollectionAppError>;
 export type CollectionAppBlankResult = CollectionAppResult<void>;
 export type CollectionAppLoadResult<T> = CollectionAppResult<T | undefined>;

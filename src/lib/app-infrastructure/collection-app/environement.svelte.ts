@@ -12,6 +12,7 @@ import type {
 } from '$lib/app-infrastructure/collection-app/data/types';
 import { CollectionAppContextualRepo } from './data/collection-app-contextual-repo';
 import { CollectionAppPermanentRepo } from './data/collection-app-permanent-repo';
+import { appState } from '$lib/engine/state/application-state.svelte';
 
 export function collectionAppInit<T extends Omit<object, 'recordId'>, TProjection extends DataProjection>(
 	dataPlaceholder: T,
@@ -26,12 +27,20 @@ export function collectionAppInit<T extends Omit<object, 'recordId'>, TProjectio
 	let permaRepo = new CollectionAppPermanentRepo<T, TProjection>(dbName, dbAdapter);
 	let repo = new CollectionAppContextualRepo(permaRepo, dbName, dbAdapter);
 
-	store = new SmartStore<T, TProjection>(contextManager.appContext, dataPlaceholder, repo, dbAdapter, storeOptions);
+	store = new SmartStore<T, TProjection>(
+		contextManager.appContext,
+		dataPlaceholder,
+		repo,
+		dbAdapter,
+		appState,
+		storeOptions
+	);
 
 	let dataStateManager = new DataStateManager(store, contextManager);
 
 	console.log('Collection App Initiated. Context:', $state.snapshot(contextManager.appContext));
 
+	// TODO AZ move to pipeline
 	async function _deleteInternal(context: CollectionAppContext): Promise<CollectionAppBlankResult> {
 		try {
 			let ret;

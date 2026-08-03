@@ -20,6 +20,8 @@ import type {
 } from './types';
 import { CollectionAppCache } from './collectionAppCache.svelte';
 import { slugify } from './data/slugify';
+import { CollectionAppCommandFactory } from './commands/collection-app-command-factory';
+import type { AppState } from '$lib/engine/state/application-state.svelte';
 
 type SaveOperationsParams<T, TProjection extends DataProjection> =
 	| {
@@ -86,15 +88,20 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 	#dataStateDispatacher = new DispatcherImpl<WithOpId<CollectionAppDataState>>();
 	#runningOpId = 0;
 
+	#commandFactory: CollectionAppCommandFactory;
+	#appState: AppState;
+
 	constructor(
 		context: CollectionAppContext,
 		placeHolderValue: T,
-		repository: AppRecordRepo<T, TProjection, SyncableAppRecordMetadata, CollectionAppError>,
+		repository: CollectionAppRepo<T, TProjection>,
 		dbAdapter: DbAdapter<T, TProjection, SyncableAppRecordMetadata>,
+		appState: AppState,
 		options?: SmartStoreOptions<T>
 	) {
 		this.#context = context;
 
+		this.#appState = appState;
 		this.#dbAdapter = dbAdapter;
 		this.#record = $state(this.#dbAdapter.constructRecord(placeHolderValue));
 		this.#repository = repository;
@@ -110,6 +117,18 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 			this.reload(context, placeHolderValue, options);
 
 			this.#initeRecordProjections();
+
+			this.#commandFactory = new CollectionAppCommandFactory(
+				appState.commandRegistry,
+				this.#repository,
+				this.#collectionAppCache,
+				(record) => {
+					console.debug('updating record', record);
+					this.#record = record;
+				},
+				this.#dataStateDispatacher,
+				() => this.#context
+			);
 		}
 	}
 
@@ -340,32 +359,65 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 	}
 
 	async saveAs(context: CollectionAppContext, newItemDisplayName: string): Promise<StoreSaveActionResult> {
-		let {
-			repoOpResult: res,
-			slug,
-			displayName,
-			contextSnapshot
-		} = await this.#saveOperations({
-			context,
-			kind: 'create',
-			record: this.#record,
-			newItemDisplayName: newItemDisplayName
-		});
+		const saveRecordSnapshot = $state.snapshot(this.#record) as CollectionAppRecord<T, TProjection>;
+		stampAppRecord(getDeviceId(), saveRecordSnapshot.meta);
+
+		let insertCtx = {
+			opId: this.#nextOpId(),
+			prevSlug: context.slug,
+			newDisplayName: newItemDisplayName,
+			prevDisplayName: context.displayName,
+			collectionAppContextSnapshot: $state.snapshot(this.#context),
+			recordToSave: saveRecordSnapshot,
+			optimisticSlug: slugify(newItemDisplayName)
+		};
+
+		let command = this.#commandFactory.insertCommand(insertCtx);
+		let res = await this.#appState.commandStack.executeAndPush(command);
 
 		if (res.ok) {
 			return {
 				ok: true,
 				value: {
 					kind: 'create',
-					newSlug: slug,
-					context: contextSnapshot,
-					newDisplayName: displayName
+					newSlug: res.value.newSlug,
+					context: res.value.contextSnapshot,
+					newDisplayName: res.value.newDisplayName
 				}
 			};
 		} else {
 			return { ok: false, error: res.error };
 		}
 	}
+
+	// OLD Save as
+	// async saveAs(context: CollectionAppContext, newItemDisplayName: string): Promise<StoreSaveActionResult> {
+	// 	let {
+	// 		repoOpResult: res,
+	// 		slug,
+	// 		displayName,
+	// 		contextSnapshot
+	// 	} = await this.#saveOperations({
+	// 		context,
+	// 		kind: 'create',
+	// 		record: this.#record,
+	// 		newItemDisplayName: newItemDisplayName
+	// 	});
+	//
+	// 	if (res.ok) {
+	// 		return {
+	// 			ok: true,
+	// 			value: {
+	// 				kind: 'create',
+	// 				newSlug: slug,
+	// 				context: contextSnapshot,
+	// 				newDisplayName: displayName
+	// 			}
+	// 		};
+	// 	} else {
+	// 		return { ok: false, error: res.error };
+	// 	}
+	// }
 
 	async delete(context: CollectionAppContext): Promise<StoreDeleteActionResult> {
 		let opId = this.#nextOpId();

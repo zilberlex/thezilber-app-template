@@ -4,8 +4,16 @@ import {
 	definePipelineSpecs,
 	PipelineCommandFactory
 } from '$lib/engine/patterns/command/pipeline/pipeline-command-factory';
+import type { CollectionAppCache } from '../collectionAppCache.svelte';
+import type { DataProjection } from '../data/types';
+import type {
+	CollectionAppContext,
+	CollectionAppDataStateDispatcher,
+	CollectionAppRecord,
+	CollectionAppRepo
+} from '../types';
 import { insertSteps } from './insert-pipeline';
-import type { CollectionAppCommandDeps } from './types';
+import type { CollectionAppCommandDeps, InsertCtx } from './types';
 
 const CollectionAppCommandSpecs = definePipelineSpecs<CollectionAppCommandDeps>()({
 	'collection-app-insert-command': {
@@ -16,20 +24,27 @@ const CollectionAppCommandSpecs = definePipelineSpecs<CollectionAppCommandDeps>(
 export type CollectionAppCommandType = keyof typeof CollectionAppCommandSpecs;
 
 export class CollectionAppCommandFactory {
+	// collectionAppRepo: CollectionAppRepo<unknown, unknown extends DataProjection>;
+	// collectionAppCache: CollectionAppCache<unknown, unknown extends DataProjection>;
+	// setCurrentAppRecord: (record: CollectionAppRecord<unknown, unknown extends DataProjection>) => void;
+	// dataStateDispatcher: CollectionAppDataStateDispatcher;
+	// currentAppContext: () => CollectionAppContext;
+	//
+
 	#factory: PipelineCommandFactory<CollectionAppCommandDeps, typeof CollectionAppCommandSpecs>;
 
 	constructor(
 		commandRegistry: CommandRegistry,
-		memoryStorage: Map<string, string>,
-		farAwayStorage: Map<string, string>
+		collectionAppRepo: CollectionAppRepo<unknown, any>,
+		collectionAppCache: CollectionAppCache<unknown, any>,
+		setCurrentAppRecord: (record: CollectionAppRecord<unknown, any>) => void,
+		dataStateDispatcher: CollectionAppDataStateDispatcher,
+		currentAppContext: () => CollectionAppContext
 	) {
+		// todo az add the serial queue
 		let serialQueue = new AsyncSerialQueue();
 		this.#factory = new PipelineCommandFactory(
-			{
-				memoryStorage,
-				farAwayStorage,
-				farAwayStorageAsyncSerialQueue: serialQueue
-			},
+			{ collectionAppRepo, collectionAppCache, setCurrentAppRecord, dataStateDispatcher, currentAppContext },
 			CollectionAppCommandSpecs
 		);
 
@@ -37,18 +52,18 @@ export class CollectionAppCommandFactory {
 	}
 
 	insertCommand(ctx: InsertCtx) {
-		return this.#factory.create('demo-insert-command', ctx);
+		return this.#factory.create('collection-app-insert-command', ctx);
 	}
 
-// 	updateCommand(ctx: UpdateCtx) {
-// 		return this.#factory.create('demo-update-command', ctx);
-// 	}
-//
-// 	deleteCommand(ctx: DeleteCtx) {
-// 		return this.#factory.create('demo-delete-command', ctx);
-// 	}
-//
-// 	clearCommand(ctx: ClearCtx) {
-// 		return this.#factory.create('demo-clear-command', ctx);
-// 	}
-// }
+	// 	updateCommand(ctx: UpdateCtx) {
+	// 		return this.#factory.create('demo-update-command', ctx);
+	// 	}
+	//
+	// 	deleteCommand(ctx: DeleteCtx) {
+	// 		return this.#factory.create('demo-delete-command', ctx);
+	// 	}
+	//
+	// 	clearCommand(ctx: ClearCtx) {
+	// 		return this.#factory.create('demo-clear-command', ctx);
+	// 	}
+}

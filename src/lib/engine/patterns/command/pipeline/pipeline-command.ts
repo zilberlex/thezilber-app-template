@@ -110,11 +110,6 @@ export class PipelineCommand<
 	}
 
 	async execute(): Promise<SuccessResult<LastNonVoidStepReturn<Steps>> | ErrorResult<E>> {
-		console.log('[PipelineCommand] Executing Command', {
-			commandType: this.#itemType,
-			baseCtx: this.#baseCtx
-		});
-
 		let lastFullCtx = this.#recentOperationCache.getLatest();
 
 		if (lastFullCtx === undefined) {

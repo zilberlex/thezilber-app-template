@@ -1,25 +1,27 @@
 import type { CollectionAppCache } from '../collectionAppCache.svelte';
-import type { DataProjection } from '../data/types';
-import type { CollectionAppContext, CollectionAppDataStateDispatcher, CollectionAppRecord, CollectionAppRepo } from '../types';
+import type {
+	CollectionAppContext,
+	CollectionAppContextManager,
+	CollectionAppDataStateDispatcher,
+	CollectionAppRecord,
+	CollectionAppRepo
+} from '../types';
 
 export type InsertCtx = {
 	opId: number;
 	prevSlug: string;
 	newDisplayName: string;
-  prevDisplayName: string;
+	prevDisplayName?: string;
 	collectionAppContextSnapshot: CollectionAppContext;
-  recordToSave: CollectionAppRecord<unknown, unknown extends DataProjection>;
-  optimisticSlug: string;
-  createdRecord?:  CollectionAppRecord<unknown, unknown extends DataProjection>;
-  relevantContext: CollectionAppContext
+	recordToSave: CollectionAppRecord<unknown, any>;
+	optimisticSlug: string;
+	createdRecord?: CollectionAppRecord<unknown, any>;
 };
 
 export type CollectionAppCommandDeps = {
-  collectionAppRepo: CollectionAppRepo<unknown, unknown extends DataProjection>;
-  collectionAppCache: CollectionAppCache<unknown, unknown extends DataProjection>;
-  setCurrentAppRecord: (record: CollectionAppRecord<unknown, unknown extends DataProjection>) => void;
-  dataStateDispatcher: CollectionAppDataStateDispatcher;
-  currentAppContext: () => CollectionAppContext;
+	collectionAppRepo: CollectionAppRepo<unknown, any>;
+	collectionAppCache: CollectionAppCache<unknown, any>;
+	setCurrentAppRecord: (record: CollectionAppRecord<unknown, any>) => void;
+	dataStateDispatcher: CollectionAppDataStateDispatcher;
+	currentAppContext: () => CollectionAppContext;
 };
-
-
