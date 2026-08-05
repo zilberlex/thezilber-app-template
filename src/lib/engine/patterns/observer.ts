@@ -27,10 +27,7 @@ export class DispatcherImpl<T> {
 	}
 
 	public signal(signalObject: T): void {
-		console.debug('signal dispatching to handler count:', this.#handlers.length, 'signal', signalObject);
-
 		this.#handlers.forEach((handler) => {
-			console.debug('dispaching Singal', signalObject, 'to handler', handler.toString());
 			try {
 				handler(signalObject);
 			} catch (error) {

@@ -37,10 +37,11 @@ const signalStartInsert = pipelineStep<CollectionAppCommandDeps, InsertCtx>(
 	(deps, ctx) => {
 		const { dataStateDispatcher } = deps;
 		const { collectionAppContextSnapshot, optimisticSlug, prevSlug, newDisplayName, prevDisplayName, opId } = ctx;
+
 		dataStateDispatcher.signal({
 			kind: 'creating',
 			context: collectionAppContextSnapshot,
-			slug: optimisticSlug,
+			optimisticSlug,
 			prevSlug: prevSlug,
 			displayName: newDisplayName,
 			prevDisplayName: prevDisplayName ?? '',
@@ -49,12 +50,17 @@ const signalStartInsert = pipelineStep<CollectionAppCommandDeps, InsertCtx>(
 	},
 	(deps, ctx) => {
 		const { dataStateDispatcher } = deps;
-		const { collectionAppContextSnapshot, optimisticSlug, prevSlug, newDisplayName, prevDisplayName, opId } = ctx;
+		const { createdRecord, collectionAppContextSnapshot, newDisplayName, opId } = ctx;
+
+		if (!createdRecord) {
+			// TODO AZ
+			throw Error('Fuck');
+		}
 
 		dataStateDispatcher.signal({
 			kind: 'deleting',
 			context: collectionAppContextSnapshot,
-			slug: optimisticSlug,
+			slug: createdRecord?.slug,
 			displayName: newDisplayName,
 			opId
 		});
@@ -166,13 +172,27 @@ const returnInsertResult = pipelineStep<CollectionAppCommandDeps, InsertCtx>(
 const signalEndInsert = pipelineStep<CollectionAppCommandDeps, InsertCtx>(
 	(deps, ctx) => {
 		const { dataStateDispatcher } = deps;
-		const { collectionAppContextSnapshot, optimisticSlug, prevSlug, newDisplayName, prevDisplayName, opId } = ctx;
+		const {
+			prevSlug,
+			createdRecord,
+			collectionAppContextSnapshot,
+			optimisticSlug,
+			newDisplayName,
+			prevDisplayName,
+			opId
+		} = ctx;
 		// TODO AZ make created state.
+
+		if (!createdRecord) {
+			throw new Error(`[signalEndInsert] Expected Created Record ${JSON.stringify(ctx)}`);
+		}
+
 		dataStateDispatcher.signal({
 			kind: 'ready',
 			context: collectionAppContextSnapshot,
-			slug: optimisticSlug,
-			prevSlug: prevSlug,
+			slug: createdRecord.slug,
+			prevOptimisticSlug: optimisticSlug,
+			prevSlug,
 			displayName: newDisplayName,
 			prevDisplayName: prevDisplayName,
 			opId

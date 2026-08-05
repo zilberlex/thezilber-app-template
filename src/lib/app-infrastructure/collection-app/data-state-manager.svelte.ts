@@ -50,9 +50,17 @@ export class DataStateManager {
 				currentDataStateEntry = {
 					kind: 'ready',
 					slug: slug,
-					displayName: ds.slug,
+					displayName: ds.displayName ?? '',
 					context: ds.context
 				};
+			}
+
+			if (ds.kind === 'ready') {
+				if (currentDataStateEntry.kind === 'creating') {
+					if (ds.slug !== currentDataStateEntry.optimisticSlug) {
+						this.#removeEntry(currentDataStateEntry.optimisticSlug);
+					}
+				}
 			}
 
 			if (currentDataStateOpId === ds.opId) {
@@ -79,8 +87,21 @@ export class DataStateManager {
 			}
 		});
 	}
+
 	#updateDataState(ds: WithOpId<CollectionAppDataState>) {
-		this.#dataStates.set(ds.slug, ds);
-		this.#dataStateOpIdTracking.set(ds.slug, ds.opId);
+		let slug;
+		if (ds.kind === 'creating') {
+			slug = ds.optimisticSlug;
+		} else {
+			slug = ds.slug;
+		}
+
+		this.#dataStates.set(slug, ds);
+		this.#dataStateOpIdTracking.set(slug, ds.opId);
+	}
+
+	#removeEntry(slug: string) {
+		this.#dataStates.delete(slug);
+		this.#dataStateOpIdTracking.delete(slug);
 	}
 }

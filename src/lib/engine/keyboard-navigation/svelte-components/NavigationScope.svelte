@@ -14,7 +14,13 @@
 		escapeMode?: ScopeEscapeMode;
 	}
 
-	let { navigationKeys, scopeName, children, class: usrCls, escapeMode = 'circular' }: Props = $props();
+	let {
+		navigationKeys = NavigationKeysConfigSets.Vertical,
+		scopeName,
+		children,
+		class: usrCls,
+		escapeMode = 'circular'
+	}: Props = $props();
 
 	let thisElement: HTMLElement;
 
@@ -33,7 +39,7 @@
 		if (browser) {
 			console.debug('NavigationScope - NavigaitonManager Context', navigationManager);
 
-			navigationKeys = navigationKeys ?? NavigationKeysConfigSets.Horizontal;
+			navigationKeys = navigationKeys;
 			scope = new NavigationScopeInfraImpl(thisElement, navigationKeys, scopeName, escapeMode);
 
 			const refreshChildren = () => scope.refreshNavigatableNodes();

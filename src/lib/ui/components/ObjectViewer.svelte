@@ -8,7 +8,7 @@
 		recursive?: boolean;
 	} & HTMLAttributes<HTMLDivElement>;
 
-	let { objectName, object, recursive = false, ...rest }: Props = $props();
+	let { objectName, object, recursive = false, class: userClass, ...rest }: Props = $props();
 
 	let objIterable = $derived.by(() => {
 		if (!object) return [];
@@ -29,7 +29,7 @@
 	});
 </script>
 
-<div {...rest} class="object-viewer">
+<div {...rest} class={[userClass, 'object-viewer']}>
 	{#if objectName}
 		<strong>{objectName}:</strong>
 	{/if}
@@ -50,6 +50,10 @@
 </div>
 
 <style>
+	.object-viewer {
+		overflow-y: scroll;
+	}
+
 	div {
 		display: flex;
 		flex-direction: column;

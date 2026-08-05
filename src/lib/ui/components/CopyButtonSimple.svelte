@@ -12,10 +12,3 @@
 <IconButton onclick={copyText} {...rest}>
 	<CopyIcon />
 </IconButton>
-
-<style>
-	:global(.icon-button) {
-		border: none;
-		padding: 0;
-	}
-</style>

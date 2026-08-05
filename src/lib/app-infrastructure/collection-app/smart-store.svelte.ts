@@ -390,35 +390,6 @@ export class SmartStore<T, TProjection extends DataProjection> implements Dispat
 		}
 	}
 
-	// OLD Save as
-	// async saveAs(context: CollectionAppContext, newItemDisplayName: string): Promise<StoreSaveActionResult> {
-	// 	let {
-	// 		repoOpResult: res,
-	// 		slug,
-	// 		displayName,
-	// 		contextSnapshot
-	// 	} = await this.#saveOperations({
-	// 		context,
-	// 		kind: 'create',
-	// 		record: this.#record,
-	// 		newItemDisplayName: newItemDisplayName
-	// 	});
-	//
-	// 	if (res.ok) {
-	// 		return {
-	// 			ok: true,
-	// 			value: {
-	// 				kind: 'create',
-	// 				newSlug: slug,
-	// 				context: contextSnapshot,
-	// 				newDisplayName: displayName
-	// 			}
-	// 		};
-	// 	} else {
-	// 		return { ok: false, error: res.error };
-	// 	}
-	// }
-
 	async delete(context: CollectionAppContext): Promise<StoreDeleteActionResult> {
 		let opId = this.#nextOpId();
 		let ctxSnapshot = $state.snapshot(context);

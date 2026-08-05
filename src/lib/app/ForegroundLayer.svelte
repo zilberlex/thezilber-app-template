@@ -5,7 +5,6 @@
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import DialogAnchor from '$lib/ui/components/dialog/DialogAnchor.svelte';
 	import MouseTracker from '$lib/ui/components/MouseTracker.svelte';
-	import Portal from '$lib/ui/components/portal/Portal.svelte';
 	import PortalExit from '$lib/ui/components/portal/PortalExit.svelte';
 	import TooltipsContainer from '$lib/ui/components/tooltips/TooltipsContainer.svelte';
 

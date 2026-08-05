@@ -95,7 +95,7 @@ export type AppDataStateOld = 'saving' | 'ready' | 'loading' | 'record-not-found
 export type CollectionAppDataState = { context: CollectionAppContext } & (
 	| {
 			kind: 'creating';
-			slug: string;
+			optimisticSlug: string;
 			prevSlug: string;
 			displayName: string;
 			prevDisplayName: string;
@@ -131,6 +131,7 @@ export type CollectionAppDataState = { context: CollectionAppContext } & (
 			kind: 'ready';
 			slug: string;
 			prevSlug?: string;
+      prevOptimisticSlug?: string;
 			displayName: string;
 			prevDisplayName?: string;
 	  }

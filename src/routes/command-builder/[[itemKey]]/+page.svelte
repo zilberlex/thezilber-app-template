@@ -34,8 +34,10 @@
 		cbAppEnv = collectionAppInit<CbData, CbProjection>(placeholderData, draftData, cbDbAdapter, 'CommandBuilderDataDb');
 	});
 
-	beforeNavigate(() => {
-		cleanup();
+	beforeNavigate(({ willUnload }) => {
+		if (willUnload) {
+			cleanup();
+		}
 	});
 
 	onDestroy(() => {

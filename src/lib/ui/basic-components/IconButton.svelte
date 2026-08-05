@@ -35,11 +35,16 @@
 
 <style>
 	.icon-button {
+		border: none;
+		padding: 0;
+
 		--_stroke: var(--stroke, var(--cl-primary));
 		--_bg: var(--bg, transparent);
 		--_stroke-hover: var(--stroke-hover, var(--cl-primary));
 		--_bg-hover: var(--bg-hover, var(--cl-primary-dimmest));
 		--_bg-active: var(--bg-active, var(--cl-on-surface));
+
+		background-color: var(--_bg);
 
 		&,
 		&:is(:hover, :focus-visible, :active) {
