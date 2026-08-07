@@ -1,3 +1,4 @@
+import { createDialogController, type DialogController } from '$lib/ui/components/dialog/dialog-context.svelte';
 import { SvelteMap } from 'svelte/reactivity';
 
 export interface DebugState {
@@ -6,6 +7,7 @@ export interface DebugState {
 	debugToggleMenu: boolean;
 	viewObjects: SvelteMap<string, any>;
 	viewObject?: any;
+	readonly debugDialogController: DialogController;
 }
 
 export const debugState: DebugState = createDebugState();
@@ -16,6 +18,7 @@ export function createDebugState(): DebugState {
 	let debugToggleMenu = $state(false);
 	let viewObjects = $state(new SvelteMap<string, any>());
 	let viewObject = $state<object | undefined>();
+	let debugDialogController = createDialogController();
 
 	return {
 		get debugConsole() {
@@ -47,6 +50,9 @@ export function createDebugState(): DebugState {
 		},
 		set debugToggleMenu(v: boolean) {
 			debugToggleMenu = v;
+		},
+		get debugDialogController() {
+			return debugDialogController;
 		}
 	};
 }

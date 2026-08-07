@@ -9,8 +9,6 @@ export interface DialogController {
 	closeActiveDialog: (id: string) => void;
 }
 
-export const appEngineDialogController: DialogController = createDialogController();
-
 export function createDialogController(): DialogController {
 	let _activeElementRender = $state<Snippet | null>(null);
 	let _isOpen = $state(false);

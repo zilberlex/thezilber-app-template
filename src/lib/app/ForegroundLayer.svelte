@@ -3,9 +3,7 @@
 	import TempMessageDisplay from '$lib/engine/application/temp-messages/TempMessageDisplay.svelte';
 	import HotkeyTooltip from '$lib/engine/hotkey-tooltip/HotkeyTooltip.svelte';
 	import { appState } from '$lib/engine/state/application-state.svelte';
-	import { appEngineDialogController } from '$lib/ui/components/dialog/dialog-context.svelte';
 	import DialogAnchor from '$lib/ui/components/dialog/DialogAnchor.svelte';
-	import AnchoredRegion from '$lib/ui/components/layout/AnchoredRegion.svelte';
 	import MouseTracker from '$lib/ui/components/MouseTracker.svelte';
 	import PortalExit from '$lib/ui/components/portal/PortalExit.svelte';
 	import TooltipsContainer from '$lib/ui/components/tooltips/TooltipsContainer.svelte';
@@ -20,7 +18,7 @@
 
 <div class="application-foreground">
 	<div class="layer modal-layer">
-		<DialogAnchor dialogController={appEngineDialogController} />
+		<DialogAnchor dialogController={appState.dialogController} />
 	</div>
 
 	<PortalExit layer={'application-layer'}>
@@ -48,11 +46,11 @@
 	</div>
 
 	<div class="layer debug-modal-layer">
-		<DialogAnchor dialogController={appEngineDialogController} />
+		<DialogAnchor dialogController={appState.debug.debugDialogController} />
 	</div>
 </div>
 
-<Dialog bind:open={appState.debug.debugToggleMenu} dialogController={appEngineDialogController}>
+<Dialog bind:open={appState.debug.debugToggleMenu} dialogController={appState.debug.debugDialogController}>
 	<EngineDebugToggleMenu />
 </Dialog>
 

@@ -10,6 +10,7 @@
 	import { HotKey } from '$lib/engine/hotkeys/hotkey-class';
 	import type { FocusableElement } from '$lib/engine/keyboard-navigation/types';
 	import { safeInstanceOf } from '$lib/engine/types/type-utils';
+	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 
 	let dialogBoxNode: HTMLElement | null = $state(null);
 	let appRoot = $derived(appState.appRoot);
@@ -29,9 +30,11 @@
 		cleanupComponent();
 	});
 
-	onMount(() => {
-		hotKeysModule.assignHotKey(new HotKey('Escape'), closeDialogHandler, true);
-	});
+	onMount(() => {});
+
+	function isRenderingElement() {
+		return dialogController.activeElementRender && dialogController.isOpen ? true : false;
+	}
 
 	const closeDialogHandler = createSmartHandler(
 		() => {
@@ -55,38 +58,47 @@
 	}
 
 	$effect(() => {
-		if (!appRoot) return;
+		track(dialogController);
 
-		if (dialogController.isOpen) {
-			const thisJob = ++focusOpenDialogJobCounter;
-			const activeElement = document.activeElement;
-			lastFocusedElement = safeInstanceOf(activeElement);
-			appRoot.inert = true;
+		return untrack(() => {
+			if (isRenderingElement()) {
+				hotKeysModule.assignHotKey(new HotKey('Escape'), closeDialogHandler, true);
 
-			tick().then(() => {
-				// This is async so the dialog box get mounted before an element inside receives focus
-				if (thisJob !== focusOpenDialogJobCounter) return;
+				if (!appRoot) return;
+				if (dialogController.isOpen) {
+					const thisJob = ++focusOpenDialogJobCounter;
+					const activeElement = document.activeElement;
+					lastFocusedElement = safeInstanceOf(activeElement);
+					appRoot.inert = true;
 
-				untrack(() => {
-					if (dialogBoxNode) {
-						const focableNodes = getFocusableElementsByNode(dialogBoxNode);
+					tick().then(() => {
+						// This is async so the dialog box get mounted before an element inside receives focus
+						if (thisJob !== focusOpenDialogJobCounter) return;
 
-						let focusTarget = dialogBoxNode;
-						if (focableNodes.length > 0) {
-							focusTarget = focableNodes[0];
-						}
+						untrack(() => {
+							if (dialogBoxNode) {
+								const focableNodes = getFocusableElementsByNode(dialogBoxNode);
 
-						engineFocus(focusTarget);
-					}
-				});
-			});
-		} else {
-			dialogCloseCleanup();
-		}
+								let focusTarget = dialogBoxNode;
+								if (focableNodes.length > 0) {
+									focusTarget = focableNodes[0];
+								}
+
+								engineFocus(focusTarget);
+							}
+						});
+					});
+				}
+				return () => {
+					hotKeysModule.removeHotKey(new HotKey('Escape'), closeDialogHandler);
+					dialogCloseCleanup();
+				};
+			}
+		});
 	});
 </script>
 
-{#if dialogController.isOpen && dialogController.activeElementRender}
+{#if isRenderingElement()}
 	<div
 		class="dialog-anchor"
 		onpointerdown={(e) => {
@@ -95,7 +107,7 @@
 		transition:fade={{ duration: 200 }}
 	>
 		<div bind:this={dialogBoxNode} aria-modal="true" class="dialog-box" role="dialog" tabindex="-1">
-			{@render dialogController.activeElementRender()}
+			{@render dialogController.activeElementRender?.()}
 		</div>
 	</div>
 {/if}
