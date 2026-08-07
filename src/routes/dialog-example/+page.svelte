@@ -1,5 +1,6 @@
 <script>
 	import Button from '$lib/ui/basic-components/Button.svelte';
+	import { appEngineDialogController } from '$lib/ui/components/dialog/dialog-context.svelte';
 	import Dialog from '$lib/ui/components/dialog/Dialog.svelte';
 
 	let isDialogOpen = $state(false);
@@ -11,7 +12,7 @@
 	dialog status: {isDialogOpen}
 </div>
 
-<Dialog bind:open={isDialogOpen}>
+<Dialog bind:open={isDialogOpen} dialogController={appEngineDialogController}>
 	<div class="dialog-box box flex-col">
 		This is dialog-box.
 		<Button onclick={() => (isDialogOpen = false)}>Close Dialog</Button>

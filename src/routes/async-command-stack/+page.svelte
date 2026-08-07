@@ -141,7 +141,7 @@
 </div>
 
 <Portal targetLayer="application-layer">
-	<AnchoredRegion top="var(--space-2)" right="var(--space-2)" bottom="var(--space-2)" alignX="stretch" alignY="bottom">
+	<AnchoredRegion anchorX="end" anchorY="end" inset="var(--space-2)">
 		<LogViewer logger={appState.logger} direction="forward" />
 	</AnchoredRegion>
 </Portal>

@@ -7,6 +7,7 @@
 	import { onDestroy, onMount } from 'svelte';
 
 	let debugHotKey = new HotKey('F12', 'alt');
+	let debugToggleMenuHotKey = new HotKey('F11', 'alt');
 	let clearDebugObjectsHotKey = new HotKey('F10', 'alt');
 
 	let undoHotKey = new HotKey('z', 'ctrl|option');
@@ -28,6 +29,10 @@
 		debug.debugConsole = newMode;
 	}
 
+	function toggleDebugToggleMenu() {
+		debug.debugToggleMenu = !debug.debugToggleMenu;
+	}
+
 	function clearDebugObjects() {
 		debug.viewObjects.clear();
 	}
@@ -36,6 +41,7 @@
 		if (browser) {
 			hotKeysModule.assignHotKey(debugHotKey, toggleDebug);
 			hotKeysModule.assignHotKey(clearDebugObjectsHotKey, clearDebugObjects);
+			hotKeysModule.assignHotKey(debugToggleMenuHotKey, toggleDebugToggleMenu);
 
 			hotKeysModule.assignHotKey(undoHotKey, globalUndo);
 			hotKeysModule.assignHotKey(redoHotKey, globalRedo);
@@ -46,6 +52,7 @@
 		if (browser) {
 			hotKeysModule.removeHotKey(debugHotKey, toggleDebug);
 			hotKeysModule.removeHotKey(clearDebugObjectsHotKey, clearDebugObjects);
+			hotKeysModule.removeHotKey(debugToggleMenuHotKey, toggleDebugToggleMenu);
 
 			hotKeysModule.removeHotKey(undoHotKey, globalUndo);
 			hotKeysModule.removeHotKey(redoHotKey, globalRedo);

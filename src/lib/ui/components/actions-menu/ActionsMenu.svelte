@@ -1,7 +1,7 @@
 <script lang="ts">
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
+	import ToggleButton from '$lib/ui/basic-components/ToggleButton.svelte';
 	import type { ActionsMenuEntry } from './action-menu-entry.svelte';
-	import ToggleButton from './ToggleButton.svelte';
 
 	const { actions }: { actions: ActionsMenuEntry[] } = $props();
 </script>
@@ -13,7 +13,7 @@
 				<div class="action-name">
 					{action.name}
 				</div>
-				<ToggleButton bind:toggleState={action.toggle} onToggle={action.action} class="toggle-action" />
+				<ToggleButton bind:toggleState={action.toggle} onToggle={action.onToggle} class="toggle-action" />
 			</div>
 		{/each}
 	</div>

@@ -3,6 +3,7 @@ import { SvelteMap } from 'svelte/reactivity';
 export interface DebugState {
 	debugConsole: boolean;
 	debugMode: boolean;
+	debugToggleMenu: boolean;
 	viewObjects: SvelteMap<string, any>;
 	viewObject?: any;
 }
@@ -12,6 +13,7 @@ export const debugState: DebugState = createDebugState();
 export function createDebugState(): DebugState {
 	let debugConsole = $state(false);
 	let debugMode = $state(false);
+	let debugToggleMenu = $state(false);
 	let viewObjects = $state(new SvelteMap<string, any>());
 	let viewObject = $state<object | undefined>();
 
@@ -19,15 +21,15 @@ export function createDebugState(): DebugState {
 		get debugConsole() {
 			return debugConsole;
 		},
-		set debugConsole(value: boolean) {
-			debugConsole = value;
+		set debugConsole(v: boolean) {
+			debugConsole = v;
 		},
 
 		get debugMode() {
 			return debugMode;
 		},
-		set debugMode(value: boolean) {
-			debugMode = value;
+		set debugMode(v: boolean) {
+			debugMode = v;
 		},
 
 		get viewObjects() {
@@ -37,8 +39,14 @@ export function createDebugState(): DebugState {
 		get viewObject() {
 			return viewObject;
 		},
-		set viewObject(value: object | undefined) {
-			viewObject = value;
+		set viewObject(v: object | undefined) {
+			viewObject = v;
+		},
+		get debugToggleMenu() {
+			return debugToggleMenu;
+		},
+		set debugToggleMenu(v: boolean) {
+			debugToggleMenu = v;
 		}
 	};
 }

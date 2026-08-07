@@ -10,6 +10,7 @@
 	import type { CbAppEnv } from './command-builder-types';
 	import PreventBrowserHotkeys from '$lib/engine/keyboard-navigation/svelte-components/PreventBrowserHotkeys.svelte';
 	import { hotkey, hotkeys } from '$lib/engine/hotkeys/hotkey-helpers';
+	import { appEngineDialogController } from '$lib/ui/components/dialog/dialog-context.svelte';
 
 	let { cbAppEnv = $bindable(), ...rest }: { cbAppEnv: CbAppEnv } = $props();
 
@@ -98,7 +99,7 @@
 		</main>
 	</div>
 
-	<Dialog bind:open={isSaveDialogOpen}>
+	<Dialog bind:open={isSaveDialogOpen} dialogController={appEngineDialogController}>
 		<OneLineForm
 			title="Save New Command"
 			defaultInput="New Command"

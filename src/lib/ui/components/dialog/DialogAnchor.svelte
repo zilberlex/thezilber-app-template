@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
-	import { activeDialogController, activeDialogState } from './dialog-context.svelte';
+	import { type DialogController } from './dialog-context.svelte';
 	import { onDestroy, onMount, tick, untrack } from 'svelte';
 	import { engineFocus, getFocusableElementsByNode } from '$lib/engine/keyboard-navigation/navigation-utils';
 	import { appState } from '$lib/engine/state/application-state.svelte';
@@ -13,6 +13,8 @@
 
 	let dialogBoxNode: HTMLElement | null = $state(null);
 	let appRoot = $derived(appState.appRoot);
+
+	let { dialogController }: { dialogController: DialogController } = $props();
 
 	let lastFocusedElement: FocusableElement | null = null;
 
@@ -33,13 +35,13 @@
 
 	const closeDialogHandler = createSmartHandler(
 		() => {
-			activeDialogController.closeAllActiveDialogs();
+			dialogController.closeAllActiveDialogs();
 		},
 		{ cooldownDelay: 20 }
 	);
 
 	function cleanupComponent() {
-		activeDialogController.closeAllActiveDialogs();
+		dialogController.closeAllActiveDialogs();
 		dialogCloseCleanup();
 	}
 
@@ -55,7 +57,7 @@
 	$effect(() => {
 		if (!appRoot) return;
 
-		if (activeDialogState.isOpen) {
+		if (dialogController.isOpen) {
 			const thisJob = ++focusOpenDialogJobCounter;
 			const activeElement = document.activeElement;
 			lastFocusedElement = safeInstanceOf(activeElement);
@@ -84,16 +86,16 @@
 	});
 </script>
 
-{#if activeDialogState.isOpen && activeDialogState.activeElementRender}
+{#if dialogController.isOpen && dialogController.activeElementRender}
 	<div
 		class="dialog-anchor"
 		onpointerdown={(e) => {
-			if (e.currentTarget === e.target) activeDialogController.closeAllActiveDialogs();
+			if (e.currentTarget === e.target) dialogController.closeAllActiveDialogs();
 		}}
 		transition:fade={{ duration: 200 }}
 	>
 		<div bind:this={dialogBoxNode} aria-modal="true" class="dialog-box" role="dialog" tabindex="-1">
-			{@render activeDialogState.activeElementRender()}
+			{@render dialogController.activeElementRender()}
 		</div>
 	</div>
 {/if}

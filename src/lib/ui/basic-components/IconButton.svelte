@@ -74,6 +74,7 @@
 
 			& :global(.icon) {
 				--icon-bg: var(--_bg-hover);
+				--icon-stroke: var(--_stroke-hover);
 			}
 		}
 

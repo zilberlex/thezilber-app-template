@@ -3,20 +3,24 @@
 	import TempMessageDisplay from '$lib/engine/application/temp-messages/TempMessageDisplay.svelte';
 	import HotkeyTooltip from '$lib/engine/hotkey-tooltip/HotkeyTooltip.svelte';
 	import { appState } from '$lib/engine/state/application-state.svelte';
+	import { appEngineDialogController } from '$lib/ui/components/dialog/dialog-context.svelte';
 	import DialogAnchor from '$lib/ui/components/dialog/DialogAnchor.svelte';
+	import AnchoredRegion from '$lib/ui/components/layout/AnchoredRegion.svelte';
 	import MouseTracker from '$lib/ui/components/MouseTracker.svelte';
 	import PortalExit from '$lib/ui/components/portal/PortalExit.svelte';
 	import TooltipsContainer from '$lib/ui/components/tooltips/TooltipsContainer.svelte';
+	import EngineDebugToggleMenu from './EngineDebugToggleMenu.svelte';
+	import Dialog from '$lib/ui/components/dialog/Dialog.svelte';
 
 	let hotkeyTooltip = $state();
 	let showHotkeyTooltip = $state(false);
 
-	type EngineLayers = 'modal-layer' | 'tooltip-layer' | 'debug-layer' | 'application-layer';
+	type EngineShellLayers = 'modal-layer' | 'tooltip-layer' | 'debug-layer' | 'application-layer';
 </script>
 
 <div class="application-foreground">
 	<div class="layer modal-layer">
-		<DialogAnchor />
+		<DialogAnchor dialogController={appEngineDialogController} />
 	</div>
 
 	<PortalExit layer={'application-layer'}>
@@ -37,12 +41,20 @@
 		{/if}
 	</div>
 
-	{#if appState.debug.debugConsole}
-		<div class="layer debug-layer">
+	<div class="layer debug-layer">
+		{#if appState.debug.debugConsole}
 			<DebugConsole />
-		</div>
-	{/if}
+		{/if}
+	</div>
+
+	<div class="layer debug-modal-layer">
+		<DialogAnchor dialogController={appEngineDialogController} />
+	</div>
 </div>
+
+<Dialog bind:open={appState.debug.debugToggleMenu} dialogController={appEngineDialogController}>
+	<EngineDebugToggleMenu />
+</Dialog>
 
 <style>
 	.application-foreground {
@@ -73,5 +85,9 @@
 
 	.debug-layer {
 		z-index: 8000;
+	}
+
+	.debug-modal-layer {
+		z-index: 9000;
 	}
 </style>

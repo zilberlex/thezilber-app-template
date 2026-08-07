@@ -22,7 +22,11 @@
 		onToggle?.(toggleState);
 	}}
 	{...mergedProps}
-	style={{ '--bg': 'var(--cl-on-surface-dimmest)' }}
+	class="toggle-button"
+	--stroke={!toggleState ? 'transparent' : 'var(--cl-primary)'}
+	--stroke-hover={!toggleState ? 'transparent' : 'var(--cl-on-surface)'}
+	--bg="var(--cl-on-surface-dimmest)"
+	--bg-hover="var(--cl-primary)"
 >
-	<ToggleIcon style={{ '--icon-stroke': !toggleState ? 'transparent' : 'var(--cl-primary)' }} />
+	<ToggleIcon />
 </IconButton>

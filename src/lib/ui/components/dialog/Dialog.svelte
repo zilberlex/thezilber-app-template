@@ -1,18 +1,36 @@
 <script lang="ts">
-	import { activeDialogController, activeDialogState } from './dialog-context.svelte';
+	import { untrack, type Snippet } from 'svelte';
+	import { type DialogController } from './dialog-context.svelte';
+	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 
-	let { open = $bindable(), children } = $props();
+	type DialogProps = {
+		open: boolean;
+		dialogController: DialogController;
+		children: Snippet;
+	};
+
+	let { open = $bindable(), dialogController, children }: DialogProps = $props();
+	const propsId = $props.id();
+	const thisDialogId = `dialog-${propsId}`;
 
 	$effect(() => {
 		if (open) {
-			activeDialogController.openActiveDialog(dialogBox);
+			dialogController.openActiveDialog(thisDialogId, dialogBox);
 		} else {
-			activeDialogController.closeActiveDialog(dialogBox);
+			dialogController.closeActiveDialog(thisDialogId);
 		}
 	});
 
 	$effect(() => {
-		open = activeDialogState.isOpen;
+		track(dialogController);
+
+		untrack(() => {
+			if (dialogController.isOpen && dialogController.currentlyOpendId === thisDialogId) {
+				open = dialogController.isOpen;
+			} else {
+				open = false;
+			}
+		});
 	});
 </script>
 
