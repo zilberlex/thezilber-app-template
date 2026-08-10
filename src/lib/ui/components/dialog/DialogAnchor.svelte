@@ -11,9 +11,13 @@
 	import type { FocusableElement } from '$lib/engine/keyboard-navigation/types';
 	import { safeInstanceOf } from '$lib/engine/types/type-utils';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
+	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 
 	let dialogBoxNode: HTMLElement | null = $state(null);
 	let appRoot = $derived(appState.appRoot);
+
+	const propsId = $props.id();
+	let dialogAnchorId = `dialog-anchor-${propsId}`;
 
 	let { dialogController }: { dialogController: DialogController } = $props();
 
@@ -99,17 +103,19 @@
 </script>
 
 {#if isRenderingElement()}
-	<div
-		class="dialog-anchor"
-		onpointerdown={(e) => {
-			if (e.currentTarget === e.target) dialogController.closeAllActiveDialogs();
-		}}
-		transition:fade={{ duration: 200 }}
-	>
-		<div bind:this={dialogBoxNode} aria-modal="true" class="dialog-box" role="dialog" tabindex="-1">
-			{@render dialogController.activeElementRender?.()}
+	<NavigationScope scopeName={dialogAnchorId}>
+		<div
+			class="dialog-anchor"
+			onpointerdown={(e) => {
+				if (e.currentTarget === e.target) dialogController.closeAllActiveDialogs();
+			}}
+			transition:fade={{ duration: 200 }}
+		>
+			<div bind:this={dialogBoxNode} aria-modal="true" class="dialog-box" role="dialog" tabindex="-1">
+				{@render dialogController.activeElementRender?.()}
+			</div>
 		</div>
-	</div>
+	</NavigationScope>
 {/if}
 
 <style>

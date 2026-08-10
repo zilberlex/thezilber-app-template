@@ -19,9 +19,8 @@
 	});
 </script>
 
-<AppInit />
-
 <AppNavigationManager>
+	<AppInit />
 	<div
 		bind:this={appState.appRoot}
 		class={['app-container', appState.navigationMode === 'keyboard' && 'keyboard-navigation']}

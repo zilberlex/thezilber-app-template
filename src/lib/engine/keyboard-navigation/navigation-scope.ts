@@ -36,8 +36,6 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 		this.scopeContainer = scopeContainer;
 		this.navigationKeys = navigationKeys;
 
-		this.refreshNavigatableNodes();
-
 		this.#escapeMode = escapeMode;
 
 		this.#abortController = new AbortController();
@@ -49,6 +47,8 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 
 	init() {
 		const { signal } = this.#abortController;
+
+		this.refreshNavigatableNodes();
 
 		this.scopeContainer.addEventListener(
 			'focusin',
@@ -142,10 +142,15 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 	}
 
 	#initializeFocusableElements(focusableElements: HTMLElement[]) {
+		const currentActiveElement = document.activeElement;
 		for (let i = 0; i < focusableElements.length; i++) {
 			const node = focusableElements[i];
 
 			node.setAttribute(NAVIGATION_ID_ATTRIBUTE, i.toString());
+
+			if (node === currentActiveElement) {
+				this.#setCurrentNode(node);
+			}
 		}
 	}
 
@@ -159,6 +164,8 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 
 		this.#currentNode = node;
 		this.#currentNodeIndex = index;
+
+		this.#focusNodeDispatcher.signal({ targetNode: node });
 	}
 
 	#setCurrentByFallbackIndex(index: number) {
@@ -219,9 +226,6 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 			console.warn('ARROW SCOPE FOCUS_CHANGE: reached unnavigatable node, skipping.');
 			return;
 		}
-		if (this.#currentNode === node) {
-			return;
-		}
 
 		const nodeIndex = this.#getNavigationIndexFromNode(node);
 
@@ -236,6 +240,5 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 		});
 
 		this.#setCurrentNode(node);
-		this.#focusNodeDispatcher.signal({ targetNode: node });
 	};
 }

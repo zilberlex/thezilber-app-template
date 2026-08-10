@@ -6,18 +6,16 @@
 	const { actions }: { actions: ActionsMenuEntry[] } = $props();
 </script>
 
-<NavigationScope scopeName="actions-menu">
-	<div class="actions-menu content-surface">
-		{#each actions as action}
-			<div class="action-controls">
-				<div class="action-name">
-					{action.name}
-				</div>
-				<ToggleButton bind:toggleState={action.toggle} onToggle={action.onToggle} class="toggle-action" />
+<div class="actions-menu content-surface">
+	{#each actions as action}
+		<div class="action-controls">
+			<div class="action-name">
+				{action.name}
 			</div>
-		{/each}
-	</div>
-</NavigationScope>
+			<ToggleButton bind:toggleState={action.toggle} onToggle={action.onToggle} class="toggle-action" />
+		</div>
+	{/each}
+</div>
 
 <style>
 	.actions-menu {

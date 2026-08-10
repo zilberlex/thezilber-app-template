@@ -9,12 +9,18 @@
 	import TooltipsContainer from '$lib/ui/components/tooltips/TooltipsContainer.svelte';
 	import EngineDebugToggleMenu from './EngineDebugToggleMenu.svelte';
 	import Dialog from '$lib/ui/components/dialog/Dialog.svelte';
+	import NavigationManagerDebugScreen from './debug-screens/NavigationManagerDebugScreen.svelte';
 
 	let hotkeyTooltip = $state();
 	let showHotkeyTooltip = $state(false);
+	appState.debug.customizableDebugScreen = customDebugSnippet;
 
 	type EngineShellLayers = 'modal-layer' | 'tooltip-layer' | 'debug-layer' | 'application-layer';
 </script>
+
+{#snippet customDebugSnippet()}
+	<NavigationManagerDebugScreen />
+{/snippet}
 
 <div class="application-foreground">
 	<div class="layer modal-layer">
@@ -42,6 +48,9 @@
 	<div class="layer debug-layer">
 		{#if appState.debug.debugConsole}
 			<DebugConsole />
+		{/if}
+		{#if appState.debug.showCustomizableDebugScreen}
+			{@render appState.debug.customizableDebugScreen?.()}
 		{/if}
 	</div>
 

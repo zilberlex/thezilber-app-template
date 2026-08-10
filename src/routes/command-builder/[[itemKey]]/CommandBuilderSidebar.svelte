@@ -42,7 +42,6 @@
 		if (!nextIndexAttribute) {
 			console.warn('NO data-item-list-index on node', node);
 		}
-		console.log('WOW deleted node attribute and focusTarget', nextIndexAttribute);
 
 		focusNext(Number(nextIndexAttribute));
 	}
@@ -71,11 +70,6 @@
 		// Gets the closest element. in svelte indexing via attribute is instant change -> if you index by attribute - the list is updated straight away, but the original item also maintains its original index
 		const nextElem =
 			itemElements.find((el) => getItemIndex(el) >= index) ?? itemElements.findLast((el) => getItemIndex(el) < index);
-
-		console.log('Wow', {
-			nextElem,
-			index
-		});
 
 		if (nextElem) {
 			const nextFocusable = getFirstFocusable(nextElem);

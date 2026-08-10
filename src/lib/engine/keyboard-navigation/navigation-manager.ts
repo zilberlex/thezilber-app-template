@@ -109,17 +109,24 @@ export class NavigationManager {
 
 		const i = this.#getScopeIndex(scope);
 		this.#destTargets[i] = scope.registerOnFocus(() => (this.#currentScopeIndex = i));
+
+		const activeElement = document.activeElement;
+
+		if (activeElement instanceof HTMLElement && scope.navigatiableNodes.includes(activeElement)) {
+			this.#currentScopeIndex = i;
+		}
 	}
 
 	unregisterScope(scope: ScopeInfra) {
 		console.debug('NavigationManager unregistering scope:', scope.scopeName);
 
-		this.#scopes = this.#scopes.filter((s) => s !== scope);
+		const i = this.#getScopeIndex(scope);
+
 		this.removeNavigationKeys(scope, scope.navigationKeys);
 
-		const i = this.#getScopeIndex(scope);
 		if (i != -1) {
-			const { unregister } = this.#destTargets.splice(this.#getScopeIndex(scope), 1)[0];
+			this.#scopes = this.#scopes.filter((s) => s.scopeName !== scope.scopeName);
+			const { unregister } = this.#destTargets.splice(i, 1)[0];
 			unregister();
 			if (this.#currentScopeIndex >= i) {
 				this.#currentScopeIndex--;
@@ -130,7 +137,7 @@ export class NavigationManager {
 	}
 
 	#getScopeIndex(scope: ScopeInfra): number {
-		return this.#scopes.findIndex((s) => s === scope);
+		return this.#scopes.findIndex((s) => s.scopeName === scope.scopeName);
 	}
 
 	removeNavigationKeys(source: ScopeInfra, navigationKeys: NavigationKeysConfig) {
@@ -309,5 +316,14 @@ export class NavigationManager {
 			keyBoardFocusNavigatedNode(node);
 			this.#dispatcher.signal({ targetNode: node, initiatingKey: key });
 		}
+	}
+
+	_debugInfo() {
+		return {
+			scopes: this.#scopes,
+			currentScope: this.#currentScope,
+			currentScopeName: this.#currentScope.scopeName,
+			currentScopeIndex: this.#currentScopeIndex
+		};
 	}
 }

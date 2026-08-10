@@ -1,6 +1,5 @@
 import type { DispatchHandler } from '$lib/engine/patterns/observer';
 import { NavigationKeyConsts } from '$lib/engine/hotkeys/consts';
-import type { HotKey } from '../hotkeys/hotkey-class';
 
 export function createNavigationKeys(nextKeys: string[], prevKeys: string[]): NavigationKeysConfig {
 	return {
@@ -41,7 +40,7 @@ export interface NavigationKeysConfig {
 export type FocusableElement = HTMLElement | SVGElement;
 
 export const NavigationKeysConfigSets = {
-	Vertical: {
+	Horizontal: {
 		prevKeys: [NavigationKeyConsts.ArrowLeft],
 		nextKeys: [NavigationKeyConsts.ArrowRight]
 	},

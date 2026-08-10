@@ -9,6 +9,7 @@
 	let debugHotKey = new HotKey('F12', 'alt');
 	let debugToggleMenuHotKey = new HotKey('F11', 'alt');
 	let clearDebugObjectsHotKey = new HotKey('F10', 'alt');
+	let showCustomizableDebugScreenHotKey = new HotKey('F8', 'alt');
 
 	let undoHotKey = new HotKey('z', 'ctrl|option');
 	let redoHotKey = new HotKey('z', 'ctrl|option', 'shift');
@@ -37,11 +38,16 @@
 		debug.viewObjects.clear();
 	}
 
+	function toggleCustomDebugScreen() {
+		debug.showCustomizableDebugScreen = !debug.showCustomizableDebugScreen;
+	}
+
 	onMount(() => {
 		if (browser) {
 			hotKeysModule.assignHotKey(debugHotKey, toggleDebug);
 			hotKeysModule.assignHotKey(clearDebugObjectsHotKey, clearDebugObjects);
 			hotKeysModule.assignHotKey(debugToggleMenuHotKey, toggleDebugToggleMenu);
+			hotKeysModule.assignHotKey(showCustomizableDebugScreenHotKey, toggleCustomDebugScreen);
 
 			hotKeysModule.assignHotKey(undoHotKey, globalUndo);
 			hotKeysModule.assignHotKey(redoHotKey, globalRedo);
@@ -53,6 +59,7 @@
 			hotKeysModule.removeHotKey(debugHotKey, toggleDebug);
 			hotKeysModule.removeHotKey(clearDebugObjectsHotKey, clearDebugObjects);
 			hotKeysModule.removeHotKey(debugToggleMenuHotKey, toggleDebugToggleMenu);
+			hotKeysModule.removeHotKey(showCustomizableDebugScreenHotKey, toggleCustomDebugScreen);
 
 			hotKeysModule.removeHotKey(undoHotKey, globalUndo);
 			hotKeysModule.removeHotKey(redoHotKey, globalRedo);

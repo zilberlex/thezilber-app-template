@@ -1,4 +1,5 @@
 import { createDialogController, type DialogController } from '$lib/ui/components/dialog/dialog-context.svelte';
+import type { Snippet } from 'svelte';
 import { SvelteMap } from 'svelte/reactivity';
 
 export interface DebugState {
@@ -8,6 +9,8 @@ export interface DebugState {
 	viewObjects: SvelteMap<string, any>;
 	viewObject?: any;
 	readonly debugDialogController: DialogController;
+	customizableDebugScreen?: Snippet;
+	showCustomizableDebugScreen?: boolean;
 }
 
 export const debugState: DebugState = createDebugState();
@@ -17,8 +20,10 @@ export function createDebugState(): DebugState {
 	let debugMode = $state(false);
 	let debugToggleMenu = $state(false);
 	let viewObjects = $state(new SvelteMap<string, any>());
-	let viewObject = $state<object | undefined>();
+	let viewObject = $state<object>();
 	let debugDialogController = createDialogController();
+	let customizableDebugScreen = $state<Snippet>();
+	let showCustomizableDebugScreen = $state<boolean>(false);
 
 	return {
 		get debugConsole() {
@@ -53,6 +58,18 @@ export function createDebugState(): DebugState {
 		},
 		get debugDialogController() {
 			return debugDialogController;
+		},
+		get customizableDebugScreen() {
+			return customizableDebugScreen;
+		},
+		set customizableDebugScreen(s: Snippet | undefined) {
+			customizableDebugScreen = s;
+		},
+		get showCustomizableDebugScreen() {
+			return showCustomizableDebugScreen;
+		},
+		set showCustomizableDebugScreen(b: boolean) {
+			showCustomizableDebugScreen = b;
 		}
 	};
 }
