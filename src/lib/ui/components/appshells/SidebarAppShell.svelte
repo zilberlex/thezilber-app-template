@@ -104,6 +104,7 @@
 		navigationKeys={NavigationKeysConfigSets.Vertical}
 		scopeName="sidebar-navigation-scope"
 		class="sidebar"
+		observerParams={{ shouldObserveThisElement: false }}
 	>
 		<aside id="app-shell-sidebar" aria-hidden={isOverlay && !isSidebarOpen}>
 			{#if !isOverlay || isSidebarOpen}

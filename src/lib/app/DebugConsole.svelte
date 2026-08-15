@@ -32,6 +32,8 @@
 		display: flex;
 		flex-direction: column;
 		flex-wrap: wrap;
+		max-width: 100%;
+		overflow: scroll;
 	}
 
 	:global(.app-state-viewer) {

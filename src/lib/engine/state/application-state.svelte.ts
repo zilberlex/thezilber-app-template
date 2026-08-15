@@ -8,7 +8,7 @@ import type { MousePos } from '../types/types';
 import { createCommandRegistry, type CommandRegistry } from '../patterns/command/persistancy/command-registry';
 import { loadCommandStack, saveCommandStack } from './command-state';
 import { browser } from '$app/environment';
-import { createDialogController, type DialogController } from '$lib/ui/components/dialog/dialog-context.svelte';
+import { createDialogController, type DialogController } from '$lib/ui/components/dialog/dialog-contoller.svelte';
 
 export interface AppState {
 	isAppLoaded: boolean;
@@ -24,6 +24,7 @@ export interface AppState {
 	appRoot: HTMLElement | undefined;
 	commandStack: CommandStack;
 	dialogController: DialogController;
+	inert: boolean;
 
 	get navigationMode(): NavigationMode;
 	get logger(): EngineLogger;
@@ -52,6 +53,7 @@ function createAppState(): AppState {
 	let mousePos = $state({ x: 0, y: 0 });
 	let dialogController = createDialogController();
 	let _appContext = $state<string>('');
+	let inert = $derived(!!dialogController.activeDialog || !!debugState.debugDialogController.activeDialog);
 
 	let commandStack = $state<CommandStack>(new CommandStack());
 	let commandRegistry = createCommandRegistry();
@@ -161,6 +163,9 @@ function createAppState(): AppState {
 		},
 		get dialogController() {
 			return dialogController;
+		},
+		get inert() {
+			return inert;
 		}
 	};
 }

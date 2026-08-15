@@ -8,28 +8,34 @@ export function createNavigationKeys(nextKeys: string[], prevKeys: string[]): Na
 	};
 }
 
+export interface NavigationTarget {
+	readonly targetElement: HTMLElement;
+	readonly navigatableNode: HTMLElement | undefined;
+}
+
 export interface NodeFocusEvent {
 	targetNode: HTMLElement;
 }
 
 export interface NextNodeInfo {
-	nextNode?: HTMLElement;
-	escapeBackupNode?: HTMLElement;
+	nextNode?: NavigationTarget;
+	escapeBackupNode?: NavigationTarget;
 }
 
 export interface ScopeInfra {
 	scopeName: string;
 	navigationKeys: NavigationKeysConfig;
 	scopeContainer: HTMLElement;
-	navigatiableNodes: HTMLElement[];
+	navigationTargets: NavigationTarget[];
 
 	getNextNodeInfo(key: string): NextNodeInfo;
 	init(): void;
 	destroy(): void;
 	registerOnFocus(handler: DispatchHandler<NodeFocusEvent>): { unregister: () => void };
 	refreshNavigatableNodes(): void;
-	get currentNode(): HTMLElement | undefined;
+	get currentNavigationTarget(): NavigationTarget | undefined;
 	get escapeMode(): ScopeEscapeMode;
+	observeMutations(element: HTMLElement, options: MutationObserverInit): void;
 }
 
 export interface NavigationKeysConfig {

@@ -15,7 +15,9 @@
 		currentScopeName: debugInfo.currentScopeName,
 		currentScopeIndex: debugInfo.currentScopeIndex,
 		totalScopes: debugInfo.scopes.length,
-		scopeNames: debugInfo.scopes.map((x) => x.scopeName)
+		scopeNames: debugInfo.scopes.map((x) => x.scopeName),
+		currentNodeClasses: debugInfo.currentScopeNode?.classList,
+		history: [...debugInfo.navigationHistory.map((x) => x[0])]
 	});
 </script>
 

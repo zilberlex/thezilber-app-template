@@ -3,28 +3,32 @@ import { DispatcherImpl } from '$lib/engine/patterns/observer';
 import type {
 	NavigationKeysConfig,
 	NextNodeInfo,
-	ScopeInfra as NavigationScopeInfra,
+	ScopeInfra,
 	NodeFocusEvent,
-	ScopeEscapeMode
+	ScopeEscapeMode,
+	NavigationTarget
 } from './types';
 import { getFocusableElementsByNode } from './navigation-utils';
 
 const NAVIGATION_ID_ATTRIBUTE = 'data-navigation-id';
 
-export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
+export default class NavigationScopeInfraImpl implements ScopeInfra {
 	scopeName: string;
 	navigationKeys: NavigationKeysConfig;
 
 	scopeContainer: HTMLElement;
-	navigatiableNodes: HTMLElement[] = [];
+	navigationTargets: NavigationTarget[] = [];
 
 	#focusNodeDispatcher = new DispatcherImpl<NodeFocusEvent>();
 
 	#abortController: AbortController;
 
-	#currentNodeIndex?: number = undefined;
-	#currentNode: HTMLElement | undefined;
+	#currentNavigationTargetIndex?: number = undefined;
+	#currentNavigationTarget: NavigationTarget | undefined;
 	#escapeMode: ScopeEscapeMode;
+	#mutationObserver = new MutationObserver(() => {
+		this.refreshNavigatableNodes();
+	});
 
 	constructor(
 		scopeContainer: HTMLElement,
@@ -62,22 +66,21 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 		);
 	}
 
-	destroy() {
-		this.#abortController.abort();
-	}
-
 	getNextNodeInfo(key: string): NextNodeInfo {
-		if (document.activeElement !== this.#currentNode) return { nextNode: this.#currentNode };
+		if (document.activeElement !== this.#currentNavigationTarget?.navigatableNode)
+			return { nextNode: this.#currentNavigationTarget };
 
 		const navKeys = this.navigationKeys;
 
 		let nextNodeIndex = null;
 
 		if (navKeys.nextKeys.includes(key)) {
-			nextNodeIndex = this.#currentNodeIndex !== undefined ? this.#currentNodeIndex + 1 : 0;
+			nextNodeIndex = this.#currentNavigationTargetIndex !== undefined ? this.#currentNavigationTargetIndex + 1 : 0;
 		} else if (navKeys.prevKeys.includes(key)) {
 			nextNodeIndex =
-				this.#currentNodeIndex !== undefined ? this.#currentNodeIndex - 1 : this.navigatiableNodes.length - 1;
+				this.#currentNavigationTargetIndex !== undefined
+					? this.#currentNavigationTargetIndex - 1
+					: this.navigationTargets.length - 1;
 		}
 
 		let ret: NextNodeInfo = {};
@@ -86,12 +89,12 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 			return {};
 		}
 
-		if (nextNodeIndex >= 0 && nextNodeIndex < this.navigatiableNodes.length) {
-			ret.nextNode = this.navigatiableNodes[nextNodeIndex];
+		if (nextNodeIndex >= 0 && nextNodeIndex < this.navigationTargets.length) {
+			ret.nextNode = this.navigationTargets[nextNodeIndex];
 		} else {
-			nextNodeIndex = nextNodeIndex < 0 ? this.navigatiableNodes.length - 1 : 0;
+			nextNodeIndex = nextNodeIndex < 0 ? this.navigationTargets.length - 1 : 0;
 
-			let nextNodeCircular = this.navigatiableNodes[nextNodeIndex];
+			let nextNodeCircular = this.navigationTargets[nextNodeIndex];
 
 			if (this.escapeMode === 'escape') {
 				ret.escapeBackupNode = nextNodeCircular;
@@ -104,21 +107,27 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 	}
 
 	refreshNavigatableNodes() {
-		const previousNode = this.#currentNode;
-		const previousIndex = this.#currentNodeIndex ?? 0;
+		const prevNavigationTarget = this.#currentNavigationTarget;
+		const previousIndex = this.#currentNavigationTargetIndex ?? 0;
 
-		this.navigatiableNodes = getFocusableElementsByNode(this.scopeContainer);
-		this.#initializeFocusableElements(this.navigatiableNodes);
+		this.navigationTargets = getFocusableElementsByNode(this.scopeContainer).map((x) =>
+			this.#createNavigationTarget(x)
+		);
+		this.#initializeFocusableElements(this.navigationTargets);
 
 		console.debug(
 			'Navigation Scope - Refreshing Navigatable Nodes',
 			this.scopeContainer,
 			'nodes found:',
-			this.navigatiableNodes
+			this.navigationTargets
 		);
 
-		if (previousNode && this.scopeContainer.contains(previousNode)) {
-			this.#setCurrentNode(previousNode);
+		if (
+			prevNavigationTarget &&
+			prevNavigationTarget.navigatableNode &&
+			this.scopeContainer.contains(prevNavigationTarget.navigatableNode)
+		) {
+			this.#setCurrentNavigationTarget(prevNavigationTarget);
 			return;
 		}
 
@@ -133,57 +142,73 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 		};
 	}
 
-	get currentNode() {
-		if (this.#currentNode) {
-			return this.#currentNode;
-		}
+	get currentNavigationTarget(): NavigationTarget | undefined {
+		const target = this.#currentNavigationTarget ?? this.navigationTargets[0];
 
-		return this.navigatiableNodes[0];
+		return target;
 	}
 
-	#initializeFocusableElements(focusableElements: HTMLElement[]) {
+	observeMutations(element: HTMLElement, options: MutationObserverInit = { childList: true }) {
+		this.#mutationObserver.observe(element, options);
+	}
+
+	destroy() {
+		this.#abortController.abort();
+		this.#mutationObserver.disconnect();
+	}
+
+	#initializeFocusableElements(focusableElements: NavigationTarget[]) {
 		const currentActiveElement = document.activeElement;
+
 		for (let i = 0; i < focusableElements.length; i++) {
-			const node = focusableElements[i];
+			const navigationTarget = focusableElements[i];
 
-			node.setAttribute(NAVIGATION_ID_ATTRIBUTE, i.toString());
+			const navigatableNode = navigationTarget.navigatableNode;
 
-			if (node === currentActiveElement) {
-				this.#setCurrentNode(node);
+			if (navigatableNode) {
+				navigationTarget.navigatableNode.setAttribute(NAVIGATION_ID_ATTRIBUTE, i.toString());
+
+				if (navigationTarget.navigatableNode === currentActiveElement) {
+					this.#setCurrentNavigationTarget(navigationTarget);
+				}
 			}
 		}
 	}
 
-	#setCurrentNode(node: HTMLElement) {
-		const index = this.#getNavigationIndexFromNode(node);
+	#resolveNavigationTargetElement(target: HTMLElement): HTMLElement | undefined {
+		return target;
+	}
+
+	#setCurrentNavigationTarget(navigationTarget: NavigationTarget) {
+		const index = this.#getNavigationIndexFromNavigationTarget(navigationTarget);
 
 		if (index === undefined) {
-			console.warn('ARROW SCOPE FOCUS_CHANGE: node missing/invalid navigation id.', node);
+			console.warn('ARROW SCOPE FOCUS_CHANGE: node missing/invalid navigation id.', navigationTarget);
 			return;
 		}
 
-		this.#currentNode = node;
-		this.#currentNodeIndex = index;
+		this.#currentNavigationTarget = navigationTarget;
+		this.#currentNavigationTargetIndex = index;
 
-		this.#focusNodeDispatcher.signal({ targetNode: node });
+		this.#focusNodeDispatcher.signal({ targetNode: navigationTarget.navigatableNode as HTMLElement });
 	}
 
 	#setCurrentByFallbackIndex(index: number) {
-		const length = this.navigatiableNodes.length;
+		const length = this.navigationTargets.length;
 
 		if (length === 0) {
-			this.#currentNode = undefined;
-			this.#currentNodeIndex = undefined;
+			this.#currentNavigationTarget = undefined;
+			this.#currentNavigationTargetIndex = undefined;
 			return;
 		}
 
 		const fallbackIndex = Math.min(index, length - 1);
 
-		this.#currentNodeIndex = fallbackIndex;
-		this.#currentNode = this.navigatiableNodes[fallbackIndex];
+		this.#currentNavigationTargetIndex = fallbackIndex;
+		this.#currentNavigationTarget = this.navigationTargets[fallbackIndex];
 	}
 
-	#getNavigatableNodeFromEvent(event: Event): HTMLElement | undefined {
+	#getNavigatableNodeFromEvent(event: Event): NavigationTarget | undefined {
 		const target = event.target;
 
 		if (!(target instanceof HTMLElement)) {
@@ -200,13 +225,13 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 			return;
 		}
 
-		return node;
+		return this.#createNavigationTarget(node);
 	}
 
-	#getNavigationIndexFromNode(node: HTMLElement): number | undefined {
-		const navId = node.getAttribute(NAVIGATION_ID_ATTRIBUTE);
+	#getNavigationIndexFromNavigationTarget(navigationTarget: NavigationTarget): number | undefined {
+		const navId = navigationTarget.navigatableNode?.getAttribute(NAVIGATION_ID_ATTRIBUTE);
 
-		if (navId === null) {
+		if (navId === null || navId === undefined) {
 			return;
 		}
 
@@ -219,26 +244,36 @@ export default class NavigationScopeInfraImpl implements NavigationScopeInfra {
 		return parsedIndex;
 	}
 
-	#onFocusElement_SetCurrentNode = (event: FocusEvent | PointerEvent) => {
-		const node = this.#getNavigatableNodeFromEvent(event);
+	#createNavigationTarget(targetElement: HTMLElement): NavigationTarget {
+		const thisScope = this;
+		return {
+			targetElement,
+			get navigatableNode() {
+				return thisScope.#resolveNavigationTargetElement(targetElement);
+			}
+		};
+	}
 
-		if (!node) {
+	#onFocusElement_SetCurrentNode = (event: FocusEvent | PointerEvent) => {
+		const navigationTarget = this.#getNavigatableNodeFromEvent(event);
+
+		if (!navigationTarget) {
 			console.warn('ARROW SCOPE FOCUS_CHANGE: reached unnavigatable node, skipping.');
 			return;
 		}
 
-		const nodeIndex = this.#getNavigationIndexFromNode(node);
+		const nodeIndex = this.#getNavigationIndexFromNavigationTarget(navigationTarget);
 
 		if (nodeIndex === undefined) {
-			console.warn('ARROW SCOPE FOCUS_CHANGE: node missing navigation id.', node);
+			console.warn('ARROW SCOPE FOCUS_CHANGE: node missing navigation id.', navigationTarget);
 			return;
 		}
 
 		console.debug('ARROW SCOPE FOCUS_CHANGE: Setting current node/index', {
 			nodeIndex,
-			node
+			node: navigationTarget
 		});
 
-		this.#setCurrentNode(node);
+		this.#setCurrentNavigationTarget(navigationTarget);
 	};
 }

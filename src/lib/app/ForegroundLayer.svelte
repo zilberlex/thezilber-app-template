@@ -23,7 +23,7 @@
 {/snippet}
 
 <div class="application-foreground">
-	<div class="layer modal-layer">
+	<div class="layer modal-layer" inert={!!appState.debug.debugDialogController.activeDialog}>
 		<DialogAnchor dialogController={appState.dialogController} />
 	</div>
 

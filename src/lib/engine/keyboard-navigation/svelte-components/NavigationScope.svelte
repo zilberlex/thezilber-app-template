@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { getContext, onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { NavigationManager } from '../navigation-manager';
 	import { browser } from '$app/environment';
-	import { type NavigationKeysConfig, type ScopeEscapeMode, type ScopeInfra, NavigationKeysConfigSets } from '../types';
+	import { type NavigationKeysConfig, type ScopeEscapeMode, NavigationKeysConfigSets } from '../types';
 	import NavigationScopeInfraImpl from '../navigation-scope';
-	import { NAVIGATION_MANAGER_CONTEXT } from './consts';
+	import type { NavigationScopeContext } from './types';
+	import { getNavigationManager, setNavigationScopeContext } from './navigation-manager-provider.svelte';
 
 	interface Props {
 		navigationKeys?: NavigationKeysConfig;
@@ -12,53 +13,69 @@
 		children?: any;
 		class?: any;
 		escapeMode?: ScopeEscapeMode;
+		observerParams?: MutationObserverInit & { shouldObserveThisElement: boolean };
 	}
+
+	const defaultObserverParams = {
+		childList: true,
+		subtree: true,
+		shouldObserveThisElement: true
+	};
 
 	let {
 		navigationKeys = NavigationKeysConfigSets.Vertical,
 		scopeName,
 		children,
 		class: usrCls,
-		escapeMode = 'circular'
+		escapeMode = 'circular',
+		observerParams = {
+			childList: true,
+			subtree: true,
+			shouldObserveThisElement: true
+		}
 	}: Props = $props();
 
+	let resolvedObserverParams = $derived({
+		...defaultObserverParams,
+		...observerParams
+	});
+
 	let thisElement: HTMLElement;
-
-	let scope: ScopeInfra;
-
 	let navigationManager: NavigationManager;
-	let mutationObserver: MutationObserver;
 
-	navigationManager = getContext(NAVIGATION_MANAGER_CONTEXT);
+	let scopeContext = $state<NavigationScopeContext>({
+		scope: undefined
+	});
+
+	setNavigationScopeContext(scopeContext);
 
 	onMount(() => {
+		navigationManager = getNavigationManager();
+
 		if (!navigationManager) {
 			console.warn('NavigationScope NavigationManager Not detected');
 		}
 
-		if (browser) {
-			console.debug('NavigationScope - NavigaitonManager Context', navigationManager);
+		console.debug('NavigationScope - NavigaitonManager Context', navigationManager);
 
-			navigationKeys = navigationKeys;
-			scope = new NavigationScopeInfraImpl(thisElement, navigationKeys, scopeName, escapeMode);
+		navigationKeys = navigationKeys;
+		const scope = new NavigationScopeInfraImpl(thisElement, navigationKeys, scopeName, escapeMode);
 
-			const refreshChildren = () => scope.refreshNavigatableNodes();
+		navigationManager?.registerScope(scope);
 
-			navigationManager?.registerScope(scope);
-			mutationObserver = new MutationObserver(refreshChildren);
-			mutationObserver.observe(thisElement, {
-				childList: true,
-				subtree: true
-			});
+		scope.init();
 
-			scope.init();
+		if (resolvedObserverParams.shouldObserveThisElement) {
+			scope.observeMutations(thisElement, resolvedObserverParams);
 		}
+
+		scopeContext.scope = scope;
 	});
 
 	onDestroy(() => {
-		if (browser) {
-			navigationManager?.unregisterScope(scope);
-			scope.destroy();
+		if (browser && scopeContext.scope) {
+			navigationManager?.unregisterScope(scopeContext.scope);
+			scopeContext.scope?.destroy();
 		}
 	});
 </script>

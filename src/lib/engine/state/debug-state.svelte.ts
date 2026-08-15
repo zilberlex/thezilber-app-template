@@ -1,4 +1,4 @@
-import { createDialogController, type DialogController } from '$lib/ui/components/dialog/dialog-context.svelte';
+import { createDialogController, type DialogController } from '$lib/ui/components/dialog/dialog-contoller.svelte';
 import type { Snippet } from 'svelte';
 import { SvelteMap } from 'svelte/reactivity';
 

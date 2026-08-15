@@ -2,9 +2,8 @@
 	import { onMount, untrack } from 'svelte';
 	import { NavigationManager } from '../navigation-manager';
 	import type { NavigationKeysConfig } from '../types';
-	import { signalNavigationHotkeyEvent } from '$lib/engine/hotkeys/bl-hotkeys-event-signals';
 	import { browser } from '$app/environment';
-	import { setNavigationManager } from './navigation-manager-provider';
+	import { setNavigationManager } from './navigation-manager-provider.svelte';
 
 	interface Props {
 		navigationKeyConfig?: NavigationKeysConfig;
@@ -20,10 +19,6 @@
 	onMount(() => {
 		if (browser) {
 			navigationManager.init();
-
-			navigationManager.registerNavigationHandler((obj) => {
-				signalNavigationHotkeyEvent(obj.initiatingKey, obj.targetNode);
-			});
 
 			return () => {
 				navigationManager.destroy();

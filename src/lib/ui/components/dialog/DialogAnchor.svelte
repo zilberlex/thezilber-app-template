@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
-	import { type DialogController } from './dialog-context.svelte';
 	import { onDestroy, onMount, tick, untrack } from 'svelte';
 	import { engineFocus, getFocusableElementsByNode } from '$lib/engine/keyboard-navigation/navigation-utils';
 	import { appState } from '$lib/engine/state/application-state.svelte';
@@ -12,6 +11,7 @@
 	import { safeInstanceOf } from '$lib/engine/types/type-utils';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
+	import type { DialogController } from './dialog-contoller.svelte';
 
 	let dialogBoxNode: HTMLElement | null = $state(null);
 	let appRoot = $derived(appState.appRoot);
@@ -36,19 +36,15 @@
 
 	onMount(() => {});
 
-	function isRenderingElement() {
-		return dialogController.activeElementRender && dialogController.isOpen ? true : false;
-	}
-
 	const closeDialogHandler = createSmartHandler(
 		() => {
-			dialogController.closeAllActiveDialogs();
+			dialogController.closeAllDialogs();
 		},
 		{ cooldownDelay: 20 }
 	);
 
 	function cleanupComponent() {
-		dialogController.closeAllActiveDialogs();
+		dialogController.closeAllDialogs();
 		dialogCloseCleanup();
 	}
 
@@ -65,15 +61,13 @@
 		track(dialogController);
 
 		return untrack(() => {
-			if (isRenderingElement()) {
+			if (dialogController.activeDialog) {
 				hotKeysModule.assignHotKey(new HotKey('Escape'), closeDialogHandler, true);
 
-				if (!appRoot) return;
-				if (dialogController.isOpen) {
+				if (dialogController.activeDialog) {
 					const thisJob = ++focusOpenDialogJobCounter;
 					const activeElement = document.activeElement;
 					lastFocusedElement = safeInstanceOf(activeElement);
-					appRoot.inert = true;
 
 					tick().then(() => {
 						// This is async so the dialog box get mounted before an element inside receives focus
@@ -102,17 +96,17 @@
 	});
 </script>
 
-{#if isRenderingElement()}
+{#if dialogController.activeDialog}
 	<NavigationScope scopeName={dialogAnchorId}>
 		<div
 			class="dialog-anchor"
 			onpointerdown={(e) => {
-				if (e.currentTarget === e.target) dialogController.closeAllActiveDialogs();
+				if (e.currentTarget === e.target) dialogController.closeAllDialogs();
 			}}
 			transition:fade={{ duration: 200 }}
 		>
 			<div bind:this={dialogBoxNode} aria-modal="true" class="dialog-box" role="dialog" tabindex="-1">
-				{@render dialogController.activeElementRender?.()}
+				{@render dialogController.activeDialog?.renderSnippet()}
 			</div>
 		</div>
 	</NavigationScope>

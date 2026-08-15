@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { untrack, type Snippet } from 'svelte';
-	import { type DialogController } from './dialog-context.svelte';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
+	import type { DialogController } from './dialog-contoller.svelte';
 
 	type DialogProps = {
 		open: boolean;
@@ -14,19 +14,23 @@
 	const thisDialogId = `dialog-${propsId}`;
 
 	$effect(() => {
-		if (open) {
-			dialogController.openActiveDialog(thisDialogId, dialogBox);
-		} else {
-			dialogController.closeActiveDialog(thisDialogId);
-		}
+		track(open);
+
+		untrack(() => {
+			if (open) {
+				dialogController.openDialog(thisDialogId, dialogBox);
+			} else {
+				dialogController.closeDialog(thisDialogId);
+			}
+		});
 	});
 
 	$effect(() => {
 		track(dialogController);
 
 		untrack(() => {
-			if (dialogController.isOpen && dialogController.currentlyOpendId === thisDialogId) {
-				open = dialogController.isOpen;
+			if (dialogController.hasDialog(thisDialogId)) {
+				open = true;
 			} else {
 				open = false;
 			}

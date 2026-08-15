@@ -23,6 +23,7 @@
 	<AppInit />
 	<div
 		bind:this={appState.appRoot}
+		inert={appState.inert}
 		class={['app-container', appState.navigationMode === 'keyboard' && 'keyboard-navigation']}
 	>
 		<header class="header">

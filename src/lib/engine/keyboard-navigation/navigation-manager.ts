@@ -1,29 +1,25 @@
 import { createKeyabordNavigationEventHandler } from '$lib/engine/hotkeys/bl-events';
 import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
 import { keyBoardFocusNavigatedNode } from '$lib/engine/keyboard-navigation/navigation-utils';
-import { DispatcherImpl } from '$lib/engine/patterns/observer';
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
 import { NavigationKeyConsts } from '$lib/engine/hotkeys/consts';
 import { type NavigationKeysConfig, type ScopeInfra } from './types';
 import { HotKey } from '../hotkeys/hotkey-class';
 import { hotkeys } from '../hotkeys/hotkey-helpers';
-
-interface NavigationEvent {
-	targetNode: HTMLElement;
-	initiatingKey: string;
-}
+import { MruMap } from '../patterns/mru-map';
 
 export class NavigationManager {
 	#scopes: ScopeInfra[] = [];
 	#navigationKeys: NavigationKeysConfig;
 	#currentScopeIndex: number = 0;
-	#dispatcher = new DispatcherImpl<NavigationEvent>();
 
 	#allNavigationKeys: OneToManyDictionary<string, ScopeInfra> = new OneToManyDictionary<string, ScopeInfra>();
 
 	#nextScopeNavigationKeys = hotkeys(['tab'], 'ctrl|option');
 
 	#prevScopeNavigationKeys = hotkeys(['tab'], 'ctrl|option', 'shift');
+
+	#scopeHistory = new MruMap<string, ScopeInfra>();
 
 	#destTargets: { unregister: () => void }[] = [];
 	#assignHotKeysCounter = 0;
@@ -95,26 +91,33 @@ export class NavigationManager {
 		};
 	}
 
-	registerNavigationHandler(handler: (dispatchedObject: NavigationEvent) => void): () => unknown {
-		this.#dispatcher.register(handler);
-
-		return () => this.#dispatcher.unregister(handler);
-	}
-
 	registerScope(scope: ScopeInfra) {
 		console.debug('NavigationManager registering scope:', scope.scopeName);
+		const scopeName = scope.scopeName;
 
 		this.#scopes.push(scope);
-		this.addNavigationKeys(scope, scope.navigationKeys);
+		this.#addNavigationKeys(scope, scope.navigationKeys);
+		this.#scopeHistory.set(scopeName, scope);
+
+		const scopeFocusHandler = this.#createScopeFocusHandler(scope);
 
 		const i = this.#getScopeIndex(scope);
-		this.#destTargets[i] = scope.registerOnFocus(() => (this.#currentScopeIndex = i));
+		this.#destTargets[i] = scope.registerOnFocus(scopeFocusHandler);
 
 		const activeElement = document.activeElement;
 
-		if (activeElement instanceof HTMLElement && scope.navigatiableNodes.includes(activeElement)) {
-			this.#currentScopeIndex = i;
+		if (
+			activeElement instanceof HTMLElement &&
+			scope.navigationTargets.some((x) => x.navigatableNode === activeElement)
+		) {
+			scopeFocusHandler();
 		}
+	}
+
+	#createScopeFocusHandler(scope: ScopeInfra) {
+		return () => {
+			this.#onFocusScopeInternal(scope);
+		};
 	}
 
 	unregisterScope(scope: ScopeInfra) {
@@ -122,15 +125,25 @@ export class NavigationManager {
 
 		const i = this.#getScopeIndex(scope);
 
-		this.removeNavigationKeys(scope, scope.navigationKeys);
-
 		if (i != -1) {
-			this.#scopes = this.#scopes.filter((s) => s.scopeName !== scope.scopeName);
+			this.#scopes.splice(i, 1);
 			const { unregister } = this.#destTargets.splice(i, 1)[0];
+			this.removeNavigationKeys(scope, scope.navigationKeys);
+
+			this.#scopeHistory.delete(scope.scopeName);
+
 			unregister();
-			if (this.#currentScopeIndex >= i) {
-				this.#currentScopeIndex--;
-				this.#currentScopeIndex = Math.max(this.#currentScopeIndex, 0);
+			if (this.#currentScopeIndex === i) {
+				let newScope = this.#scopes.at(-1);
+				let lastHistoryScope = this.#scopeHistory.current;
+
+				if (lastHistoryScope) {
+					newScope = lastHistoryScope;
+				}
+
+				if (newScope) {
+					this.#focusScopeNew(newScope);
+				}
 			}
 		} else
 			console.warn('NavigationManager - unregisterScope - scope not found in destTargets. scopeName:', scope.scopeName);
@@ -172,44 +185,65 @@ export class NavigationManager {
 
 		if (matchedSetIndex === undefined) return;
 
-		const nextScopeIndex = matchedSetIndex === 0 ? this.#nextScopeIndex() : this.#prevScopeIndex();
-
-		console.log('Scope Change - Key', eventHotkey, 'nextScopeIndex:', nextScopeIndex);
-
-		if (nextScopeIndex !== undefined && nextScopeIndex !== this.#currentScopeIndex) {
-			this.#currentScopeIndex = nextScopeIndex;
-			const nextScope = this.#scopes[nextScopeIndex];
-			let nodeToFocus = nextScope.currentNode;
-			if (nodeToFocus) {
-				this.#navigateToNodeAndCompleteQuestForKey(nodeToFocus, eventHotkey.key, document.activeElement as HTMLElement);
-			}
-		}
+		matchedSetIndex === 0 ? this.focusNextScope() : this.focusPrevScope();
 	}, 'hard');
 
 	refocus() {
-		let target = this.#currentScope.currentNode;
+		let target = this.#currentScope.currentNavigationTarget;
 		console.log('Refocusing', target);
 
-		target?.focus();
+		target?.navigatableNode?.focus();
 	}
 
 	focusNextScope() {
-		this.#focusScopeInternal(this.#nextScopeIndex());
+		let nextScope = this.#nextScope('forward');
+		if (nextScope) {
+			this.#focusScopeNew(nextScope);
+		}
 	}
 
 	focusPrevScope() {
-		this.#focusScopeInternal(this.#prevScopeIndex());
+		let nextScope = this.#nextScope('backward');
+
+		if (nextScope) {
+			this.#focusScopeNew(nextScope);
+		}
 	}
 
-	#focusScopeInternal(scopeIndex: number) {
-		if (scopeIndex !== undefined && scopeIndex !== this.#currentScopeIndex) {
-			this.#currentScopeIndex = scopeIndex;
-			const nextScope = this.#scopes[scopeIndex];
-			let nodeToFocus = nextScope.currentNode;
-			if (nodeToFocus) {
-				keyBoardFocusNavigatedNode(nodeToFocus);
-			}
+	_debugInfo() {
+		return {
+			scopes: this.#scopes,
+			currentScope: this.#currentScope,
+			currentScopeName: this.#currentScope.scopeName,
+			currentScopeIndex: this.#currentScopeIndex,
+			currentScopeNode: this.#currentScope.currentNavigationTarget,
+			navigationHistory: this.#scopeHistory.getAll()
+		};
+	}
+
+	#focusScopeNew(scope: ScopeInfra) {
+		this.#onFocusScopeInternal(scope);
+		let nodeToFocus = scope.currentNavigationTarget?.navigatableNode;
+		if (nodeToFocus) {
+			keyBoardFocusNavigatedNode(nodeToFocus);
 		}
+	}
+
+	#focusNode(scope: ScopeInfra, scopeNode: HTMLElement) {
+		this.#onFocusScopeInternal(scope);
+		keyBoardFocusNavigatedNode(scopeNode);
+	}
+
+	#onFocusScopeInternal(scope: ScopeInfra) {
+		const scopeIndex = this.#getScopeIndex(scope);
+
+		if (scopeIndex < 0) {
+			console.warn('NavigationManager Could not Find scope', scope.scopeName);
+			return;
+		}
+
+		this.#currentScopeIndex = scopeIndex;
+		this.#scopeHistory.touch(scope.scopeName);
 	}
 
 	#onNavigationKey = createKeyabordNavigationEventHandler((keyboardEvent: KeyboardEvent) => {
@@ -219,7 +253,6 @@ export class NavigationManager {
 		}
 
 		const key = keyboardEvent.key;
-		const initatingNode = keyboardEvent.target as HTMLElement;
 
 		let nextNodeInfo = this.#currentScope.getNextNodeInfo(key);
 
@@ -234,28 +267,22 @@ export class NavigationManager {
 			nextNodeInfo.escapeBackupNode
 		);
 
-		if (nextNodeInfo.nextNode)
-			// Current Scope Navigation
-			this.#navigateToNodeAndCompleteQuestForKey(nextNodeInfo.nextNode, key, initatingNode);
-		else {
-			const nextScopeIndex = this.getNextScopeIndex(key);
+		if (nextNodeInfo.nextNode) {
+			this.#focusNode(this.#currentScope, nextNodeInfo.nextNode.navigatableNode as HTMLElement);
+		} else {
+			const nextScope = this.#getNextScope(key);
 
-			if (nextScopeIndex != null) {
-				const nextScope = this.#scopes[nextScopeIndex];
-
-				let nodeIndex = this.#isNextKey(key) ? 0 : nextScope.navigatiableNodes.length - 1;
-
-				// Navigate to next scope
-				this.#navigateToNodeAndCompleteQuestForKey(nextScope.navigatiableNodes[nodeIndex], key, initatingNode);
-				this.#currentScopeIndex = nextScopeIndex;
+			if (nextScope != null) {
+				this.#focusScopeNew(nextScope);
 			} else if (nextNodeInfo.escapeBackupNode) {
 				// Navigate to current scope backup node
-				this.#navigateToNodeAndCompleteQuestForKey(nextNodeInfo.escapeBackupNode, key, initatingNode);
+
+				this.#focusNode(this.#currentScope, nextNodeInfo.escapeBackupNode.navigatableNode as HTMLElement);
 			}
 		}
 	});
 
-	private addNavigationKeys(source: ScopeInfra, navigationKeys: NavigationKeysConfig) {
+	#addNavigationKeys(scope: ScopeInfra, navigationKeys: NavigationKeysConfig) {
 		const flatNavigationKeys = navigationKeys.prevKeys.concat(navigationKeys.nextKeys);
 
 		console.log(`NavigationManager - adding NavigationKeys`, flatNavigationKeys);
@@ -264,7 +291,7 @@ export class NavigationManager {
 			flatNavigationKeys.map((x) => new HotKey(x)),
 			this.#onNavigationKey
 		);
-		flatNavigationKeys.forEach((key) => this.#allNavigationKeys.add(key, source));
+		flatNavigationKeys.forEach((key) => this.#allNavigationKeys.add(key, scope));
 	}
 
 	/* Returns the index of scope for navigation according to the key pressed.
@@ -272,29 +299,56 @@ export class NavigationManager {
 	 * Returns Null/Undefined if no relevant navigation key is pressed
 	 * Returns Null/Undefined if scopes length is 1 or less (if scope does not change).
 	 **/
-	getNextScopeIndex(key: string): number | null {
+	#getNextScope(key: string): ScopeInfra | null {
 		if (!this.#scopes.length) return null;
 
 		if (this.#isNextKey(key)) {
-			return this.#nextScopeIndex();
+			return this.#nextScope('forward');
 		} else if (this.#isPrevKey(key)) {
-			return this.#prevScopeIndex();
+			return this.#nextScope('backward');
 		}
 
 		return null;
 	}
 
-	#nextScopeIndex() {
-		let ret = (this.#currentScopeIndex + 1) % this.#scopes.length;
-		console.log('currentScopeIndex', this.#currentScopeIndex, 'nextScope:', ret);
+	#nextScope(direction: 'forward' | 'backward') {
+		const currentScopeIndex = this.#currentScopeIndex;
+		let index = currentScopeIndex;
 
-		return ret;
-	}
+		if (this.#scopes.length === 0) {
+			return null;
+		}
 
-	#prevScopeIndex() {
-		const prevScopeIndex = this.#currentScopeIndex - 1;
+		do {
+			if (direction === 'forward') {
+				index++;
+				index %= this.#scopes.length;
+			} else {
+				index--;
+				index = index >= 0 ? index : this.#scopes.length - 1;
+			}
 
-		return prevScopeIndex >= 0 ? prevScopeIndex : this.#scopes.length - 1;
+			const scopeAtIndex = this.#scopes[index];
+			const navigationTarget = scopeAtIndex.currentNavigationTarget;
+			const isInert =
+				navigationTarget &&
+				navigationTarget.navigatableNode &&
+				navigationTarget.navigatableNode.closest('[inert]') !== null;
+			console.debug('NAVIGATION Checking Next Scope', {
+				scope: scopeAtIndex.scopeName,
+				currentScopeNode: scopeAtIndex.currentNavigationTarget,
+				isInert
+			});
+
+			if (!isInert) {
+				console.debug('NAVIGATION currentScopeIndex', this.#currentScopeIndex, 'nextScopeIndex:', index);
+
+				return this.#scopes[index];
+			}
+		} while (index !== currentScopeIndex);
+
+		console.debug('NAVIGATION no next scope found. Next Scope Remains', currentScopeIndex);
+		return this.#scopes[index];
 	}
 
 	#isPrevKey(key: string): boolean {
@@ -305,25 +359,5 @@ export class NavigationManager {
 	#isNextKey(key: string): boolean {
 		const navKeys = this.#navigationKeys;
 		return navKeys.nextKeys.includes(key);
-	}
-
-	#navigateToNodeAndCompleteQuestForKey(
-		node: HTMLElement,
-		key: string,
-		initiatingNode: HTMLElement | undefined | null
-	) {
-		if (node && node !== initiatingNode) {
-			keyBoardFocusNavigatedNode(node);
-			this.#dispatcher.signal({ targetNode: node, initiatingKey: key });
-		}
-	}
-
-	_debugInfo() {
-		return {
-			scopes: this.#scopes,
-			currentScope: this.#currentScope,
-			currentScopeName: this.#currentScope.scopeName,
-			currentScopeIndex: this.#currentScopeIndex
-		};
 	}
 }
