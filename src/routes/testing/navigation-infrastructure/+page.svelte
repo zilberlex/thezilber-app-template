@@ -6,6 +6,8 @@
 	import type { ScopeInfra } from '$lib/engine/keyboard-navigation/types';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { onMount } from 'svelte';
+	import ButtonInputSwitch from './ButtonInputSwitch.svelte';
+	import { markForNavigation } from '$lib/engine/keyboard-navigation/attachments';
 
 	let newButtonCounter = 1;
 	let buttonsInfo1 = $state([
@@ -25,47 +27,55 @@
 </script>
 
 <div class="demo-container ly-center">
-	<NavigationScope scopeName="nav-scope-1" bind:scopeRet={scope1}>
+	<NavigationScope scopeName="nav-scope-1" bind:scopeRet={scope1} discoveryMode="marked">
 		<div class="list list-1 content-surface">
-			<h3>Scope 1:</h3>
+			<h3>Scope Direct Mark Elements:</h3>
 			{#each buttonsInfo1 as btn (btn.id)}
-				<Button>
-					{btn.label}
-				</Button>
+				<ButtonInputSwitch content={btn.label} {@attach markForNavigation} />
 			{/each}
 		</div>
 	</NavigationScope>
 	<NavigationScope scopeName="nav-scope-2">
 		<div class="list list-2 content-surface">
-			<h3>Scope 2:</h3>
+			<h3>Scope Mark Container:</h3>
 			{#each buttonsInfo1 as btn (btn.id)}
-				<Button>
-					{btn.label}
-				</Button>
+				<div class="element-container" {@attach markForNavigation}>
+					<ButtonInputSwitch content={btn.label} />
+				</div>
+			{/each}
+		</div>
+	</NavigationScope>
+	<NavigationScope scopeName="nav-scope-2" discoveryMode="auto">
+		<div class="list list-3 content-surface">
+			<h3>Scope AutoMark:</h3>
+			{#each buttonsInfo1 as btn (btn.id)}
+				<ButtonInputSwitch content={btn.label} />
 			{/each}
 		</div>
 	</NavigationScope>
 	<div class="controls">
 		<h3>Controls:</h3>
 		<NavigationScope scopeName="nav-scope-controles">
-			<Button
-				onclick={() => {
-					console.debug('Refeshing Nodes Scope 1', { scopeName: scope1?.scopeName });
-					scope1?.refreshNavigatableNodes();
-				}}
-			>
-				Refresh Scope 1
-			</Button>
-			<Button
-				onclick={() => {
-					buttonsInfo1.splice(2, 0, {
-						id: `button-new-${newButtonCounter++}`,
-						label: `New Button ${newButtonCounter}`
-					});
-				}}
-			>
-				Add Element
-			</Button>
+			<div class="list">
+				<Button
+					onclick={() => {
+						console.debug('Refeshing Nodes Scope 1', { scopeName: scope1?.scopeId });
+						scope1?.refreshNavigatableNodes();
+					}}
+				>
+					Refresh Scope 1
+				</Button>
+				<Button
+					onclick={() => {
+						buttonsInfo1.splice(2, 0, {
+							id: `button-new-${newButtonCounter++}`,
+							label: `New Button ${newButtonCounter}`
+						});
+					}}
+				>
+					Add Element
+				</Button>
+			</div>
 		</NavigationScope>
 	</div>
 </div>
@@ -73,6 +83,10 @@
 <style>
 	.demo-container {
 		gap: var(--space-4);
+	}
+
+	.element-container {
+		display: grid;
 	}
 
 	.list {

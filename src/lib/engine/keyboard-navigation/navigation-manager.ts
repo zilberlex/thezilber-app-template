@@ -92,12 +92,18 @@ export class NavigationManager {
 	}
 
 	registerScope(scope: ScopeInfra) {
-		console.debug('NavigationManager registering scope:', scope.scopeName);
-		const scopeName = scope.scopeName;
+		console.debug('NavigationManager registering scope:', scope.scopeId);
+		const scopeId = scope.scopeId;
+
+		const scopes = this.#scopes;
+
+		if (scopes.findIndex((s) => s.scopeId === scope.scopeId) !== -1) {
+			throw new Error(`NavigationManager Duplicate scope id ${scope.scopeId}`);
+		}
 
 		this.#scopes.push(scope);
 		this.#addNavigationKeys(scope, scope.navigationKeys);
-		this.#scopeHistory.set(scopeName, scope);
+		this.#scopeHistory.set(scopeId, scope);
 
 		const scopeFocusHandler = this.#createScopeFocusHandler(scope);
 
@@ -121,7 +127,7 @@ export class NavigationManager {
 	}
 
 	unregisterScope(scope: ScopeInfra) {
-		console.debug('NavigationManager unregistering scope:', scope.scopeName);
+		console.debug('NavigationManager unregistering scope:', scope.scopeId);
 
 		const i = this.#getScopeIndex(scope);
 
@@ -130,7 +136,7 @@ export class NavigationManager {
 			const { unregister } = this.#destTargets.splice(i, 1)[0];
 			this.removeNavigationKeys(scope, scope.navigationKeys);
 
-			this.#scopeHistory.delete(scope.scopeName);
+			this.#scopeHistory.delete(scope.scopeId);
 
 			unregister();
 			if (this.#currentScopeIndex === i) {
@@ -146,11 +152,11 @@ export class NavigationManager {
 				}
 			}
 		} else
-			console.warn('NavigationManager - unregisterScope - scope not found in destTargets. scopeName:', scope.scopeName);
+			console.warn('NavigationManager - unregisterScope - scope not found in destTargets. scopeName:', scope.scopeId);
 	}
 
 	#getScopeIndex(scope: ScopeInfra): number {
-		return this.#scopes.findIndex((s) => s.scopeName === scope.scopeName);
+		return this.#scopes.findIndex((s) => s.scopeId === scope.scopeId);
 	}
 
 	removeNavigationKeys(source: ScopeInfra, navigationKeys: NavigationKeysConfig) {
@@ -186,7 +192,7 @@ export class NavigationManager {
 		if (matchedSetIndex === undefined) return;
 
 		matchedSetIndex === 0 ? this.focusNextScope() : this.focusPrevScope();
-	}, 'hard');
+	}, 'soft');
 
 	refocus() {
 		let target = this.#currentScope.currentNavigationTarget;
@@ -214,9 +220,9 @@ export class NavigationManager {
 		return {
 			scopes: this.#scopes,
 			currentScope: this.#currentScope,
-			currentScopeName: this.#currentScope.scopeName,
+			currentScopeName: this.#currentScope.scopeId,
 			currentScopeIndex: this.#currentScopeIndex,
-			currentScopeNode: this.#currentScope.currentNavigationTarget,
+			currentNavigationTarget: this.#currentScope.currentNavigationTarget,
 			navigationHistory: this.#scopeHistory.getAll()
 		};
 	}
@@ -238,12 +244,12 @@ export class NavigationManager {
 		const scopeIndex = this.#getScopeIndex(scope);
 
 		if (scopeIndex < 0) {
-			console.warn('NavigationManager Could not Find scope', scope.scopeName);
+			console.warn('NavigationManager Could not Find scope', scope.scopeId);
 			return;
 		}
 
 		this.#currentScopeIndex = scopeIndex;
-		this.#scopeHistory.touch(scope.scopeName);
+		this.#scopeHistory.touch(scope.scopeId);
 	}
 
 	#onNavigationKey = createKeyabordNavigationEventHandler((keyboardEvent: KeyboardEvent) => {
@@ -335,7 +341,7 @@ export class NavigationManager {
 				navigationTarget.navigatableNode &&
 				navigationTarget.navigatableNode.closest('[inert]') !== null;
 			console.debug('NAVIGATION Checking Next Scope', {
-				scope: scopeAtIndex.scopeName,
+				scope: scopeAtIndex.scopeId,
 				currentScopeNode: scopeAtIndex.currentNavigationTarget,
 				isInert
 			});

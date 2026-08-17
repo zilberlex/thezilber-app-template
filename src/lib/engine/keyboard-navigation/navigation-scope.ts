@@ -1,33 +1,36 @@
 import { createSmartHandler } from '$lib/engine/events/event-handling';
 import { DispatcherImpl } from '$lib/engine/patterns/observer';
-import type {
-	NavigationKeysConfig,
-	NextNodeInfo,
-	ScopeInfra,
-	NodeFocusEvent,
-	ScopeEscapeMode,
-	NavigationTarget,
-	NavigationTargetId
+import {
+	type NavigationKeysConfig,
+	type NextNodeInfo,
+	type ScopeInfra,
+	type NodeFocusEvent,
+	type ScopeEscapeMode,
+	type KeyboardNavigationTarget,
+	type NavigationTargetId
 } from './types';
 import { getFocusableElementsByNode } from './navigation-utils';
+import { keyboardNavigationTarget } from './navigation-target';
+import { NAVIGATION_TARGET_ATTRIBUTE } from './consts';
 
 const NAVIGATION_INDEX_ATTRIBUTE = 'data-debug-navigation-index';
-
 const NAVIGATION_TARGET_ID_ATTRIBUTE = 'data-navigation-target-id';
 
+export type NavigationDiscoveryMode = 'marked' | 'auto';
+
 export default class NavigationScopeInfraImpl implements ScopeInfra {
-	scopeName: string;
+	scopeId: string;
 	navigationKeys: NavigationKeysConfig;
 
 	scopeContainer: HTMLElement;
-	navigationTargets: NavigationTarget[] = [];
+	navigationTargets: KeyboardNavigationTarget[] = [];
 
 	#focusNodeDispatcher = new DispatcherImpl<NodeFocusEvent>();
 
 	#abortController: AbortController;
 
 	#currentNavigationTargetId?: NavigationTargetId;
-	#navigationTargetsById = new Map<NavigationTargetId, NavigationTarget>();
+	#navigationTargetsById = new Map<NavigationTargetId, KeyboardNavigationTarget>();
 	#navigationTargetIndexById = new Map<NavigationTargetId, number>();
 
 	#escapeMode: ScopeEscapeMode;
@@ -37,20 +40,23 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 
 	#automaticTargetIds = new WeakMap<HTMLElement, NavigationTargetId>();
 	#targetIdCounter = 0;
+	#discoveryMode: NavigationDiscoveryMode;
 
 	constructor(
 		scopeContainer: HTMLElement,
 		navigationKeys: NavigationKeysConfig,
-		scopeName: string,
+		scopeId: string,
+		discoveryMode: NavigationDiscoveryMode = 'auto',
 		escapeMode: ScopeEscapeMode = 'circular'
 	) {
-		this.scopeName = scopeName;
+		this.scopeId = scopeId;
 		this.scopeContainer = scopeContainer;
 		this.navigationKeys = navigationKeys;
 
 		this.#escapeMode = escapeMode;
 
 		this.#abortController = new AbortController();
+		this.#discoveryMode = discoveryMode;
 	}
 
 	get escapeMode(): ScopeEscapeMode {
@@ -126,10 +132,9 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 			);
 		}
 
-		const navigationTargets = getFocusableElementsByNode(this.scopeContainer).map((x) =>
-			this.#createNavigationTarget(x)
+		const navigationTargets = this.#discoverNavigationTargetElements(this.#discoveryMode, this.scopeContainer).map(
+			(e) => this.#createNavigationTarget(e)
 		);
-
 		this.#rebuildNavigationTargets(navigationTargets);
 		this.#initializeFocusableElements(this.navigationTargets);
 
@@ -153,6 +158,14 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		this.#setCurrentByFallbackIndex(previousIndex);
 	}
 
+	#discoverNavigationTargetElements(discoveryMode: NavigationDiscoveryMode, rootElement: HTMLElement): HTMLElement[] {
+		if (discoveryMode === 'marked') {
+			return Array.from(rootElement.querySelectorAll<HTMLElement>(`[${NAVIGATION_TARGET_ATTRIBUTE}]`));
+		}
+
+		return getFocusableElementsByNode(rootElement);
+	}
+
 	registerOnFocus(handler: (dispatchedObject: NodeFocusEvent) => void): { unregister: () => void } {
 		this.#focusNodeDispatcher.register(handler);
 
@@ -161,7 +174,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		};
 	}
 
-	get currentNavigationTarget(): NavigationTarget | undefined {
+	get currentNavigationTarget(): KeyboardNavigationTarget | undefined {
 		if (this.#currentNavigationTargetId !== undefined) {
 			return this.#navigationTargetsById.get(this.#currentNavigationTargetId);
 		}
@@ -178,7 +191,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		this.#mutationObserver.disconnect();
 	}
 
-	#initializeFocusableElements(focusableElements: NavigationTarget[]) {
+	#initializeFocusableElements(focusableElements: KeyboardNavigationTarget[]) {
 		const currentActiveElement = document.activeElement;
 
 		for (let i = 0; i < focusableElements.length; i++) {
@@ -198,11 +211,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		}
 	}
 
-	#resolveNavigationTargetElement(target: HTMLElement): HTMLElement | undefined {
-		return target;
-	}
-
-	#setCurrentNavigationTarget(navigationTarget: NavigationTarget) {
+	#setCurrentNavigationTarget(navigationTarget: KeyboardNavigationTarget) {
 		const index = this.#navigationTargetIndexById.get(navigationTarget.id);
 
 		if (index === undefined) {
@@ -236,7 +245,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		this.#currentNavigationTargetId = fallbackTarget.id;
 	}
 
-	#getNavigationTargetFromEvent(event: Event): NavigationTarget | undefined {
+	#getNavigationTargetFromEvent(event: Event): KeyboardNavigationTarget | undefined {
 		const element = event.target;
 
 		if (!(element instanceof HTMLElement)) {
@@ -262,21 +271,13 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		return this.#navigationTargetsById.get(targetId);
 	}
 
-	#createNavigationTarget(targetElement: HTMLElement): NavigationTarget {
-		const thisScope = this;
+	#createNavigationTarget(targetElement: HTMLElement): KeyboardNavigationTarget {
 		const id = this.#getAutomaticNavigationTargetId(targetElement);
 
-		return {
-			id,
-			targetElement,
-
-			get navigatableNode() {
-				return thisScope.#resolveNavigationTargetElement(targetElement);
-			}
-		};
+		return keyboardNavigationTarget(id, targetElement);
 	}
 
-	#rebuildNavigationTargets(navigationTargets: NavigationTarget[]) {
+	#rebuildNavigationTargets(navigationTargets: KeyboardNavigationTarget[]) {
 		this.#navigationTargetsById.clear();
 		this.#navigationTargetIndexById.clear();
 

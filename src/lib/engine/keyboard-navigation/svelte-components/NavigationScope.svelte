@@ -2,7 +2,13 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { NavigationManager } from '../navigation-manager';
 	import { browser } from '$app/environment';
-	import { type NavigationKeysConfig, type ScopeEscapeMode, type ScopeInfra, NavigationKeysConfigSets } from '../types';
+	import {
+		type NavigationDiscoveryMode,
+		type NavigationKeysConfig,
+		type ScopeEscapeMode,
+		type ScopeInfra,
+		NavigationKeysConfigSets
+	} from '../types';
 	import NavigationScopeInfraImpl from '../navigation-scope';
 	import type { NavigationScopeContext } from './types';
 	import { getNavigationManager, setNavigationScopeContext } from './navigation-manager-provider.svelte';
@@ -14,6 +20,7 @@
 		class?: any;
 		escapeMode?: ScopeEscapeMode;
 		observerParams?: MutationObserverInit & { shouldObserveThisElement: boolean };
+		discoveryMode?: NavigationDiscoveryMode;
 		scopeRet?: ScopeInfra;
 	}
 
@@ -28,6 +35,7 @@
 		scopeName,
 		children,
 		class: usrCls,
+		discoveryMode = 'auto',
 		escapeMode = 'circular',
 		observerParams = {
 			childList: true,
@@ -36,6 +44,9 @@
 		},
 		scopeRet = $bindable()
 	}: Props = $props();
+
+	const id = $props.id();
+	const uniqueScopeName = $derived(`${scopeName}-${id}`);
 
 	let resolvedObserverParams = $derived({
 		...defaultObserverParams,
@@ -61,7 +72,7 @@
 		console.debug('NavigationScope - NavigaitonManager Context', navigationManager);
 
 		navigationKeys = navigationKeys;
-		const scope = new NavigationScopeInfraImpl(thisElement, navigationKeys, scopeName, escapeMode);
+		const scope = new NavigationScopeInfraImpl(thisElement, navigationKeys, uniqueScopeName, discoveryMode, escapeMode);
 
 		navigationManager?.registerScope(scope);
 
@@ -83,7 +94,7 @@
 	});
 </script>
 
-<div class={['navigation-scope', usrCls]} bind:this={thisElement}>
+<div class={['navigation-scope', usrCls]} bind:this={thisElement} id={uniqueScopeName}>
 	<div class="outline"></div>
 	{@render children?.()}
 </div>

@@ -35,6 +35,10 @@ function isCandidateFocusable(el: HTMLElement): boolean {
 	return true;
 }
 
+export function isFocusableElement(element: HTMLElement): boolean {
+	return element.matches(focusableCandidateSelector) && isCandidateFocusable(element);
+}
+
 export function getFocusableElementsByNode(node: HTMLElement): HTMLElement[] {
 	return Array.from<HTMLElement>(node.querySelectorAll(focusableCandidateSelector)).filter(isCandidateFocusable);
 }

@@ -10,7 +10,9 @@ export function createNavigationKeys(nextKeys: string[], prevKeys: string[]): Na
 
 export type NavigationTargetId = string;
 
-export interface NavigationTarget {
+export type NavigationDiscoveryMode = 'marked' | 'auto';
+
+export interface KeyboardNavigationTarget {
 	readonly id: NavigationTargetId;
 	readonly targetElement: HTMLElement;
 	readonly navigatableNode: HTMLElement | undefined;
@@ -21,22 +23,22 @@ export interface NodeFocusEvent {
 }
 
 export interface NextNodeInfo {
-	nextNode?: NavigationTarget;
-	escapeBackupNode?: NavigationTarget;
+	nextNode?: KeyboardNavigationTarget;
+	escapeBackupNode?: KeyboardNavigationTarget;
 }
 
 export interface ScopeInfra {
-	scopeName: string;
+	scopeId: string;
 	navigationKeys: NavigationKeysConfig;
 	scopeContainer: HTMLElement;
-	navigationTargets: NavigationTarget[];
+	navigationTargets: KeyboardNavigationTarget[];
 
 	getNextNodeInfo(key: string): NextNodeInfo;
 	init(): void;
 	destroy(): void;
 	registerOnFocus(handler: DispatchHandler<NodeFocusEvent>): { unregister: () => void };
 	refreshNavigatableNodes(): void;
-	get currentNavigationTarget(): NavigationTarget | undefined;
+	get currentNavigationTarget(): KeyboardNavigationTarget | undefined;
 	get escapeMode(): ScopeEscapeMode;
 	observeMutations(element: HTMLElement, options: MutationObserverInit): void;
 }
