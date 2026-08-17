@@ -2,7 +2,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { NavigationManager } from '../navigation-manager';
 	import { browser } from '$app/environment';
-	import { type NavigationKeysConfig, type ScopeEscapeMode, NavigationKeysConfigSets } from '../types';
+	import { type NavigationKeysConfig, type ScopeEscapeMode, type ScopeInfra, NavigationKeysConfigSets } from '../types';
 	import NavigationScopeInfraImpl from '../navigation-scope';
 	import type { NavigationScopeContext } from './types';
 	import { getNavigationManager, setNavigationScopeContext } from './navigation-manager-provider.svelte';
@@ -14,6 +14,7 @@
 		class?: any;
 		escapeMode?: ScopeEscapeMode;
 		observerParams?: MutationObserverInit & { shouldObserveThisElement: boolean };
+		scopeRet?: ScopeInfra;
 	}
 
 	const defaultObserverParams = {
@@ -32,7 +33,8 @@
 			childList: true,
 			subtree: true,
 			shouldObserveThisElement: true
-		}
+		},
+		scopeRet = $bindable()
 	}: Props = $props();
 
 	let resolvedObserverParams = $derived({
@@ -70,6 +72,7 @@
 		}
 
 		scopeContext.scope = scope;
+		scopeRet = scope;
 	});
 
 	onDestroy(() => {

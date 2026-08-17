@@ -8,7 +8,10 @@ export function createNavigationKeys(nextKeys: string[], prevKeys: string[]): Na
 	};
 }
 
+export type NavigationTargetId = string;
+
 export interface NavigationTarget {
+	readonly id: NavigationTargetId;
 	readonly targetElement: HTMLElement;
 	readonly navigatableNode: HTMLElement | undefined;
 }
