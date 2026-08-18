@@ -37,7 +37,12 @@
 	<section>
 		<h3>Negative Depth (Surface Color Transparent by design)</h3>
 		{#each trackBallAlgorithsm as trackingMode}
-			<TrackingElement3D trackingConfig={{ mode: trackingMode }} depth={-40} compensateFaceScale={true}>
+			<TrackingElement3D
+				trackingConfig={{ mode: trackingMode }}
+				depth={-40}
+				compensateFaceScale={true}
+				style="background-color: transparent;"
+			>
 				Mouse Tracker {trackingMode}
 			</TrackingElement3D>
 		{/each}
