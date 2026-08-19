@@ -35,7 +35,7 @@
 			{/each}
 		</div>
 	</NavigationScope>
-	<NavigationScope scopeName="nav-scope-2">
+	<NavigationScope scopeName="nav-scope-2" discoveryMode="marked">
 		<div class="list list-2 content-surface">
 			<h3>Scope Mark Container:</h3>
 			{#each buttonsInfo1 as btn (btn.id)}
@@ -45,7 +45,7 @@
 			{/each}
 		</div>
 	</NavigationScope>
-	<NavigationScope scopeName="nav-scope-2" discoveryMode="auto">
+	<NavigationScope scopeName="nav-scope-3" discoveryMode="auto">
 		<div class="list list-3 content-surface">
 			<h3>Scope AutoMark:</h3>
 			{#each buttonsInfo1 as btn (btn.id)}
@@ -55,7 +55,7 @@
 	</NavigationScope>
 	<div class="controls">
 		<h3>Controls:</h3>
-		<NavigationScope scopeName="nav-scope-controles">
+		<NavigationScope scopeName="nav-scope-controls">
 			<div class="list">
 				<Button
 					onclick={() => {

@@ -4,12 +4,12 @@ import {
 	type NavigationKeysConfig,
 	type NextNodeInfo,
 	type ScopeInfra,
-	type NodeFocusEvent,
+	type ScopeFocusEvent,
 	type ScopeEscapeMode,
 	type KeyboardNavigationTarget,
 	type NavigationTargetId
 } from './types';
-import { getFocusableElementsByNode } from './navigation-utils';
+import { getFocusableElementsByNode, keyBoardFocusNavigatedNode } from './navigation-utils';
 import { keyboardNavigationTarget } from './navigation-target';
 import { NAVIGATION_TARGET_ATTRIBUTE } from './consts';
 
@@ -25,7 +25,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 	scopeContainer: HTMLElement;
 	navigationTargets: KeyboardNavigationTarget[] = [];
 
-	#focusNodeDispatcher = new DispatcherImpl<NodeFocusEvent>();
+	#focusNodeDispatcher = new DispatcherImpl<ScopeFocusEvent>();
 
 	#abortController: AbortController;
 
@@ -81,43 +81,83 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 	}
 
 	getNextNodeInfo(key: string): NextNodeInfo {
-		if (document.activeElement !== this.currentNavigationTarget?.navigatableNode)
-			return { nextNode: this.currentNavigationTarget };
+		const direction = this.navigationKeys.nextKeys.includes(key)
+			? 'forward'
+			: this.navigationKeys.prevKeys.includes(key)
+				? 'backward'
+				: undefined;
+
+		if (!direction) return {};
 
 		const currentTarget = this.currentNavigationTarget;
-		const currentTargetIndex = this.#navigationTargetIndexById.get(currentTarget.id);
+		const currentNode = currentTarget?.navigatableNode;
 
-		const navKeys = this.navigationKeys;
-
-		let nextTargetIndex = null;
-
-		if (navKeys.nextKeys.includes(key)) {
-			nextTargetIndex = currentTargetIndex !== undefined ? currentTargetIndex + 1 : 0;
-		} else if (navKeys.prevKeys.includes(key)) {
-			nextTargetIndex = currentTargetIndex !== undefined ? currentTargetIndex - 1 : 0;
+		if (currentTarget && currentNode && document.activeElement !== currentNode) {
+			return { nextNode: currentTarget };
 		}
 
-		let ret: NextNodeInfo = {};
+		const currentIndex =
+			currentTarget !== undefined ? this.#navigationTargetIndexById.get(currentTarget.id) : undefined;
 
-		if (nextTargetIndex == null) {
+		const step = direction === 'forward' ? 1 : -1;
+
+		const startIndex =
+			currentIndex !== undefined
+				? currentIndex + step
+				: direction === 'forward'
+					? 0
+					: this.navigationTargets.length - 1;
+
+		const nextTarget = this.#findResolvedTarget(startIndex, direction, false);
+
+		if (nextTarget) {
+			return { nextNode: nextTarget };
+		}
+
+		const wrappedStart = direction === 'forward' ? 0 : this.navigationTargets.length - 1;
+
+		const wrappedTarget = this.#findResolvedTarget(wrappedStart, direction, false);
+
+		if (!wrappedTarget) {
 			return {};
 		}
 
-		if (nextTargetIndex >= 0 && nextTargetIndex < this.navigationTargets.length) {
-			ret.nextNode = this.navigationTargets[nextTargetIndex];
-		} else {
-			nextTargetIndex = nextTargetIndex < 0 ? this.navigationTargets.length - 1 : 0;
-
-			let nextNodeCircular = this.navigationTargets[nextTargetIndex];
-
-			if (this.escapeMode === 'escape') {
-				ret.escapeBackupNode = nextNodeCircular;
-			} else {
-				ret.nextNode = nextNodeCircular;
-			}
+		if (this.escapeMode === 'escape') {
+			return { escapeBackupNode: wrappedTarget };
 		}
 
-		return ret;
+		return { nextNode: wrappedTarget };
+	}
+
+	#findResolvedTarget(
+		startIndex: number,
+		direction: 'forward' | 'backward',
+		wrap: boolean
+	): KeyboardNavigationTarget | undefined {
+		const length = this.navigationTargets.length;
+
+		if (length === 0) return;
+
+		const step = direction === 'forward' ? 1 : -1;
+		let index = startIndex;
+
+		for (let visited = 0; visited < length; visited++) {
+			if (index < 0 || index >= length) {
+				if (!wrap) return;
+
+				index = index < 0 ? length - 1 : 0;
+			}
+
+			const target = this.navigationTargets[index];
+
+			if (target.navigatableNode) {
+				return target;
+			}
+
+			index += step;
+		}
+
+		return;
 	}
 
 	refreshNavigatableNodes() {
@@ -136,11 +176,12 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 			(e) => this.#createNavigationTarget(e)
 		);
 		this.#rebuildNavigationTargets(navigationTargets);
-		this.#initializeFocusableElements(this.navigationTargets);
+		this.#initializeNavigationTargets(this.navigationTargets);
 
 		console.debug(
 			'Navigation Scope - Refreshing Navigation Targets',
 			this.scopeContainer,
+			{ discoveryMody: this.#discoveryMode },
 			'targets:',
 			this.navigationTargets.map((target, index) => ({
 				index,
@@ -166,7 +207,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		return getFocusableElementsByNode(rootElement);
 	}
 
-	registerOnFocus(handler: (dispatchedObject: NodeFocusEvent) => void): { unregister: () => void } {
+	registerOnFocus(handler: (dispatchedObject: ScopeFocusEvent) => void): { unregister: () => void } {
 		this.#focusNodeDispatcher.register(handler);
 
 		return {
@@ -179,7 +220,49 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 			return this.#navigationTargetsById.get(this.#currentNavigationTargetId);
 		}
 
-		return this.navigationTargets[0];
+		return this.#findResolvedTarget(0, 'forward', false);
+	}
+
+	focusCurrent() {
+		const navigationTarget = this.currentNavigationTarget;
+		const navigatableNode = navigationTarget?.navigatableNode;
+
+		if (!navigatableNode) {
+			console.warn(
+				'NavigationScope FocusCurrent navigationTarget did not contain a node. Navigation target:',
+				navigationTarget
+			);
+			return;
+		}
+		keyBoardFocusNavigatedNode(navigatableNode);
+	}
+
+	focusLast() {
+		const navigationTarget = this.navigationTargets.at(-1);
+		const navigatableNode = navigationTarget?.navigatableNode;
+
+		if (!navigatableNode) {
+			console.warn(
+				'NavigationScope FocusLast navigationTarget did not contain a node. Navigation target:',
+				navigationTarget
+			);
+			return;
+		}
+		keyBoardFocusNavigatedNode(navigatableNode);
+	}
+
+	focusFirst() {
+		const navigationTarget = this.navigationTargets.at(0);
+		const navigatableNode = navigationTarget?.navigatableNode;
+
+		if (!navigatableNode) {
+			console.warn(
+				'NavigationScope FocusFirst navigationTarget did not contain a node. Navigation target:',
+				navigationTarget
+			);
+			return;
+		}
+		keyBoardFocusNavigatedNode(navigatableNode);
 	}
 
 	observeMutations(element: HTMLElement, options: MutationObserverInit = { childList: true }) {
@@ -191,7 +274,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		this.#mutationObserver.disconnect();
 	}
 
-	#initializeFocusableElements(focusableElements: KeyboardNavigationTarget[]) {
+	#initializeNavigationTargets(focusableElements: KeyboardNavigationTarget[]) {
 		const currentActiveElement = document.activeElement;
 
 		for (let i = 0; i < focusableElements.length; i++) {
@@ -199,10 +282,12 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 
 			const navigatableNode = navigationTarget.navigatableNode;
 
-			if (navigatableNode) {
-				navigationTarget.navigatableNode.setAttribute(NAVIGATION_INDEX_ATTRIBUTE, i.toString());
+			const navigationTargetNode = navigationTarget.targetElement;
 
-				navigationTarget.targetElement.setAttribute(NAVIGATION_TARGET_ID_ATTRIBUTE, navigationTarget.id);
+			if (navigatableNode) {
+				navigationTargetNode.setAttribute(NAVIGATION_INDEX_ATTRIBUTE, i.toString());
+
+				navigationTargetNode.setAttribute(NAVIGATION_TARGET_ID_ATTRIBUTE, navigationTarget.id);
 
 				if (navigationTarget.navigatableNode === currentActiveElement) {
 					this.#setCurrentNavigationTarget(navigationTarget);
@@ -222,13 +307,10 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		this.#currentNavigationTargetId = navigationTarget.id;
 	}
 
-	#signalNavigationEvent() {
-		const navigatableNode = this.currentNavigationTarget?.navigatableNode;
-		if (navigatableNode) {
-			this.#focusNodeDispatcher.signal({
-				targetNode: navigatableNode
-			});
-		}
+	#signalNavigationEvent(navigationTarget: KeyboardNavigationTarget) {
+		this.#focusNodeDispatcher.signal({
+			navigationTarget
+		});
 	}
 
 	#setCurrentByFallbackIndex(index: number) {
@@ -304,7 +386,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		}
 
 		this.#setCurrentNavigationTarget(navigationTarget);
-		this.#signalNavigationEvent();
+		this.#signalNavigationEvent(navigationTarget);
 	};
 
 	#getAutomaticNavigationTargetId(element: HTMLElement): NavigationTargetId {

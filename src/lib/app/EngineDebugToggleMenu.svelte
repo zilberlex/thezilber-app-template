@@ -5,8 +5,10 @@
 	import { actionsMenuEntry, type ActionsMenuEntry } from '$lib/ui/components/actions-menu/action-menu-entry.svelte';
 	import ActionsMenu from '$lib/ui/components/actions-menu/ActionsMenu.svelte';
 
+	let debugPointerEvents = $state(false);
+
 	function createToggleRule(action: ActionWithCleanup) {
-		let on = false;
+		let on = debugPointerEvents;
 		let undo = () => {};
 
 		return (toggleState: boolean) => {
@@ -42,7 +44,14 @@
 	const enableDebugMenuMouse = createToggleRule(() => addCssRule('debug-layer', 'pointer-events: auto !important;'));
 
 	const actions: ActionsMenuEntry[] = [
-		actionsMenuEntry({ name: 'Debug Menu Pointer Events', onToggle: enableDebugMenuMouse }),
+		actionsMenuEntry({
+			name: 'Debug Menu Pointer Events',
+			onToggle: enableDebugMenuMouse,
+			binding: externalBinding(
+				() => debugPointerEvents,
+				(v) => (debugPointerEvents = v)
+			)
+		}),
 		actionsMenuEntry({
 			name: 'Toggle Debug Console',
 			binding: externalBinding(

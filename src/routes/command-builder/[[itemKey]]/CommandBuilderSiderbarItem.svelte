@@ -88,6 +88,7 @@
 				onclick={editItemName}
 				tabindex={-1}
 				{@attach createClickHotKeyAttachment('Rename', false, hotkey('r', 'alt'))}
+				--bg={isElementPageForThisItem ? 'var(--cl-on-surface-dimmest)' : undefined}
 			>
 				<EditIcon />
 			</IconButton>
@@ -96,6 +97,7 @@
 				onclick={deleteItem}
 				tabindex={-1}
 				{@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))}
+				--bg={isElementPageForThisItem ? 'var(--cl-on-surface-dimmest)' : undefined}
 			>
 				<DeleteIcon />
 			</IconButton>
@@ -103,7 +105,7 @@
 	{/if}
 </div>
 
-<style>
+<style lang="scss">
 	.nav-collection-item {
 		position: relative;
 
@@ -114,7 +116,7 @@
 		overflow: hidden;
 
 		&:is(:focus-within, :hover) {
-			background-color: var(--cl-primary-dimmest);
+			background-color: var(--cl-on-surface-dimmest);
 		}
 
 		&.current-item {
@@ -135,6 +137,12 @@
 
 		text-decoration: none;
 		color: var(--cl-on-surface);
+
+		&:is(:hover, :focus-visible) {
+			@include pulse-text(var(--cl-primary), var(--cl-on-surface), 1s);
+
+			text-decoration: none;
+		}
 	}
 
 	.nav-collection-item-controls {

@@ -18,8 +18,8 @@ export interface KeyboardNavigationTarget {
 	readonly navigatableNode: HTMLElement | undefined;
 }
 
-export interface NodeFocusEvent {
-	targetNode: HTMLElement;
+export interface ScopeFocusEvent {
+	navigationTarget: KeyboardNavigationTarget;
 }
 
 export interface NextNodeInfo {
@@ -36,10 +36,13 @@ export interface ScopeInfra {
 	getNextNodeInfo(key: string): NextNodeInfo;
 	init(): void;
 	destroy(): void;
-	registerOnFocus(handler: DispatchHandler<NodeFocusEvent>): { unregister: () => void };
+	registerOnFocus(handler: DispatchHandler<ScopeFocusEvent>): { unregister: () => void };
 	refreshNavigatableNodes(): void;
 	get currentNavigationTarget(): KeyboardNavigationTarget | undefined;
 	get escapeMode(): ScopeEscapeMode;
+	focusCurrent(): void;
+	focusFirst(): void;
+	focusLast(): void;
 	observeMutations(element: HTMLElement, options: MutationObserverInit): void;
 }
 

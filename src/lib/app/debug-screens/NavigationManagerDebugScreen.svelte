@@ -16,10 +16,23 @@
 		currentScopeIndex: debugInfo.currentScopeIndex,
 		totalScopes: debugInfo.scopes.length,
 		scopeNames: debugInfo.scopes.map((x) => x.scopeId),
-		currentTargetElementClasses: debugInfo.currentNavigationTarget?.targetElement.classList,
-		currentNodeClasses: debugInfo.currentNavigationTarget?.navigatableNode?.classList,
-		history: [...debugInfo.navigationHistory.map((x) => x[0])]
+		currentTargetElementClasses: debugInfo.currentNavigationTarget?.targetElement.classList.toString() ?? 'undefined',
+		currentNodeClasses: debugInfo.currentNavigationTarget?.navigatableNode?.classList.toString() ?? 'undefined',
+		currentTargetElementAttributes: displayDataAttributes(debugInfo.currentNavigationTarget?.targetElement),
+		history: [...debugInfo.navigationHistory.map((x) => x[0])],
+		currentTargetNode: debugInfo.currentNavigationTarget?.targetElement,
+		currentNode: debugInfo.currentNavigationTarget?.navigatableNode
 	});
+
+	function displayDataAttributes(element?: HTMLElement) {
+		if (!element) return undefined;
+
+		return Object.fromEntries(
+			Array.from(element.attributes)
+				.filter((attr) => attr.name.startsWith('data-'))
+				.map((attr) => [attr.name, attr.value])
+		);
+	}
 </script>
 
 <div class="navigation-manager-debug content-surface">
@@ -37,6 +50,7 @@
 		inset: var(--space-2);
 		max-width: 500px;
 		max-height: 500px;
+		overflow-y: scroll;
 		pointer-events: auto;
 	}
 </style>

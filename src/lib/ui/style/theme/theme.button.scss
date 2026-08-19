@@ -1,18 +1,26 @@
 @import '$lib/ui/style/tokens.misc.css';
 
 @mixin rings {
+	--_cl-layer-2: oklch(from var(--cl-primary) calc(l - 0.15) c h);
+	--_cl-layer-3: oklch(from var(--cl-primary) calc(l - 0.35) c h);
+	--_cl-layer-4: oklch(from var(--cl-primary) calc(l - 0.45) c h);
+
+	--_cl-layer-2-invis: oklch(from var(--cl-layer-2) l c h / 0);
+	--_cl-layer-3-invis: oklch(from var(--cl-layer-3) l c h / 0);
+	--_cl-layer-4-invis: oklch(from var(--cl-layer-4) l c h / 0);
+
 	--ring1: 0 0 0 1.5px var(--cl-background);
-	--ring2: 0 0 0 3px var(--cl-primary-dim);
+	--ring2: 0 0 0 3px var(--_cl-layer-2);
 	--ring3: 0 0 0 4px var(--cl-background);
-	--ring4: 0 0 0 5px var(--cl-primary-dimmer);
+	--ring4: 0 0 0 5px var(--_cl-layer-3);
 	--ring5: 0 0 0 6px var(--cl-background);
-	--ring6: 0 0 0 7px var(--cl-primary-dimmest);
+	--ring6: 0 0 0 7px var(--_cl-layer-4);
 
-	--ring2-invis: 0 0 0 3px var(--cl-primary-dim-transparent);
-	--ring4-invis: 0 0 0 5px var(--cl-primary-dimmer-transparent);
-	--ring6-invis: 0 0 0 7px var(--cl-primary-dimmest-transparent);
+	--ring2-invis: 0 0 0 3px var(--_cl-layer-2-invis);
+	--ring4-invis: 0 0 0 5px var(--_cl-layer-3-invis);
+	--ring6-invis: 0 0 0 7px var(--_cl-layer-4-invis);
 
-	--rings-end-bg: radial-gradient(120% 100%, #000 0%, var(--cl-primary-dimmer) 175%);
+	--rings-end-bg: radial-gradient(120% 100%, #000 0%, var(--cl-primary) 175%);
 
 	animation: ring-stack 0.25s forwards linear;
 }

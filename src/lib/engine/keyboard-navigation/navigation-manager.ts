@@ -227,11 +227,19 @@ export class NavigationManager {
 		};
 	}
 
-	#focusScopeNew(scope: ScopeInfra) {
+	#focusScopeNew(scope: ScopeInfra, which: 'current' | 'first' | 'last' = 'current') {
 		this.#onFocusScopeInternal(scope);
-		let nodeToFocus = scope.currentNavigationTarget?.navigatableNode;
-		if (nodeToFocus) {
-			keyBoardFocusNavigatedNode(nodeToFocus);
+
+		switch (which) {
+			case 'current':
+				scope.focusCurrent();
+				break;
+			case 'first':
+				scope.focusFirst();
+				break;
+			case 'last':
+				scope.focusLast();
+				break;
 		}
 	}
 
@@ -276,10 +284,20 @@ export class NavigationManager {
 		if (nextNodeInfo.nextNode) {
 			this.#focusNode(this.#currentScope, nextNodeInfo.nextNode.navigatableNode as HTMLElement);
 		} else {
-			const nextScope = this.#getNextScope(key);
+			if (!this.#scopes.length) return null;
 
-			if (nextScope != null) {
-				this.#focusScopeNew(nextScope);
+			let nextScope = null;
+			const nextKey = this.#isNextKey(key);
+			const prevKey = this.#isPrevKey(key);
+
+			if (nextKey === true) {
+				nextScope = this.#nextScope('forward');
+			} else if (prevKey === true) {
+				nextScope = this.#nextScope('backward');
+			}
+
+			if (nextScope != null && (nextKey || prevKey)) {
+				this.#focusScopeNew(nextScope, nextKey ? 'first' : 'last');
 			} else if (nextNodeInfo.escapeBackupNode) {
 				// Navigate to current scope backup node
 
