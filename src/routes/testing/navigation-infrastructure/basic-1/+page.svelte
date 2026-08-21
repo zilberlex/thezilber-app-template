@@ -6,8 +6,8 @@
 	import type { ScopeInfra } from '$lib/engine/keyboard-navigation/types';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { onMount } from 'svelte';
-	import ButtonInputSwitch from './ButtonInputSwitch.svelte';
 	import { markForNavigation } from '$lib/engine/keyboard-navigation/attachments';
+	import ButtonInputSwitch from '../ButtonInputSwitch.svelte';
 
 	let newButtonCounter = 1;
 	let buttonsInfo1 = $state([
@@ -19,7 +19,7 @@
 	let navigationManager = getNavigationManager();
 	onMount(() => {
 		if (browser) {
-			navigationManager.assignScopeNavigationKeys([hotkey('t')], [hotkey('t', 'shift')]);
+			return navigationManager.assignScopeNavigationKeys([hotkey('t')], [hotkey('t', 'shift')]);
 		}
 	});
 
@@ -60,7 +60,7 @@
 				<Button
 					onclick={() => {
 						console.debug('Refeshing Nodes Scope 1', { scopeName: scope1?.scopeId });
-						scope1?.refreshNavigatableNodes();
+						scope1?.refreshNavigationTargets();
 					}}
 				>
 					Refresh Scope 1

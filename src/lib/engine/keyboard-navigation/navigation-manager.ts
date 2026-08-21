@@ -282,10 +282,8 @@ export class NavigationManager {
 		);
 
 		if (nextNodeInfo.nextNode) {
-			this.#focusNode(this.#currentScope, nextNodeInfo.nextNode.navigatableNode as HTMLElement);
+			this.#focusNode(this.#currentScope, nextNodeInfo.nextNode.navigatableNode);
 		} else {
-			if (!this.#scopes.length) return null;
-
 			let nextScope = null;
 			const nextKey = this.#isNextKey(key);
 			const prevKey = this.#isPrevKey(key);
@@ -301,7 +299,7 @@ export class NavigationManager {
 			} else if (nextNodeInfo.escapeBackupNode) {
 				// Navigate to current scope backup node
 
-				this.#focusNode(this.#currentScope, nextNodeInfo.escapeBackupNode.navigatableNode as HTMLElement);
+				this.#focusNode(this.#currentScope, nextNodeInfo.escapeBackupNode.navigatableNode);
 			}
 		}
 	});
@@ -316,23 +314,6 @@ export class NavigationManager {
 			this.#onNavigationKey
 		);
 		flatNavigationKeys.forEach((key) => this.#allNavigationKeys.add(key, scope));
-	}
-
-	/* Returns the index of scope for navigation according to the key pressed.
-	 *
-	 * Returns Null/Undefined if no relevant navigation key is pressed
-	 * Returns Null/Undefined if scopes length is 1 or less (if scope does not change).
-	 **/
-	#getNextScope(key: string): ScopeInfra | null {
-		if (!this.#scopes.length) return null;
-
-		if (this.#isNextKey(key)) {
-			return this.#nextScope('forward');
-		} else if (this.#isPrevKey(key)) {
-			return this.#nextScope('backward');
-		}
-
-		return null;
 	}
 
 	#nextScope(direction: 'forward' | 'backward') {

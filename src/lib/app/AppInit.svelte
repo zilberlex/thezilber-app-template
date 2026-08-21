@@ -9,6 +9,7 @@
 	import ForegroundLayer from './ForegroundLayer.svelte';
 	import EngineHotKeysInit from './EngineHotKeysInit.svelte';
 	import NavigationStateManager from './NavigationStateManager.svelte';
+	import EngineErrorHandler from './EngineErrorHandler.svelte';
 
 	onMount(() => {
 		if (browser) {
@@ -29,8 +30,9 @@
 	}
 </script>
 
-<svelte:window on:mousemove={handleMouseMove} />
+<svelte:window onmousemove={handleMouseMove} />
 
+<EngineErrorHandler />
 <HotKeysInitialization />
 <NavigationStateManager />
 <TooltipTracker />

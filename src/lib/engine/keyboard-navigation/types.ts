@@ -15,16 +15,20 @@ export type NavigationDiscoveryMode = 'marked' | 'auto';
 export interface KeyboardNavigationTarget {
 	readonly id: NavigationTargetId;
 	readonly targetElement: HTMLElement;
-	readonly navigatableNode: HTMLElement | undefined;
+	get navigatableNode(): HTMLElement | undefined;
 }
+
+export type ResolvedKeyboardNavigationTarget = Omit<KeyboardNavigationTarget, 'navigatableNode'> & {
+	readonly navigatableNode: HTMLElement;
+};
 
 export interface ScopeFocusEvent {
 	navigationTarget: KeyboardNavigationTarget;
 }
 
 export interface NextNodeInfo {
-	nextNode?: KeyboardNavigationTarget;
-	escapeBackupNode?: KeyboardNavigationTarget;
+	nextNode?: ResolvedKeyboardNavigationTarget;
+	escapeBackupNode?: ResolvedKeyboardNavigationTarget;
 }
 
 export interface ScopeInfra {
@@ -37,8 +41,8 @@ export interface ScopeInfra {
 	init(): void;
 	destroy(): void;
 	registerOnFocus(handler: DispatchHandler<ScopeFocusEvent>): { unregister: () => void };
-	refreshNavigatableNodes(): void;
-	get currentNavigationTarget(): KeyboardNavigationTarget | undefined;
+	refreshNavigationTargets(): void;
+	get currentNavigationTarget(): ResolvedKeyboardNavigationTarget | undefined;
 	get escapeMode(): ScopeEscapeMode;
 	focusCurrent(): void;
 	focusFirst(): void;
