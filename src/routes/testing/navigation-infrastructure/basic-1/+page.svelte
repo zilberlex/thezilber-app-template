@@ -27,7 +27,7 @@
 </script>
 
 <div class="demo-container ly-center">
-	<NavigationScope scopeName="nav-scope-1" bind:scopeRet={scope1} discoveryMode="marked">
+	<NavigationScope scopeName="nav-scope-1" bind:scopeRet={scope1} scopeOptions={{ discoveryMode: 'marked' }}>
 		<div class="list list-1 content-surface">
 			<h3>Scope Direct Mark Elements:</h3>
 			{#each buttonsInfo1 as btn (btn.id)}
@@ -35,7 +35,7 @@
 			{/each}
 		</div>
 	</NavigationScope>
-	<NavigationScope scopeName="nav-scope-2" discoveryMode="marked">
+	<NavigationScope scopeName="nav-scope-2" scopeOptions={{ discoveryMode: 'marked' }}>
 		<div class="list list-2 content-surface">
 			<h3>Scope Mark Container:</h3>
 			{#each buttonsInfo1 as btn (btn.id)}
@@ -45,7 +45,7 @@
 			{/each}
 		</div>
 	</NavigationScope>
-	<NavigationScope scopeName="nav-scope-3" discoveryMode="auto">
+	<NavigationScope scopeName="nav-scope-3" scopeOptions={{ discoveryMode: 'auto' }}>
 		<div class="list list-3 content-surface">
 			<h3>Scope AutoMark:</h3>
 			{#each buttonsInfo1 as btn (btn.id)}

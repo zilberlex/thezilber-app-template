@@ -1,57 +1,24 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { NavigationManager } from '../navigation-manager';
 	import { browser } from '$app/environment';
-	import {
-		type NavigationDiscoveryMode,
-		type NavigationKeysConfig,
-		type ScopeEscapeMode,
-		type ScopeInfra,
-		NavigationKeysConfigSets
-	} from '../types';
+	import { type NavigationScopeOptions, type ScopeInfra } from '../types';
 	import NavigationScopeInfraImpl from '../navigation-scope';
 	import type { NavigationScopeContext } from './types';
 	import { getNavigationManager, setNavigationScopeContext } from './navigation-manager-provider.svelte';
+	import type { HTMLAttributes } from 'svelte/elements';
 
-	interface Props {
-		navigationKeys?: NavigationKeysConfig;
+	interface Props extends HTMLAttributes<HTMLDivElement> {
 		scopeName: string;
-		children?: any;
-		class?: any;
-		escapeMode?: ScopeEscapeMode;
-		observerParams?: MutationObserverInit & { shouldObserveThisElement: boolean };
-		discoveryMode?: NavigationDiscoveryMode;
+		scopeOptions?: NavigationScopeOptions;
+		children?: Snippet;
 		scopeRet?: ScopeInfra;
 	}
 
-	const defaultObserverParams = {
-		childList: true,
-		subtree: true,
-		shouldObserveThisElement: true
-	};
-
-	let {
-		navigationKeys = NavigationKeysConfigSets.Vertical,
-		scopeName,
-		children,
-		class: usrCls,
-		discoveryMode = 'auto',
-		escapeMode = 'circular',
-		observerParams = {
-			childList: true,
-			subtree: true,
-			shouldObserveThisElement: true
-		},
-		scopeRet = $bindable()
-	}: Props = $props();
+	let { scopeName, children, class: usrCls, scopeOptions = {}, scopeRet = $bindable(), ...rest }: Props = $props();
 
 	const id = $props.id();
 	const uniqueScopeName = $derived(`${scopeName}-${id}`);
-
-	let resolvedObserverParams = $derived({
-		...defaultObserverParams,
-		...observerParams
-	});
 
 	let thisElement: HTMLElement;
 	let navigationManager: NavigationManager;
@@ -71,16 +38,11 @@
 
 		console.debug('NavigationScope - NavigaitonManager Context', navigationManager);
 
-		navigationKeys = navigationKeys;
-		const scope = new NavigationScopeInfraImpl(thisElement, navigationKeys, uniqueScopeName, discoveryMode, escapeMode);
+		const scope = new NavigationScopeInfraImpl(thisElement, uniqueScopeName, scopeOptions);
 
 		navigationManager?.registerScope(scope);
 
 		scope.init();
-
-		if (resolvedObserverParams.shouldObserveThisElement) {
-			scope.observeMutations(thisElement, resolvedObserverParams);
-		}
 
 		scopeContext.scope = scope;
 		scopeRet = scope;
@@ -94,7 +56,7 @@
 	});
 </script>
 
-<div class={['navigation-scope', usrCls]} bind:this={thisElement} id={uniqueScopeName}>
+<div class={['navigation-scope', usrCls]} bind:this={thisElement} id={uniqueScopeName} {...rest}>
 	<div class="outline"></div>
 	{@render children?.()}
 </div>

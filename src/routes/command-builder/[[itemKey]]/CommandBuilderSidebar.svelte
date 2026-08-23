@@ -4,7 +4,6 @@
 	import CommandBuilderSiderbarItem from './CommandBuilderSiderbarItem.svelte';
 	import type { CollectionAppRecordProjection } from '$lib/app-infrastructure/collection-app/data/types';
 	import { getFirstFocusable } from '$lib/engine/keyboard-navigation/navigation-utils';
-	import { navigationScopeObserver } from '$lib/engine/keyboard-navigation/svelte-components/navigation-manager-attachments';
 	import { getNavigationScopeContext } from '$lib/engine/keyboard-navigation/svelte-components/navigation-manager-provider.svelte';
 
 	let { cbAppEnv, ...rest }: { cbAppEnv: CbAppEnv } = $props();
@@ -88,7 +87,7 @@
 	bind:this={thisElement}
 	{...rest}
 >
-	<section class="sidebar-section" {@attach navigationScopeObserver(scopeContext)}>
+	<section class="sidebar-section">
 		<h2 bind:this={menuLabel} class="menu-label">Saved Commands:</h2>
 
 		{#each cbRecordProjections as item, i (item.recordId)}

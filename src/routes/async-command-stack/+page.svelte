@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { loadLocalState, saveLocalState } from '$lib/engine/storage/local/simple-state-persistance.svelte';
 	import { copyState } from '$lib/engine/svelte-helpers/copy-state';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
-	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/types';
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
 	import ItemSlot from './ItemSlot.svelte';
 	import Portal from '$lib/ui/components/portal/Portal.svelte';
@@ -15,6 +14,7 @@
 	import AnchoredRegion from '$lib/ui/components/layout/AnchoredRegion.svelte';
 	import { DemoManager } from './demo-manager.svelte';
 	import { beforeNavigate } from '$app/navigation';
+	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/configurations';
 
 	let inputKey = $state('');
 	let inputValue = $state('');
@@ -81,7 +81,12 @@
 </script>
 
 <div class="demo ly-center">
-	<NavigationScope scopeName="asyncApp" navigationKeys={NavigationKeysConfigSets.Vertical}>
+	<NavigationScope
+		scopeName="asyncApp"
+		scopeOptions={{
+			navigationKeys: NavigationKeysConfigSets.Vertical
+		}}
+	>
 		<div class="main">
 			<div class="remote storage-display content-surface">
 				{#each demoAppManager.farAwayStorage.entries() as [key, value] (key)}

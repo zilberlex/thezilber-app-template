@@ -9,12 +9,15 @@ import {
 	type KeyboardNavigationTarget,
 	type NavigationTargetId,
 	type ResolvedKeyboardNavigationTarget,
-	type NavigationDiscoveryMode
+	type NavigationDiscoveryMode,
+	type NavigationScopeOptions,
+	type NavigationRefreshConfig
 } from './types';
 import { getFocusableElementsByNode, keyBoardFocusNavigatedNode } from './navigation-utils';
 import { keyboardNavigationTarget } from './navigation-target';
 import { NAVIGATION_SCOPE_ATTRIBUTE, NAVIGATION_TARGET_ATTRIBUTE } from './consts';
 import { engineAssert } from '../error/engine-assert';
+import { NAVIGATION_SCOPE_DEFAULTS } from './configurations';
 
 const NAVIGATION_INDEX_ATTRIBUTE = 'data-debug-navigation-index';
 const NAVIGATION_TARGET_ID_ATTRIBUTE = 'data-navigation-target-id';
@@ -35,33 +38,36 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 	#navigationTargetIndexById = new Map<NavigationTargetId, number>();
 
 	#escapeMode: ScopeEscapeMode;
-	#mutationObserver = new MutationObserver(() => {
-		this.refreshNavigationTargets();
-	});
-
+	#mutationObserver?: MutationObserver;
 	#automaticTargetIds = new WeakMap<HTMLElement, NavigationTargetId>();
 	#targetIdCounter = 0;
 	#discoveryMode: NavigationDiscoveryMode;
 
-	constructor(
-		scopeElement: HTMLElement,
-		navigationKeys: NavigationKeysConfig,
-		scopeId: string,
-		discoveryMode: NavigationDiscoveryMode = 'auto',
-		escapeMode: ScopeEscapeMode = 'circular'
-	) {
-		NavigationScopeInfraImpl.#assertNotNestedScope(scopeElement);
+	#refreshConfig: NavigationRefreshConfig;
 
-		scopeElement.setAttribute(NAVIGATION_SCOPE_ATTRIBUTE, '');
+	constructor(
+		scopeContainer: HTMLElement,
+		scopeId: string,
+		{
+			navigationKeys = NAVIGATION_SCOPE_DEFAULTS.navigationKeys,
+			discoveryMode = NAVIGATION_SCOPE_DEFAULTS.discoveryMode,
+			escapeMode = NAVIGATION_SCOPE_DEFAULTS.escapeMode,
+			refresh = NAVIGATION_SCOPE_DEFAULTS.refresh
+		}: NavigationScopeOptions = {}
+	) {
+		assertNotNestedScope(scopeContainer);
+
+		scopeContainer.setAttribute(NAVIGATION_SCOPE_ATTRIBUTE, '');
 
 		this.scopeId = scopeId;
-		this.scopeContainer = scopeElement;
+		this.scopeContainer = scopeContainer;
 		this.navigationKeys = navigationKeys;
 
 		this.#escapeMode = escapeMode;
 
 		this.#abortController = new AbortController();
 		this.#discoveryMode = discoveryMode;
+		this.#refreshConfig = refresh;
 	}
 
 	get escapeMode(): ScopeEscapeMode {
@@ -83,6 +89,25 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 				signal
 			}
 		);
+
+		this.#initializeRefreshObservation(this.#refreshConfig);
+	}
+
+	#initializeRefreshObservation(refreshConfig: NavigationRefreshConfig) {
+		if (refreshConfig.mode === 'manual') {
+			return;
+		}
+
+		const observerOptions = {
+			...NAVIGATION_SCOPE_DEFAULTS.refresh.observerOptions,
+			...refreshConfig.observerOptions
+		};
+
+		this.#mutationObserver = new MutationObserver(() => {
+			this.refreshNavigationTargets();
+		});
+
+		this.#mutationObserver.observe(this.scopeContainer, observerOptions);
 	}
 
 	getNextNodeInfo(key: string): NextNodeInfo {
@@ -142,6 +167,9 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		const navigationTargets = this.#discoverNavigationTargetElements(this.#discoveryMode, this.scopeContainer).map(
 			(e) => this.#createNavigationTarget(e)
 		);
+
+		assertNotNestedNavigationTargets(navigationTargets);
+
 		this.#rebuildNavigationTargets(navigationTargets);
 		this.#initializeNavigationTargets(this.navigationTargets);
 
@@ -205,33 +233,10 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		}
 	}
 
-	observeMutations(element: HTMLElement, options: MutationObserverInit = { childList: true }) {
-		this.#mutationObserver.observe(element, options);
-	}
-
 	destroy() {
 		this.#abortController.abort();
-		this.#mutationObserver.disconnect();
+		this.#mutationObserver?.disconnect();
 		this.scopeContainer.removeAttribute(NAVIGATION_SCOPE_ATTRIBUTE);
-	}
-
-	static #assertNotNestedScope(scopeElement: HTMLElement): void {
-		const isSelfAlreadyInitialized = scopeElement.hasAttribute(NAVIGATION_SCOPE_ATTRIBUTE);
-
-		const foundParentScope = scopeElement.parentElement?.closest(`[${NAVIGATION_SCOPE_ATTRIBUTE}]`);
-
-		const foundChildScope = scopeElement.querySelector(`[${NAVIGATION_SCOPE_ATTRIBUTE}]`);
-
-		engineAssert(
-			!isSelfAlreadyInitialized && !foundParentScope && !foundChildScope,
-			'NavigationScope cannot overlap another NavigationScope or be initialized twice.',
-			{
-				scopeElement,
-				isSelfAlreadyInitialized,
-				foundParentScope,
-				foundChildScope
-			}
-		);
 	}
 
 	#findResolvedTarget(
@@ -409,9 +414,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		for (let index = 0; index < navigationTargets.length; index++) {
 			const target = navigationTargets[index];
 
-			if (this.#navigationTargetsById.has(target.id)) {
-				throw new Error(`Duplicate navigation target id: ${target.id}`);
-			}
+			engineAssert(!this.#navigationTargetsById.has(target.id), `Duplicate navigation target id: ${target.id}`);
 
 			this.#navigationTargetsById.set(target.id, target);
 			this.#navigationTargetIndexById.set(target.id, index);
@@ -444,5 +447,36 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		this.#automaticTargetIds.set(element, id);
 
 		return id;
+	}
+}
+
+function assertNotNestedScope(scopeElement: HTMLElement): void {
+	const isSelfAlreadyInitialized = scopeElement.hasAttribute(NAVIGATION_SCOPE_ATTRIBUTE);
+
+	const foundParentScope = scopeElement.parentElement?.closest(`[${NAVIGATION_SCOPE_ATTRIBUTE}]`);
+
+	const foundChildScope = scopeElement.querySelector(`[${NAVIGATION_SCOPE_ATTRIBUTE}]`);
+
+	engineAssert(
+		!isSelfAlreadyInitialized && !foundParentScope && !foundChildScope,
+		'NavigationScope cannot overlap another NavigationScope or be initialized twice.',
+		{
+			scopeElement,
+			isSelfAlreadyInitialized,
+			foundParentScope,
+			foundChildScope
+		}
+	);
+}
+
+function assertNotNestedNavigationTargets(navigationTargets: KeyboardNavigationTarget[]): void {
+	for (const navigationTarget of navigationTargets) {
+		const targetElement = navigationTarget.targetElement;
+		const parentTarget = targetElement.parentElement?.closest(`[${NAVIGATION_TARGET_ATTRIBUTE}]`);
+
+		engineAssert(!parentTarget, 'NavigationTarget cannot be nested inside another NavigationTarget.', {
+			targetElement,
+			parentTarget
+		});
 	}
 }

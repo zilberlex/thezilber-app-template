@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/configurations';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
-	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/types';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import ObjectViewer from '$lib/ui/components/ObjectViewer.svelte';
 
@@ -86,7 +86,9 @@
 	</div>
 	<NavigationScope
 		scopeName="Sync Simulation Controls"
-		navigationKeys={NavigationKeysConfigSets.Vertical}
+		scopeOptions={{
+			navigationKeys: NavigationKeysConfigSets.Vertical
+		}}
 	>
 		<div class="controls flex-col">
 			<Button onclick={() => modify(dId1, object1)}>Modify From Device 1</Button>

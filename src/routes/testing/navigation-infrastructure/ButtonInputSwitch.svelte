@@ -55,7 +55,7 @@
 	<input
 		bind:value={content}
 		onblur={() => commit(false)}
-		onkeydown={createSingleKeyDownHandler(hotkey('Enter'), (e) => commit(false, e))}
+		onkeyup={createSingleKeyDownHandler(hotkey('Enter'), (e) => commit(false, e))}
 		bind:this={thisElement}
 		{...rest}
 	/>

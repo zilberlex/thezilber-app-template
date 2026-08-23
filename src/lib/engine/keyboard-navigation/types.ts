@@ -47,7 +47,6 @@ export interface ScopeInfra {
 	focusCurrent(): void;
 	focusFirst(): void;
 	focusLast(): void;
-	observeMutations(element: HTMLElement, options: MutationObserverInit): void;
 }
 
 export interface NavigationKeysConfig {
@@ -57,19 +56,21 @@ export interface NavigationKeysConfig {
 
 export type FocusableElement = HTMLElement | SVGElement;
 
-export const NavigationKeysConfigSets = {
-	Horizontal: {
-		prevKeys: [NavigationKeyConsts.ArrowLeft],
-		nextKeys: [NavigationKeyConsts.ArrowRight]
-	},
-	Vertical: {
-		prevKeys: [NavigationKeyConsts.ArrowUp],
-		nextKeys: [NavigationKeyConsts.ArrowDown]
-	},
-	TwoD: {
-		prevKeys: [NavigationKeyConsts.ArrowUp, NavigationKeyConsts.ArrowLeft],
-		nextKeys: [NavigationKeyConsts.ArrowDown, NavigationKeyConsts.ArrowRight]
-	}
-};
-
 export type ScopeEscapeMode = 'escape' | 'circular';
+
+export interface NavigationScopeOptions {
+	navigationKeys?: NavigationKeysConfig;
+	discoveryMode?: NavigationDiscoveryMode;
+	escapeMode?: ScopeEscapeMode;
+
+	refresh?: NavigationRefreshConfig;
+}
+
+export type NavigationRefreshConfig =
+	| {
+			mode: 'automatic';
+			observerOptions?: MutationObserverInit;
+	  }
+	| {
+			mode: 'manual';
+	  };

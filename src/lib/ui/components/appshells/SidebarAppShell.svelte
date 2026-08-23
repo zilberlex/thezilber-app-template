@@ -2,8 +2,8 @@
 	import HamburgerIcon from '$lib/assets/icons/HamburgerIcon.svelte';
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
+	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/configurations';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
-	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/types';
 	import IconButton from '$lib/ui/basic-components/IconButton.svelte';
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
@@ -101,10 +101,11 @@
 	style:--collapsed-width={collapsedWidth}
 >
 	<NavigationScope
-		navigationKeys={NavigationKeysConfigSets.Vertical}
-		scopeName="sidebar-navigation-scope"
+		scopeName={'sidebar-navigation-scope'}
 		class="sidebar"
-		observerParams={{ shouldObserveThisElement: false }}
+		scopeOptions={{
+			navigationKeys: NavigationKeysConfigSets.Vertical
+		}}
 	>
 		<aside id="app-shell-sidebar" aria-hidden={isOverlay && !isSidebarOpen}>
 			{#if !isOverlay || isSidebarOpen}
@@ -155,7 +156,9 @@
 	<NavigationScope
 		class="main-content"
 		scopeName="main-navigation-scope"
-		navigationKeys={NavigationKeysConfigSets.Vertical}
+		scopeOptions={{
+			navigationKeys: NavigationKeysConfigSets.Vertical
+		}}
 	>
 		<div>
 			{@render main()}
