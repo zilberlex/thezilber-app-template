@@ -8,14 +8,25 @@
 	import { getNavigationManager, setNavigationScopeContext } from './navigation-manager-provider.svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 
-	interface Props extends HTMLAttributes<HTMLDivElement> {
+	interface Props extends HTMLAttributes<HTMLDivElement>, NavigationScopeOptions {
 		scopeName: string;
-		scopeOptions?: NavigationScopeOptions;
 		children?: Snippet;
 		scopeRet?: ScopeInfra;
 	}
 
-	let { scopeName, children, class: usrCls, scopeOptions = {}, scopeRet = $bindable(), ...rest }: Props = $props();
+	let {
+		scopeName,
+		children,
+		class: usrCls,
+		scopeRet = $bindable(),
+
+		navigationKeys,
+		discoveryMode,
+		escapeMode,
+		refresh,
+
+		...rest
+	}: Props = $props();
 
 	const id = $props.id();
 	const uniqueScopeName = $derived(`${scopeName}-${id}`);
@@ -37,6 +48,13 @@
 		}
 
 		console.debug('NavigationScope - NavigaitonManager Context', navigationManager);
+
+		const scopeOptions = {
+			navigationKeys,
+			discoveryMode,
+			escapeMode,
+			refresh
+		};
 
 		const scope = new NavigationScopeInfraImpl(thisElement, uniqueScopeName, scopeOptions);
 

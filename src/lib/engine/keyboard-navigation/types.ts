@@ -14,7 +14,7 @@ export type NavigationDiscoveryMode = 'marked' | 'auto';
 
 export interface KeyboardNavigationTarget {
 	readonly id: NavigationTargetId;
-	readonly targetElement: HTMLElement;
+	get targetElement(): HTMLElement | undefined;
 	get navigatableNode(): HTMLElement | undefined;
 }
 

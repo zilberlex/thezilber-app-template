@@ -1,8 +1,13 @@
 <script lang="ts">
 	import Button from '$lib/ui/basic-components/Button.svelte';
+	import type { HTMLAttributes } from 'svelte/elements';
+	type Props = {
+		startingState?: 'div' | 'button';
+	} & HTMLAttributes<HTMLElement>;
 
-	let { children = undefined, ...rest } = $props();
-	let isButton = $state(false);
+	let { children = undefined, startingState = 'div', ...rest }: Props = $props();
+	// svelte-ignore state_referenced_locally
+	let isButton = $state(startingState === 'button');
 </script>
 
 <div class="switcher" {...rest}>

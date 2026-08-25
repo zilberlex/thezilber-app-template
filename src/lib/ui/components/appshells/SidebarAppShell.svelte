@@ -103,9 +103,7 @@
 	<NavigationScope
 		scopeName={'sidebar-navigation-scope'}
 		class="sidebar"
-		scopeOptions={{
-			navigationKeys: NavigationKeysConfigSets.Vertical
-		}}
+		navigationKeys={NavigationKeysConfigSets.Vertical}
 	>
 		<aside id="app-shell-sidebar" aria-hidden={isOverlay && !isSidebarOpen}>
 			{#if !isOverlay || isSidebarOpen}
@@ -156,9 +154,7 @@
 	<NavigationScope
 		class="main-content"
 		scopeName="main-navigation-scope"
-		scopeOptions={{
-			navigationKeys: NavigationKeysConfigSets.Vertical
-		}}
+		navigationKeys={NavigationKeysConfigSets.Vertical}
 	>
 		<div>
 			{@render main()}

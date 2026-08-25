@@ -18,6 +18,7 @@ import { keyboardNavigationTarget } from './navigation-target';
 import { NAVIGATION_SCOPE_ATTRIBUTE, NAVIGATION_TARGET_ATTRIBUTE } from './consts';
 import { engineAssert } from '../error/engine-assert';
 import { NAVIGATION_SCOPE_DEFAULTS } from './configurations';
+import { weak } from '../general-js-ts/common';
 
 const NAVIGATION_INDEX_ATTRIBUTE = 'data-debug-navigation-index';
 const NAVIGATION_TARGET_ID_ATTRIBUTE = 'data-navigation-target-id';
@@ -171,18 +172,19 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		assertNotNestedNavigationTargets(navigationTargets);
 
 		this.#rebuildNavigationTargets(navigationTargets);
-		this.#initializeNavigationTargets(this.navigationTargets);
+		this.#initializeNavigationTargets(navigationTargets);
+		this.navigationTargets = navigationTargets;
 
 		console.debug(
 			'Navigation Scope - Refreshing Navigation Targets',
 			this.scopeContainer,
-			{ discoveryMody: this.#discoveryMode },
+			{ discoveryMode: this.#discoveryMode, refresh: this.#refreshConfig },
 			'targets:',
 			this.navigationTargets.map((target, index) => ({
 				index,
 				id: target.id,
-				targetElement: target.targetElement,
-				navigatableNode: target.navigatableNode
+				targetElement: weak(target.targetElement),
+				navigatableNode: weak(target.navigatableNode)
 			}))
 		);
 
@@ -331,10 +333,18 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 
 			const navigatableNode = navigationTarget.navigatableNode;
 
-			const navigationTargetNode = navigationTarget.targetElement;
+			const navigationTargetElement = navigationTarget.targetElement;
 
-			navigationTargetNode.setAttribute(NAVIGATION_INDEX_ATTRIBUTE, i.toString());
-			navigationTargetNode.setAttribute(NAVIGATION_TARGET_ID_ATTRIBUTE, navigationTarget.id);
+			if (!navigationTargetElement) {
+				console.warn('Navigation Target Element Does not exist', {
+					index: i
+				});
+
+				continue;
+			}
+
+			navigationTargetElement.setAttribute(NAVIGATION_INDEX_ATTRIBUTE, i.toString());
+			navigationTargetElement.setAttribute(NAVIGATION_TARGET_ID_ATTRIBUTE, navigationTarget.id);
 
 			if (navigatableNode === currentActiveElement) {
 				this.#setCurrentNavigationTarget(navigationTarget);
@@ -472,7 +482,7 @@ function assertNotNestedScope(scopeElement: HTMLElement): void {
 function assertNotNestedNavigationTargets(navigationTargets: KeyboardNavigationTarget[]): void {
 	for (const navigationTarget of navigationTargets) {
 		const targetElement = navigationTarget.targetElement;
-		const parentTarget = targetElement.parentElement?.closest(`[${NAVIGATION_TARGET_ATTRIBUTE}]`);
+		const parentTarget = targetElement?.parentElement?.closest(`[${NAVIGATION_TARGET_ATTRIBUTE}]`);
 
 		engineAssert(!parentTarget, 'NavigationTarget cannot be nested inside another NavigationTarget.', {
 			targetElement,

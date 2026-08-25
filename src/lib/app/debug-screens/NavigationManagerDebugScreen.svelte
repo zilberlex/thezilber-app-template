@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
-	import type { NavigationManager } from '$lib/engine/keyboard-navigation/navigation-manager';
-	import { NAVIGATION_MANAGER_CONTEXT } from '$lib/engine/keyboard-navigation/svelte-components/consts';
+	import { getNavigationManager } from '$lib/engine/keyboard-navigation/svelte-components/navigation-manager-provider.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import ObjectViewer from '$lib/ui/components/ObjectViewer.svelte';
-	import { getContext } from 'svelte';
 
-	let navigationManager = getContext<NavigationManager>(NAVIGATION_MANAGER_CONTEXT);
+	let navigationManager = getNavigationManager();
 
 	let debugInfo = $state(navigationManager._debugInfo());
 
@@ -16,9 +14,10 @@
 		currentScopeIndex: debugInfo.currentScopeIndex,
 		totalScopes: debugInfo.scopes.length,
 		scopeNames: debugInfo.scopes.map((x) => x.scopeId),
-		currentTargetElementClasses: debugInfo.currentNavigationTarget?.targetElement.classList.toString() ?? 'undefined',
+		currentTargetElementClasses:
+			debugInfo.currentNavigationTarget?.targetElement.deref()?.classList.toString() ?? 'undefined',
 		currentNodeClasses: debugInfo.currentNavigationTarget?.navigatableNode?.classList.toString() ?? 'undefined',
-		currentTargetElementAttributes: displayDataAttributes(debugInfo.currentNavigationTarget?.targetElement),
+		currentTargetElementAttributes: displayDataAttributes(debugInfo.currentNavigationTarget?.targetElement.deref()),
 		history: [...debugInfo.navigationHistory.map((x) => x[0])],
 		currentTargetNode: debugInfo.currentNavigationTarget?.targetElement,
 		currentNode: debugInfo.currentNavigationTarget?.navigatableNode

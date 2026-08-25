@@ -5,11 +5,10 @@
 	import { HotKey } from '$lib/engine/hotkeys/hotkey-class';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
-	import type { NavigationManager } from '$lib/engine/keyboard-navigation/navigation-manager';
-	import { NAVIGATION_MANAGER_CONTEXT } from '$lib/engine/keyboard-navigation/svelte-components/consts';
-	import { getContext, untrack } from 'svelte';
+	import { getNavigationManager } from '$lib/engine/keyboard-navigation/svelte-components/navigation-manager-provider.svelte';
+	import { untrack } from 'svelte';
 
-	let navigationManager = getContext<NavigationManager>(NAVIGATION_MANAGER_CONTEXT);
+	let navigationManager = getNavigationManager();
 
 	let softNextScopeNavKeys = [hotkey(NavigationKeyConsts.ArrowRight)];
 	let softPrevScopeNavKeys = [hotkey(NavigationKeyConsts.ArrowLeft)];

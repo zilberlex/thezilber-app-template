@@ -4,9 +4,9 @@
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import { onMount } from 'svelte';
 
-	import NavigatableAndUnnavigatableSwitcher from './NavigatableAndUnnavigatableSwitcher.svelte';
 	import { browser } from '$app/environment';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
+	import NavigatableAndUnnavigatableSwitcher from '../NavigatableAndUnnavigatableSwitcher.svelte';
 
 	let navigationManager = getNavigationManager();
 	onMount(() => {
@@ -18,13 +18,7 @@
 
 <main class="ly-center">
 	<div class="container">
-		<NavigationScope
-			scopeName="unresolved-test"
-			scopeOptions={{
-				discoveryMode: 'marked',
-				escapeMode: 'escape'
-			}}
-		>
+		<NavigationScope scopeName="unresolved-test" discoveryMode="marked" escapeMode="escape">
 			<div class="list">
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>A</NavigatableAndUnnavigatableSwitcher>
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>B</NavigatableAndUnnavigatableSwitcher>
@@ -33,13 +27,7 @@
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>F</NavigatableAndUnnavigatableSwitcher>
 			</div>
 		</NavigationScope>
-		<NavigationScope
-			scopeName="unresolved-test-2"
-			scopeOptions={{
-				discoveryMode: 'marked',
-				escapeMode: 'escape'
-			}}
-		>
+		<NavigationScope scopeName="unresolved-test-2" discoveryMode="marked" escapeMode="escape">
 			<div class="list">
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>A</NavigatableAndUnnavigatableSwitcher>
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>B</NavigatableAndUnnavigatableSwitcher>

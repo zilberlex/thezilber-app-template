@@ -3,11 +3,15 @@ import type { KeyboardNavigationTarget } from './types';
 
 export class KeyboardNavigationTargetImpl implements KeyboardNavigationTarget {
 	readonly id: string;
-	readonly targetElement: HTMLElement;
+	#targetElementRef: WeakRef<HTMLElement>;
 
 	constructor(id: string, targetElement: HTMLElement) {
 		this.id = id;
-		this.targetElement = targetElement;
+		this.#targetElementRef = new WeakRef(targetElement);
+	}
+
+	get targetElement() {
+		return this.#targetElementRef.deref();
 	}
 
 	get navigatableNode(): HTMLElement | undefined {
@@ -16,6 +20,15 @@ export class KeyboardNavigationTargetImpl implements KeyboardNavigationTarget {
 
 	#resolveNavigationTargetElement(): HTMLElement | undefined {
 		const targetElement = this.targetElement;
+
+		if (!targetElement || !targetElement.isConnected) {
+			console.warn('KeyboardNavigationTargetImpl no longer part of the document', {
+				id: this.id,
+				targetElementRef: this.#targetElementRef,
+				isConnected: targetElement?.isConnected
+			});
+			return;
+		}
 
 		if (isFocusableElement(targetElement)) {
 			return targetElement;
