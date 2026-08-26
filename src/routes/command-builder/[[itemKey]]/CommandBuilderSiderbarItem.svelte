@@ -9,6 +9,7 @@
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import { tick } from 'svelte';
 	import { fadeAndSlide } from '$lib/engine/transitions/fade-and-slide';
+	import { markForNavigation } from '$lib/engine/keyboard-navigation/attachments';
 
 	type Props = HTMLAttributes<HTMLDivElement> & {
 		cbAppEnv: CbAppEnv;
@@ -25,15 +26,15 @@
 	let thisFocusablePart = $state<HTMLElement>();
 	let thisElement = $state<HTMLElement>();
 
+	let refocusElement = false;
+
 	function editItemName() {
 		editingName = true;
 	}
 
 	$effect(() => {
-		if (!editingName) {
-			console.debug('Exiting Edit. Focusable item:', thisFocusablePart);
-
-			// TODO AZ this timeout works better than tick in cases list is reordered. (where the name actually changes)
+		if (thisFocusablePart && refocusElement) {
+			refocusElement = false;
 			setTimeout(() => thisFocusablePart?.focus(), 30);
 		}
 	});
@@ -43,6 +44,8 @@
 			const { newValue: newName } = detail;
 			cbAppEnv.renameByProjection(recordProjection, newName);
 		}
+
+		refocusElement = true;
 	}
 
 	function deleteItem() {
@@ -56,6 +59,7 @@
 	transition:fadeAndSlide()
 	class={['nav-collection-item', isElementPageForThisItem && 'current-item']}
 	{...rest}
+	{@attach markForNavigation}
 >
 	{#if editingName}
 		<div class="nav-collection-item-link">

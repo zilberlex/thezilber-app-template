@@ -104,6 +104,7 @@
 		scopeName={'sidebar-navigation-scope'}
 		class="sidebar"
 		navigationKeys={NavigationKeysConfigSets.Vertical}
+		discoveryMode="marked"
 	>
 		<aside id="app-shell-sidebar" aria-hidden={isOverlay && !isSidebarOpen}>
 			{#if !isOverlay || isSidebarOpen}

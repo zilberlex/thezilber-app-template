@@ -7,14 +7,6 @@ export function createSmartHandler(handler, options = {}) {
 		shouldExecuteFunction = () => true
 	} = options;
 
-	if (context)
-		console.debug(
-			'created smart handler context. options',
-			options,
-			'Handler:',
-			handler.toString()
-		);
-
 	let smartHandler = _createSmartHandlerInternal(
 		handler,
 		debounceDelay,
@@ -89,16 +81,6 @@ function _createSmartHandlerInternal(
 
 		debounceTimeoutId = window.setTimeout(async () => {
 			if (cooldown || isProcessing) {
-				// console.debug(
-				//   'handler',
-				//   handler.name,
-				//   'cd',
-				//   cooldown,
-				//   'processing',
-				//   isProcessing,
-				//   'handler:',
-				//   handler.toString()
-				// );
 				return;
 			}
 

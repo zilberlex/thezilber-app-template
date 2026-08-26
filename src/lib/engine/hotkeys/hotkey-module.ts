@@ -12,7 +12,7 @@ class HotkeysModule {
 	#onKeydownBound: (event: KeyboardEvent) => void = this.#onKeydown.bind(this);
 
 	assignHotKey(key: HotKey, handler: EventHandler<KeyboardEvent>, isCaptrue = false) {
-		console.debug('HotkeysModule assigning key:', key, 'to handler:', handler.toString());
+		console.debug('HotkeysModule assigning key:', key, 'to handler:', handler.name ?? '<annonymous>');
 
 		if (!this.#wasInitialized) {
 			throw new Error(`${HotkeysModule.name} Need to initialize Class before assigning hotkeys`);
@@ -26,6 +26,7 @@ class HotkeysModule {
 	}
 
 	removeHotKey(key: HotKey, handler: EventHandler<KeyboardEvent>) {
+		console.debug('HotkeysModule removing key:', key, 'to handler:', handler.name ?? '<annonymous>');
 		this.#hotKeysHandlers.remove(key, handler);
 		this.#hotKeysCaptureHandlers.remove(key, handler);
 	}
