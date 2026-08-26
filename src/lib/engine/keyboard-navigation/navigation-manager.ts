@@ -267,7 +267,6 @@ export class NavigationManager {
 		}
 
 		const key = keyboardEvent.key;
-
 		let nextNodeInfo = this.#currentScope.getNextNodeInfo(key);
 
 		console.debug(

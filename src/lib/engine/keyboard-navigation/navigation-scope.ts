@@ -94,8 +94,8 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		this.scopeContainer.addEventListener(
 			'focusin',
 			createSmartHandler(this.#onFocusElement_SetCurrentTarget, {
-				debounceDelay: 50,
-				cooldownDelay: 20
+				debounceDelay: 0,
+				cooldownDelay: 0
 			}),
 			{ signal }
 		);
@@ -421,7 +421,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		}
 	}
 
-	#onFocusElement_SetCurrentTarget = (event: FocusEvent | PointerEvent) => {
+	#onFocusElement_SetCurrentTarget = (event: FocusEvent) => {
 		const navigationTarget = this.#getNavigationTargetFromEvent(event);
 
 		if (!navigationTarget) {
