@@ -8,9 +8,9 @@
 	import DataStateDisplay from './DataStateDisplay.svelte';
 	import Debug from './Debug.svelte';
 	import type { CbAppEnv } from './command-builder-types';
-	import PreventBrowserHotkeys from '$lib/engine/keyboard-navigation/svelte-components/PreventBrowserHotkeys.svelte';
 	import { hotkey, hotkeys } from '$lib/engine/hotkeys/hotkey-helpers';
 	import { appState } from '$lib/engine/state/application-state.svelte';
+	import PreventBrowserHotkeys from '$lib/engine/hotkeys/svelt-components/PreventBrowserHotkeys.svelte';
 
 	let { cbAppEnv = $bindable(), ...rest }: { cbAppEnv: CbAppEnv } = $props();
 
