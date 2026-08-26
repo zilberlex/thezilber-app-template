@@ -14,10 +14,9 @@
 		currentScopeIndex: debugInfo.currentScopeIndex,
 		totalScopes: debugInfo.scopes.length,
 		scopeNames: debugInfo.scopes.map((x) => x.scopeId),
-		currentTargetElementClasses:
-			debugInfo.currentNavigationTarget?.targetElement.deref()?.classList.toString() ?? 'undefined',
+		currentTargetElementClasses: debugInfo.currentNavigationTarget?.targetElement?.classList.toString() ?? 'undefined',
 		currentNodeClasses: debugInfo.currentNavigationTarget?.navigatableNode?.classList.toString() ?? 'undefined',
-		currentTargetElementAttributes: displayDataAttributes(debugInfo.currentNavigationTarget?.targetElement.deref()),
+		currentTargetElementAttributes: displayDataAttributes(debugInfo.currentNavigationTarget?.targetElement),
 		history: [...debugInfo.navigationHistory.map((x) => x[0])],
 		currentTargetNode: debugInfo.currentNavigationTarget?.targetElement,
 		currentNode: debugInfo.currentNavigationTarget?.navigatableNode

@@ -18,13 +18,9 @@ export const NavigationKeysConfigSets = {
 
 export const NAVIGATION_SCOPE_DEFAULTS = {
 	navigationKeys: NavigationKeysConfigSets.Vertical,
-	discoveryMode: 'auto',
+	discoveryMode: 'all-focusable',
 	escapeMode: 'circular',
-	refresh: {
-		mode: 'automatic',
-		observerOptions: {
-			childList: true,
-			subtree: true
-		}
+	refreshOptions: {
+		mode: 'automatic'
 	}
 } satisfies Required<NavigationScopeOptions>;

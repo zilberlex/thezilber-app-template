@@ -45,7 +45,7 @@
 			{/each}
 		</div>
 	</NavigationScope>
-	<NavigationScope scopeName="nav-scope-3" discoveryMode="auto">
+	<NavigationScope scopeName="nav-scope-3" discoveryMode="all-focusable">
 		<div class="list list-3 content-surface">
 			<h3>Scope AutoMark:</h3>
 			{#each buttonsInfo1 as btn (btn.id)}

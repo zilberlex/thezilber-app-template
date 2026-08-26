@@ -10,7 +10,7 @@ export function createNavigationKeys(nextKeys: string[], prevKeys: string[]): Na
 
 export type NavigationTargetId = string;
 
-export type NavigationDiscoveryMode = 'marked' | 'auto';
+export type NavigationDiscoveryMode = 'marked' | 'all-focusable';
 
 export interface KeyboardNavigationTarget {
 	readonly id: NavigationTargetId;
@@ -47,6 +47,8 @@ export interface ScopeInfra {
 	focusCurrent(): void;
 	focusFirst(): void;
 	focusLast(): void;
+
+	_debugInfo(): { refreshCount: number };
 }
 
 export interface NavigationKeysConfig {
@@ -63,14 +65,9 @@ export interface NavigationScopeOptions {
 	discoveryMode?: NavigationDiscoveryMode;
 	escapeMode?: ScopeEscapeMode;
 
-	refresh?: NavigationRefreshConfig;
+	refreshOptions?: NavigationRefreshConfig;
 }
 
-export type NavigationRefreshConfig =
-	| {
-			mode: 'automatic';
-			observerOptions?: MutationObserverInit;
-	  }
-	| {
-			mode: 'manual';
-	  };
+export interface NavigationRefreshConfig {
+	mode: 'automatic' | 'manual';
+}

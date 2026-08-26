@@ -23,7 +23,7 @@
 		navigationKeys,
 		discoveryMode,
 		escapeMode,
-		refresh,
+		refreshOptions,
 
 		...rest
 	}: Props = $props();
@@ -53,8 +53,8 @@
 			navigationKeys,
 			discoveryMode,
 			escapeMode,
-			refresh
-		};
+			refreshOptions
+		} satisfies NavigationScopeOptions;
 
 		const scope = new NavigationScopeInfraImpl(thisElement, uniqueScopeName, scopeOptions);
 

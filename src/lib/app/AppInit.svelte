@@ -3,13 +3,13 @@
 	import { getAgentType } from '$lib/engine/agent/agent-utils';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onMount } from 'svelte';
-	import HotKeysInitialization from '$lib/engine/keyboard-navigation/svelte-components/HotKeysInitialization.svelte';
 	import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
 	import TooltipTracker from '$lib/engine/hotkey-tooltip/TooltipTracker.svelte';
 	import ForegroundLayer from './ForegroundLayer.svelte';
 	import EngineHotKeysInit from './EngineHotKeysInit.svelte';
 	import NavigationStateManager from './NavigationStateManager.svelte';
 	import EngineErrorHandler from './EngineErrorHandler.svelte';
+	import HotKeysInitialization from '$lib/engine/hotkeys/svelt-components/HotKeysInitialization.svelte';
 
 	onMount(() => {
 		if (browser) {
