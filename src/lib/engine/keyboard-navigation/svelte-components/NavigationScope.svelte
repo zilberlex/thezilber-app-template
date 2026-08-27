@@ -9,13 +9,13 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 
 	interface Props extends HTMLAttributes<HTMLDivElement>, NavigationScopeOptions {
-		scopeName: string;
+		scopeId: string;
 		children?: Snippet;
 		scopeRet?: ScopeInfra;
 	}
 
 	let {
-		scopeName,
+		scopeId,
 		children,
 		class: usrCls,
 		scopeRet = $bindable(),
@@ -28,11 +28,10 @@
 		...rest
 	}: Props = $props();
 
-	const id = $props.id();
-	const uniqueScopeName = $derived(`${scopeName}-${id}`);
-
 	let thisElement: HTMLElement;
 	let navigationManager: NavigationManager;
+
+	let errored = $state(false);
 
 	let scopeContext = $state<NavigationScopeContext>({
 		scope: undefined
@@ -41,29 +40,36 @@
 	setNavigationScopeContext(scopeContext);
 
 	onMount(() => {
-		navigationManager = getNavigationManager();
+		if (browser) {
+			try {
+				navigationManager = getNavigationManager();
 
-		if (!navigationManager) {
-			console.warn('NavigationScope NavigationManager Not detected');
+				if (!navigationManager) {
+					console.warn('NavigationScope NavigationManager Not detected');
+				}
+
+				console.debug('NavigationScope - NavigaitonManager Context', navigationManager);
+
+				const scopeOptions = {
+					navigationKeys,
+					discoveryMode,
+					escapeMode,
+					refreshOptions
+				} satisfies NavigationScopeOptions;
+
+				const scope = new NavigationScopeInfraImpl(thisElement, scopeId, scopeOptions);
+
+				navigationManager?.registerScope(scope);
+
+				scope.init();
+
+				scopeContext.scope = scope;
+				scopeRet = scope;
+			} catch (error) {
+				errored = true;
+				console.error(error);
+			}
 		}
-
-		console.debug('NavigationScope - NavigaitonManager Context', navigationManager);
-
-		const scopeOptions = {
-			navigationKeys,
-			discoveryMode,
-			escapeMode,
-			refreshOptions
-		} satisfies NavigationScopeOptions;
-
-		const scope = new NavigationScopeInfraImpl(thisElement, uniqueScopeName, scopeOptions);
-
-		navigationManager?.registerScope(scope);
-
-		scope.init();
-
-		scopeContext.scope = scope;
-		scopeRet = scope;
 	});
 
 	onDestroy(() => {
@@ -74,7 +80,7 @@
 	});
 </script>
 
-<div class={['navigation-scope', usrCls]} bind:this={thisElement} id={uniqueScopeName} {...rest}>
+<div class={['navigation-scope', usrCls, errored && 'error']} bind:this={thisElement} id={scopeId} {...rest}>
 	<div class="outline"></div>
 	{@render children?.()}
 </div>
@@ -86,13 +92,19 @@
 		.outline {
 			position: absolute;
 			z-index: 500;
-			inset: 2px;
+			inset: 0;
 
 			pointer-events: none;
 		}
 
 		&:focus-within .outline {
 			animation: focus-ring-in 500ms ease-out 0ms 1 forwards;
+		}
+	}
+
+	.navigation-scope {
+		&.error {
+			background-color: var(--cl-error, red);
 		}
 	}
 </style>

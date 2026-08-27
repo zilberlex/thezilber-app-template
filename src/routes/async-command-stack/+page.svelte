@@ -81,7 +81,7 @@
 </script>
 
 <div class="demo ly-center">
-	<NavigationScope scopeName="asyncApp" navigationKeys={NavigationKeysConfigSets.Vertical}>
+	<NavigationScope scopeId="asyncApp" navigationKeys={NavigationKeysConfigSets.Vertical}>
 		<div class="main">
 			<div class="remote storage-display content-surface">
 				{#each demoAppManager.farAwayStorage.entries() as [key, value] (key)}

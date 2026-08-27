@@ -101,7 +101,7 @@
 	style:--collapsed-width={collapsedWidth}
 >
 	<NavigationScope
-		scopeName={'sidebar-navigation-scope'}
+		scopeId={'sidebar-navigation-scope'}
 		class="sidebar"
 		navigationKeys={NavigationKeysConfigSets.Vertical}
 		discoveryMode="marked"
@@ -154,7 +154,7 @@
 
 	<NavigationScope
 		class="main-content"
-		scopeName="main-navigation-scope"
+		scopeId="main-navigation-scope"
 		navigationKeys={NavigationKeysConfigSets.Vertical}
 	>
 		<div>

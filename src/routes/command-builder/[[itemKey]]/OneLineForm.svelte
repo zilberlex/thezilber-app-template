@@ -54,14 +54,12 @@
 		<div class="form-controls">
 			<Button
 				onclick={() => onAction(inputField)}
-				{@attach createClickHotKeyAttachment(actionText, false, hotkey('Enter', 'alt'))}
+				{@attach createClickHotKeyAttachment(actionText, hotkey('Enter', 'alt'))}
 			>
 				{actionText}
 			</Button>
 
-			<Button onclick={onClose} {@attach createClickHotKeyAttachment('Close Dialog', false, hotkey('q', 'alt'))}>
-				Close
-			</Button>
+			<Button onclick={onClose} {@attach createClickHotKeyAttachment('Close Dialog', hotkey('q', 'alt'))}>Close</Button>
 		</div>
 	</form>
 	{#if errorMessage}

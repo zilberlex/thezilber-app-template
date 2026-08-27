@@ -97,7 +97,7 @@
 </script>
 
 {#if dialogController.activeDialog}
-	<NavigationScope scopeName={dialogAnchorId}>
+	<NavigationScope scopeId={dialogAnchorId}>
 		<div
 			class="dialog-anchor"
 			onpointerdown={(e) => {

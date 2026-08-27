@@ -9,6 +9,6 @@
 	appState.pageContext.title = 'Application-List';
 </script>
 
-<NavigationScope navigationKeys={NavigationKeysConfigSets.Vertical} scopeName="link-tree">
+<NavigationScope navigationKeys={NavigationKeysConfigSets.Vertical} scopeId="link-tree">
 	<LinkTree urls={m} />
 </NavigationScope>

@@ -50,10 +50,9 @@ function createShouldExecuteFunction(options?: ButtonHotKeyOptions) {
 	let { prioritizeInputFieldDefaults, scope } = options ?? optionsDefaults;
 	let funcs: ((e: KeyboardEvent) => boolean)[] = [];
 
-	let prioritizeInputFieldDefaultsCheck: (e: KeyboardEvent) => boolean =
-		prioritizeInputFieldDefaults
-			? (e: KeyboardEvent) => !shouldIgnoreHotKey(e, 'soft')
-			: alwaysTrue;
+	let prioritizeInputFieldDefaultsCheck: (e: KeyboardEvent) => boolean = prioritizeInputFieldDefaults
+		? (e: KeyboardEvent) => !shouldIgnoreHotKey(e, 'soft')
+		: alwaysTrue;
 	funcs.push(prioritizeInputFieldDefaultsCheck);
 
 	let scopeCheck: (e: KeyboardEvent) => boolean = scope
@@ -79,9 +78,9 @@ function createShouldExecuteFunction(options?: ButtonHotKeyOptions) {
 
 export function createClickHotKeyAttachment(
 	hotKeyTooltipText: string = '',
-	moveFocus: boolean = true,
 	hotKey: HotKey,
-	options?: ButtonHotKeyOptions
+	options?: ButtonHotKeyOptions,
+	moveFocus: boolean = false
 ): Attachment {
 	return (node) => {
 		const nodeElement = node as HTMLElement;
@@ -144,11 +143,7 @@ export function createClickHandler(
 	);
 }
 
-export function createOnKeyDownHandler(
-	node: Element,
-	keys: KeyboardEventKeyType,
-	handler: (e: KeyboardEvent) => void
-) {
+export function createOnKeyDownHandler(node: Element, keys: KeyboardEventKeyType, handler: (e: KeyboardEvent) => void) {
 	return createSmartHandler(
 		(event: KeyboardEvent) => {
 			handler(event);

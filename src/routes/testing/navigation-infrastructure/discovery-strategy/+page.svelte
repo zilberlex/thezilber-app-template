@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { markForNavigation } from '$lib/engine/keyboard-navigation/attachments';
-	import { getNavigationManager } from '$lib/engine/keyboard-navigation/svelte-components/navigation-manager-provider.svelte';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import { onMount } from 'svelte';
 
@@ -10,11 +9,11 @@
 	import type { ScopeInfra } from '$lib/engine/keyboard-navigation/types';
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import Button from '$lib/ui/basic-components/Button.svelte';
+	import { assignNavigationManagerKeys } from '$lib/engine/keyboard-navigation/svelte-components/sveltekit-helpers';
 
-	let navigationManager = getNavigationManager();
 	onMount(() => {
 		if (browser) {
-			return navigationManager.assignScopeNavigationKeys([hotkey('t')], [hotkey('t', 'shift')]);
+			return assignNavigationManagerKeys(hotkey('t'), hotkey('t', 'shift'));
 		}
 	});
 
@@ -32,7 +31,7 @@
 <main class="ly-center">
 	<div>
 		<div class="container">
-			<NavigationScope scopeName="scope-all-focusable" discoveryMode="all-focusable" bind:scopeRet={scopeAllFocusable}>
+			<NavigationScope scopeId="scope-all-focusable" discoveryMode="all-focusable" bind:scopeRet={scopeAllFocusable}>
 				<div class="list">
 					<div>
 						All-Focusable Discovery - Refresh Count <span class="emp">[{refreshAllFocusableCount}]</span>
@@ -42,7 +41,7 @@
 					<NavigatableAndUnnavigatableSwitcher>C</NavigatableAndUnnavigatableSwitcher>
 				</div>
 			</NavigationScope>
-			<NavigationScope scopeName="scope-marked-stable" discoveryMode="marked" bind:scopeRet={scopeMarkedStable}>
+			<NavigationScope scopeId="scope-marked-stable" discoveryMode="marked" bind:scopeRet={scopeMarkedStable}>
 				<div class="list">
 					<div>
 						Marked Discovery (Marked Element is Not Touched)- Refresh Count <span class="emp"
@@ -54,7 +53,7 @@
 					<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>C</NavigatableAndUnnavigatableSwitcher>
 				</div>
 			</NavigationScope>
-			<NavigationScope scopeName="scope-marked-unstable" discoveryMode="marked" bind:scopeRet={scopeMarkedNonStable}>
+			<NavigationScope scopeId="scope-marked-unstable" discoveryMode="marked" bind:scopeRet={scopeMarkedNonStable}>
 				<div class="list">
 					<div>
 						Marked Discovery (NonStable)- Refresh Count <span class="emp">[{refreshMarkedNonStableCount}]</span>
@@ -76,8 +75,7 @@
 					refreshMarkedCount = scopeMarkedStable?._debugInfo().refreshCount ?? 0;
 					refreshMarkedNonStableCount = scopeMarkedNonStable?._debugInfo().refreshCount ?? 0;
 				}}
-				{@attach createClickHotKeyAttachment('Refresh Counts', false, hotkey('r', 'alt'))}
-				>Refresh Number Counter</Button
+				{@attach createClickHotKeyAttachment('Refresh Counts', hotkey('r', 'alt'))}>Refresh Number Counter</Button
 			>
 		</div>
 	</div>

@@ -81,20 +81,15 @@
 			<Button
 				class="button-save"
 				onclick={defaultSaveButtonBehavior}
-				{@attach createClickHotKeyAttachment('Save', false, hotkey('s', 'alt'))}
+				{@attach createClickHotKeyAttachment('Save', hotkey('s', 'alt'))}
 				>{isPermanentCommandPage ? 'Save' : 'Save As'}</Button
 			>
 
 			{#if isPermanentCommandPage}
-				<Button
-					{@attach createClickHotKeyAttachment('Save As', false, hotkey('s', 'alt', 'shift'))}
-					onclick={openSaveAsPopup}
-				>
+				<Button {@attach createClickHotKeyAttachment('Save As', hotkey('s', 'alt', 'shift'))} onclick={openSaveAsPopup}>
 					Save As
 				</Button>
-				<Button {@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))} onclick={deleteItem}>
-					Delete
-				</Button>
+				<Button {@attach createClickHotKeyAttachment('Delete', hotkey('d', 'alt'))} onclick={deleteItem}>Delete</Button>
 			{/if}
 		</main>
 	</div>

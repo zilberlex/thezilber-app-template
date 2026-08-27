@@ -53,4 +53,8 @@
 		min-height: 0;
 		min-width: 0;
 	}
+
+	.keyboard-navigation {
+		pointer-events: none;
+	}
 </style>

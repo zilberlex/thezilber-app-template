@@ -18,7 +18,7 @@
 
 <main class="ly-center">
 	<div class="container">
-		<NavigationScope scopeName="unresolved-test" discoveryMode="marked" escapeMode="escape">
+		<NavigationScope scopeId="unresolved-test" discoveryMode="marked" escapeMode="escape">
 			<div class="list">
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>A</NavigatableAndUnnavigatableSwitcher>
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>B</NavigatableAndUnnavigatableSwitcher>
@@ -27,7 +27,7 @@
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>F</NavigatableAndUnnavigatableSwitcher>
 			</div>
 		</NavigationScope>
-		<NavigationScope scopeName="unresolved-test-2" discoveryMode="marked" escapeMode="escape">
+		<NavigationScope scopeId="unresolved-test-2" discoveryMode="marked" escapeMode="escape">
 			<div class="list">
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>A</NavigatableAndUnnavigatableSwitcher>
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>B</NavigatableAndUnnavigatableSwitcher>

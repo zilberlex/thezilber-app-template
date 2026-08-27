@@ -14,7 +14,7 @@
 </script>
 
 <main class="ly-center">
-	<NavigationScope scopeName="justScope" discoveryMode="marked" bind:scopeRet={scope}>
+	<NavigationScope scopeId="justScope" discoveryMode="marked" bind:scopeRet={scope}>
 		<div class="outer" {@attach markForNavigation}>
 			<div class="inner" {@attach markForNavigation}>
 				<Button>Inner Button</Button>

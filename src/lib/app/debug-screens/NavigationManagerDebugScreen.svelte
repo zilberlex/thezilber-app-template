@@ -1,13 +1,17 @@
 <script lang="ts">
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
+	import type { NavigationManager } from '$lib/engine/keyboard-navigation/navigation-manager';
 	import { getNavigationManager } from '$lib/engine/keyboard-navigation/svelte-components/navigation-manager-provider.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import ObjectViewer from '$lib/ui/components/ObjectViewer.svelte';
 
-	let navigationManager = getNavigationManager();
+	let { navigationManager }: { navigationManager?: NavigationManager } = $props();
 
-	let debugInfo = $state(navigationManager._debugInfo());
+	// svelte-ignore state_referenced_locally
+	const navigationManagerDerived = $derived(navigationManager ?? getNavigationManager());
+
+	let debugInfo = $state(navigationManagerDerived._debugInfo());
 
 	let debugInfoDisplay = $derived({
 		currentScopeName: debugInfo.currentScopeName,
@@ -17,9 +21,9 @@
 		currentTargetElementClasses: debugInfo.currentNavigationTarget?.targetElement?.classList.toString() ?? 'undefined',
 		currentNodeClasses: debugInfo.currentNavigationTarget?.navigatableNode?.classList.toString() ?? 'undefined',
 		currentTargetElementAttributes: displayDataAttributes(debugInfo.currentNavigationTarget?.targetElement),
-		history: [...debugInfo.navigationHistory.map((x) => x[0])],
 		currentTargetNode: debugInfo.currentNavigationTarget?.targetElement,
-		currentNode: debugInfo.currentNavigationTarget?.navigatableNode
+		currentNode: debugInfo.currentNavigationTarget?.navigatableNode,
+		currentScope: debugInfo.currentScope
 	});
 
 	function displayDataAttributes(element?: HTMLElement) {
@@ -35,8 +39,8 @@
 
 <div class="navigation-manager-debug content-surface">
 	<Button
-		{@attach createClickHotKeyAttachment('Refresh', false, hotkey('r', 'alt'))}
-		onclick={() => (debugInfo = navigationManager._debugInfo())}>Refresh</Button
+		{@attach createClickHotKeyAttachment('Refresh', hotkey('r', 'alt'))}
+		onclick={() => (debugInfo = navigationManagerDerived._debugInfo())}>Refresh</Button
 	>
 	<ObjectViewer object={debugInfoDisplay} />
 </div>

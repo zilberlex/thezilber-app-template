@@ -4,11 +4,11 @@
 </script>
 
 <main class="ly-center">
-	<NavigationScope scopeName="parent-scope">
+	<NavigationScope scopeId="parent-scope">
 		<div>
 			<Button>A</Button>
 			<Button>B</Button>
-			<NavigationScope scopeName="child-scope">
+			<NavigationScope scopeId="child-scope">
 				<div>
 					<Button>A-2</Button>
 					<Button>B-2</Button>

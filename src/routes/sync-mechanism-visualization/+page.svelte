@@ -85,7 +85,7 @@
 		{/if}
 	</div>
 	<NavigationScope
-		scopeName="Sync Simulation Controls"
+		scopeId="Sync Simulation Controls"
 		scopeOptions={{
 			navigationKeys: NavigationKeysConfigSets.Vertical
 		}}

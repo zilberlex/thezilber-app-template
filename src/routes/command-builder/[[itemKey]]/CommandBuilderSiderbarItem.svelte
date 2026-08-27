@@ -91,7 +91,7 @@
 			<IconButton
 				onclick={editItemName}
 				tabindex={-1}
-				{@attach createClickHotKeyAttachment('Rename', false, hotkey('r', 'alt'))}
+				{@attach createClickHotKeyAttachment('Rename', hotkey('r', 'alt'))}
 				--bg={isElementPageForThisItem ? 'var(--cl-on-surface-dimmest)' : undefined}
 			>
 				<EditIcon />
@@ -100,7 +100,7 @@
 			<IconButton
 				onclick={deleteItem}
 				tabindex={-1}
-				{@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))}
+				{@attach createClickHotKeyAttachment('Delete', hotkey('d', 'alt'))}
 				--bg={isElementPageForThisItem ? 'var(--cl-on-surface-dimmest)' : undefined}
 			>
 				<DeleteIcon />

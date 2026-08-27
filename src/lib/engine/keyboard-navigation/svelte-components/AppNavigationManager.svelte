@@ -6,13 +6,14 @@
 	import { setNavigationManager } from './navigation-manager-provider.svelte';
 
 	interface Props {
+		navigationManager?: NavigationManager;
 		navigationKeyConfig?: NavigationKeysConfig;
 		children?: any;
 	}
 
-	let { navigationKeyConfig, children }: Props = $props();
+	let { navigationKeyConfig, navigationManager = $bindable(), children }: Props = $props();
 
-	let navigationManager: NavigationManager = new NavigationManager(untrack(() => navigationKeyConfig));
+	navigationManager = new NavigationManager(untrack(() => navigationKeyConfig));
 
 	setNavigationManager(navigationManager);
 
