@@ -5,10 +5,8 @@
 	import type { CbData } from './command-builder-types';
 	import { tokenize, type Token } from './custom-tokenizer';
 
-	let {
-		commandBuilderState = $bindable(),
-		disabled = false
-	}: { commandBuilderState: CbData; disabled?: boolean } = $props();
+	let { commandBuilderState = $bindable(), disabled = false }: { commandBuilderState: CbData; disabled?: boolean } =
+		$props();
 
 	let tokens = $derived(tokenize(commandBuilderState.commandStr));
 	let formSchema = $derived.by(() => {
@@ -30,11 +28,7 @@
 		return result;
 	}
 
-	function constructTextCommandFromFields(
-		tokens: Token[],
-		schema: DynamicFormSchema,
-		fields: string[]
-	): string {
+	function constructTextCommandFromFields(tokens: Token[], schema: DynamicFormSchema, fields: string[]): string {
 		let schemaEntries = Object.entries(schema);
 		let parts: string[] = [];
 

@@ -125,7 +125,7 @@
 						aria-controls="app-shell-sidebar"
 						onclick={toggleSidebar}
 						tabindex={-1}
-						{@attach createClickHotKeyAttachment('Open Sidebar', false, hotkey('o', 'alt'))}
+						{@attach createClickHotKeyAttachment('Open Sidebar', hotkey('o', 'alt'))}
 					>
 						<HamburgerIcon />
 					</IconButton>

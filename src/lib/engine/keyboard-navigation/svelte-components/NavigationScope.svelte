@@ -41,32 +41,32 @@
 
 	onMount(() => {
 		if (browser) {
+			navigationManager = getNavigationManager();
+
+			if (!navigationManager) {
+				console.warn('NavigationScope NavigationManager Not detected');
+			}
+
+			console.debug('NavigationScope - NavigaitonManager Context', navigationManager);
+
+			const scopeOptions = {
+				navigationKeys,
+				discoveryMode,
+				escapeMode,
+				refreshOptions
+			} satisfies NavigationScopeOptions;
+
+			const scope = new NavigationScopeInfraImpl(thisElement, scopeId, scopeOptions);
+
 			try {
-				navigationManager = getNavigationManager();
-
-				if (!navigationManager) {
-					console.warn('NavigationScope NavigationManager Not detected');
-				}
-
-				console.debug('NavigationScope - NavigaitonManager Context', navigationManager);
-
-				const scopeOptions = {
-					navigationKeys,
-					discoveryMode,
-					escapeMode,
-					refreshOptions
-				} satisfies NavigationScopeOptions;
-
-				const scope = new NavigationScopeInfraImpl(thisElement, scopeId, scopeOptions);
-
-				navigationManager?.registerScope(scope);
-
 				scope.init();
+				navigationManager?.registerScope(scope);
 
 				scopeContext.scope = scope;
 				scopeRet = scope;
 			} catch (error) {
 				errored = true;
+				scope.destroy();
 				console.error(error);
 			}
 		}

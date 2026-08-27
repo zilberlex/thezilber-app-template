@@ -165,7 +165,8 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		assertNotNestedNavigationTargets(navigationTargets, this.#discoveryStrategy.mode);
 
 		this.#rebuildNavigationTargets(navigationTargets);
-		this.#initializeNavigationTargets(navigationTargets);
+
+		const activeNavigationTarget = this.#initializeNavigationTargets(navigationTargets);
 
 		console.debug(
 			'Navigation Scope - Refreshing Navigation Targets',
@@ -179,6 +180,11 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 				navigatableNode: weak(target.navigatableNode)
 			}))
 		);
+
+		if (activeNavigationTarget) {
+			this.#setCurrentNavigationTarget(activeNavigationTarget);
+			return;
+		}
 
 		if (previousTargetId !== undefined && this.#navigationTargetsById.has(previousTargetId)) {
 			this.#currentNavigationTargetId = previousTargetId;
@@ -315,14 +321,14 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		}
 	}
 
-	#initializeNavigationTargets(navigationTargets: KeyboardNavigationTarget[]) {
+	#initializeNavigationTargets(navigationTargets: KeyboardNavigationTarget[]): KeyboardNavigationTarget | undefined {
 		const currentActiveElement = document.activeElement;
+		let activeNavigationTarget: KeyboardNavigationTarget | undefined;
 
 		for (let i = 0; i < navigationTargets.length; i++) {
 			const navigationTarget = navigationTargets[i];
 
 			const navigatableNode = navigationTarget.navigatableNode;
-
 			const navigationTargetElement = navigationTarget.targetElement;
 
 			if (!navigationTargetElement) {
@@ -337,9 +343,11 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 			navigationTargetElement.setAttribute(NAVIGATION_TARGET_ID_ATTRIBUTE, navigationTarget.id);
 
 			if (navigatableNode === currentActiveElement) {
-				this.#setCurrentNavigationTarget(navigationTarget);
+				activeNavigationTarget = navigationTarget;
 			}
 		}
+
+		return activeNavigationTarget;
 	}
 
 	#setCurrentNavigationTarget(navigationTarget: KeyboardNavigationTarget) {
