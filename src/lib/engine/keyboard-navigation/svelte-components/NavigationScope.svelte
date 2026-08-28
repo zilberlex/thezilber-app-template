@@ -10,12 +10,14 @@
 
 	interface Props extends HTMLAttributes<HTMLDivElement>, NavigationScopeOptions {
 		scopeId: string;
+		scopeOrder?: number;
 		children?: Snippet;
 		scopeRet?: ScopeInfra;
 	}
 
 	let {
 		scopeId,
+		scopeOrder,
 		children,
 		class: usrCls,
 		scopeRet = $bindable(),
@@ -60,7 +62,7 @@
 
 			try {
 				scope.init();
-				navigationManager?.registerScope(scope);
+				navigationManager?.registerScope(scope, scopeOrder);
 
 				scopeContext.scope = scope;
 				scopeRet = scope;

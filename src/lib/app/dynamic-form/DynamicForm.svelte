@@ -4,12 +4,7 @@
 	import CopyButtonSimple from '$lib/ui/components/CopyButtonSimple.svelte';
 
 	import { untrack, type Component } from 'svelte';
-	import type {
-		AnyNonVoid,
-		DynamicForm,
-		DynamicFormField,
-		DynamicFormSchema
-	} from './dynamic-form-types';
+	import type { AnyNonVoid, DynamicForm, DynamicFormField, DynamicFormSchema } from './dynamic-form-types';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import { formFromSchema, mergeForms, resolveFieldValue } from './dynamic-form';
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
@@ -32,9 +27,7 @@
 	// 🔹 entries derived directly from state
 	let formIterable: [string, DynamicFormField][] = $derived.by(() => Object.entries(form));
 
-	let fieldValues = $derived.by(() =>
-		formIterable.map(([, f]) => resolveFieldValue(f as DynamicFormField))
-	);
+	let fieldValues = $derived.by(() => formIterable.map(([, f]) => resolveFieldValue(f as DynamicFormField)));
 
 	let output = $derived.by(() => {
 		const values = fieldValues;
@@ -78,10 +71,7 @@
 		{:else}
 			<div class="overlay-wrapper">
 				<div class="copy-button">
-					<CopyButtonSimple
-						textToCopy={output}
-						{@attach createClickHotKeyAttachment('Copy', false, hotkey('c', 'alt'))}
-					/>
+					<CopyButtonSimple textToCopy={output} {@attach createClickHotKeyAttachment('Copy', hotkey('c', 'alt'))} />
 				</div>
 				<OutputCombo id="output" value={output}>Output</OutputCombo>
 			</div>

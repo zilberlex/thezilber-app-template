@@ -7,14 +7,15 @@ import { engineAssert } from '$lib/engine/error/engine-assert';
 import { type NavigationKeysConfig, type ScopeInfra } from './types';
 import { HotKey } from '../hotkeys/hotkey-class';
 import { hotkeys } from '../hotkeys/hotkey-helpers';
-import { weak } from '../general-js-ts/common';
+import { PriorityMapList } from '../patterns/priority-map-list';
+
+const DEFAULT_SCOPE_ORDER = 1;
 
 export class NavigationManager {
-	#scopeEntries = new Map<string, ScopeEntry>();
+	#scopeEntries = new PriorityMapList<string, ScopeEntry>();
 	#navigationKeys: NavigationKeysConfig;
 
 	#currentScopeId?: string;
-	#currentScopeIndexHint?: number;
 
 	#allNavigationKeys: OneToManyDictionary<string, ScopeInfra> = new OneToManyDictionary<string, ScopeInfra>();
 
@@ -87,7 +88,7 @@ export class NavigationManager {
 		};
 	}
 
-	registerScope(scope: ScopeInfra) {
+	registerScope(scope: ScopeInfra, scopeOrder?: number) {
 		const scopeId = scope.scopeId;
 		const prevEntryExisted = this.#scopeEntries.has(scopeId);
 		console.debug('NavigationManager registering scope:', {
@@ -112,7 +113,8 @@ export class NavigationManager {
 
 		if (!entry) {
 			entry = {};
-			this.#scopeEntries.set(scopeId, entry);
+
+			this.#scopeEntries.insert(scopeId, entry, scopeOrder ?? DEFAULT_SCOPE_ORDER);
 		}
 
 		entry.scope = scope;
@@ -155,20 +157,6 @@ export class NavigationManager {
 		entry.removeFocusListener = undefined;
 	}
 
-	#getScopeIndex(scope: ScopeInfra): number {
-		let index = 0;
-
-		for (const scopeId of this.#scopeEntries.keys()) {
-			if (scopeId === scope.scopeId) {
-				return index;
-			}
-
-			index++;
-		}
-
-		return -1;
-	}
-
 	removeNavigationKeys(source: ScopeInfra, navigationKeys: NavigationKeysConfig) {
 		const flatNavigationKeys = navigationKeys.prevKeys.concat(navigationKeys.nextKeys);
 
@@ -188,6 +176,10 @@ export class NavigationManager {
 			[...this.#nextScopeNavigationKeys, ...this.#prevScopeNavigationKeys],
 			this.#onChangeScopeKey
 		);
+
+		for (const entry of this.#scopeEntries.values()) {
+			entry.removeFocusListener?.();
+		}
 	}
 
 	#onChangeScopeKey = createKeyabordNavigationEventHandler((keyboardEvent: KeyboardEvent) => {
@@ -246,9 +238,10 @@ export class NavigationManager {
 
 		return {
 			scopes: this.#scopeEntries,
-			currentScope: currentScope,
+			currentScope,
 			currentScopeName: currentScope?.scopeId,
-			currentScopeIndex: this.#currentScopeIndexHint,
+			currentScopeIndex:
+				this.#currentScopeId !== undefined ? this.#scopeEntries.indexOf(this.#currentScopeId) : undefined,
 			currentNavigationTarget: currentScope?.currentNavigationTarget
 		};
 	}
@@ -275,15 +268,14 @@ export class NavigationManager {
 	}
 
 	#onFocusScopeInternal(scope: ScopeInfra) {
-		const scopeIndex = this.#getScopeIndex(scope);
+		const entry = this.#scopeEntries.get(scope.scopeId);
 
-		if (scopeIndex < 0) {
-			console.warn('NavigationManager Could not Find scope', scope.scopeId);
+		if (entry?.scope !== scope) {
+			console.warn('NavigationManager Could not Find live scope', scope.scopeId);
 			return;
 		}
 
 		this.#currentScopeId = scope.scopeId;
-		this.#currentScopeIndexHint = scopeIndex;
 	}
 
 	#onNavigationKey = createKeyabordNavigationEventHandler((keyboardEvent: KeyboardEvent) => {
@@ -342,8 +334,7 @@ export class NavigationManager {
 	}
 
 	#nextScopeFrom(scope: ScopeInfra, direction: 'forward' | 'backward'): ScopeInfra | undefined {
-		const scopeIndex = this.#getScopeIndex(scope);
-		const scopes = [...this.#scopeEntries.values()];
+		const scopeIndex = this.#scopeEntries.indexOf(scope.scopeId);
 
 		if (scopeIndex === -1 || this.#scopeEntries.size === 0) {
 			return;
@@ -358,10 +349,10 @@ export class NavigationManager {
 				index = index > 0 ? index - 1 : this.#scopeEntries.size - 1;
 			}
 
-			const candidateScope = scopes[index];
+			const candidateScope = this.#scopeEntries.at(index)?.scope;
 
-			if (candidateScope?.scope?.currentNavigationTarget) {
-				return candidateScope.scope;
+			if (candidateScope?.currentNavigationTarget) {
+				return candidateScope;
 			}
 		} while (index !== scopeIndex);
 
@@ -375,7 +366,17 @@ export class NavigationManager {
 	}
 
 	#focusBackupScope() {
-		const backupScope = this.#findClosestNavigatableScope(this.#currentScopeIndexHint);
+		let currentScopeIndex: number | undefined;
+
+		if (this.#currentScopeId !== undefined) {
+			const index = this.#scopeEntries.indexOf(this.#currentScopeId);
+
+			if (index !== -1) {
+				currentScopeIndex = index;
+			}
+		}
+
+		const backupScope = this.#findClosestNavigatableScope(currentScopeIndex);
 
 		if (!backupScope) {
 			console.warn('NavigationManager no usable scope present');
@@ -386,34 +387,41 @@ export class NavigationManager {
 	}
 
 	#findClosestNavigatableScope(indexHint: number | undefined): ScopeInfra | undefined {
-		const scopeEntriesArr = [...this.#scopeEntries.values()];
 		if (this.#scopeEntries.size === 0) {
-			return undefined;
+			return;
 		}
 
 		if (indexHint === undefined) {
-			return scopeEntriesArr.find((scopeEntry) => scopeEntry.scope?.currentNavigationTarget !== undefined)?.scope;
+			for (const entry of this.#scopeEntries.values()) {
+				if (entry.scope?.currentNavigationTarget) {
+					return entry.scope;
+				}
+			}
+
+			return;
 		}
 
 		const startIndex = Math.min(indexHint, this.#scopeEntries.size - 1);
 
 		for (let distance = 0; distance < this.#scopeEntries.size; distance++) {
 			const forwardIndex = startIndex + distance;
+			const forwardScope = this.#scopeEntries.at(forwardIndex)?.scope;
 
-			if (forwardIndex < this.#scopeEntries.size && scopeEntriesArr[forwardIndex].scope?.currentNavigationTarget) {
-				return scopeEntriesArr[forwardIndex].scope;
+			if (forwardScope?.currentNavigationTarget) {
+				return forwardScope;
 			}
 
 			if (distance === 0) continue;
 
 			const backwardIndex = startIndex - distance;
+			const backwardScope = this.#scopeEntries.at(backwardIndex)?.scope;
 
-			if (backwardIndex >= 0 && scopeEntriesArr[backwardIndex].scope?.currentNavigationTarget) {
-				return scopeEntriesArr[backwardIndex].scope;
+			if (backwardScope?.currentNavigationTarget) {
+				return backwardScope;
 			}
 		}
 
-		return undefined;
+		return;
 	}
 
 	#isPrevKey(key: string): boolean {
