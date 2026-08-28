@@ -194,11 +194,11 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		this.#setCurrentByFallbackIndex(previousIndex);
 	}
 
-	registerOnFocus(handler: (dispatchedObject: ScopeFocusEvent) => void): { unregister: () => void } {
+	registerOnFocus(handler: (dispatchedObject: ScopeFocusEvent) => void): () => void {
 		this.#focusTargetDispatcher.register(handler);
 
-		return {
-			unregister: () => this.#focusTargetDispatcher.unregister(handler)
+		return () => {
+			this.#focusTargetDispatcher.unregister(handler);
 		};
 	}
 

@@ -7,10 +7,10 @@ import { engineAssert } from '$lib/engine/error/engine-assert';
 import { type NavigationKeysConfig, type ScopeInfra } from './types';
 import { HotKey } from '../hotkeys/hotkey-class';
 import { hotkeys } from '../hotkeys/hotkey-helpers';
-import { MruMap } from '../patterns/mru-map';
+import { weak } from '../general-js-ts/common';
 
 export class NavigationManager {
-	#scopes: ScopeInfra[] = [];
+	#scopeEntries = new Map<string, ScopeEntry>();
 	#navigationKeys: NavigationKeysConfig;
 
 	#currentScopeId?: string;
@@ -22,7 +22,6 @@ export class NavigationManager {
 
 	#prevScopeNavigationKeys = hotkeys(['tab'], 'ctrl|option', 'shift');
 
-	#destTargets: { unregister: () => void }[] = [];
 	#assignHotKeysCounter = 0;
 
 	constructor(navigationKeys?: NavigationKeysConfig) {
@@ -89,29 +88,39 @@ export class NavigationManager {
 	}
 
 	registerScope(scope: ScopeInfra) {
-		console.debug('NavigationManager registering scope:', scope.scopeId);
 		const scopeId = scope.scopeId;
+		const prevEntryExisted = this.#scopeEntries.has(scopeId);
+		console.debug('NavigationManager registering scope:', {
+			scopeId,
+			prevEntryExisted
+		});
 
-		const existingLiveScope = this.#scopes.find((existingScope) => existingScope.scopeId === scope.scopeId);
+		let entry = this.#scopeEntries.get(scopeId);
 
 		engineAssert(
-			existingLiveScope === undefined,
+			entry?.scope === undefined,
 			`NavigationManager cannot register multiple live scopes with the same scope ID.`,
 			{
-				scopeId: scope.scopeId,
+				scopeId,
 				newScope: scope,
-				existingLiveScope,
-				registeredScopeIds: this.#scopes.map((scope) => scope.scopeId)
+				existingLiveScope: entry?.scope,
+				registeredScopeIds: [...this.#scopeEntries.entries()]
+					.filter(([, entry]) => entry.scope !== undefined)
+					.map(([scopeId]) => scopeId)
 			}
 		);
 
-		this.#scopes.push(scope);
+		if (!entry) {
+			entry = {};
+			this.#scopeEntries.set(scopeId, entry);
+		}
+
+		entry.scope = scope;
+
 		this.#addNavigationKeys(scope, scope.navigationKeys);
 
 		const scopeFocusHandler = this.#createScopeFocusHandler(scope);
-
-		const i = this.#getScopeIndex(scope);
-		this.#destTargets[i] = scope.registerOnFocus(scopeFocusHandler);
+		entry.removeFocusListener = scope.registerOnFocus(scopeFocusHandler);
 
 		const activeElement = document.activeElement;
 
@@ -132,38 +141,32 @@ export class NavigationManager {
 	unregisterScope(scope: ScopeInfra) {
 		console.debug('NavigationManager unregistering scope:', scope.scopeId);
 
-		const scopeIndex = this.#getScopeIndex(scope);
+		const entry = this.#scopeEntries.get(scope.scopeId);
 
-		if (scopeIndex === -1) {
+		if (!entry?.scope) {
 			console.warn('NavigationManager - unregisterScope - scope not found. scopeId:', scope.scopeId);
 			return;
 		}
 
-		const wasCurrentScope = this.#currentScopeId === scope.scopeId;
-
-		this.#scopes.splice(scopeIndex, 1);
-
-		const { unregister } = this.#destTargets.splice(scopeIndex, 1)[0];
-
 		this.removeNavigationKeys(scope, scope.navigationKeys);
-		unregister();
+		entry.removeFocusListener?.();
 
-		if (wasCurrentScope) {
-			this.#currentScopeIndexHint = scopeIndex;
-			return;
-		}
-
-		const currentScope = this.#getCurrentScope();
-
-		if (currentScope) {
-			this.#currentScopeIndexHint = this.#getScopeIndex(currentScope);
-		} else if (this.#currentScopeIndexHint !== undefined && scopeIndex < this.#currentScopeIndexHint) {
-			this.#currentScopeIndexHint--;
-		}
+		entry.scope = undefined;
+		entry.removeFocusListener = undefined;
 	}
 
 	#getScopeIndex(scope: ScopeInfra): number {
-		return this.#scopes.findIndex((s) => s.scopeId === scope.scopeId);
+		let index = 0;
+
+		for (const scopeId of this.#scopeEntries.keys()) {
+			if (scopeId === scope.scopeId) {
+				return index;
+			}
+
+			index++;
+		}
+
+		return -1;
 	}
 
 	removeNavigationKeys(source: ScopeInfra, navigationKeys: NavigationKeysConfig) {
@@ -185,7 +188,6 @@ export class NavigationManager {
 			[...this.#nextScopeNavigationKeys, ...this.#prevScopeNavigationKeys],
 			this.#onChangeScopeKey
 		);
-		this.#destTargets.forEach((dest) => dest.unregister());
 	}
 
 	#onChangeScopeKey = createKeyabordNavigationEventHandler((keyboardEvent: KeyboardEvent) => {
@@ -243,7 +245,7 @@ export class NavigationManager {
 		const currentScope = this.#getCurrentScope();
 
 		return {
-			scopes: this.#scopes,
+			scopes: this.#scopeEntries,
 			currentScope: currentScope,
 			currentScopeName: currentScope?.scopeId,
 			currentScopeIndex: this.#currentScopeIndexHint,
@@ -341,8 +343,9 @@ export class NavigationManager {
 
 	#nextScopeFrom(scope: ScopeInfra, direction: 'forward' | 'backward'): ScopeInfra | undefined {
 		const scopeIndex = this.#getScopeIndex(scope);
+		const scopes = [...this.#scopeEntries.values()];
 
-		if (scopeIndex === -1 || this.#scopes.length === 0) {
+		if (scopeIndex === -1 || this.#scopeEntries.size === 0) {
 			return;
 		}
 
@@ -350,15 +353,15 @@ export class NavigationManager {
 
 		do {
 			if (direction === 'forward') {
-				index = (index + 1) % this.#scopes.length;
+				index = (index + 1) % this.#scopeEntries.size;
 			} else {
-				index = index > 0 ? index - 1 : this.#scopes.length - 1;
+				index = index > 0 ? index - 1 : this.#scopeEntries.size - 1;
 			}
 
-			const candidateScope = this.#scopes[index];
+			const candidateScope = scopes[index];
 
-			if (candidateScope.currentNavigationTarget) {
-				return candidateScope;
+			if (candidateScope?.scope?.currentNavigationTarget) {
+				return candidateScope.scope;
 			}
 		} while (index !== scopeIndex);
 
@@ -368,7 +371,7 @@ export class NavigationManager {
 	#getCurrentScope(): ScopeInfra | undefined {
 		if (this.#currentScopeId === undefined) return undefined;
 
-		return this.#scopes.find((scope) => scope.scopeId === this.#currentScopeId);
+		return this.#scopeEntries.get(this.#currentScopeId)?.scope;
 	}
 
 	#focusBackupScope() {
@@ -383,29 +386,30 @@ export class NavigationManager {
 	}
 
 	#findClosestNavigatableScope(indexHint: number | undefined): ScopeInfra | undefined {
-		if (this.#scopes.length === 0) {
+		const scopeEntriesArr = [...this.#scopeEntries.values()];
+		if (this.#scopeEntries.size === 0) {
 			return undefined;
 		}
 
 		if (indexHint === undefined) {
-			return this.#scopes.find((scope) => scope.currentNavigationTarget !== undefined);
+			return scopeEntriesArr.find((scopeEntry) => scopeEntry.scope?.currentNavigationTarget !== undefined)?.scope;
 		}
 
-		const startIndex = Math.min(indexHint, this.#scopes.length - 1);
+		const startIndex = Math.min(indexHint, this.#scopeEntries.size - 1);
 
-		for (let distance = 0; distance < this.#scopes.length; distance++) {
+		for (let distance = 0; distance < this.#scopeEntries.size; distance++) {
 			const forwardIndex = startIndex + distance;
 
-			if (forwardIndex < this.#scopes.length && this.#scopes[forwardIndex].currentNavigationTarget) {
-				return this.#scopes[forwardIndex];
+			if (forwardIndex < this.#scopeEntries.size && scopeEntriesArr[forwardIndex].scope?.currentNavigationTarget) {
+				return scopeEntriesArr[forwardIndex].scope;
 			}
 
 			if (distance === 0) continue;
 
 			const backwardIndex = startIndex - distance;
 
-			if (backwardIndex >= 0 && this.#scopes[backwardIndex].currentNavigationTarget) {
-				return this.#scopes[backwardIndex];
+			if (backwardIndex >= 0 && scopeEntriesArr[backwardIndex].scope?.currentNavigationTarget) {
+				return scopeEntriesArr[backwardIndex].scope;
 			}
 		}
 
@@ -421,4 +425,9 @@ export class NavigationManager {
 		const navKeys = this.#navigationKeys;
 		return navKeys.nextKeys.includes(key);
 	}
+}
+
+interface ScopeEntry {
+	scope?: ScopeInfra;
+	removeFocusListener?: () => void;
 }

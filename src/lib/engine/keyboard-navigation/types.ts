@@ -40,7 +40,7 @@ export interface ScopeInfra {
 	getNextNodeInfo(key: string): NextNodeInfo;
 	init(): void;
 	destroy(): void;
-	registerOnFocus(handler: DispatchHandler<ScopeFocusEvent>): { unregister: () => void };
+	registerOnFocus(handler: DispatchHandler<ScopeFocusEvent>): () => void;
 	refreshNavigationTargets(): void;
 	get currentNavigationTarget(): ResolvedKeyboardNavigationTarget | undefined;
 	get escapeMode(): ScopeEscapeMode;
