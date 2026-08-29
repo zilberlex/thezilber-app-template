@@ -48,6 +48,9 @@ export interface ScopeInfra {
 	focusFirst(): void;
 	focusLast(): void;
 
+	getNavigationTargetRestorationPoint(): NavigationTargetRestorationPoint | undefined;
+	restoreNavigationTarget(restorationPoint: NavigationTargetRestorationPoint): boolean;
+
 	_debugInfo(): { refreshCount: number };
 }
 
@@ -70,4 +73,8 @@ export interface NavigationScopeOptions {
 
 export interface NavigationRefreshConfig {
 	mode: 'automatic' | 'manual';
+}
+
+export interface NavigationTargetRestorationPoint {
+	readonly index: number;
 }

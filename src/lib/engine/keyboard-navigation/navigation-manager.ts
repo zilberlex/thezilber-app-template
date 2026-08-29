@@ -4,7 +4,7 @@ import { keyBoardFocusNavigatedNode } from '$lib/engine/keyboard-navigation/navi
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
 import { NavigationKeyConsts } from '$lib/engine/hotkeys/consts';
 import { engineAssert } from '$lib/engine/error/engine-assert';
-import { type NavigationKeysConfig, type ScopeInfra } from './types';
+import { type NavigationKeysConfig, type NavigationTargetRestorationPoint, type ScopeInfra } from './types';
 import { HotKey } from '../hotkeys/hotkey-class';
 import { hotkeys } from '../hotkeys/hotkey-helpers';
 import { PriorityMapList } from '../patterns/priority-map-list';
@@ -119,17 +119,22 @@ export class NavigationManager {
 
 		entry.scope = scope;
 
+		const activeElement = document.activeElement;
+
+		const hasActiveTarget =
+			activeElement instanceof HTMLElement &&
+			scope.navigationTargets.some((target) => target.navigatableNode === activeElement);
+
+		if (entry.navigationTargetRestorationPoint && !hasActiveTarget) {
+			scope.restoreNavigationTarget(entry.navigationTargetRestorationPoint);
+		}
+
 		this.#addNavigationKeys(scope, scope.navigationKeys);
 
 		const scopeFocusHandler = this.#createScopeFocusHandler(scope);
 		entry.removeFocusListener = scope.registerOnFocus(scopeFocusHandler);
 
-		const activeElement = document.activeElement;
-
-		if (
-			activeElement instanceof HTMLElement &&
-			scope.navigationTargets.some((x) => x.navigatableNode === activeElement)
-		) {
+		if (hasActiveTarget) {
 			scopeFocusHandler();
 		}
 	}
@@ -149,6 +154,8 @@ export class NavigationManager {
 			console.warn('NavigationManager - unregisterScope - scope not found. scopeId:', scope.scopeId);
 			return;
 		}
+
+		entry.navigationTargetRestorationPoint = scope.getNavigationTargetRestorationPoint();
 
 		this.removeNavigationKeys(scope, scope.navigationKeys);
 		entry.removeFocusListener?.();
@@ -438,4 +445,5 @@ export class NavigationManager {
 interface ScopeEntry {
 	scope?: ScopeInfra;
 	removeFocusListener?: () => void;
+	navigationTargetRestorationPoint?: NavigationTargetRestorationPoint;
 }

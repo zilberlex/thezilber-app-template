@@ -10,7 +10,8 @@ import {
 	type NavigationTargetId,
 	type ResolvedKeyboardNavigationTarget,
 	type NavigationScopeOptions,
-	type NavigationDiscoveryMode
+	type NavigationDiscoveryMode,
+	type NavigationTargetRestorationPoint
 } from './types';
 import { keyBoardFocusNavigatedNode } from './navigation-utils';
 import { keyboardNavigationTarget } from './navigation-target';
@@ -231,6 +232,34 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		if (target) {
 			keyBoardFocusNavigatedNode(target.navigatableNode);
 		}
+	}
+
+	getNavigationTargetRestorationPoint(): NavigationTargetRestorationPoint | undefined {
+		const currentTargetId = this.#currentNavigationTargetId;
+
+		if (currentTargetId === undefined) {
+			return;
+		}
+
+		const index = this.#navigationTargetIndexById.get(currentTargetId);
+
+		if (index === undefined) {
+			return;
+		}
+
+		return { index };
+	}
+
+	restoreNavigationTarget(restorationPoint: NavigationTargetRestorationPoint): boolean {
+		const target = this.navigationTargets[restorationPoint.index];
+
+		if (!target) {
+			return false;
+		}
+
+		this.#setCurrentNavigationTarget(target);
+
+		return true;
 	}
 
 	destroy() {
