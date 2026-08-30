@@ -35,11 +35,8 @@ export interface ScopeInfra {
 	scopeId: string;
 	navigationKeys: NavigationKeysConfig;
 	scopeContainer: HTMLElement;
-	navigationTargets: KeyboardNavigationTarget[];
 
 	getNextNodeInfo(key: string): NextNodeInfo;
-	init(): void;
-	destroy(): void;
 	registerOnFocus(handler: DispatchHandler<ScopeFocusEvent>): () => void;
 	refreshNavigationTargets(): void;
 	get currentNavigationTarget(): ResolvedKeyboardNavigationTarget | undefined;
@@ -50,6 +47,11 @@ export interface ScopeInfra {
 
 	getNavigationTargetRestorationPoint(): NavigationTargetRestorationPoint | undefined;
 	restoreNavigationTarget(restorationPoint: NavigationTargetRestorationPoint): boolean;
+
+	hasNavigationTargetForNode(node: Element | null): boolean;
+
+	init(): void;
+	destroy(): void;
 
 	_debugInfo(): { refreshCount: number };
 }

@@ -121,9 +121,7 @@ export class NavigationManager {
 
 		const activeElement = document.activeElement;
 
-		const hasActiveTarget =
-			activeElement instanceof HTMLElement &&
-			scope.navigationTargets.some((target) => target.navigatableNode === activeElement);
+		const hasActiveTarget = activeElement instanceof HTMLElement && scope.hasNavigationTargetForNode(activeElement);
 
 		if (entry.navigationTargetRestorationPoint && !hasActiveTarget) {
 			scope.restoreNavigationTarget(entry.navigationTargetRestorationPoint);
