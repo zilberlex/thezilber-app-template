@@ -83,14 +83,12 @@ export class PriorityMapList<K, V> extends MapList<K, V> {
 
 		let newIndex = this.#upperBound(priority);
 
-		// The upper-bound search still includes this entry.
-		// When moving toward a higher priority, remove its contribution.
 		if (priority > oldPriority) {
 			newIndex--;
 		}
 
 		if (!this.moveToIndex(key, newIndex)) {
-			return false;
+			throw new Error('PriorityMapList internal entry invariant violated.');
 		}
 
 		this.#priorities.set(key, priority);

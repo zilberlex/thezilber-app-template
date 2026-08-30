@@ -1,3 +1,5 @@
+import { TrackedEntryArray } from './tracked-entry-array';
+
 interface MapListEntry<K, V> {
 	key: K;
 	value: V;
@@ -5,11 +7,11 @@ interface MapListEntry<K, V> {
 }
 
 export class MapList<K, V> implements Iterable<[K, V]> {
-	#entries: MapListEntry<K, V>[] = [];
+	#entries = new TrackedEntryArray<MapListEntry<K, V>>();
 	#map = new Map<K, MapListEntry<K, V>>();
 
 	get size(): number {
-		return this.#entries.length;
+		return this.#entries.size;
 	}
 
 	has(key: K): boolean {
@@ -29,6 +31,7 @@ export class MapList<K, V> implements Iterable<[K, V]> {
 		}
 
 		this.push(key, value);
+
 		return this;
 	}
 
@@ -44,7 +47,6 @@ export class MapList<K, V> implements Iterable<[K, V]> {
 		}
 
 		this.#map.delete(entry.key);
-		entry.index = -1;
 
 		return [entry.key, entry.value];
 	}
@@ -56,27 +58,17 @@ export class MapList<K, V> implements Iterable<[K, V]> {
 			return false;
 		}
 
-		const index = entry.index;
-
-		if (this.#entries[index] !== entry) {
-			throw new Error('MapList internal index invariant violated.');
+		if (!this.#entries.delete(entry)) {
+			throw new Error('MapList internal entry invariant violated.');
 		}
 
-		this.#entries.splice(index, 1);
 		this.#map.delete(key);
-
-		entry.index = -1;
-		this.#repairIndexes(index);
 
 		return true;
 	}
 
 	clear(): void {
-		for (const entry of this.#entries) {
-			entry.index = -1;
-		}
-
-		this.#entries.length = 0;
+		this.#entries.clear();
 		this.#map.clear();
 	}
 
@@ -132,21 +124,14 @@ export class MapList<K, V> implements Iterable<[K, V]> {
 
 	protected insertAt(index: number, key: K, value: V): number {
 		this.#assertNewKey(key);
-		this.#assertInsertIndex(index);
 
 		const entry: MapListEntry<K, V> = {
 			key,
 			value,
-			index
+			index: -1
 		};
 
-		if (index === this.#entries.length) {
-			this.#entries.push(entry);
-		} else {
-			this.#entries.splice(index, 0, entry);
-			this.#repairIndexes(index + 1);
-		}
-
+		this.#entries.insert(index, entry);
 		this.#map.set(key, entry);
 
 		return this.size;
@@ -159,47 +144,16 @@ export class MapList<K, V> implements Iterable<[K, V]> {
 			return false;
 		}
 
-		this.#assertMoveIndex(index);
-
-		const oldIndex = entry.index;
-
-		if (oldIndex === index) {
-			return true;
+		if (!this.#entries.move(entry, index)) {
+			throw new Error('MapList internal entry invariant violated.');
 		}
-
-		if (this.#entries[oldIndex] !== entry) {
-			throw new Error('MapList internal index invariant violated.');
-		}
-
-		this.#entries.splice(oldIndex, 1);
-		this.#entries.splice(index, 0, entry);
-
-		this.#repairIndexes(Math.min(oldIndex, index), Math.max(oldIndex, index));
 
 		return true;
 	}
 
-	#repairIndexes(start: number, end = this.#entries.length - 1): void {
-		for (let index = start; index <= end; index++) {
-			this.#entries[index].index = index;
-		}
-	}
-
 	#assertNewKey(key: K): void {
 		if (this.#map.has(key)) {
-			throw new Error('MapList cannot push a duplicate key.');
-		}
-	}
-
-	#assertInsertIndex(index: number): void {
-		if (!Number.isInteger(index) || index < 0 || index > this.size) {
-			throw new RangeError(`MapList insertion index out of range: ${index}`);
-		}
-	}
-
-	#assertMoveIndex(index: number): void {
-		if (!Number.isInteger(index) || index < 0 || index >= this.size) {
-			throw new RangeError(`MapList move index out of range: ${index}`);
+			throw new Error('MapList cannot contain duplicate keys.');
 		}
 	}
 }
