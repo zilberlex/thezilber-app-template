@@ -1,7 +1,8 @@
+import { assertPriority, nextPriority, priorityUpperBound } from './priority-utils';
+
 export interface PriorityListEntry<T> {
 	readonly value: T;
 	readonly priority: number;
-	readonly index: number;
 }
 
 interface MutablePriorityListEntry<T> {
@@ -30,7 +31,9 @@ export class PriorityList<T> implements Iterable<T> {
 	}
 
 	indexOf(entry: PriorityListEntry<T>): number {
-		return this.#ownsEntry(entry) ? entry.index : -1;
+		const mutableEntry = entry as MutablePriorityListEntry<T>;
+
+		return this.#ownsEntry(mutableEntry) ? mutableEntry.index : -1;
 	}
 
 	/**
@@ -40,7 +43,8 @@ export class PriorityList<T> implements Iterable<T> {
 	 * Every following automatic priority is the current last priority + 1.
 	 */
 	push(value: T): PriorityListEntry<T> {
-		const priority = this.#nextPriority();
+		const lastPriority = this.#entries.at(-1)?.priority;
+		const priority = nextPriority(lastPriority);
 
 		const entry: MutablePriorityListEntry<T> = {
 			value,
@@ -61,7 +65,7 @@ export class PriorityList<T> implements Iterable<T> {
 	 * with that priority.
 	 */
 	insert(value: T, priority: number): PriorityListEntry<T> {
-		this.#assertPriority(priority);
+		assertPriority(priority);
 
 		const index = this.#upperBound(priority);
 
@@ -83,13 +87,13 @@ export class PriorityList<T> implements Iterable<T> {
 	 * The entry's stored index gives us the old position directly.
 	 */
 	setPriority(entry: PriorityListEntry<T>, priority: number): boolean {
-		this.#assertPriority(priority);
-
-		if (!this.#ownsEntry(entry)) {
-			return false;
-		}
+		assertPriority(priority);
 
 		const mutableEntry = entry as MutablePriorityListEntry<T>;
+
+		if (!this.#ownsEntry(mutableEntry)) {
+			return false;
+		}
 
 		if (mutableEntry.priority === priority) {
 			return true;
@@ -111,11 +115,11 @@ export class PriorityList<T> implements Iterable<T> {
 	}
 
 	delete(entry: PriorityListEntry<T>): boolean {
-		if (!this.#ownsEntry(entry)) {
+		const mutableEntry = entry as MutablePriorityListEntry<T>;
+
+		if (!this.#ownsEntry(mutableEntry)) {
 			return false;
 		}
-
-		const mutableEntry = entry as MutablePriorityListEntry<T>;
 		const index = mutableEntry.index;
 
 		this.#entries.splice(index, 1);
@@ -156,41 +160,8 @@ export class PriorityList<T> implements Iterable<T> {
 		return this.values();
 	}
 
-	#nextPriority(): number {
-		const lastEntry = this.#entries[this.#entries.length - 1];
-
-		if (!lastEntry) {
-			return 1;
-		}
-
-		const priority = lastEntry.priority + 1;
-
-		if (!Number.isFinite(priority) || priority <= lastEntry.priority) {
-			throw new RangeError('Unable to allocate the next automatic priority.');
-		}
-
-		return priority;
-	}
-
-	/**
-	 * Finds the position immediately after the existing entries
-	 * with the supplied priority.
-	 */
 	#upperBound(priority: number): number {
-		let low = 0;
-		let high = this.#entries.length;
-
-		while (low < high) {
-			const middle = Math.floor((low + high) / 2);
-
-			if (this.#entries[middle].priority <= priority) {
-				low = middle + 1;
-			} else {
-				high = middle;
-			}
-		}
-
-		return low;
+		return priorityUpperBound(this.#entries.length, (index) => this.#entries[index].priority, priority);
 	}
 
 	#repairIndexes(start: number, end = this.#entries.length - 1): void {
@@ -199,15 +170,9 @@ export class PriorityList<T> implements Iterable<T> {
 		}
 	}
 
-	#ownsEntry(entry: PriorityListEntry<T>): boolean {
+	#ownsEntry(entry: MutablePriorityListEntry<T>): boolean {
 		const index = entry.index;
 
 		return Number.isInteger(index) && index >= 0 && index < this.#entries.length && this.#entries[index] === entry;
-	}
-
-	#assertPriority(priority: number): void {
-		if (!Number.isFinite(priority)) {
-			throw new RangeError('Priority must be a finite number.');
-		}
 	}
 }

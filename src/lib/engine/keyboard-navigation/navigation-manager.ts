@@ -7,7 +7,7 @@ import { engineAssert } from '$lib/engine/error/engine-assert';
 import { type NavigationKeysConfig, type NavigationTargetRestorationPoint, type ScopeInfra } from './types';
 import { HotKey } from '../hotkeys/hotkey-class';
 import { hotkeys } from '../hotkeys/hotkey-helpers';
-import { PriorityMapList } from '../patterns/priority-map-list';
+import { PriorityMapList } from '../patterns/lists-and-maps-advanced/priority-map-list';
 
 const DEFAULT_SCOPE_ORDER = 1;
 
