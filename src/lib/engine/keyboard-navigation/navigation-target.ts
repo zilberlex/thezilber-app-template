@@ -1,11 +1,11 @@
 import { getFocusableElementsByNode, isFocusableElement } from './navigation-utils';
-import type { KeyboardNavigationTarget } from './types';
+import type { KeyboardNavigationTarget, NavigationTargetId } from './types';
 
 export class KeyboardNavigationTargetImpl implements KeyboardNavigationTarget {
-	readonly id: string;
+	readonly id: NavigationTargetId;
 	#targetElementRef: WeakRef<HTMLElement>;
 
-	constructor(id: string, targetElement: HTMLElement) {
+	constructor(id: NavigationTargetId, targetElement: HTMLElement) {
 		this.id = id;
 		this.#targetElementRef = new WeakRef(targetElement);
 	}
@@ -38,6 +38,6 @@ export class KeyboardNavigationTargetImpl implements KeyboardNavigationTarget {
 	}
 }
 
-export function keyboardNavigationTarget(id: string, targetElement: HTMLElement) {
+export function keyboardNavigationTarget(id: NavigationTargetId, targetElement: HTMLElement) {
 	return new KeyboardNavigationTargetImpl(id, targetElement);
 }

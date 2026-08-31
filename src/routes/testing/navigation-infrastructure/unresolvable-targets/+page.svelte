@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { markForNavigation } from '$lib/engine/keyboard-navigation/attachments';
 	import { getNavigationManager } from '$lib/engine/keyboard-navigation/svelte-components/navigation-manager-provider.svelte';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import { onMount } from 'svelte';
@@ -7,6 +6,7 @@
 	import { browser } from '$app/environment';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import NavigatableAndUnnavigatableSwitcher from '../NavigatableAndUnnavigatableSwitcher.svelte';
+	import { markForNavigation } from '$lib/engine/keyboard-navigation/svelte-components/attachments';
 
 	let navigationManager = getNavigationManager();
 	onMount(() => {
@@ -20,20 +20,20 @@
 	<div class="container">
 		<NavigationScope scopeId="unresolved-test" discoveryMode="marked" escapeMode="escape">
 			<div class="list">
-				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>A</NavigatableAndUnnavigatableSwitcher>
-				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>B</NavigatableAndUnnavigatableSwitcher>
-				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>C</NavigatableAndUnnavigatableSwitcher>
-				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>D</NavigatableAndUnnavigatableSwitcher>
-				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>F</NavigatableAndUnnavigatableSwitcher>
+				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>A</NavigatableAndUnnavigatableSwitcher>
+				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>B</NavigatableAndUnnavigatableSwitcher>
+				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>C</NavigatableAndUnnavigatableSwitcher>
+				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>D</NavigatableAndUnnavigatableSwitcher>
+				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>F</NavigatableAndUnnavigatableSwitcher>
 			</div>
 		</NavigationScope>
 		<NavigationScope scopeId="unresolved-test-2" discoveryMode="marked" escapeMode="escape">
 			<div class="list">
-				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>A</NavigatableAndUnnavigatableSwitcher>
-				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>B</NavigatableAndUnnavigatableSwitcher>
-				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>C</NavigatableAndUnnavigatableSwitcher>
-				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>D</NavigatableAndUnnavigatableSwitcher>
-				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>F</NavigatableAndUnnavigatableSwitcher>
+				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>A</NavigatableAndUnnavigatableSwitcher>
+				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>B</NavigatableAndUnnavigatableSwitcher>
+				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>C</NavigatableAndUnnavigatableSwitcher>
+				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>D</NavigatableAndUnnavigatableSwitcher>
+				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>F</NavigatableAndUnnavigatableSwitcher>
 			</div>
 		</NavigationScope>
 	</div>

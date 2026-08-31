@@ -8,9 +8,9 @@ export function createNavigationKeys(nextKeys: string[], prevKeys: string[]): Na
 	};
 }
 
-export type NavigationTargetId = string;
-
 export type NavigationDiscoveryMode = 'marked' | 'all-focusable';
+
+export type NavigationTargetId = string;
 
 export interface KeyboardNavigationTarget {
 	readonly id: NavigationTargetId;
@@ -78,5 +78,6 @@ export interface NavigationRefreshConfig {
 }
 
 export interface NavigationTargetRestorationPoint {
+	readonly id: NavigationTargetId;
 	readonly index: number;
 }

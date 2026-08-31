@@ -16,8 +16,8 @@
 	let debugInfoDisplay = $derived({
 		currentScopeName: debugInfo.currentScopeName,
 		currentScopeIndex: debugInfo.currentScopeIndex,
-		totalScopes: debugInfo.scopes.length,
-		scopeNames: debugInfo.scopes.map((x) => x.scopeId),
+		totalScopes: debugInfo.scopes.size,
+		scopeNames: [...debugInfo.scopes.values()].map((x) => x.scope?.scopeId),
 		currentTargetElementClasses: debugInfo.currentNavigationTarget?.targetElement?.classList.toString() ?? 'undefined',
 		currentNodeClasses: debugInfo.currentNavigationTarget?.navigatableNode?.classList.toString() ?? 'undefined',
 		currentTargetElementAttributes: displayDataAttributes(debugInfo.currentNavigationTarget?.targetElement),

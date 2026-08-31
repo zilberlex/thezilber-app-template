@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { markForNavigation } from '$lib/engine/keyboard-navigation/attachments';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import { onMount } from 'svelte';
 
@@ -10,6 +9,7 @@
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { assignNavigationManagerKeys } from '$lib/engine/keyboard-navigation/svelte-components/sveltekit-helpers';
+	import { markForNavigation } from '$lib/engine/keyboard-navigation/svelte-components/attachments';
 
 	onMount(() => {
 		if (browser) {
@@ -48,9 +48,9 @@
 							>[{refreshMarkedCount}]</span
 						>
 					</div>
-					<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>A</NavigatableAndUnnavigatableSwitcher>
-					<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>B</NavigatableAndUnnavigatableSwitcher>
-					<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>C</NavigatableAndUnnavigatableSwitcher>
+					<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>A</NavigatableAndUnnavigatableSwitcher>
+					<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>B</NavigatableAndUnnavigatableSwitcher>
+					<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>C</NavigatableAndUnnavigatableSwitcher>
 				</div>
 			</NavigationScope>
 			<NavigationScope scopeId="scope-marked-unstable" discoveryMode="marked" bind:scopeRet={scopeMarkedNonStable}>
@@ -59,7 +59,8 @@
 						Marked Discovery (NonStable)- Refresh Count <span class="emp">[{refreshMarkedNonStableCount}]</span>
 					</div>
 					{#each nonStableElements as el}
-						<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation}>{el}</NavigatableAndUnnavigatableSwitcher>
+						<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>{el}</NavigatableAndUnnavigatableSwitcher
+						>
 					{/each}
 					<Button onclick={() => nonStableElements.push((nonStableElements.findLast(() => true) ?? 0) + 1)}>
 						Add Element

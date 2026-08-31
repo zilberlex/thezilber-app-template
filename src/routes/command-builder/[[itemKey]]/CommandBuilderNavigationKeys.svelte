@@ -10,14 +10,6 @@
 
 	let navigationManager = getNavigationManager();
 
-	let softNextScopeNavKeys = [hotkey(NavigationKeyConsts.ArrowRight)];
-	let softPrevScopeNavKeys = [hotkey(NavigationKeyConsts.ArrowLeft)];
-	let hardNextScopeNavKeys = [hotkey('tab', 'ctrl|option')];
-	let hardPrevScopeNavKeys = [hotkey('tab', 'ctrl|option', 'shift')];
-
-	let nextScopeNavigationKeys = [...softNextScopeNavKeys, ...hardNextScopeNavKeys];
-	let prevScopeNavigationKeys = [...softPrevScopeNavKeys, ...hardPrevScopeNavKeys];
-
 	function onScopeChangeKey(keyboardEvent: KeyboardEvent) {
 		let eventHotkey = HotKey.fromEvent(keyboardEvent);
 
@@ -29,24 +21,8 @@
 	}
 
 	$effect(() => {
-		return untrack(() => {
-			if (browser) {
-				const softKeys = [...softNextScopeNavKeys, ...softPrevScopeNavKeys];
-				const hardKeys = [...hardNextScopeNavKeys, ...hardPrevScopeNavKeys];
-				const allKeys = [...softKeys, ...hardKeys];
-
-				const onScopeChangeMixed = createKeyboardNavigationEventHandlerMixedSoftness(
-					onScopeChangeKey,
-					softKeys,
-					hardKeys
-				);
-
-				hotKeysModule.assignHotKeys(allKeys, onScopeChangeMixed);
-
-				return () => {
-					hotKeysModule.removeHotKeys(allKeys, onScopeChangeMixed);
-				};
-			}
-		});
+		if (browser) {
+			return navigationManager.assignScopeNavigationKeys([hotkey('t')], [hotkey('t', 'shift')]);
+		}
 	});
 </script>

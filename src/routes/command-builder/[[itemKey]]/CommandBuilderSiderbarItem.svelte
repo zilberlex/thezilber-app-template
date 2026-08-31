@@ -9,7 +9,7 @@
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import { tick } from 'svelte';
 	import { fadeAndSlide } from '$lib/engine/transitions/fade-and-slide';
-	import { markForNavigation } from '$lib/engine/keyboard-navigation/attachments';
+	import { markForNavigation } from '$lib/engine/keyboard-navigation/svelte-components/attachments';
 
 	type Props = HTMLAttributes<HTMLDivElement> & {
 		cbAppEnv: CbAppEnv;
@@ -59,7 +59,7 @@
 	transition:fadeAndSlide()
 	class={['nav-collection-item', isElementPageForThisItem && 'current-item']}
 	{...rest}
-	{@attach markForNavigation}
+	{@attach markForNavigation(recordProjection.recordId)}
 >
 	{#if editingName}
 		<div class="nav-collection-item-link">

@@ -15,19 +15,28 @@ import {
 } from './types';
 import { keyBoardFocusNavigatedNode } from './navigation-utils';
 import { keyboardNavigationTarget } from './navigation-target';
-import { NAVIGATION_SCOPE_ATTRIBUTE, NAVIGATION_TARGET_ATTRIBUTE } from './consts';
+import {
+	NAVIGATION_RESOLVED_TARGET_ID_ATTRIBUTE,
+	NAVIGATION_SCOPE_ATTRIBUTE,
+	NAVIGATION_TARGET_ATTRIBUTE,
+	NAVIGATION_TARGET_ID_ATTRIBUTE
+} from './consts';
+
 import { engineAssert } from '../error/engine-assert';
 import { NAVIGATION_SCOPE_DEFAULTS } from './configurations';
-import { weak } from '../general-js-ts/common';
+
 import {
 	getNavigationDiscoveryStrategy,
 	type NavigationDiscoveryStrategy
 } from './discovery-strategies/navigation-discovery-strategy';
 import { NavigationRefreshController } from './navigation-refresh-controller';
-import { MapList } from '../patterns/lists-and-maps-advanced/map-list';
+import { MapList } from '$lib/engine/patterns/lists-and-maps-advanced/map-list';
 
 const NAVIGATION_INDEX_ATTRIBUTE = 'data-debug-navigation-index';
-const NAVIGATION_TARGET_ID_ATTRIBUTE = 'data-navigation-target-id';
+
+const AUTOMATIC_NAVIGATION_TARGET_ID_PREFIX = '__navigation-auto-';
+
+let automaticNavigationTargetIdCounter = 0;
 
 export default class NavigationScopeInfraImpl implements ScopeInfra {
 	scopeId: string;
@@ -39,12 +48,12 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 
 	#abortController: AbortController;
 
-	#currentNavigationTargetId?: NavigationTargetId;
+	#currentNavigationTargetData?: NavigationTargetRestorationPoint;
+
 	#navigationTargets = new MapList<NavigationTargetId, KeyboardNavigationTarget>();
 
 	#escapeMode: ScopeEscapeMode;
 	#automaticTargetIds = new WeakMap<HTMLElement, NavigationTargetId>();
-	#targetIdCounter = 0;
 
 	#discoveryStrategy: NavigationDiscoveryStrategy;
 	#refreshController: NavigationRefreshController;
@@ -154,11 +163,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 
 	refreshNavigationTargets() {
 		this.#refreshCount++;
-		const previousTargetId = this.#currentNavigationTargetId;
 
-		const previousTargetIndex = previousTargetId !== undefined ? this.#navigationTargets.indexOf(previousTargetId) : -1;
-
-		const previousIndex = previousTargetIndex !== -1 ? previousTargetIndex : 0;
 		const navigationTargets = this.#discoveryStrategy
 			.discover(this.scopeContainer)
 			.map((element) => this.#createNavigationTarget(element));
@@ -169,32 +174,26 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 
 		const activeNavigationTarget = this.#initializeNavigationTargets(navigationTargets);
 
-		console.debug(
-			'Navigation Scope - Refreshing Navigation Targets',
-			this.scopeContainer,
-			{ discoveryMode: this.#discoveryStrategy.mode, refreshMode: this.#refreshController.mode },
-			'targets:',
-			Array.from(this.#navigationTargets.entries(), ([id, target], index) => ({
-				index,
-				id,
-				targetElement: weak(target.targetElement),
-				navigatableNode: weak(target.navigatableNode)
-			}))
-		);
-
 		if (activeNavigationTarget) {
 			this.#setCurrentNavigationTarget(activeNavigationTarget);
 			return;
 		}
 
-		if (previousTargetId !== undefined && this.#navigationTargets.has(previousTargetId)) {
-			this.#currentNavigationTargetId = previousTargetId;
+		const currentTargetData = this.#currentNavigationTargetData;
+
+		if (!currentTargetData) {
 			return;
 		}
 
-		this.#setCurrentByFallbackIndex(previousIndex);
-	}
+		const currentIndex = this.#navigationTargets.indexOf(currentTargetData.id);
 
+		if (currentIndex !== -1) {
+			this.#currentNavigationTargetData = {
+				id: currentTargetData.id,
+				index: currentIndex
+			};
+		}
+	}
 	registerOnFocus(handler: (dispatchedObject: ScopeFocusEvent) => void): () => void {
 		this.#focusTargetDispatcher.register(handler);
 
@@ -235,36 +234,30 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 	}
 
 	getNavigationTargetRestorationPoint(): NavigationTargetRestorationPoint | undefined {
-		const currentTargetId = this.#currentNavigationTargetId;
-
-		if (currentTargetId === undefined) {
-			return;
-		}
-
-		const index = this.#navigationTargets.indexOf(currentTargetId);
-
-		if (index === -1) {
-			return;
-		}
-
-		return { index };
+		return this.#currentNavigationTargetData ? { ...this.#currentNavigationTargetData } : undefined;
 	}
 
 	restoreNavigationTarget(restorationPoint: NavigationTargetRestorationPoint): boolean {
-		const { index } = restorationPoint;
+		const { id, index } = restorationPoint;
+
+		const targetById = this.#navigationTargets.get(id);
+
+		if (targetById) {
+			this.#setCurrentNavigationTarget(targetById);
+			return true;
+		}
 
 		if (!Number.isInteger(index) || index < 0) {
 			return false;
 		}
 
-		const target = this.#navigationTargets.at(index);
+		const targetByIndex = this.#navigationTargets.at(index);
 
-		if (!target) {
+		if (!targetByIndex) {
 			return false;
 		}
 
-		this.#setCurrentNavigationTarget(target);
-
+		this.#setCurrentNavigationTarget(targetByIndex);
 		return true;
 	}
 
@@ -318,24 +311,25 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 	}
 
 	#resolveCurrentNavigationTarget(): ResolvedKeyboardNavigationTarget | undefined {
-		const currentTargetId = this.#currentNavigationTargetId;
+		const currentTargetData = this.#currentNavigationTargetData;
 
-		if (currentTargetId === undefined) {
+		if (!currentTargetData) {
 			return this.#findResolvedTarget(0, 'forward');
 		}
 
-		const currentIndex = this.#navigationTargets.indexOf(currentTargetId);
+		const currentIndex = this.#navigationTargets.indexOf(currentTargetData.id);
 
-		if (currentIndex === -1) {
-			console.warn('No Navigation Target Index On Scope', {
-				scopeId: this.scopeId,
-				currentNavigationTargetId: currentTargetId
-			});
+		if (currentIndex !== -1) {
+			return this.#findClosestResolvedTarget(currentIndex);
+		}
 
+		if (this.#navigationTargets.size === 0) {
 			return;
 		}
 
-		return this.#findClosestResolvedTarget(currentIndex);
+		const fallbackIndex = Math.min(currentTargetData.index, this.#navigationTargets.size - 1);
+
+		return this.#findClosestResolvedTarget(fallbackIndex);
 	}
 
 	#findClosestResolvedTarget(startIndex: number): ResolvedKeyboardNavigationTarget | undefined {
@@ -383,7 +377,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 			}
 
 			navigationTargetElement.setAttribute(NAVIGATION_INDEX_ATTRIBUTE, i.toString());
-			navigationTargetElement.setAttribute(NAVIGATION_TARGET_ID_ATTRIBUTE, navigationTarget.id);
+			navigationTargetElement.setAttribute(NAVIGATION_RESOLVED_TARGET_ID_ATTRIBUTE, navigationTarget.id);
 
 			if (navigatableNode === currentActiveElement) {
 				activeNavigationTarget = navigationTarget;
@@ -401,27 +395,16 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 			return;
 		}
 
-		this.#currentNavigationTargetId = navigationTarget.id;
+		this.#currentNavigationTargetData = {
+			id: navigationTarget.id,
+			index
+		};
 	}
 
 	#signalNavigationEvent(navigationTarget: KeyboardNavigationTarget) {
 		this.#focusTargetDispatcher.signal({
 			navigationTarget
 		});
-	}
-
-	#setCurrentByFallbackIndex(index: number) {
-		const length = this.#navigationTargets.size;
-
-		if (length === 0) {
-			this.#currentNavigationTargetId = undefined;
-			return;
-		}
-
-		const fallbackIndex = Math.min(index, length - 1);
-		const fallbackTarget = this.#navigationTargets.at(fallbackIndex);
-
-		this.#currentNavigationTargetId = fallbackTarget?.id;
 	}
 
 	#getNavigationTargetFromEvent(event: Event): KeyboardNavigationTarget | undefined {
@@ -431,7 +414,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 			return;
 		}
 
-		const targetElement = element.closest(`[${NAVIGATION_TARGET_ID_ATTRIBUTE}]`);
+		const targetElement = element.closest(`[${NAVIGATION_RESOLVED_TARGET_ID_ATTRIBUTE}]`);
 
 		if (!(targetElement instanceof HTMLElement)) {
 			return;
@@ -441,7 +424,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 			return;
 		}
 
-		const targetId = targetElement.getAttribute(NAVIGATION_TARGET_ID_ATTRIBUTE);
+		const targetId = targetElement.getAttribute(NAVIGATION_RESOLVED_TARGET_ID_ATTRIBUTE);
 
 		if (!targetId) {
 			return;
@@ -451,9 +434,19 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 	}
 
 	#createNavigationTarget(targetElement: HTMLElement): KeyboardNavigationTarget {
-		const id = this.#getAutomaticNavigationTargetId(targetElement);
+		const explicitId = targetElement.getAttribute(NAVIGATION_TARGET_ID_ATTRIBUTE);
 
-		return keyboardNavigationTarget(id, targetElement);
+		if (explicitId !== null) {
+			engineAssert(
+				!explicitId.startsWith(AUTOMATIC_NAVIGATION_TARGET_ID_PREFIX),
+				`Navigation target ID cannot use reserved prefix: ${AUTOMATIC_NAVIGATION_TARGET_ID_PREFIX}`,
+				{ targetElement, explicitId }
+			);
+
+			return keyboardNavigationTarget(explicitId, targetElement);
+		}
+
+		return keyboardNavigationTarget(this.#getAutomaticNavigationTargetId(targetElement), targetElement);
 	}
 
 	#rebuildNavigationTargets(navigationTargets: KeyboardNavigationTarget[]) {
@@ -488,7 +481,8 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 			return existing;
 		}
 
-		const id = `auto-${this.#targetIdCounter++}`;
+		const id = `${AUTOMATIC_NAVIGATION_TARGET_ID_PREFIX}${automaticNavigationTargetIdCounter++}`;
+
 		this.#automaticTargetIds.set(element, id);
 
 		return id;

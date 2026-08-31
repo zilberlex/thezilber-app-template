@@ -6,8 +6,8 @@
 	import type { ScopeInfra } from '$lib/engine/keyboard-navigation/types';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { onMount } from 'svelte';
-	import { markForNavigation } from '$lib/engine/keyboard-navigation/attachments';
 	import ButtonInputSwitch from '../ButtonInputSwitch.svelte';
+	import { markForNavigation } from '$lib/engine/keyboard-navigation/svelte-components/attachments';
 
 	let newButtonCounter = 1;
 	let buttonsInfo1 = $state([
@@ -31,7 +31,7 @@
 		<div class="list list-1 content-surface">
 			<h3>Scope Direct Mark Elements:</h3>
 			{#each buttonsInfo1 as btn (btn.id)}
-				<ButtonInputSwitch content={btn.label} {@attach markForNavigation} />
+				<ButtonInputSwitch content={btn.label} {@attach markForNavigation()} />
 			{/each}
 		</div>
 	</NavigationScope>
@@ -39,7 +39,7 @@
 		<div class="list list-2 content-surface">
 			<h3>Scope Mark Container:</h3>
 			{#each buttonsInfo1 as btn (btn.id)}
-				<div class="element-container" {@attach markForNavigation}>
+				<div class="element-container" {@attach markForNavigation()}>
 					<ButtonInputSwitch content={btn.label} />
 				</div>
 			{/each}
