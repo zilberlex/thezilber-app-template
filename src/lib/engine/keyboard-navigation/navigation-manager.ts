@@ -19,9 +19,8 @@ export class NavigationManager {
 
 	#allNavigationKeys: OneToManyDictionary<string, ScopeInfra> = new OneToManyDictionary<string, ScopeInfra>();
 
-	#nextScopeNavigationKeys = hotkeys(['tab'], 'ctrl|option');
-
-	#prevScopeNavigationKeys = hotkeys(['tab'], 'ctrl|option', 'shift');
+	#nextScopeNavigationKeys = hotkeys(['t']);
+	#prevScopeNavigationKeys = hotkeys(['t'], 'shift');
 
 	#assignHotKeysCounter = 0;
 

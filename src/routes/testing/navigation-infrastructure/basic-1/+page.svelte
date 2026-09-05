@@ -1,11 +1,7 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
-	import { getNavigationManager } from '$lib/engine/keyboard-navigation/svelte-components/navigation-manager-provider.svelte';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import type { ScopeInfra } from '$lib/engine/keyboard-navigation/types';
 	import Button from '$lib/ui/basic-components/Button.svelte';
-	import { onMount } from 'svelte';
 	import ButtonInputSwitch from '../ButtonInputSwitch.svelte';
 	import { markForNavigation } from '$lib/engine/keyboard-navigation/svelte-components/attachments';
 
@@ -15,13 +11,6 @@
 		{ id: 'button-2', label: 'Button2' },
 		{ id: 'button-3', label: 'Button3' }
 	]);
-
-	let navigationManager = getNavigationManager();
-	onMount(() => {
-		if (browser) {
-			return navigationManager.assignScopeNavigationKeys([hotkey('t')], [hotkey('t', 'shift')]);
-		}
-	});
 
 	let scope1 = $state<ScopeInfra>();
 </script>

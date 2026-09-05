@@ -9,9 +9,10 @@
 	import AppInit from '$lib/app/AppInit.svelte';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onNavigate } from '$app/navigation';
-	import AppNavigationManager from '$lib/engine/keyboard-navigation/svelte-components/AppNavigationManager.svelte';
+	import KeyboardNavigationManager from '$lib/engine/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
 
 	import '$lib/ui/style/effects.scss';
+	import EngineErrorHandler from '$lib/app/EngineErrorHandler.svelte';
 
 	let { children } = $props();
 	onNavigate(() => {
@@ -19,8 +20,7 @@
 	});
 </script>
 
-<AppNavigationManager>
-	<AppInit />
+<AppInit>
 	<div
 		bind:this={appState.appRoot}
 		inert={appState.inert}
@@ -35,9 +35,9 @@
 			{@render children?.()}
 		</main>
 	</div>
-</AppNavigationManager>
+</AppInit>
 
-<style lang="scss">
+<style>
 	.app-container {
 		height: 100dvh;
 		width: 100%;

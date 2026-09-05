@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, untrack } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 	import { NavigationManager } from '../navigation-manager';
 	import type { NavigationKeysConfig } from '../types';
 	import { browser } from '$app/environment';
@@ -17,13 +17,13 @@
 
 	setNavigationManager(navigationManager);
 
-	onMount(() => {
-		if (browser) {
-			navigationManager.init();
+	if (browser) {
+		navigationManager.init();
+	}
 
-			return () => {
-				navigationManager.destroy();
-			};
+	onDestroy(() => {
+		if (browser) {
+			navigationManager.destroy();
 		}
 	});
 </script>

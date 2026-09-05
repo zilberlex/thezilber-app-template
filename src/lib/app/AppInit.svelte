@@ -10,6 +10,9 @@
 	import NavigationStateManager from './NavigationStateManager.svelte';
 	import EngineErrorHandler from './EngineErrorHandler.svelte';
 	import HotKeysInitialization from '$lib/engine/hotkeys/svelt-components/HotKeysInitialization.svelte';
+	import KeyboardNavigationManager from '$lib/engine/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
+
+	let { children } = $props();
 
 	onMount(() => {
 		if (browser) {
@@ -32,7 +35,6 @@
 
 <svelte:window onmousemove={handleMouseMove} />
 
-<EngineErrorHandler />
 <HotKeysInitialization />
 <NavigationStateManager />
 <TooltipTracker />
@@ -40,3 +42,8 @@
 <ForegroundLayer />
 
 <EngineHotKeysInit />
+
+<KeyboardNavigationManager>
+	<EngineErrorHandler />
+	{@render children()}
+</KeyboardNavigationManager>

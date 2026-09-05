@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
-	import AppNavigationManager from '$lib/engine/keyboard-navigation/svelte-components/AppNavigationManager.svelte';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
+	import KeyboardNavigationManager from '$lib/engine/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { NavigationManager } from '$lib/engine/keyboard-navigation/navigation-manager';
 	import NavigationManagerDebugScreen from '$lib/app/debug-screens/NavigationManagerDebugScreen.svelte';
@@ -16,12 +16,6 @@
 
 	let navigationManager = $state<NavigationManager>();
 
-	$effect(() => {
-		if (navigationManager) {
-			navigationManager.assignScopeNavigationKeys([hotkey('t')], [hotkey('t', 'shift')]);
-		}
-	});
-
 	debugState.customizableDebugScreen = customDebugSnippet;
 </script>
 
@@ -29,7 +23,7 @@
 	<NavigationManagerDebugScreen {navigationManager} />
 {/snippet}
 
-<AppNavigationManager bind:navigationManager>
+<KeyboardNavigationManager bind:navigationManager>
 	<main class="ly-center">
 		<div class="container">
 			<NavigationScope scopeId="controlsScope" navigationKeys={NavigationKeysConfigSets.Horizontal}>
@@ -80,7 +74,7 @@
 			</div>
 		</div>
 	</main>
-</AppNavigationManager>
+</KeyboardNavigationManager>
 
 <style>
 	.scopes {

@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
-	import AppNavigationManager from '$lib/engine/keyboard-navigation/svelte-components/AppNavigationManager.svelte';
-	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
+	import KeyboardNavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { NavigationManager } from '$lib/engine/keyboard-navigation/navigation-manager';
 	import NavigationManagerDebugScreen from '$lib/app/debug-screens/NavigationManagerDebugScreen.svelte';
@@ -10,6 +9,7 @@
 	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/configurations';
 	import ToggleOnOff from '../ToggleOnOff.svelte';
 	import { markForNavigation } from '$lib/engine/keyboard-navigation/svelte-components/attachments';
+	import KeyboardNavigationManager from '$lib/engine/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
 
 	let showScopeA = $state(true);
 	let showScopeB = $state(true);
@@ -19,12 +19,6 @@
 
 	let navigationManager = $state<NavigationManager>();
 
-	$effect(() => {
-		if (navigationManager) {
-			navigationManager.assignScopeNavigationKeys([hotkey('t')], [hotkey('t', 'shift')]);
-		}
-	});
-
 	debugState.customizableDebugScreen = customDebugSnippet;
 </script>
 
@@ -32,10 +26,10 @@
 	<NavigationManagerDebugScreen {navigationManager} />
 {/snippet}
 
-<AppNavigationManager bind:navigationManager>
+<KeyboardNavigationManager bind:navigationManager>
 	<main class="ly-center">
 		<div class="container">
-			<NavigationScope scopeId="controlsScope" navigationKeys={NavigationKeysConfigSets.Horizontal}>
+			<KeyboardNavigationScope scopeId="controlsScope" navigationKeys={NavigationKeysConfigSets.Horizontal}>
 				<ToggleOnOff bind:toggle={showScopeA} {@attach createClickHotKeyAttachment('Toggle A', hotkey('1'))}>
 					Scope A
 				</ToggleOnOff>
@@ -49,33 +43,33 @@
 				<ToggleOnOff bind:toggle={hideC2} {@attach createClickHotKeyAttachment('Toggle Element C-2', hotkey('4'))}>
 					Toggle C-2 + Add Random
 				</ToggleOnOff>
-			</NavigationScope>
+			</KeyboardNavigationScope>
 
 			<div class="scopes">
 				<div class="scope-container">
-					<NavigationScope scopeId="scopeA" class="scope" escapeMode="escape" discoveryMode="all-focusable">
+					<KeyboardNavigationScope scopeId="scopeA" class="scope" escapeMode="escape" discoveryMode="all-focusable">
 						<div>Scope A - Discovery All-Focusable</div>
 						{#if showScopeA}
 							<Button }>A</Button>
 							<Button>B</Button>
 							<Button>C</Button>
 						{/if}
-					</NavigationScope>
+					</KeyboardNavigationScope>
 				</div>
 
 				<div class="scope-container">
-					<NavigationScope scopeId="scopeB" class="scope" escapeMode="escape" discoveryMode="marked">
+					<KeyboardNavigationScope scopeId="scopeB" class="scope" escapeMode="escape" discoveryMode="marked">
 						<div>Scope B - Discovery Marked, Auto Id</div>
 						{#if showScopeB}
 							<Button {@attach markForNavigation()}>A</Button>
 							<Button {@attach markForNavigation()}>B</Button>
 							<Button {@attach markForNavigation()}>C</Button>
 						{/if}
-					</NavigationScope>
+					</KeyboardNavigationScope>
 				</div>
 
 				<div class="scope-container">
-					<NavigationScope scopeId="scopeC" class="scope" escapeMode="escape" discoveryMode={'marked'}>
+					<KeyboardNavigationScope scopeId="scopeC" class="scope" escapeMode="escape" discoveryMode={'marked'}>
 						<div>Scope C - Discovery Marked, Explicit Id</div>
 						{#if showScopeC}
 							<Button {@attach markForNavigation('3-a')}>A</Button>
@@ -88,12 +82,12 @@
 							{/if}
 							<Button {@attach markForNavigation('3-c')}>C</Button>
 						{/if}
-					</NavigationScope>
+					</KeyboardNavigationScope>
 				</div>
 			</div>
 		</div>
 	</main>
-</AppNavigationManager>
+</KeyboardNavigationManager>
 
 <style>
 	.scopes {

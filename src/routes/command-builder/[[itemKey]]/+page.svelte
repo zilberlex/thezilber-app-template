@@ -6,7 +6,6 @@
 	import type { CbAppEnv, CbData, CbProjection } from './command-builder-types';
 	import { collectionAppInit } from '$lib/app-infrastructure/collection-app/environement.svelte';
 	import CommandBuilderSidebar from './CommandBuilderSidebar.svelte';
-	import CommandBuilderNavigationKeys from './CommandBuilderNavigationKeys.svelte';
 	import { onDestroy, onMount } from 'svelte';
 	import { beforeNavigate } from '$app/navigation';
 
@@ -49,8 +48,6 @@
 		cbAppEnv?.destroy();
 	}
 </script>
-
-<CommandBuilderNavigationKeys />
 
 {#if cbAppEnv !== undefined}
 	<SidebarAppShell>

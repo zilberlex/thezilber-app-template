@@ -1,19 +1,7 @@
 <script lang="ts">
-	import { getNavigationManager } from '$lib/engine/keyboard-navigation/svelte-components/navigation-manager-provider.svelte';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
-	import { onMount } from 'svelte';
-
-	import { browser } from '$app/environment';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import NavigatableAndUnnavigatableSwitcher from '../NavigatableAndUnnavigatableSwitcher.svelte';
 	import { markForNavigation } from '$lib/engine/keyboard-navigation/svelte-components/attachments';
-
-	let navigationManager = getNavigationManager();
-	onMount(() => {
-		if (browser) {
-			return navigationManager.assignScopeNavigationKeys([hotkey('t')], [hotkey('t', 'shift')]);
-		}
-	});
 </script>
 
 <main class="ly-center">
