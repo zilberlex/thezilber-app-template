@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
-	import { flip, shift } from '@floating-ui/dom';
+	import { flip, shift, type FloatingElement, type VirtualElement } from '@floating-ui/dom';
 	import { offset } from '@floating-ui/dom';
 	import { computePosition } from '@floating-ui/dom';
+	import { untrack } from 'svelte';
 
-	let { children = null } = $props();
+	let { children = null, shouldUpdatePos } = $props();
 	let mouseX = $state(0);
 	let mouseY = $state(0);
 
@@ -18,9 +19,9 @@
 		mouseY = event.clientY;
 	}
 
-	let mouseTrackerElement: HTMLElement;
+	let mouseTrackerElement: HTMLElement | undefined = $state();
 
-	const virtualMouse = {
+	const virtualMouse: VirtualElement = {
 		getBoundingClientRect() {
 			const x = mouseX;
 			const y = mouseY;
@@ -40,10 +41,8 @@
 		}
 	};
 
-	async function updatePosition() {
-		if (!mouseTrackerElement) return;
-
-		const { x, y } = await computePosition(virtualMouse as any, mouseTrackerElement, {
+	async function updatePosition(anchor: FloatingElement) {
+		const { x, y } = await computePosition(virtualMouse, anchor, {
 			placement: 'bottom-start',
 			middleware: [
 				offset({
@@ -61,14 +60,36 @@
 			]
 		});
 
-		mouseTrackerElement.style.left = `${x}px`;
-		mouseTrackerElement.style.top = `${y}px`;
+		anchor.style.left = `${x}px`;
+		anchor.style.top = `${y}px`;
 	}
 
 	$effect(() => {
-		if (!mouseTrackerElement) return;
+		if (!mouseTrackerElement || !shouldTrack) return;
 		track(mouseX, mouseY);
-		void updatePosition();
+		updatePosition(mouseTrackerElement);
+	});
+
+	let stopTrackingDelay = 0;
+	let shouldTrack = $state(shouldUpdatePos);
+
+	$effect(() => {
+		track(shouldUpdatePos);
+
+		return untrack(() => {
+			if (shouldUpdatePos) {
+				shouldTrack = true;
+				return () => {};
+			} else {
+				let t = setTimeout(() => {
+					shouldUpdatePos = false;
+				}, stopTrackingDelay);
+
+				return () => {
+					clearTimeout(t);
+				};
+			}
+		});
 	});
 </script>
 

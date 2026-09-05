@@ -20,7 +20,18 @@ picture {
 button {
 	outline: none;
 	border: none;
+}
+
+:root {
 	caret-color: transparent;
+}
+
+/* Restore normal caret where typing is real */
+input,
+textarea,
+[contenteditable],
+[role='textbox'] {
+	caret-color: auto;
 }
 
 input,
@@ -29,6 +40,10 @@ textarea,
 select {
 	font: inherit;
 	background-color: inherit;
+	color: inherit;
+}
+
+a {
 	color: inherit;
 }
 

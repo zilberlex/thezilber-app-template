@@ -1,53 +1,82 @@
 import { createSmartHandler } from '../events/event-handling';
 import { signalClickHotkeyEvent } from './bl-hotkeys-event-signals';
 import { GO_KEYS } from './hotkey-groups';
-import {
-	ArrowKeysArray,
-	NavigationKeyConsts,
-	NodesWhichTakePriorityOverSoftHotKeys,
-	type NavType
-} from './consts';
+import { ArrowKeysArray, NavigationKeyConsts, NodesWhichTakePriorityOverSoftHotKeys } from './consts';
+import type { NavType } from './types';
+import { HotKey } from './hotkey-class';
+export type KeyboardEventHandler = (keyboardEvent: KeyboardEvent) => void;
 
-/**
- * @param {function(KeyboardEvent): void} onActionEventHandler
- * @returns {function(KeyboardEvent)}
- */
-export function createOnGoClickHandler(onActionEventHandler) {
+export function createOnGoClickHandler(onActionEventHandler: KeyboardEventHandler) {
 	let smartClickHandling = createKeyabordNavigationEventHandler(onActionEventHandler);
 
-	/** @param {KeyboardEvent} event */
-	return async function (event) {
+	return async function (event: KeyboardEvent) {
 		// TODO create better infra for relevancy -> preventdefault -> cd+debounce creation
 		if (isKeyboardGoEvent(event)) {
 			await smartClickHandling.call(this, event);
-			signalClickHotkeyEvent(event.key, event.target);
+
+			let target = null;
+			if (event.target instanceof HTMLElement) target = event.target;
+			signalClickHotkeyEvent(event.key, target);
 		}
 	};
 }
 
-/**
- * @param {function(KeyboardEvent): void} handler
- * @returns {function(KeyboardEvent): void}
- */
-export function createKeyabordNavigationEventHandler(handler) {
+export function createKeyabordNavigationEventHandler(
+	handler: KeyboardEventHandler,
+	strength: 'soft' | 'hard' = 'soft'
+) {
 	return createSmartHandler(handler, {
 		cooldownDelay: 20,
-		shouldExecuteFunction: (event) => !shouldIgnoreHotKey(event)
+		shouldExecuteFunction: (event: KeyboardEvent) => !shouldIgnoreHotKey(event, strength)
 	});
 }
 
-/** @param {KeyboardEvent} event */
-export function isKeyboardGoEvent(event) {
+export function createSoftKeyHandler(handler: KeyboardEventHandler) {
+	return createSmartHandler(handler, {
+		cooldownDelay: 20,
+		shouldExecuteFunction: (event: KeyboardEvent) => !shouldIgnoreHotKey(event, 'soft')
+	});
+}
+
+export function createKeyboardNavigationEventHandlerMixedSoftness(
+	handler: KeyboardEventHandler,
+	softKeys: HotKey[],
+	hardKeys: HotKey[]
+) {
+	let shouldExecuteFunction = (event: Event) =>
+		!shouldIgnoreHotkeyPrecise(event as KeyboardEvent, HotKey.fromEvent(event as KeyboardEvent), softKeys, hardKeys);
+
+	return createSmartHandler(handler, {
+		cooldownDelay: 20,
+		shouldExecuteFunction
+	});
+}
+
+export function isKeyboardGoEvent(event: KeyboardEvent) {
 	return GO_KEYS.includes(event.key.toLowerCase());
 }
 
-export function shouldIgnoreHotKey(event: KeyboardEvent) {
+function shouldIgnoreHotkeyPrecise(event: KeyboardEvent, eventKey: HotKey, softKeys: HotKey[], hardKeys: HotKey[]) {
+	let hardMatch = eventKey.pickBestMatchingKey(hardKeys);
+
+	if (hardMatch) {
+		return true;
+	}
+
+	let softMatch = eventKey.pickBestMatchingKey(softKeys);
+
+	if (softMatch) {
+		return shouldIgnoreHotKey(event, 'soft');
+	}
+
+	return false;
+}
+
+export function shouldIgnoreHotKey(event: KeyboardEvent, strength: 'soft' | 'hard') {
+	if (strength === 'hard') return false;
 	let element = event.target as HTMLElement;
 	let navType = GetNavType(event);
-	return (
-		navType.strength === 'soft' &&
-		NodesWhichTakePriorityOverSoftHotKeys.includes(element.tagName.toLowerCase())
-	);
+	return navType.strength === 'soft' && NodesWhichTakePriorityOverSoftHotKeys.includes(element.tagName.toLowerCase());
 }
 
 export function GetNavType(event: KeyboardEvent): NavType {

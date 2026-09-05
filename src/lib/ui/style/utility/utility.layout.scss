@@ -4,6 +4,8 @@ $emit-default: false !default;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+  min-height: 100%;
+  min-width: 100%;
 }
 
 @mixin ly-full-screen {

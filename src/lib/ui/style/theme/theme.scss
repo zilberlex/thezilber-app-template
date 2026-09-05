@@ -1,4 +1,6 @@
-@use '$lib/ui/style/effects.scss' as *;
+@use '$lib/ui/style/effects.scss' as * with (
+	$emit-default: true
+);
 @use '$lib/ui/style/utility.color.scss' as *;
 @use '$lib/ui/style/theme/theme.button.scss' as tButton;
 @use '$lib/ui/style/theme/theme.box.scss' as tBox;
@@ -6,19 +8,23 @@
 @use '$lib/ui/style/theme/theme.input.scss' as tInput;
 @use '$lib/ui/style/theme/theme.lists.scss' as tLists;
 @use '$lib/ui/style/theme/theme.href.scss' as tHref;
+@use '$lib/ui/style/theme/theme.scrollbar.scss' as tScrollbar;
 @use '$lib/ui/style/theme/theme.headlines.scss' as headline;
 @use '$lib/ui/style/utility/utility.scss' with (
 	$emit-default: true
 );
+@use '$lib/ui/style/theme/theme.caret.scss';
+@use '$lib/ui/style/theme/theme.content-surface.scss' as tContentSurface;
+@import '$lib/engine/elements-3d/three-d.css';
 @import '$lib/ui/style/tokens.color.css';
 @import '$lib/ui/style/tokens.typography.css';
-@import '$lib/ui/style/tokens.layout.css';
 @import '$lib/ui/style/tokens.misc.css';
+@import '$lib/ui/style/tokens.style.semantic.css';
 
 body,
 input {
 	font-family: var(--font-1);
-	font-size: var(--font-size-1);
+	font-size: var(--font-size-body);
 }
 
 body {

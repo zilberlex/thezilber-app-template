@@ -1,18 +1,26 @@
 @import '$lib/ui/style/tokens.misc.css';
 
 @mixin rings {
+	--_cl-layer-2: oklch(from var(--cl-primary) calc(l - 0.15) c h);
+	--_cl-layer-3: oklch(from var(--cl-primary) calc(l - 0.35) c h);
+	--_cl-layer-4: oklch(from var(--cl-primary) calc(l - 0.45) c h);
+
+	--_cl-layer-2-invis: oklch(from var(--cl-layer-2) l c h / 0);
+	--_cl-layer-3-invis: oklch(from var(--cl-layer-3) l c h / 0);
+	--_cl-layer-4-invis: oklch(from var(--cl-layer-4) l c h / 0);
+
 	--ring1: 0 0 0 1.5px var(--cl-background);
-	--ring2: 0 0 0 3px var(--cl-primary-dim);
+	--ring2: 0 0 0 3px var(--_cl-layer-2);
 	--ring3: 0 0 0 4px var(--cl-background);
-	--ring4: 0 0 0 5px var(--cl-primary-dimmer);
+	--ring4: 0 0 0 5px var(--_cl-layer-3);
 	--ring5: 0 0 0 6px var(--cl-background);
-	--ring6: 0 0 0 7px var(--cl-primary-dimmest);
+	--ring6: 0 0 0 7px var(--_cl-layer-4);
 
-	--ring2-invis: 0 0 0 3px var(--cl-primary-dim-transparent);
-	--ring4-invis: 0 0 0 5px var(--cl-primary-dimmer-transparent);
-	--ring6-invis: 0 0 0 7px var(--cl-primary-dimmest-transparent);
+	--ring2-invis: 0 0 0 3px var(--_cl-layer-2-invis);
+	--ring4-invis: 0 0 0 5px var(--_cl-layer-3-invis);
+	--ring6-invis: 0 0 0 7px var(--_cl-layer-4-invis);
 
-	--rings-end-bg: radial-gradient(120% 100%, #000 0%, var(--cl-primary-dimmer) 175%);
+	--rings-end-bg: radial-gradient(120% 100%, #000 0%, var(--cl-primary) 175%);
 
 	animation: ring-stack 0.25s forwards linear;
 }
@@ -61,16 +69,18 @@
 			inset var(--ring5),
 			inset var(--ring6);
 
-		background: var(--rings-end-bg);
+		// No background works better with 3d Effects.
+		//background: var(--rings-end-bg);
 	}
 }
 
 button,
 a.link-button {
-	position: relative;
-	isolation: isolate;
+	cursor: pointer;
 
-  --_hover-offset: -4px;
+	position: relative;
+
+	--_hover-offset: -4px;
 
 	color: var(--cl-on-primary);
 	background-color: var(--cl-background);
@@ -79,19 +89,20 @@ a.link-button {
 
 	border: var(--border-thick) solid var(--cl-primary);
 	border-radius: var(--border-radius);
-	padding: var(--space-2) var(--space-3);
 
-	filter: drop-shadow(0px 0px 4px var(--color-1-transparent));
+	padding: var(--space-2) var(--space-4);
 
 	line-height: var(--sp-line-height);
+
+	box-shadow:
+		0 0 4px var(--color-1-transparent),
+		0 0 8px transparent;
 
 	&,
 	&::before,
 	&::after,
 	& span {
-		transition:
-			all,
-			0.25s linear;
+		transition: all 0.25s linear;
 	}
 
 	span {
@@ -100,55 +111,68 @@ a.link-button {
 		padding-inline: 2px;
 	}
 
-	&:is(:focus-visible, :hover), &.btn-pressed {
+	&:is(:focus-visible, :hover),
+	&.btn-pressed {
 		border-color: var(--color-1-brightest);
-		filter: drop-shadow(0px 0px 4px var(--color-1));
+		box-shadow:
+			0 0 4px var(--color-1),
+			0 0 8px color-mix(in srgb, var(--color-1) 60%, transparent);
 
 		&::after {
 			@include rings();
 
 			position: absolute;
 			inset: 0;
+			z-index: -1;
+
 			content: '';
 
 			border-radius: inherit;
-
-			z-index: -1;
-
 			box-shadow: none;
 		}
 
-		& {
-			transform: translate(0, calc(-4px)) scale(1);
+		&:not(.td-surface) {
+			transform: translateY(var(--_hover-offset));
+		}
+
+		&.td-surface {
+			--td-translate-y: var(--_hover-offset);
 		}
 
 		& span {
-			transform: translate(0, calc(0.5px)) scale(1);
+			transform: translateY(0.5px);
 		}
 	}
-  
+
 	&:active,
-  &.btn-start-work {
+	&.btn-start-work {
 		&,
-		& * {
+		& *:not(.td-face) {
 			transition: all 0s;
 		}
-  }
+	}
 
 	&:active,
-  &.btn-pressed {
+	&.btn-pressed {
+		&:not(.td-surface) {
+			transform: translateY(0);
 
-		& {
-			transform: translate(0, 0) scale(1);
+			& span {
+				transform: translateY(0);
+			}
 		}
 
-		& span {
-			transform: translate(0, 0) scale(1);
+		&.td-surface {
+			--td-translate-y: 0px;
+			--td-depth: 0px;
+			--td-depth-transition-time: 0ms;
 		}
 	}
 
-  &.btn-pressed {
-    border-color: var(--cl-primary-brightest);
-		filter: drop-shadow(0px 0px 12px var(--cl-primary));
-  }
+	&.btn-pressed {
+		border-color: var(--cl-primary-brightest);
+		box-shadow:
+			0 0 8px var(--cl-primary),
+			0 0 16px color-mix(in srgb, var(--cl-primary) 70%, transparent);
+	}
 }

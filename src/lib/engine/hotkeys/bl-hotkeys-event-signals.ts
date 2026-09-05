@@ -20,32 +20,14 @@ export interface MarkParagraphEventObject {
 	wasMarked: boolean;
 }
 
-const navigationHotkeyEventDispatcher = new DispatcherImpl<NavigationHotkeyEventObject>();
 const clickHotkeyEventDispatcher = new DispatcherImpl<ClickHotkeyEventObject>();
 const focusHotkeyEventDispatcher = new DispatcherImpl<ClickHotkeyEventObject>();
 const markParagraphEventDispatcher = new DispatcherImpl<MarkParagraphEventObject>();
 
 type BLEventsHandler<T> = (obj: T) => any | boolean;
 type UnregisterFunction = () => any;
-type RegisterFunction<T> = (
-	handlerWithCheckForAutoRemoval: BLEventsHandler<T>
-) => UnregisterFunction;
 
-export function registerNavigationHotkeyHandler(
-	handler: (obj: NavigationHotkeyEventObject) => any | boolean
-): UnregisterFunction {
-	navigationHotkeyEventDispatcher.register(handler);
-
-	return () => navigationHotkeyEventDispatcher.unregister(handler);
-}
-
-export function signalNavigationHotkeyEvent(key: string, targetNode: HTMLElement) {
-	navigationHotkeyEventDispatcher.signal({ key, targetNode });
-}
-
-export function registerClickHotkeyHandler(
-	handler: BLEventsHandler<ClickHotkeyEventObject>
-): UnregisterFunction {
+export function registerClickHotkeyHandler(handler: BLEventsHandler<ClickHotkeyEventObject>): UnregisterFunction {
 	clickHotkeyEventDispatcher.register(handler);
 
 	return () => clickHotkeyEventDispatcher.unregister(handler);

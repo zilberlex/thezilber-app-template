@@ -29,6 +29,20 @@ export class OneToManyDictionary<TKey extends KeyLike | PrimitiveKey, TValue> {
 		}
 	}
 
+	getMultiple(keys: TKey[]): Array<{ key: TKey; values: TValue[] }> {
+		const result: Array<{ key: TKey; values: TValue[] }> = [];
+
+		for (const key of keys) {
+			const values = this.get(key);
+
+			if (values.length > 0) {
+				result.push({ key, values });
+			}
+		}
+
+		return result;
+	}
+
 	removeValues(key: TKey, values: TValue[]) {
 		const normlizedKey = this.normalizeKey(key);
 		let currentValues = this.#map.get(normlizedKey);

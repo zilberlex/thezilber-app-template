@@ -1,0 +1,18 @@
+@keyframes caret-animation {
+  from {
+    caret-color: transparent;
+  }
+  
+  to {
+    caret-color: var(--cl-primary);
+  }
+}
+
+input,
+textarea,
+[contenteditable],
+[role='textbox'] {
+  caret-animation: manual;
+  animation: caret-animation infinite cubic-bezier(0.411, 0.746, 0.677, 0.985) alternate 1s;
+}
+

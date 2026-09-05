@@ -6,45 +6,63 @@ type EventHandler<E extends Event> = (event: E) => void;
 class HotkeysModule {
 	#wasInitialized = false;
 
-	#hotKeysToHandlers = new OneToManyDictionary<HotKey, EventHandler<KeyboardEvent>>(true);
+	#hotKeysHandlers = new OneToManyDictionary<HotKey, EventHandler<KeyboardEvent>>(true);
+	#hotKeysCaptureHandlers = new OneToManyDictionary<HotKey, EventHandler<KeyboardEvent>>(true);
 
 	#onKeydownBound: (event: KeyboardEvent) => void = this.#onKeydown.bind(this);
 
-	assignHotKey(key: HotKey, handler: EventHandler<KeyboardEvent>) {
-		console.debug('HotkeysModule assigning key:', key, 'to handler:', handler.toString());
+	assignHotKey(key: HotKey, handler: EventHandler<KeyboardEvent>, isCaptrue = false) {
+		console.debug('HotkeysModule assigning key:', key, 'to handler:', handler.name ?? '<annonymous>');
 
 		if (!this.#wasInitialized) {
 			throw new Error(`${HotkeysModule.name} Need to initialize Class before assigning hotkeys`);
 		}
 
-		this.#hotKeysToHandlers.add(key, handler);
+		if (isCaptrue) {
+			this.#hotKeysCaptureHandlers.add(key, handler);
+		} else {
+			this.#hotKeysHandlers.add(key, handler);
+		}
 	}
 
 	removeHotKey(key: HotKey, handler: EventHandler<KeyboardEvent>) {
-		this.#hotKeysToHandlers.remove(key, handler);
+		console.debug('HotkeysModule removing key:', key, 'to handler:', handler.name ?? '<annonymous>');
+		this.#hotKeysHandlers.remove(key, handler);
+		this.#hotKeysCaptureHandlers.remove(key, handler);
 	}
 
-	assignHotKeys(keys: HotKey[], handler: EventHandler<KeyboardEvent>) {
-		keys.forEach((key) => this.assignHotKey(key, handler));
+	assignHotKeys(keys: HotKey[], handler: EventHandler<KeyboardEvent>, isCaptrue = false) {
+		keys.forEach((key) => this.assignHotKey(key, handler, isCaptrue));
 	}
 
 	removeHotKeys(keys: HotKey[], handler: EventHandler<KeyboardEvent>) {
 		keys.forEach((key) => this.removeHotKey(key, handler));
 	}
 
+	count = 0;
 	#onKeydown(event: KeyboardEvent) {
-		let hotKeyedHandlers = this.#hotKeysToHandlers;
-		let eventKey = HotKey.fromEvent(event);
-		let handlers = hotKeyedHandlers.get(eventKey);
+		let hotKeyedHandlers = this.#hotKeysHandlers;
 
-		console.debug(
-			'HotkeysModule - reachedKeydownEvent key:',
-			eventKey.toKey(),
-			'relevantHandlers',
-			handlers?.length
+		if (event.eventPhase === Event.CAPTURING_PHASE) {
+			hotKeyedHandlers = this.#hotKeysCaptureHandlers;
+		}
+
+		let eventKey = HotKey.fromEvent(event);
+		const possibleMatches = eventKey.getPossibleRegisteredMatches();
+
+		const matches = hotKeyedHandlers.getMultiple(possibleMatches);
+
+		const handlers = eventKey.pickBestMatch(
+			matches.map(({ key, values }) => ({
+				hotKey: key,
+				cbObject: values
+			}))
 		);
 
-		handlers?.forEach((handler) => handler(event));
+		console.debug('HotkeysModule - reachedKeydownEvent key:', eventKey.toKey(), 'relevantHandlers', handlers?.length);
+
+		// Fires Last Handler - Hopefully this is good enough for most cases.
+		handlers?.at(-1)?.(event);
 	}
 
 	init() {
@@ -53,13 +71,15 @@ class HotkeysModule {
 		}
 
 		document.addEventListener('keydown', this.#onKeydownBound);
+		document.addEventListener('keydown', this.#onKeydownBound, { capture: true });
 		this.#wasInitialized = true;
 	}
 
 	destroy() {
 		document.removeEventListener('keydown', this.#onKeydownBound);
+		document.removeEventListener('keydown', this.#onKeydownBound, { capture: true });
 
-		this.#hotKeysToHandlers = new OneToManyDictionary();
+		this.#hotKeysHandlers = new OneToManyDictionary();
 		this.#wasInitialized = false;
 	}
 }

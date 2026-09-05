@@ -1,6 +1,6 @@
 import type { Command } from '../command';
 
-export function wrapAutoResetCommand(command: Command, timeoutMs: number): Command {
+export function wrapAutoResetCommand(command: Command<boolean>, timeoutMs: number): Command<boolean> {
 	let timeout: number;
 	let wasExecuted: boolean;
 	return {
@@ -19,10 +19,12 @@ export function wrapAutoResetCommand(command: Command, timeoutMs: number): Comma
 		},
 		undo: () => {
 			clearTimeout(timeout);
+			let ret = false;
 			if (command.executed) {
-				command.undo();
+				ret = command.undo();
 			}
 			wasExecuted = false;
+			return ret;
 		},
 		get executed() {
 			return command.executed;

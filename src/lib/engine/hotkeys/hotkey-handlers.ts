@@ -41,20 +41,12 @@ function btnClickCssFlow(btn: HTMLButtonElement, triggerType: TriggerType = 'KEY
 	let btnCommands = allBtnCommands.get(btn);
 
 	if (!btnCommands) {
-		console.log('Creating New CssCommands For Button', btn);
+		console.debug('Creating New CssCommands For Button', btn);
 		btnCommands = [];
-		let startWorkClassCommand = createAddTempCssClassCommand(
-			btn,
-			'btn-start-work',
-			BUTTON_RAPID_FIRE_COOLDOWN
-		);
+		let startWorkClassCommand = createAddTempCssClassCommand(btn, 'btn-start-work', BUTTON_RAPID_FIRE_COOLDOWN);
 		btnCommands.push(startWorkClassCommand);
 		if (triggerType == 'KEY_DOWN') {
-			let btnPressedClassCommand = createAddTempCssClassCommand(
-				btn,
-				'btn-pressed',
-				BUTTON_PRESSED_DURATION
-			);
+			let btnPressedClassCommand = createAddTempCssClassCommand(btn, 'btn-pressed', BUTTON_PRESSED_DURATION);
 
 			btnCommands.push(btnPressedClassCommand);
 		}

@@ -1,5 +1,5 @@
-export type Command = {
-	execute: () => boolean;
-	undo: () => void;
-	readonly executed: boolean;
-};
+export interface Command<R = void> {
+	execute: () => R;
+	undo: () => R;
+	get executed(): boolean;
+}

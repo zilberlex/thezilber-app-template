@@ -6,7 +6,7 @@ import { wrapAutoResetCommand } from './auto-reset-command';
  * Execute: Adds the specified class to the target Element.
  * Undo: will remove the cssClass.
  *  * the class will be removed only if the class was added due to command execution. */
-export function createAddCssClassCommand(target: Element, cssClass: string): Command {
+export function createAddCssClassCommand(target: Element, cssClass: string): Command<boolean> {
 	let wasExecuted = false;
 	return {
 		execute: () => {
@@ -20,10 +20,15 @@ export function createAddCssClassCommand(target: Element, cssClass: string): Com
 			return true;
 		},
 		undo: () => {
+			let ret = false;
 			if (wasExecuted) {
 				target.classList.remove(cssClass);
 				wasExecuted = false;
+
+				ret = true;
 			}
+
+			return ret;
 		},
 		get executed() {
 			return wasExecuted;
@@ -37,10 +42,6 @@ export function createAddCssClassCommand(target: Element, cssClass: string): Com
  * * Will only remove the class if the class was not present when the command was executed.
  *
  * Rapid Executions of the Command will refresh the duration. */
-export function createAddTempCssClassCommand(
-	target: Element,
-	cssClass: string,
-	durationMs: number
-) {
+export function createAddTempCssClassCommand(target: Element, cssClass: string, durationMs: number) {
 	return wrapAutoResetCommand(createAddCssClassCommand(target, cssClass), durationMs);
 }

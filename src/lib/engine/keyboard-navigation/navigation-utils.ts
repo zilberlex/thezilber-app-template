@@ -1,16 +1,56 @@
-import { navigationStateManager } from '$lib/engine/state/navigation-state';
+import { navigationStateManager } from '../state/navigation-state.svelte';
+import { safeInstanceOf } from '../types/type-utils';
+import type { FocusableElement } from './types';
 
-export function keyBoardFocusNavigatedNode(node: HTMLElement) {
-	navigationStateManager.setKeyboardNavigationMode();
+export function engineFocus(node: FocusableElement) {
 	node.focus({ preventScroll: true });
 	node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-	const textElement = node as HTMLInputElement | HTMLTextAreaElement | null;
-	if (textElement) textElement.select();
+	const textElement = safeInstanceOf(node, HTMLInputElement, HTMLTextAreaElement);
+	textElement?.select();
+}
+
+export function keyBoardFocusNavigatedNode(node: FocusableElement) {
+	navigationStateManager.setKeyboardNavigationMode();
+
+	engineFocus(node);
+}
+
+const focusableCandidateSelector = [
+	'a[href]',
+	'button',
+	'input',
+	'select',
+	'textarea',
+	'details > summary:first-of-type',
+	'[tabindex]',
+	'[contenteditable="true"]'
+].join(',');
+
+function isCandidateFocusable(el: HTMLElement): boolean {
+	if (el.matches('[disabled]')) return false;
+	if (el.matches('[tabindex="-1"]')) return false;
+	if (el.closest('[inert]')) return false;
+
+	return true;
+}
+
+export function isFocusableElement(element: HTMLElement): boolean {
+	return element.matches(focusableCandidateSelector) && isCandidateFocusable(element);
 }
 
 export function getFocusableElementsByNode(node: HTMLElement): HTMLElement[] {
-	return Array.from<HTMLElement>(
-		node.querySelectorAll('a, button, input, textarea, select, summary, [tabindex]')
-	).filter((el) => !el.hasAttribute('disabled') && el.tabIndex !== -1);
+	return Array.from<HTMLElement>(node.querySelectorAll(focusableCandidateSelector)).filter(isCandidateFocusable);
+}
+
+export function getFirstFocusable(node: HTMLElement) {
+	if (node.matches(focusableCandidateSelector) && isCandidateFocusable(node)) {
+		return node;
+	}
+
+	let candidate = node.querySelector(focusableCandidateSelector) as HTMLElement;
+	if (candidate && isCandidateFocusable(candidate)) {
+		return candidate;
+	}
+	return null;
 }

@@ -5,19 +5,16 @@
 	import '$lib/ui/style/theme/theme.scss';
 	import { createFocusHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { resolve } from '$app/paths';
+	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 </script>
 
 <div class="home-button-container">
-	<a
-		href={resolve('/')}
-		class="home-button left"
-		{@attach createFocusHotKeyAttachment('Home ', 'h', 'alt')}>Home</a
+	<a href={resolve('/')} class="home-button left" {@attach createFocusHotKeyAttachment('Home ', hotkey('h', 'alt'))}
+		>Home</a
 	>
 </div>
 
 <style lang="scss">
-	@use '$lib/ui/style/utility/utility.scss' as *;
-
 	.home-button-container {
 		padding-block: 10px;
 		display: inline-block;

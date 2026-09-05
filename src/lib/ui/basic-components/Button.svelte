@@ -13,15 +13,11 @@
 		...rest
 	} = $props();
 
-	const onkeyDown = createEngineButtonClickOnKeyDownHandler();
-	const onClick = createEngineButtonOnClickHandler();
+	const onkeydown = createEngineButtonClickOnKeyDownHandler();
+	const onclick = createEngineButtonOnClickHandler();
 
 	const mergedProps = $derived(
-		mergeProps(
-			{ onkeydown: userOnKeydown, onclick: userOnClick },
-			{ onkeydown: onkeyDown, onclick: onClick },
-			rest
-		)
+		mergeProps({ onkeydown: userOnKeydown, onclick: userOnClick }, { onkeydown, onclick }, rest)
 	);
 </script>
 

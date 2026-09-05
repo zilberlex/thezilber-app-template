@@ -1,0 +1,47 @@
+:root {
+	--ef-focus-ring-out-size-start: 0;
+	--ef-focus-ring-out-size-end: 5px;
+
+	--ef-focus-ring-in-size-start: 10px;
+	--ef-focus-ring-in-size-end: 10px;
+}
+
+@keyframes focus-ring-out {
+	0% {
+		outline: 2px solid oklch(from var(--cl-primary-brightest) l c h / 0);
+		outline-offset: var(--ef-focus-ring-out-size-start);
+	}
+
+	50% {
+		outline: 2px solid oklch(from var(--cl-primary-brightest) l c h / 1);
+	}
+
+	100% {
+		outline: 2px solid oklch(from var(--cl-primary-brightest) l c h / 0);
+		outline-offset: var(--ef-focus-ring-out-size-end);
+	}
+}
+
+@keyframes focus-ring-in {
+	0% {
+		outline: 2px solid oklch(from var(--cl-primary-brightest) l c h / 0);
+		outline-offset: var(--ef-focus-ring-in-size-start);
+		border-radius: 25%;
+	}
+	50% {
+		outline: 2px solid oklch(from var(--cl-primary-brightest) l c h / 1);
+	}
+	100% {
+		outline: 2px solid oklch(from var(--cl-primary-brightest) l c h / 0);
+		outline-offset: var(--ef-focus-ring-in-size-end);
+		border-radius: 0%;
+	}
+}
+
+.ef-focus-ring-in {
+	animation: focus-ring-in 500ms ease-out 0ms 1 forwards;
+}
+
+.ef-focus-ring-out {
+	animation: focus-ring-out 500ms ease-out 0ms 1 forwards;
+}

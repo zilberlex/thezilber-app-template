@@ -3,11 +3,13 @@
 a[href] {
 	color: var(--cl-primary);
 	text-decoration-color: var(--cl-on-surface);
+	text-decoration: none;
+	text-weight: 800;
 
 	&:is(:hover, :focus-visible) {
 		outline: none;
 
-		@include glow-text();
-		text-decoration-color: var(--cl-primary);
+		@include pulse-text(var(--cl-on-surface), var(--cl-primary), 1s);
+		text-decoration: underline;
 	}
 }

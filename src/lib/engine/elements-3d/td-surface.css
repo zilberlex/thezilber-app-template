@@ -1,0 +1,35 @@
+.td-surface {
+	--_td-facing-factor: calc(cos(var(--td-rotate-x)) * cos(var(--td-rotate-y)));
+
+	--_td-depth-perspective-ratio: calc(var(--td-depth) / var(--td-perspective));
+
+	--_td-face-compensation-amount: calc(
+		var(--td-face-scale-compensation) * var(--_td-facing-factor) * var(--_td-depth-perspective-ratio)
+	);
+
+	--_td-front-face-scale: calc(1 - var(--_td-face-compensation-amount));
+	--_td-back-face-scale: calc(1 + var(--_td-face-compensation-amount));
+
+	display: inline-grid;
+
+	inline-size: 100%;
+	min-inline-size: 0;
+	min-block-size: 0;
+
+	box-sizing: border-box;
+
+	transform-origin: center;
+	transform-style: preserve-3d;
+
+	pointer-events: auto;
+
+	transform: translate3d(var(--td-translate-x), var(--td-translate-y), var(--td-translate-z))
+		perspective(var(--td-perspective)) rotateZ(var(--td-rotate-z)) rotateY(var(--td-rotate-y))
+		rotateX(var(--td-rotate-x)) scale(var(--td-scale));
+
+	transition: transform var(--td-transform-time) var(--td-transform-easing);
+}
+
+.td-element--negative-depth .td-surface {
+	background-color: transparent;
+}

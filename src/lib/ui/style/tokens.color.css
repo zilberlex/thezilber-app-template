@@ -8,14 +8,15 @@
 	--color-3: oklch(0% 0 0);
 	--color-4: red;
 	--color-5: oklch(0.8775 0.1495 195.24);
+	--color-6: oklch(0.8736 0.1929 98.76);
 
 	--color-1-transparent: oklch(var(--color-1-values) / 0);
 
 	--color-1-dim: oklch(from var(--color-1) calc(l - 0.15) c h);
 	--color-1-dim-transparent: oklch(from var(--color-1-dim) l c h / 0);
-	--color-1-dimmer: oklch(from var(--color-1) calc(l - 0.25) c h);
+	--color-1-dimmer: oklch(from var(--color-1) calc(l - 0.45) c h);
 	--color-1-dimmer-transparent: oklch(from var(--color-1-dimmer) l c h / 0);
-	--color-1-dimmest: oklch(from var(--color-1) calc(l - 0.35) c h);
+	--color-1-dimmest: oklch(from var(--color-1) calc(l - 0.6) c h);
 	--color-1-dimmest-transparent: oklch(from var(--color-1-dimmest) l c h / 0);
 	--color-1-bright: oklch(from var(--color-1) calc(l + 0.18) c h);
 	--color-1-brightest: oklch(from var(--color-1) calc(l + 0.36) c h);
@@ -29,12 +30,14 @@
 	--color-3-brighter: oklch(from var(--color-3) calc(l + 0.18) c h);
 
 	--color-3-dim: oklch(from var(--color-3) calc(l - 0.15) c h);
+	--color-3-dimmer: oklch(from var(--color-3) calc(l - 0.25) c h);
+	--color-3-dimmest: oklch(from var(--color-3) calc(l - 0.8) c h);
 
 	/* Semantic Palette */
 	--accent: var(--color-1);
 	--fg: var(--color-2);
 	--bg: var(--color-3);
-	--accent-strong: var(--color-4);
+	--accent-strong: var(--color-5);
 
 	/* Color System */
 	--cl-primary: var(--color-1);
@@ -54,6 +57,8 @@
 
 	--cl-surface: var(--color-3);
 	--cl-surface-dim: var(--color-3-dim);
+	--cl-surface-dimmer: var(--color-3-dimmer);
+	--cl-surface-dimmest: var(--color-3-dimmest);
 	--cl-on-surface: var(--color-2);
 	--cl-on-surface-dim: var(--color-2-dim);
 	--cl-on-surface-dimmer: var(--color-2-dimmer);
@@ -61,4 +66,7 @@
 
 	--cl-background: var(--color-3);
 	--cl-on-background: var(--color-2);
+
+	--cl-error: var(--color-4);
+	--cl-warn: var(--color-6);
 }

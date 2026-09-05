@@ -4,34 +4,30 @@
 	import CopyButtonSimple from '$lib/ui/components/CopyButtonSimple.svelte';
 
 	import { untrack, type Component } from 'svelte';
-	import type {
-		AnyNonVoid,
-		DynamicForm,
-		DynamicFormField,
-		DynamicFormSchema
-	} from './dynamic-form-types';
+	import type { AnyNonVoid, DynamicForm, DynamicFormField, DynamicFormSchema } from './dynamic-form-types';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import { formFromSchema, mergeForms, resolveFieldValue } from './dynamic-form';
 	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
+	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 
 	let {
 		formSchema,
 		outputFunc,
 		OutputComponent,
-		form = $bindable({})
+		form = $bindable({}),
+		disabled = false
 	} = $props<{
 		formSchema: DynamicFormSchema;
 		outputFunc: (...args: any[]) => AnyNonVoid;
 		OutputComponent?: Component;
 		form: DynamicForm;
+		disabled?: boolean;
 	}>();
 
 	// 🔹 entries derived directly from state
 	let formIterable: [string, DynamicFormField][] = $derived.by(() => Object.entries(form));
 
-	let fieldValues = $derived.by(() =>
-		formIterable.map(([, f]) => resolveFieldValue(f as DynamicFormField))
-	);
+	let fieldValues = $derived.by(() => formIterable.map(([, f]) => resolveFieldValue(f as DynamicFormField)));
 
 	let output = $derived.by(() => {
 		const values = fieldValues;
@@ -62,6 +58,7 @@
 				type={dynamicFormField.schema.type}
 				placeholder={resolveFieldValue(dynamicFormField).toString()}
 				bind:value={dynamicFormField.value}
+				{disabled}
 			>
 				{fieldName}
 			</InputCombo>
@@ -74,10 +71,7 @@
 		{:else}
 			<div class="overlay-wrapper">
 				<div class="copy-button">
-					<CopyButtonSimple
-						textToCopy={output}
-						{@attach createClickHotKeyAttachment('Copy', 'c', 'alt')}
-					/>
+					<CopyButtonSimple textToCopy={output} {@attach createClickHotKeyAttachment('Copy', hotkey('c', 'alt'))} />
 				</div>
 				<OutputCombo id="output" value={output}>Output</OutputCombo>
 			</div>
@@ -107,7 +101,7 @@
 
 	:global(output-combo) {
 		display: inline-block;
-		padding-inline-end: calc(2 * var(--padding-2) + var(--icon-width));
+		padding-inline-end: calc(2 * var(--space-3) + var(--icon-width));
 	}
 
 	.overlay-wrapper {
@@ -117,6 +111,6 @@
 	.copy-button {
 		position: absolute;
 		display: inline-block;
-		right: var(--padding-2);
+		right: var(--space-3);
 	}
 </style>

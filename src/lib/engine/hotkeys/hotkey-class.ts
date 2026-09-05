@@ -1,15 +1,17 @@
 import type { KeyLike } from '../patterns/key';
 import type { HotKeyModifier } from './types';
 
-const MODIFIER_INDEX: Record<HotKeyModifier, number> = {
+export const MODIFIER_INDEX: Record<HotKeyModifier, number> = {
 	'ctrl|option': 0,
-	shift: 1,
-	alt: 2
+	alt: 1,
+	shift: 2
 } as const;
+
+const ALL_MODIFIERS: HotKeyModifier[] = ['ctrl|option', 'alt', 'shift'];
 
 export class HotKey implements KeyLike {
 	readonly key: string;
-	readonly #flags: [boolean, boolean, boolean]; // [ctrl, shift, alt]
+	readonly #flags: [boolean, boolean, boolean]; // [ctrl|option, alt, shift]
 
 	constructor(key: string, ...modifiers: HotKeyModifier[]) {
 		this.key = key.toLowerCase();
@@ -24,11 +26,13 @@ export class HotKey implements KeyLike {
 	get ctrlOrOption() {
 		return this.#flags[MODIFIER_INDEX['ctrl|option']];
 	}
-	get shift() {
-		return this.#flags[MODIFIER_INDEX['shift']];
-	}
+
 	get alt() {
 		return this.#flags[MODIFIER_INDEX['alt']];
+	}
+
+	get shift() {
+		return this.#flags[MODIFIER_INDEX['shift']];
 	}
 
 	toKey(): string {
@@ -40,19 +44,42 @@ export class HotKey implements KeyLike {
 		return this.toKey() === other.toKey();
 	}
 
+	test(target: HotKey): number {
+		if (this.key !== target.key) {
+			return -1;
+		}
+
+		let score = 0;
+
+		for (let i = 0; i < this.#flags.length; i++) {
+			const eventHasModifier = this.#flags[i];
+			const targetRequiresModifier = target.#flags[i];
+
+			if (targetRequiresModifier && !eventHasModifier) {
+				return -1;
+			}
+
+			if (targetRequiresModifier) {
+				score++;
+			}
+		}
+
+		return score;
+	}
+
 	toString(): string {
-		let parts = [];
+		const parts: string[] = [];
 
 		if (this.#flags[MODIFIER_INDEX['ctrl|option']]) {
 			parts.push('Ctrl');
 		}
 
-		if (this.#flags[MODIFIER_INDEX['shift']]) {
-			parts.push('Shift');
-		}
-
 		if (this.#flags[MODIFIER_INDEX['alt']]) {
 			parts.push('Alt');
+		}
+
+		if (this.#flags[MODIFIER_INDEX['shift']]) {
+			parts.push('Shift');
 		}
 
 		parts.push(this.key.toUpperCase());
@@ -62,10 +89,97 @@ export class HotKey implements KeyLike {
 
 	static fromEvent(event: KeyboardEvent): HotKey {
 		const mods: HotKeyModifier[] = [];
+
 		if (event.ctrlKey || event.metaKey) mods.push('ctrl|option');
-		if (event.shiftKey) mods.push('shift');
 		if (event.altKey) mods.push('alt');
+		if (event.shiftKey) mods.push('shift');
 
 		return new HotKey(event.key, ...mods);
+	}
+
+	pickBestMatch<T>(entries: Array<{ hotKey: HotKey; cbObject: T }>): T | undefined {
+		let bestScore = -1;
+		let bestValue: T | undefined = undefined;
+
+		for (const entry of entries) {
+			const score = this.test(entry.hotKey);
+
+			if (score > bestScore) {
+				bestScore = score;
+				bestValue = entry.cbObject;
+			}
+		}
+
+		return bestValue;
+	}
+
+	pickBestMatchingKey(entries: HotKey[]): HotKey | undefined {
+		let bestScore = -1;
+		let bestValue: HotKey | undefined = undefined;
+
+		for (const entry of entries) {
+			const score = this.test(entry);
+
+			if (score > bestScore) {
+				bestScore = score;
+				bestValue = entry;
+			}
+		}
+
+		return bestValue;
+	}
+
+	#getRequiredModifiers(): HotKeyModifier[] {
+		const result: HotKeyModifier[] = [];
+
+		for (const mod of ALL_MODIFIERS) {
+			if (this.#flags[MODIFIER_INDEX[mod]]) {
+				result.push(mod);
+			}
+		}
+
+		return result;
+	}
+
+	getPossibleRegisteredMatches(): HotKey[] {
+		const activeMods = this.#getRequiredModifiers();
+		const results: HotKey[] = [];
+
+		const recurse = (index: number, currentMods: HotKeyModifier[]) => {
+			if (index >= activeMods.length) {
+				results.push(new HotKey(this.key, ...currentMods));
+				return;
+			}
+
+			// without this modifier
+			recurse(index + 1, currentMods);
+
+			// with this modifier
+			recurse(index + 1, [...currentMods, activeMods[index]]);
+		};
+
+		recurse(0, []);
+
+		return results;
+	}
+
+	bestMatchingSetIndex(hotkeySets: HotKey[][]): number | undefined {
+		let bestScore = -1;
+		let bestSetIndex: number | undefined = undefined;
+
+		for (let setIndex = 0; setIndex < hotkeySets.length; setIndex++) {
+			const hotkeys = hotkeySets[setIndex];
+
+			for (const hotkey of hotkeys) {
+				const score = this.test(hotkey);
+
+				if (score > bestScore) {
+					bestScore = score;
+					bestSetIndex = setIndex;
+				}
+			}
+		}
+
+		return bestScore >= 0 ? bestSetIndex : undefined;
 	}
 }

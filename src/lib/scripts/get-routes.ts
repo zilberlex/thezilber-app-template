@@ -7,7 +7,8 @@ export function getRoutes() {
 			path
 				.replace('/src/routes', '')
 				.replace('/+page.svelte', '')
-				.replace(/\[([^\]]+)\]/g, ':$1') || '/';
+				// Removes [[optional-arguments]]
+				.replace(/\/\[\[([^\]]+)\]\]/g, '') || '/';
 
 		// const parts = route?;
 		ret.push(route);

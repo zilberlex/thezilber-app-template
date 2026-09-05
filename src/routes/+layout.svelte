@@ -5,10 +5,14 @@
 	import '@fontsource/audiowide';
 	import '$lib/ui/style/reset.css';
 	import '$lib/ui/style/theme/theme.scss';
+
 	import AppInit from '$lib/app/AppInit.svelte';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onNavigate } from '$app/navigation';
-	import AppNavigationManager from '$lib/engine/keyboard-navigation/svelte-components/AppNavigationManager.svelte';
+	import KeyboardNavigationManager from '$lib/engine/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
+
+	import '$lib/ui/style/effects.scss';
+	import EngineErrorHandler from '$lib/app/EngineErrorHandler.svelte';
 
 	let { children } = $props();
 	onNavigate(() => {
@@ -16,14 +20,12 @@
 	});
 </script>
 
-<svelte:head>
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-</svelte:head>
-
-<AppInit />
-
-<AppNavigationManager>
-	<div class="app-container">
+<AppInit>
+	<div
+		bind:this={appState.appRoot}
+		inert={appState.inert}
+		class={['app-container', appState.navigationMode === 'keyboard' && 'keyboard-navigation']}
+	>
 		<header class="header">
 			<div>
 				<HomeButton />
@@ -33,24 +35,26 @@
 			{@render children?.()}
 		</main>
 	</div>
-</AppNavigationManager>
+</AppInit>
 
-<style lang="scss">
-	@use '$lib/ui/style/utility/utility.scss' as *;
-
+<style>
 	.app-container {
-		min-height: 100vh;
+		height: 100dvh;
 		width: 100%;
 		min-width: 350px;
-
 		padding-top: 10px;
-
 		display: flex;
 		flex-direction: column;
+		min-height: 0;
 	}
 
 	.page-container {
 		flex: 1 1 auto;
-		@include ly-center();
+		min-height: 0;
+		min-width: 0;
+	}
+
+	.keyboard-navigation {
+		pointer-events: none;
 	}
 </style>

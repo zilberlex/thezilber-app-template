@@ -16,10 +16,9 @@
 </output-combo>
 
 <style lang="scss">
-	output {
-		--ef_change-colors_col1: var(--color-1);
-		--ef_change-colors_col2: var(--color-1-bright);
+	@use '$lib/ui/style/effects.scss' as *;
 
-		animation: animation-change-colors 1s linear infinite alternate;
+	output {
+		@include pulse-text(var(--color-1), var(--color-1-bright));
 	}
 </style>

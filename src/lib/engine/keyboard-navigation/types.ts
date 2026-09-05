@@ -8,25 +8,52 @@ export function createNavigationKeys(nextKeys: string[], prevKeys: string[]): Na
 	};
 }
 
-export interface NodeFocusEvent {
-	targetNode: HTMLElement;
+export type NavigationDiscoveryMode = 'marked' | 'all-focusable';
+
+export type NavigationTargetId = string;
+
+export interface KeyboardNavigationTarget {
+	readonly id: NavigationTargetId;
+	get targetElement(): HTMLElement | undefined;
+	get navigatableNode(): HTMLElement | undefined;
+}
+
+export type ResolvedKeyboardNavigationTarget = Omit<KeyboardNavigationTarget, 'navigatableNode'> & {
+	readonly navigatableNode: HTMLElement;
+};
+
+export interface ScopeFocusEvent {
+	navigationTarget: KeyboardNavigationTarget;
 }
 
 export interface NextNodeInfo {
-	nextNode?: HTMLElement;
-	escapeBackupNode?: HTMLElement;
+	nextNode?: ResolvedKeyboardNavigationTarget;
+	escapeBackupNode?: ResolvedKeyboardNavigationTarget;
 }
 
 export interface ScopeInfra {
-	scopeName: string;
+	scopeId: string;
 	navigationKeys: NavigationKeysConfig;
 	scopeContainer: HTMLElement;
-	navigatiableNodes: HTMLElement[];
 
 	getNextNodeInfo(key: string): NextNodeInfo;
+	registerOnFocus(handler: DispatchHandler<ScopeFocusEvent>): () => void;
+	refreshNavigationTargets(): void;
+	get currentNavigationTarget(): ResolvedKeyboardNavigationTarget | undefined;
+	get escapeMode(): ScopeEscapeMode;
+	focusCurrent(): void;
+	focusFirst(): void;
+	focusLast(): void;
+
+	getNavigationTargetRestorationPoint(): NavigationTargetRestorationPoint | undefined;
+	restoreNavigationTarget(restorationPoint: NavigationTargetRestorationPoint): boolean;
+
+	hasNavigationTargetForNode(node: Element | null): boolean;
+
 	init(): void;
 	destroy(): void;
-	registerOnFocus(handler: DispatchHandler<NodeFocusEvent>): { unregister: () => void };
+
+	_debugInfo(): { refreshCount: number };
 }
 
 export interface NavigationKeysConfig {
@@ -34,17 +61,23 @@ export interface NavigationKeysConfig {
 	nextKeys: string[];
 }
 
-export const NavigationKeysConfigSets = {
-	Horizontal: {
-		prevKeys: [NavigationKeyConsts.ArrowLeft],
-		nextKeys: [NavigationKeyConsts.ArrowRight]
-	},
-	Vertical: {
-		prevKeys: [NavigationKeyConsts.ArrowUp],
-		nextKeys: [NavigationKeyConsts.ArrowDown]
-	},
-	TwoD: {
-		prevKeys: [NavigationKeyConsts.ArrowUp, NavigationKeyConsts.ArrowLeft],
-		nextKeys: [NavigationKeyConsts.ArrowDown, NavigationKeyConsts.ArrowRight]
-	}
-};
+export type FocusableElement = HTMLElement | SVGElement;
+
+export type ScopeEscapeMode = 'escape' | 'circular';
+
+export interface NavigationScopeOptions {
+	navigationKeys?: NavigationKeysConfig;
+	discoveryMode?: NavigationDiscoveryMode;
+	escapeMode?: ScopeEscapeMode;
+
+	refreshOptions?: NavigationRefreshConfig;
+}
+
+export interface NavigationRefreshConfig {
+	mode: 'automatic' | 'manual';
+}
+
+export interface NavigationTargetRestorationPoint {
+	readonly id: NavigationTargetId;
+	readonly index: number;
+}
