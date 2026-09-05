@@ -1,4 +1,4 @@
-import { createSmartHandler } from '../events/event-handling';
+import { createSmartHandler } from '../../../packages/core/src/events/event-handling';
 import { isKeyboardGoEvent } from './bl-events';
 import { engineHotkeysConfig, type TriggerType } from './hotkey-module-config';
 import type { Command } from '$lib/engine/patterns/command/command';

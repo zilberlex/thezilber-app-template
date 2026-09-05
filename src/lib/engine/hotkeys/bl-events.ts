@@ -1,4 +1,4 @@
-import { createSmartHandler } from '../events/event-handling';
+import { createSmartHandler } from '../../../packages/core/src/events/event-handling';
 import { signalClickHotkeyEvent } from './bl-hotkeys-event-signals';
 import { GO_KEYS } from './hotkey-groups';
 import { ArrowKeysArray, NavigationKeyConsts, NodesWhichTakePriorityOverSoftHotKeys } from './consts';

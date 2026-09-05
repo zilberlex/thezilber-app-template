@@ -9,10 +9,7 @@
 	import AppInit from '$lib/app/AppInit.svelte';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onNavigate } from '$app/navigation';
-	import KeyboardNavigationManager from '$lib/engine/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
-
 	import '$lib/ui/style/effects.scss';
-	import EngineErrorHandler from '$lib/app/EngineErrorHandler.svelte';
 
 	let { children } = $props();
 	onNavigate(() => {

@@ -1,4 +1,4 @@
-import { createSmartHandler } from '$lib/engine/events/event-handling';
+import { createSmartHandler } from '../../packages/core/src/events/event-handling';
 import { track } from '$lib/engine/svelte-helpers/track.svelte';
 import { untrack } from 'svelte';
 

@@ -1,4 +1,4 @@
-import { createSmartHandler } from '$lib/engine/events/event-handling';
+import { createSmartHandler } from '../../../packages/core/src/events/event-handling';
 import { hotKeysModule } from './hotkey-module';
 import { keyBoardFocusNavigatedNode } from '../keyboard-navigation/navigation-utils';
 import { signalClickHotkeyEvent, signalFocusHotkeyEvent } from './bl-hotkeys-event-signals';
