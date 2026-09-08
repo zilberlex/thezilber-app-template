@@ -1,21 +1,3 @@
-import { navigationStateManager } from '../state/navigation-state.svelte';
-import { safeInstanceOf } from '../types/type-utils';
-import type { FocusableElement } from './types';
-
-export function engineFocus(node: FocusableElement) {
-	node.focus({ preventScroll: true });
-	node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-	const textElement = safeInstanceOf(node, HTMLInputElement, HTMLTextAreaElement);
-	textElement?.select();
-}
-
-export function keyBoardFocusNavigatedNode(node: FocusableElement) {
-	navigationStateManager.setKeyboardNavigationMode();
-
-	engineFocus(node);
-}
-
 const focusableCandidateSelector = [
 	'a[href]',
 	'button',
@@ -35,15 +17,15 @@ function isCandidateFocusable(el: HTMLElement): boolean {
 	return true;
 }
 
-export function isFocusableElement(element: HTMLElement): boolean {
+export function isFocusable(element: HTMLElement): boolean {
 	return element.matches(focusableCandidateSelector) && isCandidateFocusable(element);
 }
 
-export function getFocusableElementsByNode(node: HTMLElement): HTMLElement[] {
+export function getFocusable(node: HTMLElement): HTMLElement[] {
 	return Array.from<HTMLElement>(node.querySelectorAll(focusableCandidateSelector)).filter(isCandidateFocusable);
 }
 
-export function getFirstFocusable(node: HTMLElement) {
+export function getFirstFocusable(node: HTMLElement): HTMLElement | null {
 	if (node.matches(focusableCandidateSelector) && isCandidateFocusable(node)) {
 		return node;
 	}

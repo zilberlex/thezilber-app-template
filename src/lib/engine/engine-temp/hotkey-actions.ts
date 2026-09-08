@@ -1,14 +1,14 @@
 import { createSmartHandler } from '$lib/engine/events/event-handling';
-import { hotKeysModule } from './hotkey-module';
-import { keyBoardFocusNavigatedNode } from '../keyboard-navigation/navigation-utils';
-import { signalClickHotkeyEvent, signalFocusHotkeyEvent } from './bl-hotkeys-event-signals';
+import { hotKeysModule } from '../hotkeys/hotkey-module';
 import type { KeyboardEventKeyType, KeyCheckFn } from '$lib/engine/hotkeys/key-identification';
-import { engineHotkeysConfig } from './hotkey-module-config';
-import { shouldIgnoreHotKey } from './bl-events';
-import { HotKey } from './hotkey-class';
+import { shouldIgnoreHotKey } from '../hotkeys/bl-events';
+import { HotKey } from '../hotkeys/hotkey-class';
 import { HotkeyTooltipAttribute } from '../hotkey-tooltip/tooltip-consts';
 import { chain } from '../general-js-ts/chain-funcs';
 import type { Attachment } from 'svelte/attachments';
+import { engineHotkeysConfig } from './hotkey-config';
+import { engineElementInteraction } from './engine-interactions';
+import { assignHotkeyToClick } from '../hotkeys/svelt-components/hotkey-attachments';
 
 const HOTKEY_COOLDOWN_MS = engineHotkeysConfig.buttonRapidFireCooldownMs;
 
@@ -17,7 +17,7 @@ type ButtonHotKeyOptions = {
 	prioritizeInputFieldDefaults?: boolean;
 };
 
-export function createFocusHotKeyAttachment(
+export function createHotKeyTriggerFocusAttachment(
 	hotKeyTooltipText: string = '',
 	hotKey: HotKey,
 	options?: ButtonHotKeyOptions
@@ -26,7 +26,7 @@ export function createFocusHotKeyAttachment(
 		const nodeElement = node as HTMLElement;
 		if (!nodeElement) throw new Error(`Expected node to be HTML Element. Node: ${node}`);
 
-		let focusHandler = createFocusHandler(nodeElement, hotKey, options);
+		let focusHandler = createHotKeyTriggerFocusHandler(nodeElement, hotKey, options);
 		hotKeysModule.assignHotKey(hotKey, focusHandler);
 
 		assignHotKeyTooltip(node, hotKey, hotKeyTooltipText);
@@ -46,7 +46,7 @@ const optionsDefaults: ButtonHotKeyOptions = {
 	scope: undefined
 };
 
-function createShouldExecuteFunction(options?: ButtonHotKeyOptions) {
+function createHotKeyShouldExecuteFunction(options?: ButtonHotKeyOptions) {
 	let { prioritizeInputFieldDefaults, scope } = options ?? optionsDefaults;
 	let funcs: ((e: KeyboardEvent) => boolean)[] = [];
 
@@ -76,35 +76,34 @@ function createShouldExecuteFunction(options?: ButtonHotKeyOptions) {
 	return ret;
 }
 
-export function createClickHotKeyAttachment(
+export function createHotKeyTriggerClickAttachment(
 	hotKeyTooltipText: string = '',
 	hotKey: HotKey,
 	options?: ButtonHotKeyOptions,
 	moveFocus: boolean = false
 ): Attachment {
+	const hotkeyClickAttachment = assignHotkeyToClick(hotKey, engineElementInteraction, {
+		moveFocus: moveFocus,
+		...options
+	});
+
 	return (node) => {
 		const nodeElement = node as HTMLElement;
 		if (!nodeElement) throw new Error(`Expected node to be HTML Element. Node: ${node}`);
 
-		let clickHandler = createClickHandler(nodeElement, hotKey.key, moveFocus, options);
-		hotKeysModule.assignHotKey(hotKey, clickHandler);
-
 		assignHotKeyTooltip(node, hotKey, hotKeyTooltipText);
 
-		return () => {
-			hotKeysModule.removeHotKey(hotKey, clickHandler);
-		};
+		return hotkeyClickAttachment(node);
 	};
 }
 
-export function createFocusHandler(node: HTMLElement, key: HotKey, options?: ButtonHotKeyOptions) {
-	let shouldExecuteFunction = createShouldExecuteFunction(options);
+export function createHotKeyTriggerFocusHandler(node: HTMLElement, key: HotKey, options?: ButtonHotKeyOptions) {
+	let shouldExecuteFunction = createHotKeyShouldExecuteFunction(options);
 
 	return createSmartHandler(
 		(event: Event) => {
 			if (event.target !== node) {
-				keyBoardFocusNavigatedNode(node);
-				signalFocusHotkeyEvent(key.key, node);
+				engineElementInteraction.focus(node);
 			}
 		},
 		{
@@ -115,25 +114,23 @@ export function createFocusHandler(node: HTMLElement, key: HotKey, options?: But
 	);
 }
 
-export function createClickHandler(
+export function createHotKeyTriggerClickHandler(
 	node: HTMLElement,
 	initiatingKey: string,
 	moveFocus: boolean,
 	options?: ButtonHotKeyOptions
 ) {
-	const shouldExecuteFunction = createShouldExecuteFunction(options);
+	const shouldExecuteFunction = createHotKeyShouldExecuteFunction(options);
 	return createSmartHandler(
 		(_event: Event) => {
 			let currentActiveElement = document.activeElement;
-			node.click();
+			engineElementInteraction.click(node);
 
 			if (!moveFocus) {
 				if (currentActiveElement instanceof HTMLElement) {
-					currentActiveElement.focus();
+					engineElementInteraction.focus(currentActiveElement);
 				} else node.blur();
 			}
-
-			signalClickHotkeyEvent(initiatingKey, node);
 		},
 		{
 			cooldownDelay: HOTKEY_COOLDOWN_MS,

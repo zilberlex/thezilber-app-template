@@ -1,6 +1,5 @@
 import { createKeyabordNavigationEventHandler } from '$lib/engine/hotkeys/bl-events';
 import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
-import { keyBoardFocusNavigatedNode } from '$lib/engine/keyboard-navigation/navigation-utils';
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
 import { NavigationKeyConsts } from '$lib/engine/hotkeys/consts';
 import { engineAssert } from '$lib/engine/error/engine-assert';
@@ -8,6 +7,8 @@ import { type NavigationKeysConfig, type NavigationTargetRestorationPoint, type 
 import { HotKey } from '../hotkeys/hotkey-class';
 import { hotkeys } from '../hotkeys/hotkey-helpers';
 import { PriorityMapList } from '../patterns/lists-and-maps-advanced/priority-map-list';
+import type { ElementInteraction } from '../interactions/types';
+import { nativeElementInteraction } from '../interactions/triggers/elements/element-interactions';
 
 const DEFAULT_SCOPE_ORDER = 1;
 
@@ -23,6 +24,8 @@ export class NavigationManager {
 	#prevScopeNavigationKeys = hotkeys(['t'], 'shift');
 
 	#assignHotKeysCounter = 0;
+
+	#elementInteraction: ElementInteraction = nativeElementInteraction;
 
 	constructor(navigationKeys?: NavigationKeysConfig) {
 		this.#navigationKeys = navigationKeys ?? {
@@ -90,6 +93,8 @@ export class NavigationManager {
 	registerScope(scope: ScopeInfra, scopeOrder?: number) {
 		const scopeId = scope.scopeId;
 		const prevEntryExisted = this.#scopeEntries.has(scopeId);
+		scope.elementInteraction = this.#elementInteraction;
+
 		console.debug('NavigationManager registering scope:', {
 			scopeId,
 			prevEntryExisted
@@ -268,7 +273,7 @@ export class NavigationManager {
 
 	#focusNode(scope: ScopeInfra, scopeNode: HTMLElement) {
 		this.#onFocusScopeInternal(scope);
-		keyBoardFocusNavigatedNode(scopeNode);
+		this.#elementInteraction.focus(scopeNode);
 	}
 
 	#onFocusScopeInternal(scope: ScopeInfra) {

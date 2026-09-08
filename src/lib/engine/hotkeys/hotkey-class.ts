@@ -67,6 +67,10 @@ export class HotKey implements KeyLike {
 		return score;
 	}
 
+	matches(target: HotKey, exact = false): boolean {
+		return exact ? this.equals(target) : this.test(target) >= 0;
+	}
+
 	toString(): string {
 		const parts: string[] = [];
 

@@ -3,7 +3,7 @@ import { HotKey } from './hotkey-class';
 
 type EventHandler<E extends Event> = (event: E) => void;
 
-class HotkeysModule {
+export class HotkeysModule {
 	#wasInitialized = false;
 
 	#hotKeysHandlers = new OneToManyDictionary<HotKey, EventHandler<KeyboardEvent>>(true);

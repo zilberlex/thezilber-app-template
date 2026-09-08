@@ -13,7 +13,6 @@ import {
 	type NavigationDiscoveryMode,
 	type NavigationTargetRestorationPoint
 } from './types';
-import { keyBoardFocusNavigatedNode } from './navigation-utils';
 import { keyboardNavigationTarget } from './navigation-target';
 import {
 	NAVIGATION_RESOLVED_TARGET_ID_ATTRIBUTE,
@@ -31,6 +30,8 @@ import {
 } from './discovery-strategies/navigation-discovery-strategy';
 import { NavigationRefreshController } from './navigation-refresh-controller';
 import { MapList } from '$lib/engine/patterns/lists-and-maps-advanced/map-list';
+import type { ElementInteraction } from '../interactions/types';
+import { nativeElementInteraction } from '../interactions/triggers/elements/element-interactions';
 
 const NAVIGATION_INDEX_ATTRIBUTE = 'data-debug-navigation-index';
 
@@ -43,6 +44,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 	navigationKeys: NavigationKeysConfig;
 
 	scopeContainer: HTMLElement;
+	elementInteraction: ElementInteraction = nativeElementInteraction;
 
 	#focusTargetDispatcher = new DispatcherImpl<ScopeFocusEvent>();
 
@@ -214,14 +216,14 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 			return;
 		}
 
-		keyBoardFocusNavigatedNode(target.navigatableNode);
+		this.elementInteraction.focus(target.navigatableNode);
 	}
 
 	focusFirst() {
 		const target = this.#findResolvedTarget(0, 'forward');
 
 		if (target) {
-			keyBoardFocusNavigatedNode(target.navigatableNode);
+			this.elementInteraction.focus(target.navigatableNode);
 		}
 	}
 
@@ -229,7 +231,7 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		const target = this.#findResolvedTarget(this.#navigationTargets.size - 1, 'backward');
 
 		if (target) {
-			keyBoardFocusNavigatedNode(target.navigatableNode);
+			this.elementInteraction.focus(target.navigatableNode);
 		}
 	}
 

@@ -1,5 +1,4 @@
 import { createSmartHandler } from '../events/event-handling';
-import { signalClickHotkeyEvent } from './bl-hotkeys-event-signals';
 import { GO_KEYS } from './hotkey-groups';
 import { ArrowKeysArray, NavigationKeyConsts, NodesWhichTakePriorityOverSoftHotKeys } from './consts';
 import type { NavType } from './types';
@@ -16,7 +15,6 @@ export function createOnGoClickHandler(onActionEventHandler: KeyboardEventHandle
 
 			let target = null;
 			if (event.target instanceof HTMLElement) target = event.target;
-			signalClickHotkeyEvent(event.key, target);
 		}
 	};
 }

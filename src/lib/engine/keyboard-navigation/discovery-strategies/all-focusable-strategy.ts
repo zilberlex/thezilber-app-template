@@ -1,4 +1,4 @@
-import { getFocusableElementsByNode } from '../navigation-utils';
+import { getFocusable } from '$lib/engine/interactions/inspection/elements/focusability';
 import type { NavigationDiscoveryStrategy } from './navigation-discovery-strategy';
 
 export const allFocusableDiscoveryStrategy: NavigationDiscoveryStrategy = {
@@ -12,7 +12,7 @@ export const allFocusableDiscoveryStrategy: NavigationDiscoveryStrategy = {
 	},
 
 	discover(rootElement) {
-		return getFocusableElementsByNode(rootElement);
+		return getFocusable(rootElement);
 	},
 
 	isInvalidatedBy(mutations) {

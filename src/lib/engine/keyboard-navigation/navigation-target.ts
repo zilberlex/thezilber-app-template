@@ -1,4 +1,4 @@
-import { getFocusableElementsByNode, isFocusableElement } from './navigation-utils';
+import { getFocusable, isFocusable } from '../interactions/inspection/elements/focusability';
 import type { KeyboardNavigationTarget, NavigationTargetId } from './types';
 
 export class KeyboardNavigationTargetImpl implements KeyboardNavigationTarget {
@@ -30,11 +30,11 @@ export class KeyboardNavigationTargetImpl implements KeyboardNavigationTarget {
 			return;
 		}
 
-		if (isFocusableElement(targetElement)) {
+		if (isFocusable(targetElement)) {
 			return targetElement;
 		}
 
-		return getFocusableElementsByNode(targetElement)[0];
+		return getFocusable(targetElement)[0];
 	}
 }
 

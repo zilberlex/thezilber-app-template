@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { onDestroy, onMount, tick, untrack } from 'svelte';
-	import { engineFocus, getFocusableElementsByNode } from '$lib/engine/keyboard-navigation/navigation-utils';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onNavigate } from '$app/navigation';
 	import { createSmartHandler } from '$lib/engine/events/event-handling';
@@ -12,6 +11,8 @@
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import type { DialogController } from './dialog-contoller.svelte';
+	import { engineElementInteraction } from '$lib/engine/engine-temp/engine-interactions';
+	import { getFocusable } from '$lib/engine/interactions/inspection/elements/focusability';
 
 	let dialogBoxNode: HTMLElement | null = $state(null);
 	let appRoot = $derived(appState.appRoot);
@@ -54,7 +55,7 @@
 			appRoot.inert = false;
 		}
 
-		if (lastFocusedElement && document.contains(lastFocusedElement)) engineFocus(lastFocusedElement);
+		if (lastFocusedElement && document.contains(lastFocusedElement)) engineElementInteraction.focus(lastFocusedElement);
 	}
 
 	$effect(() => {
@@ -75,14 +76,14 @@
 
 						untrack(() => {
 							if (dialogBoxNode) {
-								const focableNodes = getFocusableElementsByNode(dialogBoxNode);
+								const focableNodes = getFocusable(dialogBoxNode);
 
 								let focusTarget = dialogBoxNode;
 								if (focableNodes.length > 0) {
 									focusTarget = focableNodes[0];
 								}
 
-								engineFocus(focusTarget);
+								engineElementInteraction.focus(focusTarget);
 							}
 						});
 					});

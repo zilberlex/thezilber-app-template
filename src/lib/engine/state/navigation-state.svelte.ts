@@ -1,5 +1,3 @@
-import { DispatcherImpl } from '$lib/engine/patterns/observer';
-
 export type NavigationMode = 'mouse' | 'keyboard';
 
 class NavigationStateManager {

@@ -71,6 +71,7 @@ export class OneToManyDictionary<TKey extends KeyLike | PrimitiveKey, TValue> {
 	has(key: TKey): boolean {
 		return this.#map.has(this.normalizeKey(key));
 	}
+
 	private normalizeKey(key: TKey): string | TKey {
 		return isKeyLike(key) ? key.toKey() : key;
 	}
