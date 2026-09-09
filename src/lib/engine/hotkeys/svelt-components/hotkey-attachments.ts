@@ -2,13 +2,13 @@ import type { Attachment } from 'svelte/attachments';
 import type { HotKey } from '../hotkey-class';
 import { hotKeysModule } from '../hotkey-module';
 import type { ElementInteraction } from '$lib/engine/interactions/types';
-import type { ButtonHotKeyOptions } from '../types';
 import { createHotKeyTriggerClickHandler, createHotKeyTriggerFocusHandler } from '../hotkey-handlers';
+import type { HotKeyToTriggerClickOptions, HotKeyToTriggerOptions } from '../types';
 
 export function assignHotkeyToClick(
 	hotKey: HotKey,
 	elementInteraction: ElementInteraction,
-	options: ButtonHotKeyOptions = {
+	options: HotKeyToTriggerClickOptions = {
 		prioritizeInputFieldDefaults: true,
 		moveFocus: false
 	}
@@ -29,9 +29,8 @@ export function assignHotkeyToClick(
 export function assignHotkeyToFocus(
 	hotKey: HotKey,
 	elementInteraction: ElementInteraction,
-	options: ButtonHotKeyOptions = {
-		prioritizeInputFieldDefaults: true,
-		moveFocus: false
+	options: HotKeyToTriggerOptions = {
+		prioritizeInputFieldDefaults: true
 	}
 ): Attachment {
 	return (node) => {

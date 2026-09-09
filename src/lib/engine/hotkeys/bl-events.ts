@@ -1,6 +1,6 @@
 import { createSmartHandler } from '../events/event-handling';
-import { GO_KEYS } from './hotkey-groups';
 import { ArrowKeysArray, NavigationKeyConsts, NodesWhichTakePriorityOverSoftHotKeys } from './consts';
+import { GO_KEYS } from './hotkey-groups';
 import type { NavType } from './types';
 export type KeyboardEventHandler = (keyboardEvent: KeyboardEvent) => void;
 

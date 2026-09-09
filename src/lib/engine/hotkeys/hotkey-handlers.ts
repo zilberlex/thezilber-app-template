@@ -2,7 +2,7 @@ import { createSmartHandler } from '../events/event-handling';
 import type { ElementInteraction } from '../interactions/types';
 import { NodesWhichTakePriorityOverSoftHotKeys } from './consts';
 import { HotKey } from './hotkey-class';
-import type { ButtonHotKeyOptions } from './types';
+import type { HotKeyToTriggerClickOptions, HotKeyToTriggerOptions } from './types';
 
 const BUTTON_RAPID_FIRE_COOLDOWN_DEFAULT = 20;
 
@@ -13,7 +13,7 @@ function alwaysTrue() {
 export function createHotKeyTriggerClickHandler(
 	node: HTMLElement,
 	elementInteraction: ElementInteraction,
-	options: ButtonHotKeyOptions
+	options: HotKeyToTriggerClickOptions
 ) {
 	const { moveFocus } = options;
 
@@ -21,7 +21,7 @@ export function createHotKeyTriggerClickHandler(
 	return createSmartHandler(
 		(_event: Event) => {
 			let currentActiveElement = document.activeElement;
-			node.click();
+			elementInteraction.click(node);
 
 			if (!moveFocus) {
 				if (currentActiveElement && currentActiveElement instanceof HTMLElement) {
@@ -40,7 +40,7 @@ export function createHotKeyTriggerClickHandler(
 export function createHotKeyTriggerFocusHandler(
 	node: HTMLElement,
 	elementInteraction: ElementInteraction,
-	options: ButtonHotKeyOptions
+	options: HotKeyToTriggerOptions
 ) {
 	let shouldExecuteFunction = createHotKeyShouldExecuteFunction(options);
 
@@ -58,7 +58,7 @@ export function createHotKeyTriggerFocusHandler(
 	);
 }
 
-function createHotKeyShouldExecuteFunction(options: ButtonHotKeyOptions) {
+function createHotKeyShouldExecuteFunction(options: HotKeyToTriggerOptions) {
 	let { prioritizeInputFieldDefaults } = options;
 	let funcs: ((e: KeyboardEvent) => boolean)[] = [];
 

@@ -6,7 +6,10 @@ export type NavType = {
 	isArrow: boolean;
 };
 
-type ButtonHotKeyOptions = {
+type HotKeyToTriggerOptions = {
 	prioritizeInputFieldDefaults?: boolean;
+};
+
+type HotKeyToTriggerClickOptions = HotKeyToTriggerOptions & {
 	moveFocus?: boolean;
 };
