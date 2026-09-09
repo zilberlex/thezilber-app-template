@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-temp/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import { loadSessionStorage, saveSessionStorage } from '$lib/engine/storage/session/session-storage';
 	import Button from '$lib/ui/basic-components/Button.svelte';
@@ -54,12 +54,14 @@
 		<div class="form-controls">
 			<Button
 				onclick={() => onAction(inputField)}
-				{@attach createClickHotKeyAttachment(actionText, hotkey('Enter', 'alt'))}
+				{@attach createHotKeyTriggerClickAttachment(actionText, hotkey('Enter', 'alt'))}
 			>
 				{actionText}
 			</Button>
 
-			<Button onclick={onClose} {@attach createClickHotKeyAttachment('Close Dialog', hotkey('q', 'alt'))}>Close</Button>
+			<Button onclick={onClose} {@attach createHotKeyTriggerClickAttachment('Close Dialog', hotkey('q', 'alt'))}
+				>Close</Button
+			>
 		</div>
 	</form>
 	{#if errorMessage}

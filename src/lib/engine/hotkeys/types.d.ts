@@ -5,3 +5,8 @@ export type NavType = {
 	strength: 'soft' | 'hard';
 	isArrow: boolean;
 };
+
+type ButtonHotKeyOptions = {
+	prioritizeInputFieldDefaults?: boolean;
+	moveFocus?: boolean;
+};

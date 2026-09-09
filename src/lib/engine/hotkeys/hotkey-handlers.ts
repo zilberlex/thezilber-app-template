@@ -1,34 +1,80 @@
 import { createSmartHandler } from '../events/event-handling';
-import { isKeyboardGoEvent } from './bl-events';
-import { engineElementInteraction } from '../engine-temp/engine-interactions';
-import { engineHotkeysConfig } from '../engine-temp/hotkey-config';
+import type { ElementInteraction } from '../interactions/types';
+import { NodesWhichTakePriorityOverSoftHotKeys } from './consts';
+import { HotKey } from './hotkey-class';
+import type { ButtonHotKeyOptions } from './types';
 
-const BUTTON_RAPID_FIRE_COOLDOWN = engineHotkeysConfig.buttonRapidFireCooldownMs;
+const BUTTON_RAPID_FIRE_COOLDOWN_DEFAULT = 20;
 
-export const createEngineButtonClickOnKeyDownHandler = () =>
-	createSmartHandler(
-		(event: KeyboardEvent) => {
-			const btn = event.target as HTMLButtonElement;
+function alwaysTrue() {
+	return true;
+}
 
-			btn.click();
+export function createHotKeyTriggerClickHandler(
+	node: HTMLElement,
+	elementInteraction: ElementInteraction,
+	options: ButtonHotKeyOptions
+) {
+	const { moveFocus } = options;
+
+	const shouldExecuteFunction = createHotKeyShouldExecuteFunction(options);
+	return createSmartHandler(
+		(_event: Event) => {
+			let currentActiveElement = document.activeElement;
+			node.click();
+
+			if (!moveFocus) {
+				if (currentActiveElement && currentActiveElement instanceof HTMLElement) {
+					elementInteraction.focus(currentActiveElement);
+				} else elementInteraction.blur(node);
+			} else elementInteraction.focus(node);
 		},
 		{
-			cooldownDelay: BUTTON_RAPID_FIRE_COOLDOWN,
-			shouldExecuteFunction: isKeyboardGoEvent,
-			shouldPreventDefault: true
+			cooldownDelay: BUTTON_RAPID_FIRE_COOLDOWN_DEFAULT,
+			context: `click node: [${node.toString()}]`,
+			shouldExecuteFunction
 		}
 	);
+}
 
-// Improve this - This should create a wrapper to a handler.
-export const createEngineButtonOnClickHandler = () =>
-	createSmartHandler(
-		(event: KeyboardEvent) => {
-			const btn = event.target as HTMLButtonElement;
-			engineElementInteraction.click(btn);
-			console.log('lol1');
+export function createHotKeyTriggerFocusHandler(
+	node: HTMLElement,
+	elementInteraction: ElementInteraction,
+	options: ButtonHotKeyOptions
+) {
+	let shouldExecuteFunction = createHotKeyShouldExecuteFunction(options);
+
+	return createSmartHandler(
+		(event: Event) => {
+			if (event.target !== node) {
+				elementInteraction.focus(node);
+			}
 		},
 		{
-			cooldownDelay: BUTTON_RAPID_FIRE_COOLDOWN,
-			shouldPreventDefault: true
+			cooldownDelay: BUTTON_RAPID_FIRE_COOLDOWN_DEFAULT,
+			context: `focus node: [${node.toString()}]`,
+			shouldExecuteFunction
 		}
 	);
+}
+
+function createHotKeyShouldExecuteFunction(options: ButtonHotKeyOptions) {
+	let { prioritizeInputFieldDefaults } = options;
+	let funcs: ((e: KeyboardEvent) => boolean)[] = [];
+
+	let prioritizeInputFieldDefaultsCheck: (e: KeyboardEvent) => boolean = prioritizeInputFieldDefaults
+		? (e: KeyboardEvent) => !shouldIgnoreHotKey(e, 'soft')
+		: alwaysTrue;
+	funcs.push(prioritizeInputFieldDefaultsCheck);
+
+	return prioritizeInputFieldDefaultsCheck;
+}
+
+export function shouldIgnoreHotKey(event: KeyboardEvent, strength: 'soft' | 'hard') {
+	let key = HotKey.fromEvent(event);
+	let currentActiveElement = document.activeElement;
+
+	if (strength === 'hard' || key.alt || key.ctrlOrOption || !currentActiveElement) return false;
+	let element = currentActiveElement as HTMLElement;
+	return strength === 'soft' && NodesWhichTakePriorityOverSoftHotKeys.includes(element.tagName.toLowerCase());
+}

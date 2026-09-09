@@ -1,8 +1,6 @@
 <script lang="ts">
-	import {
-		createEngineButtonClickOnKeyDownHandler,
-		createEngineButtonOnClickHandler
-	} from '$lib/engine/hotkeys/hotkey-handlers';
+	import { engineElementInteraction } from '$lib/engine/engine-temp/engine-interactions';
+	import { keyTriggerClick } from '$lib/engine/interactions/hooks/elements/on-keydown-click';
 	import type { Snippet } from 'svelte';
 	import { mergeProps } from 'svelte-toolbelt';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
@@ -16,17 +14,13 @@
 		children,
 		thisNode = $bindable(),
 		onkeydown: userOnKeydown = () => {},
-		onclick: userOnClick = undefined,
 		class: userClass = undefined,
 		...rest
 	}: Props = $props();
 
-	const onkeyDown = createEngineButtonClickOnKeyDownHandler();
-	const onClick = createEngineButtonOnClickHandler();
+	const onkeydown = keyTriggerClick(engineElementInteraction);
 
-	const mergedProps = $derived(
-		mergeProps({ onkeydown: userOnKeydown, onclick: userOnClick }, { onkeydown: onkeyDown, onclick: onClick }, rest)
-	);
+	const mergedProps = $derived(mergeProps({ onkeydown: userOnKeydown }, { onkeydown }, rest));
 </script>
 
 <button {...mergedProps} bind:this={thisNode} class={['icon-button', userClass]}>

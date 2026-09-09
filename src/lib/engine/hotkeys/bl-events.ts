@@ -2,22 +2,7 @@ import { createSmartHandler } from '../events/event-handling';
 import { GO_KEYS } from './hotkey-groups';
 import { ArrowKeysArray, NavigationKeyConsts, NodesWhichTakePriorityOverSoftHotKeys } from './consts';
 import type { NavType } from './types';
-import { HotKey } from './hotkey-class';
 export type KeyboardEventHandler = (keyboardEvent: KeyboardEvent) => void;
-
-export function createOnGoClickHandler(onActionEventHandler: KeyboardEventHandler) {
-	let smartClickHandling = createKeyabordNavigationEventHandler(onActionEventHandler);
-
-	return async function (event: KeyboardEvent) {
-		// TODO create better infra for relevancy -> preventdefault -> cd+debounce creation
-		if (isKeyboardGoEvent(event)) {
-			await smartClickHandling.call(this, event);
-
-			let target = null;
-			if (event.target instanceof HTMLElement) target = event.target;
-		}
-	};
-}
 
 export function createKeyabordNavigationEventHandler(
 	handler: KeyboardEventHandler,
@@ -36,38 +21,8 @@ export function createSoftKeyHandler(handler: KeyboardEventHandler) {
 	});
 }
 
-export function createKeyboardNavigationEventHandlerMixedSoftness(
-	handler: KeyboardEventHandler,
-	softKeys: HotKey[],
-	hardKeys: HotKey[]
-) {
-	let shouldExecuteFunction = (event: Event) =>
-		!shouldIgnoreHotkeyPrecise(event as KeyboardEvent, HotKey.fromEvent(event as KeyboardEvent), softKeys, hardKeys);
-
-	return createSmartHandler(handler, {
-		cooldownDelay: 20,
-		shouldExecuteFunction
-	});
-}
-
 export function isKeyboardGoEvent(event: KeyboardEvent) {
 	return GO_KEYS.includes(event.key.toLowerCase());
-}
-
-function shouldIgnoreHotkeyPrecise(event: KeyboardEvent, eventKey: HotKey, softKeys: HotKey[], hardKeys: HotKey[]) {
-	let hardMatch = eventKey.pickBestMatchingKey(hardKeys);
-
-	if (hardMatch) {
-		return true;
-	}
-
-	let softMatch = eventKey.pickBestMatchingKey(softKeys);
-
-	if (softMatch) {
-		return shouldIgnoreHotKey(event, 'soft');
-	}
-
-	return false;
 }
 
 export function shouldIgnoreHotKey(event: KeyboardEvent, strength: 'soft' | 'hard') {
