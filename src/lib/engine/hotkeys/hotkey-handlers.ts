@@ -1,3 +1,4 @@
+import type { KeyboardEventHandler } from 'svelte/elements';
 import { createSmartHandler } from '../events/event-handling';
 import type { ElementInteraction } from '../interactions/types';
 import { NodesWhichTakePriorityOverSoftHotKeys } from './consts';
@@ -5,10 +6,6 @@ import { HotKey } from './hotkey-class';
 import type { HotKeyToTriggerClickOptions, HotKeyToTriggerOptions } from './types';
 
 const BUTTON_RAPID_FIRE_COOLDOWN_DEFAULT = 20;
-
-function alwaysTrue() {
-	return true;
-}
 
 export function createHotKeyTriggerClickHandler(
 	node: HTMLElement,
@@ -58,23 +55,32 @@ export function createHotKeyTriggerFocusHandler(
 	);
 }
 
-function createHotKeyShouldExecuteFunction(options: HotKeyToTriggerOptions) {
-	let { prioritizeInputFieldDefaults } = options;
-	let funcs: ((e: KeyboardEvent) => boolean)[] = [];
-
-	let prioritizeInputFieldDefaultsCheck: (e: KeyboardEvent) => boolean = prioritizeInputFieldDefaults
-		? (e: KeyboardEvent) => !shouldIgnoreHotKey(e, 'soft')
-		: alwaysTrue;
-	funcs.push(prioritizeInputFieldDefaultsCheck);
-
-	return prioritizeInputFieldDefaultsCheck;
+export function createHotKeyHandler(
+	handler: KeyboardEventHandler<HTMLElement>,
+	options: HotKeyToTriggerOptions = { prioritizeInputFieldDefaults: true }
+) {
+	return createSmartHandler(handler, {
+		cooldownDelay: 20,
+		shouldExecuteFunction: createHotKeyShouldExecuteFunction(options)
+	});
 }
 
-export function shouldIgnoreHotKey(event: KeyboardEvent, strength: 'soft' | 'hard') {
-	let key = HotKey.fromEvent(event);
-	let currentActiveElement = document.activeElement;
+function createHotKeyShouldExecuteFunction(options: HotKeyToTriggerOptions) {
+	return (e: KeyboardEvent) => shouldExecuteHotKeyHandler(e, options);
+}
 
-	if (strength === 'hard' || key.alt || key.ctrlOrOption || !currentActiveElement) return false;
-	let element = currentActiveElement as HTMLElement;
-	return strength === 'soft' && NodesWhichTakePriorityOverSoftHotKeys.includes(element.tagName.toLowerCase());
+export function shouldExecuteHotKeyHandler(event: KeyboardEvent, options: HotKeyToTriggerOptions) {
+	let eventTarget = event.target as HTMLElement;
+
+	let key = HotKey.fromEvent(event);
+
+	if (key.alt || key.ctrlOrOption) {
+		return true;
+	}
+
+	if (eventTarget && options.prioritizeInputFieldDefaults) {
+		return !NodesWhichTakePriorityOverSoftHotKeys.includes(eventTarget.tagName.toLowerCase());
+	}
+
+	return true;
 }

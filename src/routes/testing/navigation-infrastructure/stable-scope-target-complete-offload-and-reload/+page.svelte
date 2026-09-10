@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import KeyboardNavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
@@ -10,6 +9,7 @@
 	import ToggleOnOff from '../ToggleOnOff.svelte';
 	import { markForNavigation } from '$lib/engine/keyboard-navigation/svelte-components/attachments';
 	import KeyboardNavigationManager from '$lib/engine/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 
 	let showScopeA = $state(true);
 	let showScopeB = $state(true);
@@ -30,17 +30,20 @@
 	<main class="ly-center">
 		<div class="container">
 			<KeyboardNavigationScope scopeId="controlsScope" navigationKeys={NavigationKeysConfigSets.Horizontal}>
-				<ToggleOnOff bind:toggle={showScopeA} {@attach createClickHotKeyAttachment('Toggle A', hotkey('1'))}>
+				<ToggleOnOff bind:toggle={showScopeA} {@attach createHotKeyTriggerClickAttachment('Toggle A', hotkey('1'))}>
 					Scope A
 				</ToggleOnOff>
-				<ToggleOnOff bind:toggle={showScopeB} {@attach createClickHotKeyAttachment('Toggle B', hotkey('2'))}>
+				<ToggleOnOff bind:toggle={showScopeB} {@attach createHotKeyTriggerClickAttachment('Toggle B', hotkey('2'))}>
 					Scope B
 				</ToggleOnOff>
-				<ToggleOnOff bind:toggle={showScopeC} {@attach createClickHotKeyAttachment('Toggle C', hotkey('3'))}>
+				<ToggleOnOff bind:toggle={showScopeC} {@attach createHotKeyTriggerClickAttachment('Toggle C', hotkey('3'))}>
 					Scope C
 				</ToggleOnOff>
 
-				<ToggleOnOff bind:toggle={hideC2} {@attach createClickHotKeyAttachment('Toggle Element C-2', hotkey('4'))}>
+				<ToggleOnOff
+					bind:toggle={hideC2}
+					{@attach createHotKeyTriggerClickAttachment('Toggle Element C-2', hotkey('4'))}
+				>
 					Toggle C-2 + Add Random
 				</ToggleOnOff>
 			</KeyboardNavigationScope>

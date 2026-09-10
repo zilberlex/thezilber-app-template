@@ -1,4 +1,4 @@
-import { NavigationKeyConsts } from '../hotkeys/consts';
+import { NavigationKeyConsts } from './consts';
 import type { NavigationScopeOptions } from './types';
 
 export const NavigationKeysConfigSets = {

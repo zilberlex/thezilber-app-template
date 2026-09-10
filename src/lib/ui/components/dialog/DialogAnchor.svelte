@@ -11,8 +11,8 @@
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import type { DialogController } from './dialog-contoller.svelte';
-	import { engineElementInteraction } from '$lib/engine/engine-temp/engine-interactions';
 	import { getFocusable } from '$lib/engine/interactions/inspection/elements/focusability';
+	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
 
 	let dialogBoxNode: HTMLElement | null = $state(null);
 	let appRoot = $derived(appState.appRoot);

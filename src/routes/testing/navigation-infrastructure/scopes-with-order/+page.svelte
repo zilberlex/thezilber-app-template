@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
@@ -9,6 +8,7 @@
 	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/configurations';
 	import ToggleOnOff from '../ToggleOnOff.svelte';
 	import KeyboardNavigationManager from '$lib/engine/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 
 	let showScopeA = $state(true);
 	let showScopeB = $state(true);
@@ -29,19 +29,19 @@
 	<main class="ly-center">
 		<div class="container">
 			<NavigationScope scopeId="controlsScope" navigationKeys={NavigationKeysConfigSets.Horizontal}>
-				<ToggleOnOff bind:toggle={showScopeA} {@attach createClickHotKeyAttachment('Toggle A', hotkey('1'))}>
+				<ToggleOnOff bind:toggle={showScopeA} {@attach createHotKeyTriggerClickAttachment('Toggle A', hotkey('1'))}>
 					Scope Order 2 (Hotkey 1)
 				</ToggleOnOff>
-				<ToggleOnOff bind:toggle={showScopeB} {@attach createClickHotKeyAttachment('Toggle B', hotkey('2'))}>
+				<ToggleOnOff bind:toggle={showScopeB} {@attach createHotKeyTriggerClickAttachment('Toggle B', hotkey('2'))}>
 					Scope Order 1 (Hotkey 2)
 				</ToggleOnOff>
-				<ToggleOnOff bind:toggle={showScopeC} {@attach createClickHotKeyAttachment('Toggle C', hotkey('3'))}>
+				<ToggleOnOff bind:toggle={showScopeC} {@attach createHotKeyTriggerClickAttachment('Toggle C', hotkey('3'))}>
 					Scope Order 3 (Hotkey 3)
 				</ToggleOnOff>
-				<ToggleOnOff bind:toggle={showScopeD} {@attach createClickHotKeyAttachment('Toggle D', hotkey('4'))}>
+				<ToggleOnOff bind:toggle={showScopeD} {@attach createHotKeyTriggerClickAttachment('Toggle D', hotkey('4'))}>
 					Scope Order 5 (Hotkey 4)
 				</ToggleOnOff>
-				<ToggleOnOff bind:toggle={showScopeE} {@attach createClickHotKeyAttachment('Toggle E', hotkey('5'))}>
+				<ToggleOnOff bind:toggle={showScopeE} {@attach createHotKeyTriggerClickAttachment('Toggle E', hotkey('5'))}>
 					Scope Order 4 (Hotkey 5)
 				</ToggleOnOff>
 			</NavigationScope>

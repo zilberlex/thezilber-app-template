@@ -1,6 +1,10 @@
 import type { DispatchHandler } from '$lib/engine/patterns/observer';
-import { NavigationKeyConsts } from '$lib/engine/hotkeys/consts';
 import type { ElementInteraction } from '../interactions/types';
+
+export type NavType = {
+	direction: 'hor-prev' | 'hor-next' | 'ver-prev' | 'ver-next' | undefined;
+	isArrow: boolean;
+};
 
 export function createNavigationKeys(nextKeys: string[], prevKeys: string[]): NavigationKeysConfig {
 	return {

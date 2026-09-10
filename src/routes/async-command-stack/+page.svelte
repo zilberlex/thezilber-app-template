@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import { onMount } from 'svelte';
 	import { loadLocalState, saveLocalState } from '$lib/engine/storage/local/simple-state-persistance.svelte';
@@ -114,24 +114,24 @@
 				>
 					Value
 				</InputCombo>
-				<Button onclick={insertItem} {@attach createClickHotKeyAttachment('Insert', false, hotkey('a', 'alt'))}>
+				<Button onclick={insertItem} {@attach createHotKeyTriggerClickAttachment('Insert', false, hotkey('a', 'alt'))}>
 					Insert
 				</Button>
-				<Button onclick={updateItem} {@attach createClickHotKeyAttachment('Update', false, hotkey('u', 'alt'))}>
+				<Button onclick={updateItem} {@attach createHotKeyTriggerClickAttachment('Update', false, hotkey('u', 'alt'))}>
 					Update
 				</Button>
-				<Button onclick={clearState} {@attach createClickHotKeyAttachment('Clear', false, hotkey('r', 'alt'))}>
+				<Button onclick={clearState} {@attach createHotKeyTriggerClickAttachment('Clear', false, hotkey('r', 'alt'))}>
 					Clear
 				</Button>
-				<Button onclick={deleteItem} {@attach createClickHotKeyAttachment('Delete', false, hotkey('d', 'alt'))}>
+				<Button onclick={deleteItem} {@attach createHotKeyTriggerClickAttachment('Delete', false, hotkey('d', 'alt'))}>
 					Delete
 				</Button>
-				<Button onclick={() => undo()} {@attach createClickHotKeyAttachment('Undo', false, hotkey('z', 'ctrl|option'))}>
+				<Button onclick={() => undo()} {@attach createHotKeyTriggerClickAttachment('Undo', false, hotkey('z', 'ctrl|option'))}>
 					Undo
 				</Button>
 				<Button
 					onclick={() => redo()}
-					{@attach createClickHotKeyAttachment('Redo', false, hotkey('z', 'ctrl|option', 'shift'))}
+					{@attach createHotKeyTriggerClickAttachment('Redo', false, hotkey('z', 'ctrl|option', 'shift'))}
 				>
 					Redo
 				</Button>

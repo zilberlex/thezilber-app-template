@@ -5,7 +5,7 @@
 	import '$lib/ui/style/theme/theme.scss';
 	import { resolve } from '$app/paths';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
-	import { createHotKeyTriggerFocusAttachment } from '$lib/engine/engine-temp/hotkey-actions';
+	import { createHotKeyTriggerFocusAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 </script>
 
 <div class="home-button-container">

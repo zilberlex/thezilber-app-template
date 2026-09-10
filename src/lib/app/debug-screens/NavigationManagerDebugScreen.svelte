@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-temp/hotkey-actions';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import type { NavigationManager } from '$lib/engine/keyboard-navigation/navigation-manager';
 	import { getNavigationManager } from '$lib/engine/keyboard-navigation/svelte-components/navigation-manager-provider.svelte';

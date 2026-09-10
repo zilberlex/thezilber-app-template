@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { createSoftKeyHandler } from '$lib/engine/hotkeys/bl-events';
 	import { HotKey } from '$lib/engine/hotkeys/hotkey-class';
+	import { createHotKeyHandler } from '$lib/engine/hotkeys/hotkey-handlers';
 	import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onDestroy, onMount } from 'svelte';
@@ -14,11 +14,11 @@
 	let undoHotKey = new HotKey('z', 'ctrl|option');
 	let redoHotKey = new HotKey('z', 'ctrl|option', 'shift');
 
-	let globalUndo = createSoftKeyHandler((e) => {
+	let globalUndo = createHotKeyHandler((e) => {
 		appState.commandStack?.undo();
 	});
 
-	let globalRedo = createSoftKeyHandler(() => {
+	let globalRedo = createHotKeyHandler(() => {
 		appState.commandStack?.redo();
 	});
 

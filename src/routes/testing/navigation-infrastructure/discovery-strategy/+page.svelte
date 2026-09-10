@@ -6,10 +6,10 @@
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import NavigatableAndUnnavigatableSwitcher from '../NavigatableAndUnnavigatableSwitcher.svelte';
 	import type { ScopeInfra } from '$lib/engine/keyboard-navigation/types';
-	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { assignNavigationManagerKeys } from '$lib/engine/keyboard-navigation/svelte-components/sveltekit-helpers';
 	import { markForNavigation } from '$lib/engine/keyboard-navigation/svelte-components/attachments';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 
 	onMount(() => {
 		if (browser) {
@@ -76,7 +76,8 @@
 					refreshMarkedCount = scopeMarkedStable?._debugInfo().refreshCount ?? 0;
 					refreshMarkedNonStableCount = scopeMarkedNonStable?._debugInfo().refreshCount ?? 0;
 				}}
-				{@attach createClickHotKeyAttachment('Refresh Counts', hotkey('r', 'alt'))}>Refresh Number Counter</Button
+				{@attach createHotKeyTriggerClickAttachment('Refresh Counts', hotkey('r', 'alt'))}
+				>Refresh Number Counter</Button
 			>
 		</div>
 	</div>

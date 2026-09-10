@@ -1,6 +1,6 @@
 <script lang="ts">
 	import HamburgerIcon from '$lib/assets/icons/HamburgerIcon.svelte';
-	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-temp/hotkey-actions';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/configurations';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';

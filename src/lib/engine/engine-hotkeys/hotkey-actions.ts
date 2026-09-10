@@ -1,16 +1,8 @@
-import { createSmartHandler } from '$lib/engine/events/event-handling';
-import { hotKeysModule } from '../hotkeys/hotkey-module';
-import type { KeyboardEventKeyType, KeyCheckFn } from '$lib/engine/hotkeys/key-identification';
-import { shouldIgnoreHotKey } from '../hotkeys/bl-events';
 import { HotKey } from '../hotkeys/hotkey-class';
 import { HotkeyTooltipAttribute } from '../hotkey-tooltip/tooltip-consts';
-import { chain } from '../general-js-ts/chain-funcs';
 import type { Attachment } from 'svelte/attachments';
-import { engineHotkeysConfig } from './hotkey-config';
 import { engineElementInteraction } from './engine-interactions';
 import { assignHotkeyToClick, assignHotkeyToFocus } from '../hotkeys/svelt-components/hotkey-attachments';
-
-const HOTKEY_COOLDOWN_MS = engineHotkeysConfig.buttonRapidFireCooldownMs;
 
 type ButtonHotKeyOptions = {
 	scope?: HTMLElement;

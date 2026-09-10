@@ -1,7 +1,5 @@
-import { createKeyabordNavigationEventHandler } from '$lib/engine/hotkeys/bl-events';
 import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
-import { NavigationKeyConsts } from '$lib/engine/hotkeys/consts';
 import { engineAssert } from '$lib/engine/error/engine-assert';
 import { type NavigationKeysConfig, type NavigationTargetRestorationPoint, type ScopeInfra } from './types';
 import { HotKey } from '../hotkeys/hotkey-class';
@@ -9,6 +7,8 @@ import { hotkeys } from '../hotkeys/hotkey-helpers';
 import { PriorityMapList } from '../patterns/lists-and-maps-advanced/priority-map-list';
 import type { ElementInteraction } from '../interactions/types';
 import { nativeElementInteraction } from '../interactions/triggers/elements/element-interactions';
+import { NavigationKeyConsts } from './consts';
+import { createKeyabordNavigationEventHandler } from './handlers';
 
 const DEFAULT_SCOPE_ORDER = 1;
 
@@ -202,7 +202,7 @@ export class NavigationManager {
 		if (matchedSetIndex === undefined) return;
 
 		matchedSetIndex === 0 ? this.focusNextScope() : this.focusPrevScope();
-	}, 'soft');
+	});
 
 	refocus() {
 		const scope = this.#getCurrentScope();
