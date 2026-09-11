@@ -1,4 +1,4 @@
-import { removeFromArrayLast } from '$lib/engine/general-js-ts/arrayRemoveByItem';
+import { removeFromArrayLast } from '$lib/engine/general-js-ts/array-remove-by-item';
 import type { MaybePromise } from '$lib/engine/general-js-ts/typescript/type-helpers';
 import { isErrorResult } from '$lib/engine/patterns/result/common';
 import type { MaybeResult } from '$lib/engine/patterns/result/types';

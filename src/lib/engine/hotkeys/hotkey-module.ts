@@ -54,7 +54,7 @@ export class HotkeysModule {
 
 		const handlers = eventKey.pickBestMatch(
 			matches.map(({ key, values }) => ({
-				hotKey: key,
+				kbKey: key,
 				cbObject: values
 			}))
 		);

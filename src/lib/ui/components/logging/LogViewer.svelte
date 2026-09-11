@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { removeFromArrayPredicate } from '$lib/engine/general-js-ts/arrayRemoveByItem';
+	import { removeFromArrayPredicate } from '$lib/engine/general-js-ts/array-remove-by-item';
 	import { composeTransitions } from '$lib/engine/transitions/transition-tools/transition-composition/compose-transitions';
 	import { typewriter } from '$lib/engine/transitions/typewriter';
 	import { cubicIn, cubicOut, linear, sineIn, sineInOut, sineOut } from 'svelte/easing';
