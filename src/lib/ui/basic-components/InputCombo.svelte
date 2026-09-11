@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createHotKeyTriggerFocusAttachment } from '$lib/engine/engine-temp/hotkey-actions';
+	import { createHotKeyTriggerFocusAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import type { Snippet } from 'svelte';
 

@@ -8,7 +8,7 @@
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import { formFromSchema, mergeForms, resolveFieldValue } from './dynamic-form';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
-	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-temp/hotkey-actions';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 
 	let {
 		formSchema,

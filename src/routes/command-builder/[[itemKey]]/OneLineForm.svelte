@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-temp/hotkey-actions';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import { loadSessionStorage, saveSessionStorage } from '$lib/engine/storage/session/session-storage';
 	import Button from '$lib/ui/basic-components/Button.svelte';

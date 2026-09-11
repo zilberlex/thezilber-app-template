@@ -1,29 +1,8 @@
 import { createSmartHandler } from '$lib/engine/events/event-handling';
 import { toArray } from '$lib/engine/general-js-ts/to-array';
 import { HotKey } from '$lib/engine/hotkeys/hotkey-class';
-import { hotkey, hotkeys } from '$lib/engine/hotkeys/hotkey-helpers';
+import { hotkeys } from '$lib/engine/hotkeys/hotkey-helpers';
 import type { ElementInteraction } from '../../types';
-
-// export function createKeyboardClickHandler(
-// 	interaction: ElementInteraction,
-// 	options?: {
-// 		cooldownMs?: number;
-// 	}
-// ) {
-// 	return createSmartHandler(
-// 		(event: KeyboardEvent) => {
-// 			interaction.click(event.currentTarget as HTMLElement);
-// 		},
-// 		{
-// 			cooldownDelay: options?.cooldownMs ?? 0,
-// 			shouldExecuteFunction: isKeyboardGoEvent,
-// 			shouldPreventDefault: true
-// 		}
-// 	);
-// }
-//
-//
-//
 
 export function keyTriggerClick(
 	interaction: ElementInteraction,

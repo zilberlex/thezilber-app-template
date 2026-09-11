@@ -9,7 +9,7 @@
 	import { tick } from 'svelte';
 	import { fadeAndSlide } from '$lib/engine/transitions/fade-and-slide';
 	import { markForNavigation } from '$lib/engine/keyboard-navigation/svelte-components/attachments';
-	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-temp/hotkey-actions';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 
 	type Props = HTMLAttributes<HTMLDivElement> & {
 		cbAppEnv: CbAppEnv;
