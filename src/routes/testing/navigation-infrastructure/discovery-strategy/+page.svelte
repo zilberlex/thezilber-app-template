@@ -3,17 +3,17 @@
 	import { onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import NavigatableAndUnnavigatableSwitcher from '../NavigatableAndUnnavigatableSwitcher.svelte';
 	import type { ScopeInfra } from '$lib/engine/keyboard-navigation/types';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { assignNavigationManagerKeys } from '$lib/engine/keyboard-navigation/svelte-components/sveltekit-helpers';
 	import { markForNavigation } from '$lib/engine/keyboard-navigation/svelte-components/attachments';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
+	import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
 
 	onMount(() => {
 		if (browser) {
-			return assignNavigationManagerKeys(hotkey('t'), hotkey('t', 'shift'));
+			return assignNavigationManagerKeys(kbKey('t'), kbKey('t', 'shift'));
 		}
 	});
 
@@ -76,7 +76,7 @@
 					refreshMarkedCount = scopeMarkedStable?._debugInfo().refreshCount ?? 0;
 					refreshMarkedNonStableCount = scopeMarkedNonStable?._debugInfo().refreshCount ?? 0;
 				}}
-				{@attach createHotKeyTriggerClickAttachment('Refresh Counts', hotkey('r', 'alt'))}
+				{@attach createHotKeyTriggerClickAttachment('Refresh Counts', kbKey('r', 'alt'))}
 				>Refresh Number Counter</Button
 			>
 		</div>

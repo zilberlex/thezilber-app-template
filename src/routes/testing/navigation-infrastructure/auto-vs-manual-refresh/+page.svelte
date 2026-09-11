@@ -6,13 +6,13 @@
 	import NavigatableAndUnnavigatableSwitcher from '../NavigatableAndUnnavigatableSwitcher.svelte';
 	import { browser } from '$app/environment';
 	import { assignNavigationManagerKeys } from '$lib/engine/keyboard-navigation/svelte-components/sveltekit-helpers';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
+	import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
 
 	let scopeManual = $state<ScopeInfra>();
 
 	onMount(() => {
 		if (browser) {
-			return assignNavigationManagerKeys(hotkey('t'), hotkey('t', 'shift'));
+			return assignNavigationManagerKeys(kbKey('t'), kbKey('t', 'shift'));
 		}
 	});
 </script>

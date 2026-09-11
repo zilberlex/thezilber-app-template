@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import KeyboardNavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { NavigationManager } from '$lib/engine/keyboard-navigation/navigation-manager';
@@ -10,6 +9,7 @@
 	import { markForNavigation } from '$lib/engine/keyboard-navigation/svelte-components/attachments';
 	import KeyboardNavigationManager from '$lib/engine/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
+	import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
 
 	let showScopeA = $state(true);
 	let showScopeB = $state(true);
@@ -30,19 +30,19 @@
 	<main class="ly-center">
 		<div class="container">
 			<KeyboardNavigationScope scopeId="controlsScope" navigationKeys={NavigationKeysConfigSets.Horizontal}>
-				<ToggleOnOff bind:toggle={showScopeA} {@attach createHotKeyTriggerClickAttachment('Toggle A', hotkey('1'))}>
+				<ToggleOnOff bind:toggle={showScopeA} {@attach createHotKeyTriggerClickAttachment('Toggle A', kbKey('1'))}>
 					Scope A
 				</ToggleOnOff>
-				<ToggleOnOff bind:toggle={showScopeB} {@attach createHotKeyTriggerClickAttachment('Toggle B', hotkey('2'))}>
+				<ToggleOnOff bind:toggle={showScopeB} {@attach createHotKeyTriggerClickAttachment('Toggle B', kbKey('2'))}>
 					Scope B
 				</ToggleOnOff>
-				<ToggleOnOff bind:toggle={showScopeC} {@attach createHotKeyTriggerClickAttachment('Toggle C', hotkey('3'))}>
+				<ToggleOnOff bind:toggle={showScopeC} {@attach createHotKeyTriggerClickAttachment('Toggle C', kbKey('3'))}>
 					Scope C
 				</ToggleOnOff>
 
 				<ToggleOnOff
 					bind:toggle={hideC2}
-					{@attach createHotKeyTriggerClickAttachment('Toggle Element C-2', hotkey('4'))}
+					{@attach createHotKeyTriggerClickAttachment('Toggle Element C-2', kbKey('4'))}
 				>
 					Toggle C-2 + Add Random
 				</ToggleOnOff>

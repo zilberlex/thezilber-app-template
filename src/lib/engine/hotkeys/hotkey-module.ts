@@ -11,14 +11,14 @@ export class HotkeysModule {
 
 	#onKeydownBound: (event: KeyboardEvent) => void = this.#onKeydown.bind(this);
 
-	assignHotKey(key: KbKey, handler: EventHandler<KeyboardEvent>, isCaptrue = false) {
+	assignHotKey(key: KbKey, handler: EventHandler<KeyboardEvent>, isCapture = false) {
 		console.debug('HotkeysModule assigning key:', key, 'to handler:', handler.name ?? '<annonymous>');
 
 		if (!this.#wasInitialized) {
 			throw new Error(`${HotkeysModule.name} Need to initialize Class before assigning hotkeys`);
 		}
 
-		if (isCaptrue) {
+		if (isCapture) {
 			this.#hotKeysCaptureHandlers.add(key, handler);
 		} else {
 			this.#hotKeysHandlers.add(key, handler);
@@ -47,7 +47,7 @@ export class HotkeysModule {
 			hotKeyedHandlers = this.#hotKeysCaptureHandlers;
 		}
 
-		let eventKey = KbKey.fromEvent(event);
+		const eventKey = KbKey.fromEvent(event);
 		const possibleMatches = eventKey.getPossibleRegisteredMatches();
 
 		const matches = hotKeyedHandlers.getMultiple(possibleMatches);

@@ -112,12 +112,12 @@ export class KbKey implements KeyLike {
 		return new KbKey(event.key, ...mods);
 	}
 
-	pickBestMatch<T>(entries: Array<{ hotKey: KbKey; cbObject: T }>): T | undefined {
+	pickBestMatch<T>(entries: Array<{ kbKey: KbKey; cbObject: T }>): T | undefined {
 		let bestScore = Infinity;
 		let bestValue: T | undefined;
 
 		for (const entry of entries) {
-			const score = entry.hotKey.test(this);
+			const score = entry.kbKey.test(this);
 
 			if (score >= 0 && score < bestScore) {
 				bestScore = score;
