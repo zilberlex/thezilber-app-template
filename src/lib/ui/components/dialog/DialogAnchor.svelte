@@ -5,7 +5,6 @@
 	import { onNavigate } from '$app/navigation';
 	import { createSmartHandler } from '$lib/engine/events/event-handling';
 	import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
-	import { HotKey } from '$lib/engine/hotkeys/hotkey-class';
 	import type { FocusableElement } from '$lib/engine/keyboard-navigation/types';
 	import { safeInstanceOf } from '$lib/engine/types/type-utils';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
@@ -13,6 +12,7 @@
 	import type { DialogController } from './dialog-contoller.svelte';
 	import { getFocusable } from '$lib/engine/interactions/inspection/elements/focusability';
 	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
+	import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
 
 	let dialogBoxNode: HTMLElement | null = $state(null);
 	let appRoot = $derived(appState.appRoot);
@@ -28,7 +28,7 @@
 
 	onDestroy(() => {
 		cleanupComponent();
-		hotKeysModule.removeHotKey(new HotKey('Escape'), closeDialogHandler);
+		hotKeysModule.removeHotKey(kbKey('Escape'), closeDialogHandler);
 	});
 
 	onNavigate(() => {
@@ -63,7 +63,7 @@
 
 		return untrack(() => {
 			if (dialogController.activeDialog) {
-				hotKeysModule.assignHotKey(new HotKey('Escape'), closeDialogHandler, true);
+				hotKeysModule.assignHotKey(kbKey('Escape'), closeDialogHandler, true);
 
 				if (dialogController.activeDialog) {
 					const thisJob = ++focusOpenDialogJobCounter;
@@ -89,7 +89,7 @@
 					});
 				}
 				return () => {
-					hotKeysModule.removeHotKey(new HotKey('Escape'), closeDialogHandler);
+					hotKeysModule.removeHotKey(kbKey('Escape'), closeDialogHandler);
 					dialogCloseCleanup();
 				};
 			}

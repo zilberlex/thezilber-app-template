@@ -4,15 +4,15 @@
 	import '$lib/ui/style/reset.css';
 	import '$lib/ui/style/theme/theme.scss';
 	import { resolve } from '$app/paths';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import { createHotKeyTriggerFocusAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
+	import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
 </script>
 
 <div class="home-button-container">
 	<a
 		href={resolve('/')}
 		class="home-button left"
-		{@attach createHotKeyTriggerFocusAttachment('Home ', hotkey('h', 'alt'))}>Home</a
+		{@attach createHotKeyTriggerFocusAttachment('Home ', kbKey('h', 'alt'))}>Home</a
 	>
 </div>
 

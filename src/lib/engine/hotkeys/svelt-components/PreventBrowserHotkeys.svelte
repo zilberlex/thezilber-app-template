@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { HotKey } from '$lib/engine/hotkeys/hotkey-class';
 	import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
+	import type { KbKey } from '$lib/engine/keyboard-key/kb-key';
 
 	type Props = {
-		preventedKeys: HotKey[];
+		preventedKeys: KbKey[];
 	};
 
 	let { preventedKeys }: Props = $props();

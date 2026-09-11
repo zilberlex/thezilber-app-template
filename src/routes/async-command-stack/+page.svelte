@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { createHotKeyTriggerClickAttachment } from '$lib/engine/hotkeys/hotkey-actions';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import { onMount } from 'svelte';
 	import { loadLocalState, saveLocalState } from '$lib/engine/storage/local/simple-state-persistance.svelte';
 	import { copyState } from '$lib/engine/svelte-helpers/copy-state';
@@ -15,6 +13,8 @@
 	import { DemoManager } from './demo-manager.svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/configurations';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
+	import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
 
 	let inputKey = $state('');
 	let inputValue = $state('');
@@ -114,24 +114,24 @@
 				>
 					Value
 				</InputCombo>
-				<Button onclick={insertItem} {@attach createHotKeyTriggerClickAttachment('Insert', false, hotkey('a', 'alt'))}>
+				<Button onclick={insertItem} {@attach createHotKeyTriggerClickAttachment('Insert', kbKey('a', 'alt'))}>
 					Insert
 				</Button>
-				<Button onclick={updateItem} {@attach createHotKeyTriggerClickAttachment('Update', false, hotkey('u', 'alt'))}>
+				<Button onclick={updateItem} {@attach createHotKeyTriggerClickAttachment('Update', kbKey('u', 'alt'))}>
 					Update
 				</Button>
-				<Button onclick={clearState} {@attach createHotKeyTriggerClickAttachment('Clear', false, hotkey('r', 'alt'))}>
+				<Button onclick={clearState} {@attach createHotKeyTriggerClickAttachment('Clear', kbKey('r', 'alt'))}>
 					Clear
 				</Button>
-				<Button onclick={deleteItem} {@attach createHotKeyTriggerClickAttachment('Delete', false, hotkey('d', 'alt'))}>
+				<Button onclick={deleteItem} {@attach createHotKeyTriggerClickAttachment('Delete', kbKey('d', 'alt'))}>
 					Delete
 				</Button>
-				<Button onclick={() => undo()} {@attach createHotKeyTriggerClickAttachment('Undo', false, hotkey('z', 'ctrl|option'))}>
+				<Button onclick={() => undo()} {@attach createHotKeyTriggerClickAttachment('Undo', kbKey('z', 'ctrl|meta'))}>
 					Undo
 				</Button>
 				<Button
 					onclick={() => redo()}
-					{@attach createHotKeyTriggerClickAttachment('Redo', false, hotkey('z', 'ctrl|option', 'shift'))}
+					{@attach createHotKeyTriggerClickAttachment('Redo', kbKey('z', 'ctrl|meta', 'shift'))}
 				>
 					Redo
 				</Button>

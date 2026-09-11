@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
+	import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
 	import { loadSessionStorage, saveSessionStorage } from '$lib/engine/storage/session/session-storage';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
@@ -54,12 +54,12 @@
 		<div class="form-controls">
 			<Button
 				onclick={() => onAction(inputField)}
-				{@attach createHotKeyTriggerClickAttachment(actionText, hotkey('Enter', 'alt'))}
+				{@attach createHotKeyTriggerClickAttachment(actionText, kbKey('Enter', 'alt'))}
 			>
 				{actionText}
 			</Button>
 
-			<Button onclick={onClose} {@attach createHotKeyTriggerClickAttachment('Close Dialog', hotkey('q', 'alt'))}
+			<Button onclick={onClose} {@attach createHotKeyTriggerClickAttachment('Close Dialog', kbKey('q', 'alt'))}
 				>Close</Button
 			>
 		</div>

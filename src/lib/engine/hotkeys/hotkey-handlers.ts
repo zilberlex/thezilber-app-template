@@ -2,8 +2,7 @@ import type { KeyboardEventHandler } from 'svelte/elements';
 import { createSmartHandler } from '../events/event-handling';
 import type { ElementInteraction } from '../interactions/types';
 import { NodesWhichTakePriorityOverSoftHotKeys } from './consts';
-import { HotKey } from './hotkey-class';
-import type { HotKeyToTriggerClickOptions, HotKeyToTriggerOptions } from './types';
+import { KbKey } from '$lib/engine/keyboard-key/kb-key';
 
 const BUTTON_RAPID_FIRE_COOLDOWN_DEFAULT = 20;
 
@@ -72,9 +71,9 @@ function createHotKeyShouldExecuteFunction(options: HotKeyToTriggerOptions) {
 export function shouldExecuteHotKeyHandler(event: KeyboardEvent, options: HotKeyToTriggerOptions) {
 	let eventTarget = event.target as HTMLElement;
 
-	let key = HotKey.fromEvent(event);
+	let key = KbKey.fromEvent(event);
 
-	if (key.alt || key.ctrlOrOption) {
+	if (key.alt || key.ctrlOrMeta) {
 		return true;
 	}
 

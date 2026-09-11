@@ -1,7 +1,7 @@
 <script lang="ts">
 	import HamburgerIcon from '$lib/assets/icons/HamburgerIcon.svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
+	import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
 	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/configurations';
 	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import IconButton from '$lib/ui/basic-components/IconButton.svelte';
@@ -125,7 +125,7 @@
 						aria-controls="app-shell-sidebar"
 						onclick={toggleSidebar}
 						tabindex={-1}
-						{@attach createHotKeyTriggerClickAttachment('Open Sidebar', hotkey('o', 'alt'))}
+						{@attach createHotKeyTriggerClickAttachment('Open Sidebar', kbKey('o', 'alt'))}
 					>
 						<HamburgerIcon />
 					</IconButton>

@@ -1,17 +1,17 @@
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
-import { HotKey } from './hotkey-class';
+import { KbKey } from '../keyboard-key/kb-key';
 
 type EventHandler<E extends Event> = (event: E) => void;
 
 export class HotkeysModule {
 	#wasInitialized = false;
 
-	#hotKeysHandlers = new OneToManyDictionary<HotKey, EventHandler<KeyboardEvent>>(true);
-	#hotKeysCaptureHandlers = new OneToManyDictionary<HotKey, EventHandler<KeyboardEvent>>(true);
+	#hotKeysHandlers = new OneToManyDictionary<KbKey, EventHandler<KeyboardEvent>>(true);
+	#hotKeysCaptureHandlers = new OneToManyDictionary<KbKey, EventHandler<KeyboardEvent>>(true);
 
 	#onKeydownBound: (event: KeyboardEvent) => void = this.#onKeydown.bind(this);
 
-	assignHotKey(key: HotKey, handler: EventHandler<KeyboardEvent>, isCaptrue = false) {
+	assignHotKey(key: KbKey, handler: EventHandler<KeyboardEvent>, isCaptrue = false) {
 		console.debug('HotkeysModule assigning key:', key, 'to handler:', handler.name ?? '<annonymous>');
 
 		if (!this.#wasInitialized) {
@@ -25,17 +25,17 @@ export class HotkeysModule {
 		}
 	}
 
-	removeHotKey(key: HotKey, handler: EventHandler<KeyboardEvent>) {
+	removeHotKey(key: KbKey, handler: EventHandler<KeyboardEvent>) {
 		console.debug('HotkeysModule removing key:', key, 'to handler:', handler.name ?? '<annonymous>');
 		this.#hotKeysHandlers.remove(key, handler);
 		this.#hotKeysCaptureHandlers.remove(key, handler);
 	}
 
-	assignHotKeys(keys: HotKey[], handler: EventHandler<KeyboardEvent>, isCaptrue = false) {
+	assignHotKeys(keys: KbKey[], handler: EventHandler<KeyboardEvent>, isCaptrue = false) {
 		keys.forEach((key) => this.assignHotKey(key, handler, isCaptrue));
 	}
 
-	removeHotKeys(keys: HotKey[], handler: EventHandler<KeyboardEvent>) {
+	removeHotKeys(keys: KbKey[], handler: EventHandler<KeyboardEvent>) {
 		keys.forEach((key) => this.removeHotKey(key, handler));
 	}
 
@@ -47,7 +47,7 @@ export class HotkeysModule {
 			hotKeyedHandlers = this.#hotKeysCaptureHandlers;
 		}
 
-		let eventKey = HotKey.fromEvent(event);
+		let eventKey = KbKey.fromEvent(event);
 		const possibleMatches = eventKey.getPossibleRegisteredMatches();
 
 		const matches = hotKeyedHandlers.getMultiple(possibleMatches);

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
+	import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
 	import type { NavigationManager } from '$lib/engine/keyboard-navigation/navigation-manager';
 	import { getNavigationManager } from '$lib/engine/keyboard-navigation/svelte-components/navigation-manager-provider.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
@@ -40,7 +40,7 @@
 
 <div class="navigation-manager-debug content-surface">
 	<Button
-		{@attach createHotKeyTriggerClickAttachment('Refresh', hotkey('r', 'alt'))}
+		{@attach createHotKeyTriggerClickAttachment('Refresh', kbKey('r', 'alt'))}
 		onclick={() => (debugInfo = navigationManagerDerived._debugInfo())}>Refresh</Button
 	>
 	<ObjectViewer object={debugInfoDisplay} />

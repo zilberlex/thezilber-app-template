@@ -1,19 +1,19 @@
 import type { KeyLike } from '../patterns/key';
-import type { HotKeyModifier } from './types';
+import type { KbKeyModifier } from './types';
 
-export const MODIFIER_INDEX: Record<HotKeyModifier, number> = {
-	'ctrl|option': 0,
+export const MODIFIER_INDEX: Record<KbKeyModifier, number> = {
+	'ctrl|meta': 0,
 	alt: 1,
 	shift: 2
 } as const;
 
-const ALL_MODIFIERS: HotKeyModifier[] = ['ctrl|option', 'alt', 'shift'];
+const ALL_MODIFIERS: KbKeyModifier[] = ['ctrl|meta', 'alt', 'shift'];
 
-export class HotKey implements KeyLike {
+export class KbKey implements KeyLike {
 	readonly key: string;
 	readonly #flags: [boolean, boolean, boolean]; // [ctrl|option, alt, shift]
 
-	constructor(key: string, ...modifiers: HotKeyModifier[]) {
+	constructor(key: string, ...modifiers: KbKeyModifier[]) {
 		this.key = key.toLowerCase();
 		this.#flags = [false, false, false];
 
@@ -23,8 +23,8 @@ export class HotKey implements KeyLike {
 		}
 	}
 
-	get ctrlOrOption() {
-		return this.#flags[MODIFIER_INDEX['ctrl|option']];
+	get ctrlOrMeta() {
+		return this.#flags[MODIFIER_INDEX['ctrl|meta']];
 	}
 
 	get alt() {
@@ -40,42 +40,53 @@ export class HotKey implements KeyLike {
 		return `${bits}:${this.key}`;
 	}
 
-	equals(other: HotKey): boolean {
+	equals(other: KbKey): boolean {
 		return this.toKey() === other.toKey();
 	}
 
-	test(target: HotKey): number {
-		if (this.key !== target.key) {
-			return -1;
+	test(eventKey: KbKey): number {
+		const expectedModifierCount = this.#flags.filter(Boolean).length;
+		let score = -1 - expectedModifierCount;
+
+		const keyMatches = this.key === eventKey.key;
+
+		if (keyMatches) {
+			score++;
 		}
 
-		let score = 0;
+		let matchedExpectedModifiers = 0;
+		let extraModifiers = 0;
 
 		for (let i = 0; i < this.#flags.length; i++) {
-			const eventHasModifier = this.#flags[i];
-			const targetRequiresModifier = target.#flags[i];
+			const bindingRequiresModifier = this.#flags[i];
+			const eventHasModifier = eventKey.#flags[i];
 
-			if (targetRequiresModifier && !eventHasModifier) {
-				return -1;
-			}
-
-			if (targetRequiresModifier) {
+			if (bindingRequiresModifier && eventHasModifier) {
+				matchedExpectedModifiers++;
 				score++;
+			} else if (!bindingRequiresModifier && eventHasModifier) {
+				extraModifiers++;
 			}
+		}
+
+		const expectedBindingMatched = keyMatches && matchedExpectedModifiers === expectedModifierCount;
+
+		if (expectedBindingMatched) {
+			score += extraModifiers;
 		}
 
 		return score;
 	}
 
-	matches(target: HotKey, exact = false): boolean {
-		return exact ? this.equals(target) : this.test(target) >= 0;
+	matches(eventKey: KbKey, exact = false): boolean {
+		return exact ? this.equals(eventKey) : this.test(eventKey) >= 0;
 	}
 
 	toString(): string {
 		const parts: string[] = [];
 
-		if (this.#flags[MODIFIER_INDEX['ctrl|option']]) {
-			parts.push('Ctrl');
+		if (this.#flags[MODIFIER_INDEX['ctrl|meta']]) {
+			parts.push('Ctrl|Meta');
 		}
 
 		if (this.#flags[MODIFIER_INDEX['alt']]) {
@@ -91,24 +102,24 @@ export class HotKey implements KeyLike {
 		return parts.join('+');
 	}
 
-	static fromEvent(event: KeyboardEvent): HotKey {
-		const mods: HotKeyModifier[] = [];
+	static fromEvent(event: KeyboardEvent): KbKey {
+		const mods: KbKeyModifier[] = [];
 
-		if (event.ctrlKey || event.metaKey) mods.push('ctrl|option');
+		if (event.ctrlKey || event.metaKey) mods.push('ctrl|meta');
 		if (event.altKey) mods.push('alt');
 		if (event.shiftKey) mods.push('shift');
 
-		return new HotKey(event.key, ...mods);
+		return new KbKey(event.key, ...mods);
 	}
 
-	pickBestMatch<T>(entries: Array<{ hotKey: HotKey; cbObject: T }>): T | undefined {
-		let bestScore = -1;
-		let bestValue: T | undefined = undefined;
+	pickBestMatch<T>(entries: Array<{ hotKey: KbKey; cbObject: T }>): T | undefined {
+		let bestScore = Infinity;
+		let bestValue: T | undefined;
 
 		for (const entry of entries) {
-			const score = this.test(entry.hotKey);
+			const score = entry.hotKey.test(this);
 
-			if (score > bestScore) {
+			if (score >= 0 && score < bestScore) {
 				bestScore = score;
 				bestValue = entry.cbObject;
 			}
@@ -117,24 +128,8 @@ export class HotKey implements KeyLike {
 		return bestValue;
 	}
 
-	pickBestMatchingKey(entries: HotKey[]): HotKey | undefined {
-		let bestScore = -1;
-		let bestValue: HotKey | undefined = undefined;
-
-		for (const entry of entries) {
-			const score = this.test(entry);
-
-			if (score > bestScore) {
-				bestScore = score;
-				bestValue = entry;
-			}
-		}
-
-		return bestValue;
-	}
-
-	#getRequiredModifiers(): HotKeyModifier[] {
-		const result: HotKeyModifier[] = [];
+	#getRequiredModifiers(): KbKeyModifier[] {
+		const result: KbKeyModifier[] = [];
 
 		for (const mod of ALL_MODIFIERS) {
 			if (this.#flags[MODIFIER_INDEX[mod]]) {
@@ -145,13 +140,13 @@ export class HotKey implements KeyLike {
 		return result;
 	}
 
-	getPossibleRegisteredMatches(): HotKey[] {
+	getPossibleRegisteredMatches(): KbKey[] {
 		const activeMods = this.#getRequiredModifiers();
-		const results: HotKey[] = [];
+		const results: KbKey[] = [];
 
-		const recurse = (index: number, currentMods: HotKeyModifier[]) => {
+		const recurse = (index: number, currentMods: KbKeyModifier[]) => {
 			if (index >= activeMods.length) {
-				results.push(new HotKey(this.key, ...currentMods));
+				results.push(new KbKey(this.key, ...currentMods));
 				return;
 			}
 
@@ -167,7 +162,7 @@ export class HotKey implements KeyLike {
 		return results;
 	}
 
-	bestMatchingSetIndex(hotkeySets: HotKey[][]): number | undefined {
+	bestMatchingSetIndex(hotkeySets: KbKey[][]): number | undefined {
 		let bestScore = -1;
 		let bestSetIndex: number | undefined = undefined;
 

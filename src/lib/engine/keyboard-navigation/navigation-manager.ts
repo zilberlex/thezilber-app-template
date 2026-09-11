@@ -2,8 +2,8 @@ import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
 import { OneToManyDictionary } from '$lib/engine/patterns/one-to-many-dictionary';
 import { engineAssert } from '$lib/engine/error/engine-assert';
 import { type NavigationKeysConfig, type NavigationTargetRestorationPoint, type ScopeInfra } from './types';
-import { HotKey } from '../hotkeys/hotkey-class';
-import { hotkeys } from '../hotkeys/hotkey-helpers';
+import { KbKey } from '$lib/engine/keyboard-key/kb-key';
+import { kbKeys } from '../keyboard-key/kb-key-factories';
 import { PriorityMapList } from '../patterns/lists-and-maps-advanced/priority-map-list';
 import type { ElementInteraction } from '../interactions/types';
 import { nativeElementInteraction } from '../interactions/triggers/elements/element-interactions';
@@ -20,8 +20,8 @@ export class NavigationManager {
 
 	#allNavigationKeys: OneToManyDictionary<string, ScopeInfra> = new OneToManyDictionary<string, ScopeInfra>();
 
-	#nextScopeNavigationKeys = hotkeys(['t']);
-	#prevScopeNavigationKeys = hotkeys(['t'], 'shift');
+	#nextScopeNavigationKeys = kbKeys(['t']);
+	#prevScopeNavigationKeys = kbKeys(['t'], 'shift');
 
 	#assignHotKeysCounter = 0;
 
@@ -42,7 +42,7 @@ export class NavigationManager {
 		);
 	}
 
-	assignScopeNavigationKeys(nextScopeKeys: HotKey[], prevScopeKeys: HotKey[]) {
+	assignScopeNavigationKeys(nextScopeKeys: KbKey[], prevScopeKeys: KbKey[]) {
 		let relevantCounter = ++this.#assignHotKeysCounter;
 
 		let prevState = {
@@ -175,7 +175,7 @@ export class NavigationManager {
 			this.#allNavigationKeys.remove(key, source);
 
 			if (!this.#allNavigationKeys.has(key)) {
-				hotKeysModule.removeHotKey(new HotKey(key), this.#onNavigationKey);
+				hotKeysModule.removeHotKey(new KbKey(key), this.#onNavigationKey);
 			}
 		});
 	}
@@ -192,7 +192,7 @@ export class NavigationManager {
 	}
 
 	#onChangeScopeKey = createKeyabordNavigationEventHandler((keyboardEvent: KeyboardEvent) => {
-		let eventHotkey = HotKey.fromEvent(keyboardEvent);
+		let eventHotkey = KbKey.fromEvent(keyboardEvent);
 
 		const matchedSetIndex = eventHotkey.bestMatchingSetIndex([
 			this.#nextScopeNavigationKeys,
@@ -336,7 +336,7 @@ export class NavigationManager {
 		console.log(`NavigationManager - adding NavigationKeys`, flatNavigationKeys);
 
 		hotKeysModule.assignHotKeys(
-			flatNavigationKeys.map((x) => new HotKey(x)),
+			flatNavigationKeys.map((x) => new KbKey(x)),
 			this.#onNavigationKey
 		);
 		flatNavigationKeys.forEach((key) => this.#allNavigationKeys.add(key, scope));

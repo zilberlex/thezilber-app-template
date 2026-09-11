@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { HotKey } from '$lib/engine/hotkeys/hotkey-class';
 	import { createHotKeyHandler } from '$lib/engine/hotkeys/hotkey-handlers';
 	import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
+	import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onDestroy, onMount } from 'svelte';
 
-	let debugHotKey = new HotKey('F12', 'alt');
-	let debugToggleMenuHotKey = new HotKey('F11', 'alt');
-	let clearDebugObjectsHotKey = new HotKey('F10', 'alt');
-	let showCustomizableDebugScreenHotKey = new HotKey('F8', 'alt');
+	let debugHotKey = kbKey('F12', 'alt');
+	let debugToggleMenuHotKey = kbKey('F11', 'alt');
+	let clearDebugObjectsHotKey = kbKey('F10', 'alt');
+	let showCustomizableDebugScreenHotKey = kbKey('F8', 'alt');
 
-	let undoHotKey = new HotKey('z', 'ctrl|option');
-	let redoHotKey = new HotKey('z', 'ctrl|option', 'shift');
+	let undoHotKey = kbKey('z', 'ctrl|meta');
+	let redoHotKey = kbKey('z', 'ctrl|meta', 'shift');
 
 	let globalUndo = createHotKeyHandler((e) => {
 		appState.commandStack?.undo();

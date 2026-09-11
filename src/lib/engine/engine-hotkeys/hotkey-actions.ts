@@ -1,8 +1,8 @@
-import { HotKey } from '../hotkeys/hotkey-class';
 import { HotkeyTooltipAttribute } from '../hotkey-tooltip/tooltip-consts';
 import type { Attachment } from 'svelte/attachments';
 import { engineElementInteraction } from './engine-interactions';
 import { assignHotkeyToClick, assignHotkeyToFocus } from '../hotkeys/svelt-components/hotkey-attachments';
+import type { KbKey } from '$lib/engine/keyboard-key/kb-key';
 
 type ButtonHotKeyOptions = {
 	scope?: HTMLElement;
@@ -11,7 +11,7 @@ type ButtonHotKeyOptions = {
 
 export function createHotKeyTriggerFocusAttachment(
 	hotKeyTooltipText: string = '',
-	hotKey: HotKey,
+	hotKey: KbKey,
 	options?: ButtonHotKeyOptions
 ): Attachment {
 	const hotkeyToFocusAttachment = assignHotkeyToFocus(hotKey, engineElementInteraction, options);
@@ -28,7 +28,7 @@ export function createHotKeyTriggerFocusAttachment(
 
 export function createHotKeyTriggerClickAttachment(
 	hotKeyTooltipText: string = '',
-	hotKey: HotKey,
+	hotKey: KbKey,
 	options?: ButtonHotKeyOptions,
 	moveFocus: boolean = false
 ): Attachment {
@@ -47,6 +47,6 @@ export function createHotKeyTriggerClickAttachment(
 	};
 }
 
-function assignHotKeyTooltip(node: Element, key: HotKey, tooltipText: string) {
+function assignHotKeyTooltip(node: Element, key: KbKey, tooltipText: string) {
 	node.setAttribute(HotkeyTooltipAttribute, `${tooltipText} (${key.toString()})`);
 }

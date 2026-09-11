@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-temp/hotkey-actions';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
+	import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 
 	let state = $state(false);
@@ -13,7 +13,7 @@
 				state = !state;
 				console.log('Clicked!');
 			}}
-			{@attach createHotKeyTriggerClickAttachment('', hotkey('p'))}
+			{@attach createHotKeyTriggerClickAttachment('', kbKey('p'))}
 			tabindex="-1"
 		>
 			Hotkeyed button

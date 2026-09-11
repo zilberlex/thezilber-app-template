@@ -1,10 +1,10 @@
-import { HotKey } from '../hotkey-class';
+import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
 
 const keys = [
-	new HotKey('s', ['ctrl|option']),
-	new HotKey('s', ['alt']),
-	new HotKey('s', ['ctrl|option', 'alt']),
-	new HotKey('s', ['alt', 'ctrl|option'])
+	kbKey('s', 'ctrl|meta'),
+	kbKey('s', 'alt'),
+	kbKey('s', 'ctrl|meta', 'alt'),
+	kbKey('s', 'alt', 'ctrl|meta')
 ];
 
 let c = 0;

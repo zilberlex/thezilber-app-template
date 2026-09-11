@@ -1,12 +1,12 @@
 import { createSmartHandler } from '$lib/engine/events/event-handling';
 import { toArray } from '$lib/engine/general-js-ts/to-array';
-import { HotKey } from '$lib/engine/hotkeys/hotkey-class';
-import { hotkeys } from '$lib/engine/hotkeys/hotkey-helpers';
+import { KbKey } from '$lib/engine/keyboard-key/kb-key';
+import { kbKeys } from '$lib/engine/keyboard-key/kb-key-factories';
 import type { ElementInteraction } from '../../types';
 
 export function keyTriggerClick(
 	interaction: ElementInteraction,
-	hotkey: HotKey | HotKey[] = hotkeys(['enter', ' ']),
+	hotkey: KbKey | KbKey[] = kbKeys(['enter', ' ']),
 	options = {
 		cooldownMs: 20
 	}
@@ -23,7 +23,7 @@ export function keyTriggerClick(
 		{
 			cooldownDelay: cooldownMs,
 			shouldExecuteFunction: (event: KeyboardEvent) => {
-				const eventKey = HotKey.fromEvent(event);
+				const eventKey = KbKey.fromEvent(event);
 				return asHotkeys.some((hk) => hk.matches(eventKey));
 			},
 			shouldPreventDefault: true

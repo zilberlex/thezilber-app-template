@@ -1,12 +1,11 @@
 import type { Attachment } from 'svelte/attachments';
-import type { HotKey } from '../hotkey-class';
 import { hotKeysModule } from '../hotkey-module';
 import type { ElementInteraction } from '$lib/engine/interactions/types';
 import { createHotKeyTriggerClickHandler, createHotKeyTriggerFocusHandler } from '../hotkey-handlers';
-import type { HotKeyToTriggerClickOptions, HotKeyToTriggerOptions } from '../types';
+import type { KbKey } from '$lib/engine/keyboard-key/kb-key';
 
 export function assignHotkeyToClick(
-	hotKey: HotKey,
+	hotKey: KbKey,
 	elementInteraction: ElementInteraction,
 	options: HotKeyToTriggerClickOptions = {
 		prioritizeInputFieldDefaults: true,
@@ -27,7 +26,7 @@ export function assignHotkeyToClick(
 }
 
 export function assignHotkeyToFocus(
-	hotKey: HotKey,
+	hotKey: KbKey,
 	elementInteraction: ElementInteraction,
 	options: HotKeyToTriggerOptions = {
 		prioritizeInputFieldDefaults: true
