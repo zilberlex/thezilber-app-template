@@ -1,13 +1,18 @@
-export function createSmartHandler(handler, options = {}) {
+import type { SmartHandlerOptions } from './types';
+
+export function createSmartHandler<E extends Event>(
+	handler: (e: E) => void | Promise<void>,
+	options: SmartHandlerOptions<E> = {}
+): (e: E) => void {
 	const {
 		debounceDelay = 0,
-		cooldownDelay = 1500,
+		cooldownDelay = 0,
 		context,
 		shouldPreventDefault = true,
 		shouldExecuteFunction = () => true
 	} = options;
 
-	let smartHandler = _createSmartHandlerInternal(
+	let smartHandler = createSmartHandlerInternal(
 		handler,
 		debounceDelay,
 		cooldownDelay,
@@ -26,67 +31,58 @@ export function createSmartHandler(handler, options = {}) {
 	return smartHandler;
 }
 
-/**
- * @param {(...args: any[]) => void} callback
- * @returns {(...args: any[]) => void}
- */
-export function requestAnimationFrameThrottle(callback) {
+export function requestAnimationFrameThrottle<Args extends unknown[]>(callback: (...args: Args) => void) {
 	let ticking = false;
-	/**
-	 * @type {any[]}
-	 */
-	let lastArgs = [];
+	let lastArgs: Args;
 
-	return (/** @type {any[]} */ ...args) => {
+	return (...args: Args) => {
 		lastArgs = args;
 
 		if (ticking) return;
 
 		ticking = true;
 
-		window.requestAnimationFrame(() => {
-			callback(...lastArgs);
-			ticking = false;
+		requestAnimationFrame(() => {
+			try {
+				callback(...lastArgs);
+			} finally {
+				ticking = false;
+			}
 		});
 	};
 }
 
-/**
- * @param {function} handler
- */
-function _createSmartHandlerInternal(
-	handler,
-	debounceDelay,
-	cooldownDelay,
-	shouldPreventDefault,
-	shouldExecuteFunction
-) {
-	/**
-	 * @type {number | undefined}
-	 */
-	let debounceTimeoutId;
+function createSmartHandlerInternal<E extends Event>(
+	handler: (event: E) => void | Promise<void>,
+	debounceDelay: number,
+	cooldownDelay: number,
+	shouldPreventDefault: boolean,
+	shouldExecuteFunction: (event: E) => boolean
+): (event: E) => void {
+	let debounceTimeoutId: ReturnType<typeof setTimeout> | undefined;
 	let cooldown = false;
 	let isProcessing = false;
 
-	let ret = async function (/** @type {Event} */ event) {
+	return function (this: unknown, event: E) {
 		if (!shouldExecuteFunction(event)) return;
 
-		if (debounceTimeoutId) {
-			window.clearTimeout(debounceTimeoutId);
+		if (debounceTimeoutId !== undefined) {
+			clearTimeout(debounceTimeoutId);
 		}
 
 		if (shouldPreventDefault) {
-			event?.preventDefault();
+			event.preventDefault();
 		}
 
-		debounceTimeoutId = window.setTimeout(async () => {
+		debounceTimeoutId = setTimeout(async () => {
 			if (cooldown || isProcessing) {
 				return;
 			}
 
 			isProcessing = true;
 			cooldown = true;
-			window.setTimeout(() => {
+
+			setTimeout(() => {
 				cooldown = false;
 			}, cooldownDelay);
 
@@ -97,6 +93,4 @@ function _createSmartHandlerInternal(
 			}
 		}, debounceDelay);
 	};
-
-	return ret;
 }
