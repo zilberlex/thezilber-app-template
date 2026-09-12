@@ -1,5 +1,5 @@
 // restartClassAnimation.svelte.ts
-import { nextFrame } from '$lib/engine/general-js-ts/nextFrame';
+import { nextFrame } from '$lib/packages/core/general-js-ts/next-frame';
 
 export function restartableAnimationClass() {
 	let active = $state(false);

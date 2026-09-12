@@ -5,11 +5,11 @@
 	import InlineNameEditor, { type EditDetail } from '$lib/ui/components/InlineNameEditor.svelte';
 	import type { CbAppEnv, CbRecordProjection } from './command-builder-types';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
 	import { tick } from 'svelte';
 	import { fadeAndSlide } from '$lib/engine/transitions/fade-and-slide';
-	import { markForNavigation } from '$lib/engine/keyboard-navigation/svelte-components/attachments';
+	import { markForNavigation } from '$lib/packages/keyboard-navigation/svelte-components/attachments';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
+	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 
 	type Props = HTMLAttributes<HTMLDivElement> & {
 		cbAppEnv: CbAppEnv;
@@ -91,7 +91,7 @@
 			<IconButton
 				onclick={editItemName}
 				tabindex={-1}
-				{@attach createClickHotKeyAttachment('Rename', hotkey('r', 'alt'))}
+				{@attach createHotKeyTriggerClickAttachment('Rename', kbKey('r', 'alt'))}
 				--bg={isElementPageForThisItem ? 'var(--cl-on-surface-dimmest)' : undefined}
 			>
 				<EditIcon />
@@ -100,7 +100,7 @@
 			<IconButton
 				onclick={deleteItem}
 				tabindex={-1}
-				{@attach createClickHotKeyAttachment('Delete', hotkey('d', 'alt'))}
+				{@attach createHotKeyTriggerClickAttachment('Delete', kbKey('d', 'alt'))}
 				--bg={isElementPageForThisItem ? 'var(--cl-on-surface-dimmest)' : undefined}
 			>
 				<DeleteIcon />

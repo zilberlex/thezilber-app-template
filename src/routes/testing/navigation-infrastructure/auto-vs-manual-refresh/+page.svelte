@@ -1,18 +1,18 @@
 <script lang="ts">
-	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
-	import type { ScopeInfra } from '$lib/engine/keyboard-navigation/types';
+	import NavigationScope from '$lib/packages/keyboard-navigation/svelte-components/NavigationScope.svelte';
+	import type { ScopeInfra } from '$lib/packages/keyboard-navigation/types';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { onMount } from 'svelte';
 	import NavigatableAndUnnavigatableSwitcher from '../NavigatableAndUnnavigatableSwitcher.svelte';
 	import { browser } from '$app/environment';
-	import { assignNavigationManagerKeys } from '$lib/engine/keyboard-navigation/svelte-components/sveltekit-helpers';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
+	import { assignNavigationManagerKeys } from '$lib/packages/keyboard-navigation/svelte-components/sveltekit-helpers';
+	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 
 	let scopeManual = $state<ScopeInfra>();
 
 	onMount(() => {
 		if (browser) {
-			return assignNavigationManagerKeys(hotkey('t'), hotkey('t', 'shift'));
+			return assignNavigationManagerKeys(kbKey('t'), kbKey('t', 'shift'));
 		}
 	});
 </script>

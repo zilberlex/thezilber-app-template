@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Button from '$lib/ui/basic-components/Button.svelte';
-	import { createClickHotKeyAttachment, createFocusHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 
 	import CommandBuilder from './CommandBuilder.svelte';
 	import Dialog from '$lib/ui/components/dialog/Dialog.svelte';
@@ -8,9 +7,13 @@
 	import DataStateDisplay from './DataStateDisplay.svelte';
 	import Debug from './Debug.svelte';
 	import type { CbAppEnv } from './command-builder-types';
-	import { hotkey, hotkeys } from '$lib/engine/hotkeys/hotkey-helpers';
 	import { appState } from '$lib/engine/state/application-state.svelte';
-	import PreventBrowserHotkeys from '$lib/engine/hotkeys/svelt-components/PreventBrowserHotkeys.svelte';
+	import PreventBrowserHotkeys from '$lib/packages/hotkey-module/svelt-components/PreventBrowserHotkeys.svelte';
+	import {
+		createHotKeyTriggerClickAttachment,
+		createHotKeyTriggerFocusAttachment
+	} from '$lib/engine/engine-hotkeys/hotkey-actions';
+	import { kbKey, kbKeys } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 
 	let { cbAppEnv = $bindable(), ...rest }: { cbAppEnv: CbAppEnv } = $props();
 
@@ -58,7 +61,7 @@
 		}
 	});
 
-	const preventedBrowserDefaults = hotkeys([...Array(10).keys()].map(String), 'alt');
+	const preventedBrowserDefaults = kbKeys([...Array(10).keys()].map(String), 'alt');
 </script>
 
 {#if cbAppEnv}
@@ -72,7 +75,7 @@
 				<input
 					bind:value={cbAppEnv.data.commandName}
 					class="input-title"
-					{@attach createFocusHotKeyAttachment('Modify Title', hotkey('i', 'alt'))}
+					{@attach createHotKeyTriggerFocusAttachment('Modify Title', kbKey('i', 'alt'))}
 				/>
 			{/if}
 
@@ -81,15 +84,20 @@
 			<Button
 				class="button-save"
 				onclick={defaultSaveButtonBehavior}
-				{@attach createClickHotKeyAttachment('Save', hotkey('s', 'alt'))}
+				{@attach createHotKeyTriggerClickAttachment('Save', kbKey('s', 'alt'))}
 				>{isPermanentCommandPage ? 'Save' : 'Save As'}</Button
 			>
 
 			{#if isPermanentCommandPage}
-				<Button {@attach createClickHotKeyAttachment('Save As', hotkey('s', 'alt', 'shift'))} onclick={openSaveAsPopup}>
+				<Button
+					{@attach createHotKeyTriggerClickAttachment('Save As', kbKey('s', 'alt', 'shift'))}
+					onclick={openSaveAsPopup}
+				>
 					Save As
 				</Button>
-				<Button {@attach createClickHotKeyAttachment('Delete', hotkey('d', 'alt'))} onclick={deleteItem}>Delete</Button>
+				<Button {@attach createHotKeyTriggerClickAttachment('Delete', kbKey('d', 'alt'))} onclick={deleteItem}
+					>Delete</Button
+				>
 			{/if}
 		</main>
 	</div>

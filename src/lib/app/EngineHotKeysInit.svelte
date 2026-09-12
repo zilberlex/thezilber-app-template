@@ -1,24 +1,24 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { createSoftKeyHandler } from '$lib/engine/hotkeys/bl-events';
-	import { HotKey } from '$lib/engine/hotkeys/hotkey-class';
-	import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
+	import { createHotKeyHandler } from '$lib/packages/hotkey-module/hotkey-handlers';
+	import { hotKeysModule } from '$lib/packages/hotkey-module/hotkey-manager';
+	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onDestroy, onMount } from 'svelte';
 
-	let debugHotKey = new HotKey('F12', 'alt');
-	let debugToggleMenuHotKey = new HotKey('F11', 'alt');
-	let clearDebugObjectsHotKey = new HotKey('F10', 'alt');
-	let showCustomizableDebugScreenHotKey = new HotKey('F8', 'alt');
+	let debugHotKey = kbKey('F12', 'alt');
+	let debugToggleMenuHotKey = kbKey('F11', 'alt');
+	let clearDebugObjectsHotKey = kbKey('F10', 'alt');
+	let showCustomizableDebugScreenHotKey = kbKey('F8', 'alt');
 
-	let undoHotKey = new HotKey('z', 'ctrl|option');
-	let redoHotKey = new HotKey('z', 'ctrl|option', 'shift');
+	let undoHotKey = kbKey('z', 'ctrl|meta');
+	let redoHotKey = kbKey('z', 'ctrl|meta', 'shift');
 
-	let globalUndo = createSoftKeyHandler((e) => {
+	let globalUndo = createHotKeyHandler((e) => {
 		appState.commandStack?.undo();
 	});
 
-	let globalRedo = createSoftKeyHandler(() => {
+	let globalRedo = createHotKeyHandler(() => {
 		appState.commandStack?.redo();
 	});
 

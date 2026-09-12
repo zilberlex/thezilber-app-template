@@ -1,9 +1,9 @@
-import { AsyncSerialQueue } from '$lib/engine/patterns/async-serial-queue';
-import type { CommandRegistry } from '$lib/engine/patterns/command/persistancy/command-registry';
+import { AsyncSerialQueue } from '$lib/packages/core/patterns/async-serial-queue';
+import type { CommandRegistry } from '$lib/packages/core/patterns/command/persistancy/command-registry';
 import {
 	definePipelineSpecs,
 	PipelineCommandFactory
-} from '$lib/engine/patterns/command/pipeline/pipeline-command-factory';
+} from '$lib/packages/core/patterns/command/pipeline/pipeline-command-factory';
 import { clearSteps } from './clear-pipeline';
 import { deleteSteps } from './delete-pipeline';
 import { insertSteps } from './insert-pipline';

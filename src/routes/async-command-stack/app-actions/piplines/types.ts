@@ -1,4 +1,4 @@
-import type { AsyncSerialQueue } from '$lib/engine/patterns/async-serial-queue';
+import type { AsyncSerialQueue } from '$lib/packages/core/patterns/async-serial-queue';
 
 export type InsertCtx = {
 	insertValue: string;

@@ -25,3 +25,8 @@ vite.config.ts.timestamp-*
 # Docs
 # Need to use force publish
 /docs
+
+
+# webstorm bs
+.idea/
+*.iml

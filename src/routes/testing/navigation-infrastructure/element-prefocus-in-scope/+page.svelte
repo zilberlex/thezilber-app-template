@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
-	import { markForNavigation } from '$lib/engine/keyboard-navigation/svelte-components/attachments';
-	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
-	import { assignNavigationManagerKeys } from '$lib/engine/keyboard-navigation/svelte-components/sveltekit-helpers';
+	import { markForNavigation } from '$lib/packages/keyboard-navigation/svelte-components/attachments';
+	import NavigationScope from '$lib/packages/keyboard-navigation/svelte-components/NavigationScope.svelte';
+	import { assignNavigationManagerKeys } from '$lib/packages/keyboard-navigation/svelte-components/sveltekit-helpers';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { onMount } from 'svelte';
+	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 
 	function focusImmediately(node: HTMLElement) {
 		node.focus();
@@ -13,7 +13,7 @@
 
 	onMount(() => {
 		if (browser) {
-			assignNavigationManagerKeys(hotkey('t'), hotkey('t', 'shift'));
+			assignNavigationManagerKeys(kbKey('t'), kbKey('t', 'shift'));
 		}
 	});
 </script>

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { HotKey } from '$lib/engine/hotkeys/hotkey-class';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
+	import { KbKey } from '$lib/packages/core/input/keyboard-key/kb-key';
+	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 
@@ -28,7 +28,7 @@
 		}
 	});
 
-	function createSingleKeyDownHandler(key: HotKey, handler: (e: Event) => void) {
+	function createSingleKeyDownHandler(key: KbKey, handler: (e: Event) => void) {
 		let didFire = false;
 
 		return (e: KeyboardEvent) => {
@@ -36,7 +36,7 @@
 				return;
 			}
 
-			if (key.test(HotKey.fromEvent(e)) < 0) {
+			if (key.test(KbKey.fromEvent(e)) < 0) {
 				return;
 			}
 
@@ -55,7 +55,7 @@
 	<input
 		bind:value={content}
 		onblur={() => commit(false)}
-		onkeyup={createSingleKeyDownHandler(hotkey('Enter'), (e) => commit(false, e))}
+		onkeyup={createSingleKeyDownHandler(kbKey('Enter'), (e) => commit(false, e))}
 		bind:this={thisElement}
 		{...rest}
 	/>

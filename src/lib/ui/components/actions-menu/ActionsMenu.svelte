@@ -1,5 +1,5 @@
 <script lang="ts">
-	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
+	import NavigationScope from '$lib/packages/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import ToggleButton from '$lib/ui/basic-components/ToggleButton.svelte';
 	import type { ActionsMenuEntry } from './action-menu-entry.svelte';
 

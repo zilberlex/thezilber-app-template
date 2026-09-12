@@ -7,8 +7,8 @@
 	import type { AnyNonVoid, DynamicForm, DynamicFormField, DynamicFormSchema } from './dynamic-form-types';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import { formFromSchema, mergeForms, resolveFieldValue } from './dynamic-form';
-	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
+	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 
 	let {
 		formSchema,
@@ -71,7 +71,10 @@
 		{:else}
 			<div class="overlay-wrapper">
 				<div class="copy-button">
-					<CopyButtonSimple textToCopy={output} {@attach createClickHotKeyAttachment('Copy', hotkey('c', 'alt'))} />
+					<CopyButtonSimple
+						textToCopy={output}
+						{@attach createHotKeyTriggerClickAttachment('Copy', kbKey('c', 'alt'))}
+					/>
 				</div>
 				<OutputCombo id="output" value={output}>Output</OutputCombo>
 			</div>

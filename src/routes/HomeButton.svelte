@@ -3,14 +3,16 @@
 	import '@fontsource/audiowide';
 	import '$lib/ui/style/reset.css';
 	import '$lib/ui/style/theme/theme.scss';
-	import { createFocusHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
 	import { resolve } from '$app/paths';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
+	import { createHotKeyTriggerFocusAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
+	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 </script>
 
 <div class="home-button-container">
-	<a href={resolve('/')} class="home-button left" {@attach createFocusHotKeyAttachment('Home ', hotkey('h', 'alt'))}
-		>Home</a
+	<a
+		href={resolve('/')}
+		class="home-button left"
+		{@attach createHotKeyTriggerFocusAttachment('Home ', kbKey('h', 'alt'))}>Home</a
 	>
 </div>
 

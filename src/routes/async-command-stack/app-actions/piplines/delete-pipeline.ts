@@ -1,7 +1,7 @@
-import { sleep } from '$lib/engine/general-js-ts/common';
-import type { PipelineSteps } from '$lib/engine/patterns/command/pipeline/types';
-import { errorResult } from '$lib/engine/patterns/result/common';
-import { pipelineStep } from '../../../../lib/engine/patterns/command/pipeline/pipeline-step';
+import { sleep } from '$lib/packages/core/general-js-ts/common';
+import type { PipelineSteps } from '$lib/packages/core/patterns/command/pipeline/types';
+import { errorResult } from '$lib/packages/core/patterns/result/common';
+import { pipelineStep } from '$lib/packages/core/patterns/command/pipeline/pipeline-step';
 import type { DeleteCtx, DemoCommandDeps } from './types';
 
 const startingStep = pipelineStep<DemoCommandDeps, DeleteCtx>(

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import CopyIcon from '$lib/assets/icons/CopyIcon.svelte';
-	import type { Command } from '$lib/engine/patterns/command/command';
-	import { createChangeElementTextContentTemporaryCommand } from '$lib/engine/patterns/command/command-impl/change-element-content-command';
+	import type { Command } from '$lib/packages/core/patterns/command/command';
+	import { createChangeElementTextContentTemporaryCommand } from '$lib/packages/core/patterns/command/command-impl/change-element-content-command';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 
 	const {

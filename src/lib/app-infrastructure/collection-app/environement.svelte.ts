@@ -1,4 +1,4 @@
-import { getErrorMessage } from '$lib/engine/general-js-ts/extract-error-message';
+import { getErrorMessage } from '$lib/packages/core/general-js-ts/extract-error-message';
 import { untrack } from 'svelte';
 import { createCollectionAppContextManager, ctxEquals } from './context-manager.svelte';
 import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';

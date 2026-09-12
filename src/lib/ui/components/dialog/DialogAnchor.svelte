@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { onDestroy, onMount, tick, untrack } from 'svelte';
-	import { engineFocus, getFocusableElementsByNode } from '$lib/engine/keyboard-navigation/navigation-utils';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onNavigate } from '$app/navigation';
-	import { createSmartHandler } from '$lib/engine/events/event-handling';
-	import { hotKeysModule } from '$lib/engine/hotkeys/hotkey-module';
-	import { HotKey } from '$lib/engine/hotkeys/hotkey-class';
-	import type { FocusableElement } from '$lib/engine/keyboard-navigation/types';
+	import { createSmartHandler } from '$lib/packages/core/events/event-handling';
+	import { hotKeysModule } from '$lib/packages/hotkey-module/hotkey-manager';
+	import type { FocusableElement } from '$lib/packages/keyboard-navigation/types';
 	import { safeInstanceOf } from '$lib/engine/types/type-utils';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
-	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
+	import NavigationScope from '$lib/packages/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import type { DialogController } from './dialog-contoller.svelte';
+	import { getFocusable } from '$lib/packages/interactions/inspection/elements/focusability';
+	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
+	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 
 	let dialogBoxNode: HTMLElement | null = $state(null);
 	let appRoot = $derived(appState.appRoot);
@@ -27,7 +28,7 @@
 
 	onDestroy(() => {
 		cleanupComponent();
-		hotKeysModule.removeHotKey(new HotKey('Escape'), closeDialogHandler);
+		hotKeysModule.removeHotKey(kbKey('Escape'), closeDialogHandler);
 	});
 
 	onNavigate(() => {
@@ -54,7 +55,7 @@
 			appRoot.inert = false;
 		}
 
-		if (lastFocusedElement && document.contains(lastFocusedElement)) engineFocus(lastFocusedElement);
+		if (lastFocusedElement && document.contains(lastFocusedElement)) engineElementInteraction.focus(lastFocusedElement);
 	}
 
 	$effect(() => {
@@ -62,7 +63,7 @@
 
 		return untrack(() => {
 			if (dialogController.activeDialog) {
-				hotKeysModule.assignHotKey(new HotKey('Escape'), closeDialogHandler, true);
+				hotKeysModule.assignHotKey(kbKey('Escape'), closeDialogHandler, true);
 
 				if (dialogController.activeDialog) {
 					const thisJob = ++focusOpenDialogJobCounter;
@@ -75,20 +76,20 @@
 
 						untrack(() => {
 							if (dialogBoxNode) {
-								const focableNodes = getFocusableElementsByNode(dialogBoxNode);
+								const focableNodes = getFocusable(dialogBoxNode);
 
 								let focusTarget = dialogBoxNode;
 								if (focableNodes.length > 0) {
 									focusTarget = focableNodes[0];
 								}
 
-								engineFocus(focusTarget);
+								engineElementInteraction.focus(focusTarget);
 							}
 						});
 					});
 				}
 				return () => {
-					hotKeysModule.removeHotKey(new HotKey('Escape'), closeDialogHandler);
+					hotKeysModule.removeHotKey(kbKey('Escape'), closeDialogHandler);
 					dialogCloseCleanup();
 				};
 			}

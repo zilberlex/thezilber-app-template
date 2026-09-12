@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { DispatcherImpl, type Dispatcher, type DispatchHandler } from '$lib/engine/patterns/observer';
+import { DispatcherImpl, type Dispatcher, type DispatchHandler } from '$lib/packages/core/patterns/observer';
 import type {
 	AppRecordRepo,
 	DataProjection,

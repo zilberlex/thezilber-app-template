@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { createFocusHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
+	import { createHotKeyTriggerFocusAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
+	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 	import type { Snippet } from 'svelte';
 
 	type HotKeyParams = {
@@ -36,8 +36,7 @@
 
 <input-combo {...rest} bind:this={thisElement}>
 	<label for={id}
-		><span class="prefix" style="min-width: {minLableWidth}">{@render children?.()}</span><span
-			class="suffix">:</span
+		><span class="prefix" style="min-width: {minLableWidth}">{@render children?.()}</span><span class="suffix">:</span
 		></label
 	>
 	<input
@@ -49,7 +48,7 @@
 		{placeholder}
 		required
 		{@attach hotKeyPramas
-			? createFocusHotKeyAttachment(hotKeyPramas.tooltip, hotkey(hotKeyPramas.hotkey, 'alt'))
+			? createHotKeyTriggerFocusAttachment(hotKeyPramas.tooltip, kbKey(hotKeyPramas.hotkey, 'alt'))
 			: () => {}}
 	/>
 </input-combo>

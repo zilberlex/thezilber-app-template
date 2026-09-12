@@ -1,9 +1,9 @@
 <script lang="ts">
-	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
-	import type { ScopeInfra } from '$lib/engine/keyboard-navigation/types';
+	import NavigationScope from '$lib/packages/keyboard-navigation/svelte-components/NavigationScope.svelte';
+	import type { ScopeInfra } from '$lib/packages/keyboard-navigation/types';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import ButtonInputSwitch from '../ButtonInputSwitch.svelte';
-	import { markForNavigation } from '$lib/engine/keyboard-navigation/svelte-components/attachments';
+	import { markForNavigation } from '$lib/packages/keyboard-navigation/svelte-components/attachments';
 
 	let newButtonCounter = 1;
 	let buttonsInfo1 = $state([

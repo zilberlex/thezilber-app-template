@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { createClickHotKeyAttachment } from '$lib/engine/hotkeys/hotkey-actions';
-	import { hotkey } from '$lib/engine/hotkeys/hotkey-helpers';
-	import type { NavigationManager } from '$lib/engine/keyboard-navigation/navigation-manager';
-	import { getNavigationManager } from '$lib/engine/keyboard-navigation/svelte-components/navigation-manager-provider.svelte';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
+	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
+	import type { NavigationManager } from '$lib/packages/keyboard-navigation/navigation-manager';
+	import { getNavigationManager } from '$lib/packages/keyboard-navigation/svelte-components/navigation-manager-provider.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import ObjectViewer from '$lib/ui/components/ObjectViewer.svelte';
 
@@ -11,6 +11,7 @@
 	// svelte-ignore state_referenced_locally
 	const navigationManagerDerived = $derived(navigationManager ?? getNavigationManager());
 
+	// svelte-ignore state_referenced_locally
 	let debugInfo = $state(navigationManagerDerived._debugInfo());
 
 	let debugInfoDisplay = $derived({
@@ -39,7 +40,7 @@
 
 <div class="navigation-manager-debug content-surface">
 	<Button
-		{@attach createClickHotKeyAttachment('Refresh', hotkey('r', 'alt'))}
+		{@attach createHotKeyTriggerClickAttachment('Refresh', kbKey('r', 'alt'))}
 		onclick={() => (debugInfo = navigationManagerDerived._debugInfo())}>Refresh</Button
 	>
 	<ObjectViewer object={debugInfoDisplay} />
