@@ -1,7 +1,7 @@
 import { removeFromArrayLast } from '$lib/packages/core/general-js-ts/array-remove-by-item';
 import type { MaybePromise } from '$lib/packages/core/general-js-ts/typescript/type-helpers';
-import { isErrorResult } from '$lib/engine/patterns/result/common';
-import type { MaybeResult } from '$lib/engine/patterns/result/types';
+import { isErrorResult } from '$lib/packages/core/patterns/result/common';
+import type { MaybeResult } from '$lib/packages/core/patterns/result/types';
 import type { Command } from '../command';
 import type { CommandRegistry } from '../persistancy/command-registry';
 import type { PersistedCommand } from '../persistancy/persistent-command';

@@ -5,7 +5,7 @@
 	import { type NavigationScopeOptions, type ScopeInfra } from '../types';
 	import NavigationScopeInfraImpl from '../navigation-scope';
 	import type { NavigationScopeContext } from './types';
-	import { getNavigationManager, setNavigationScopeContext } from './navigation-manager-provider.svelte';
+	import { getNavigationManager, setNavigationScopeContext } from './navigation-manager-provider.svelte.js';
 	import type { HTMLAttributes } from 'svelte/elements';
 
 	interface Props extends HTMLAttributes<HTMLDivElement>, NavigationScopeOptions {

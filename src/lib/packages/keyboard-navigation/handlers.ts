@@ -3,7 +3,7 @@ import { ArrowKeysArray, NavigationKeyConsts } from './consts';
 import type { NavType } from './types';
 import { createHotKeyHandler } from '$lib/packages/hotkey-module/hotkey-handlers';
 
-export function createKeyabordNavigationEventHandler(handler: KeyboardEventHandler<HTMLElement>) {
+export function createKeyabordNavigationEventHandler(handler: KeyboardEventHandler<any>) {
 	return createHotKeyHandler(handler);
 }
 

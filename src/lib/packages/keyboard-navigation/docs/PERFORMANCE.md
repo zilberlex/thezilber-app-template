@@ -228,7 +228,7 @@ Use stable IDs for correctness when a logical target may be destroyed and recrea
 </button>
 ```
 
-See `README.md` for the complete identity and restoration behavior.
+See `../../../../../README.md` for the complete identity and restoration behavior.
 
 ---
 

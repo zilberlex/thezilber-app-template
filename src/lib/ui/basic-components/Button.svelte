@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
-	import { keyTriggerClick } from '$lib/engine/interactions/hooks/elements/on-keydown-click';
+	import { keyTriggerClick } from '$lib/packages/interactions/hooks/elements/on-keydown-click';
 	import { mergeProps } from 'svelte-toolbelt';
 
 	let { children = undefined, thisNode = $bindable(), onkeydown: userOnKeydown = () => {}, ...rest } = $props();

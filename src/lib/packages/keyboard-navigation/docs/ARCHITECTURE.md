@@ -453,7 +453,7 @@ markForNavigation(id)
 
 The navigation core reads those attributes without depending on Svelte attachments directly.
 
-The behavior and identity semantics of `markForNavigation` are documented in `README.md`.
+The behavior and identity semantics of `markForNavigation` are documented in `../../../../../README.md`.
 
 ---
 

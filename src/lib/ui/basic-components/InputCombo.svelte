@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createHotKeyTriggerFocusAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
+	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 	import type { Snippet } from 'svelte';
 
 	type HotKeyParams = {

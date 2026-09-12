@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ActionWithCleanup } from '$lib/engine/patterns/cleanup-pattern';
+	import type { ActionWithCleanup } from '$lib/packages/core/patterns/cleanup-pattern';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { externalBinding } from '$lib/engine/svelte-helpers/binding.svelte';
 	import { actionsMenuEntry, type ActionsMenuEntry } from '$lib/ui/components/actions-menu/action-menu-entry.svelte';

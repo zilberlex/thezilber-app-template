@@ -119,7 +119,7 @@ export class KbKey implements KeyLike {
 		for (const entry of entries) {
 			const score = entry.kbKey.test(this);
 
-			if (score >= 0 && score < bestScore) {
+			if (kbTestScoreIsBetterMatch(score, bestScore)) {
 				bestScore = score;
 				bestValue = entry.cbObject;
 			}
@@ -128,16 +128,24 @@ export class KbKey implements KeyLike {
 		return bestValue;
 	}
 
-	#getRequiredModifiers(): KbKeyModifier[] {
-		const result: KbKeyModifier[] = [];
+	bestMatchingSetIndex(hotkeySets: KbKey[][]): number | undefined {
+		let bestScore = Infinity;
+		let bestSetIndex: number | undefined = undefined;
 
-		for (const mod of ALL_MODIFIERS) {
-			if (this.#flags[MODIFIER_INDEX[mod]]) {
-				result.push(mod);
+		for (let setIndex = 0; setIndex < hotkeySets.length; setIndex++) {
+			const hotkeys = hotkeySets[setIndex];
+
+			for (const hotkey of hotkeys) {
+				const score = this.test(hotkey);
+
+				if (kbTestScoreIsBetterMatch(score, bestScore)) {
+					bestScore = score;
+					bestSetIndex = setIndex;
+				}
 			}
 		}
 
-		return result;
+		return bestScore >= 0 ? bestSetIndex : undefined;
 	}
 
 	getPossibleRegisteredMatches(): KbKey[] {
@@ -162,23 +170,19 @@ export class KbKey implements KeyLike {
 		return results;
 	}
 
-	bestMatchingSetIndex(hotkeySets: KbKey[][]): number | undefined {
-		let bestScore = -1;
-		let bestSetIndex: number | undefined = undefined;
+	#getRequiredModifiers(): KbKeyModifier[] {
+		const result: KbKeyModifier[] = [];
 
-		for (let setIndex = 0; setIndex < hotkeySets.length; setIndex++) {
-			const hotkeys = hotkeySets[setIndex];
-
-			for (const hotkey of hotkeys) {
-				const score = this.test(hotkey);
-
-				if (score > bestScore) {
-					bestScore = score;
-					bestSetIndex = setIndex;
-				}
+		for (const mod of ALL_MODIFIERS) {
+			if (this.#flags[MODIFIER_INDEX[mod]]) {
+				result.push(mod);
 			}
 		}
 
-		return bestScore >= 0 ? bestSetIndex : undefined;
+		return result;
 	}
+}
+
+export function kbTestScoreIsBetterMatch(score: number, bestScore: number) {
+	return score >= 0 && score < bestScore;
 }

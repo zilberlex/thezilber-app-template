@@ -1,9 +1,9 @@
 <script lang="ts">
 	import HamburgerIcon from '$lib/assets/icons/HamburgerIcon.svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
-	import { NavigationKeysConfigSets } from '$lib/engine/keyboard-navigation/configurations';
-	import NavigationScope from '$lib/engine/keyboard-navigation/svelte-components/NavigationScope.svelte';
+	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
+	import { NavigationKeysConfigSets } from '$lib/packages/keyboard-navigation/configurations';
+	import NavigationScope from '$lib/packages/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import IconButton from '$lib/ui/basic-components/IconButton.svelte';
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';

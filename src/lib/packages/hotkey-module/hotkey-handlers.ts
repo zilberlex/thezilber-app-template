@@ -1,6 +1,6 @@
 import type { KeyboardEventHandler } from 'svelte/elements';
 import { createSmartHandler } from '$lib/packages/core/events/event-handling';
-import type { ElementInteraction } from '../interactions/types';
+import type { ElementInteraction } from '$lib/packages/interactions/types';
 import { NodesWhichTakePriorityOverSoftHotKeys } from './consts';
 import { KbKey } from '$lib/packages/core/input/keyboard-key/kb-key';
 
@@ -55,7 +55,7 @@ export function createHotKeyTriggerFocusHandler(
 }
 
 export function createHotKeyHandler(
-	handler: KeyboardEventHandler<HTMLElement>,
+	handler: KeyboardEventHandler<any>,
 	options: HotKeyToTriggerOptions = { prioritizeInputFieldDefaults: true }
 ) {
 	return createSmartHandler(handler, {

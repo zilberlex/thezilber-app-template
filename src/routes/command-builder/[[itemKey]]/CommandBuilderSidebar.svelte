@@ -3,7 +3,7 @@
 	import type { CbAppEnv } from './command-builder-types';
 	import CommandBuilderSiderbarItem from './CommandBuilderSiderbarItem.svelte';
 	import type { CollectionAppRecordProjection } from '$lib/app-infrastructure/collection-app/data/types';
-	import { getFirstFocusable } from '$lib/engine/interactions/inspection/elements/focusability';
+	import { getFirstFocusable } from '$lib/packages/interactions/inspection/elements/focusability';
 
 	let { cbAppEnv, ...rest }: { cbAppEnv: CbAppEnv } = $props();
 

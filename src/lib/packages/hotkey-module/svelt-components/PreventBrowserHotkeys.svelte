@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { hotKeysModule } from '$lib/engine/hotkey-module/hotkey-manager';
+	import { hotKeysModule } from '$lib/packages/hotkey-module/hotkey-manager';
 	import type { KbKey } from '$lib/packages/core/input/keyboard-key/kb-key';
 
 	type Props = {

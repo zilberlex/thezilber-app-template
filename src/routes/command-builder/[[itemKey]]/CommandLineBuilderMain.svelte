@@ -8,12 +8,12 @@
 	import Debug from './Debug.svelte';
 	import type { CbAppEnv } from './command-builder-types';
 	import { appState } from '$lib/engine/state/application-state.svelte';
-	import PreventBrowserHotkeys from '$lib/engine/hotkeys/svelt-components/PreventBrowserHotkeys.svelte';
+	import PreventBrowserHotkeys from '$lib/packages/hotkey-module/svelt-components/PreventBrowserHotkeys.svelte';
 	import {
 		createHotKeyTriggerClickAttachment,
 		createHotKeyTriggerFocusAttachment
 	} from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey, kbKeys } from '$lib/engine/keyboard-key/kb-key-factories';
+	import { kbKey, kbKeys } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 
 	let { cbAppEnv = $bindable(), ...rest }: { cbAppEnv: CbAppEnv } = $props();
 

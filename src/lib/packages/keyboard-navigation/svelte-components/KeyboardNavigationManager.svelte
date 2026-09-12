@@ -3,7 +3,7 @@
 	import { NavigationManager } from '../navigation-manager';
 	import type { NavigationKeysConfig } from '../types';
 	import { browser } from '$app/environment';
-	import { setNavigationManager } from './navigation-manager-provider.svelte';
+	import { setNavigationManager } from './navigation-manager-provider.svelte.js';
 
 	interface Props {
 		navigationManager?: NavigationManager;

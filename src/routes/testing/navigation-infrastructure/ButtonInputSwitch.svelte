@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { KbKey } from '$lib/engine/keyboard-key/kb-key';
-	import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
+	import { KbKey } from '$lib/packages/core/input/keyboard-key/kb-key';
+	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 

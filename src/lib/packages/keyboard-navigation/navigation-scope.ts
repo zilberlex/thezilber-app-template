@@ -21,7 +21,7 @@ import {
 	NAVIGATION_TARGET_ID_ATTRIBUTE
 } from './consts';
 
-import { engineAssert } from '../error/engine-assert';
+import { engineAssert } from '../../engine/error/engine-assert';
 import { NAVIGATION_SCOPE_DEFAULTS } from './configurations';
 
 import {

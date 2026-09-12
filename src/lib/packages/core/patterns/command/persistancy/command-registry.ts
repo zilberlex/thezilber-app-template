@@ -1,4 +1,4 @@
-import type { PersistableCommand, PersistedCommand } from '$lib/engine/patterns/command/persistancy/persistent-command';
+import type { PersistableCommand, PersistedCommand } from '$lib/packages/core/patterns/command/persistancy/persistent-command';
 import { Registry } from '../../registry';
 
 export type CommandRegistry = Registry<PersistedCommand<any>, PersistableCommand<any>>;

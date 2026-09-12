@@ -1,4 +1,4 @@
-import type { Dispatcher } from '$lib/engine/patterns/observer';
+import type { Dispatcher } from '$lib/packages/core/patterns/observer';
 import { SvelteMap } from 'svelte/reactivity';
 import type { CollectionAppDataState, CollectionAppContextManager, WithOpId } from './types';
 

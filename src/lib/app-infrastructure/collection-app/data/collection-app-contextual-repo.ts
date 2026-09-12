@@ -1,4 +1,4 @@
-import { getErrorMessage } from '$lib/engine/general-js-ts/extract-error-message';
+import { getErrorMessage } from '$lib/packages/core/general-js-ts/extract-error-message';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
 import {
 	loadLocalStorage,

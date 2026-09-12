@@ -1,5 +1,5 @@
 import type { HotKey } from '$lib/packages/hotkey-module/hotkey-class';
-import { getNavigationManager } from './navigation-manager-provider.svelte';
+import { getNavigationManager } from './navigation-manager-provider.svelte.js';
 
 export function assignNavigationManagerKeys(nextKey: HotKey, prevKey: HotKey) {
 	const navigationManager = getNavigationManager();

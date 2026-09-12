@@ -5,7 +5,7 @@
 	import '$lib/ui/style/theme/theme.scss';
 	import { resolve } from '$app/paths';
 	import { createHotKeyTriggerFocusAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey } from '$lib/engine/keyboard-key/kb-key-factories';
+	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 </script>
 
 <div class="home-button-container">
