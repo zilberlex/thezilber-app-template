@@ -1,27 +1,17 @@
 @use '../effects' as * with (
 	$emit-default: true
 );
-@use 'extra/utility.color' as *;
-@use 'elements/button' as tButton;
-@use 'elements/box' as tBox;
-@use 'elements/app-tooltip' as tTooltip;
-@use 'elements/input' as tInput;
-@use 'elements/lists' as tLists;
-@use 'elements/href' as tHref;
-@use 'elements/scrollbar' as tScrollbar;
-@use 'elements/headlines' as headline;
 @use '../utility/utility' with (
 	$emit-default: true
 );
-@use 'elements/caret';
-@use 'elements/content-surface' as tContentSurface;
-@use 'integrations/elements-3d/button' as tButton3d;
+
+@use 'extra' as *;
+@use 'elements';
+@use 'integrations/elements-3d';
+
+@import 'tokens/index.css';
 
 @import '$lib/engine/elements-3d/three-d.css';
-@import 'tokens/color.css';
-@import 'tokens/typography.css';
-@import 'tokens/misc.css';
-@import 'tokens/shape.css';
 
 body,
 input {

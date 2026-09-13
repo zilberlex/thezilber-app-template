@@ -3,9 +3,8 @@ a.link-button.td-surface {
 	// 3D buttons opt out of the normal button movement.
 	translate: none;
 
-	--td-translate-y: -4px;
-
 	&:is(:hover, :focus, :focus-visible) {
+		--td-translate-y: -4px;
 		--td-rotate-x: 15deg;
 	}
 
