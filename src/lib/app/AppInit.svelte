@@ -11,6 +11,7 @@
 	import EngineErrorHandler from './EngineErrorHandler.svelte';
 	import HotKeysInitialization from '$lib/packages/hotkey-module/svelt-components/HotKeysInitialization.svelte';
 	import KeyboardNavigationManager from '$lib/packages/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
+	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
 
 	let { children } = $props();
 
@@ -43,7 +44,7 @@
 
 <EngineHotKeysInit />
 
-<KeyboardNavigationManager>
+<KeyboardNavigationManager elementInteraction={engineElementInteraction}>
 	<EngineErrorHandler />
 	{@render children()}
 </KeyboardNavigationManager>
