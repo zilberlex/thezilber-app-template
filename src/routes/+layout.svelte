@@ -4,7 +4,7 @@
 	import '@fontsource-variable/jetbrains-mono';
 	import '@fontsource/audiowide';
 	import '$lib/packages/ui/style/reset.css';
-	import '$lib/packages/ui/style/theme/elements/theme.scss';
+	import '$lib/packages/ui/style/theme/theme.scss';
 
 	import AppInit from '$lib/app/AppInit.svelte';
 	import { appState } from '$lib/engine/state/application-state.svelte';

@@ -1,4 +1,4 @@
-@import '../tokens/tokens.misc.css';
+@import '../tokens/misc.css';
 
 @mixin rings {
 	--_cl-layer-2: oklch(from var(--cl-primary) calc(l - 0.15) c h);
