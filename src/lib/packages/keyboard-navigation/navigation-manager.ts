@@ -25,13 +25,18 @@ export class NavigationManager {
 
 	#assignHotKeysCounter = 0;
 
-	#elementInteraction: ElementInteraction = nativeElementInteraction;
+	#elementInteraction: ElementInteraction;
 
-	constructor(navigationKeys?: NavigationKeysConfig) {
+	constructor(
+		navigationKeys?: NavigationKeysConfig,
+		elementInteraction: ElementInteraction = nativeElementInteraction
+	) {
 		this.#navigationKeys = navigationKeys ?? {
 			nextKeys: [NavigationKeyConsts.ArrowDown],
 			prevKeys: [NavigationKeyConsts.ArrowUp]
 		};
+
+		this.#elementInteraction = elementInteraction;
 	}
 
 	init() {

@@ -4,16 +4,27 @@
 	import type { NavigationKeysConfig } from '../types';
 	import { browser } from '$app/environment';
 	import { setNavigationManager } from './navigation-manager-provider.svelte.js';
+	import type { ElementInteraction } from '$lib/packages/interactions/types';
+	import { nativeElementInteraction } from '$lib/packages/interactions/triggers/elements/element-interactions';
 
 	interface Props {
 		navigationManager?: NavigationManager;
 		navigationKeyConfig?: NavigationKeysConfig;
+		elementInteraction?: ElementInteraction;
 		children?: any;
 	}
 
-	let { navigationKeyConfig, navigationManager = $bindable(), children }: Props = $props();
+	let {
+		navigationKeyConfig,
+		navigationManager = $bindable(),
+		elementInteraction = nativeElementInteraction,
+		children
+	}: Props = $props();
 
-	navigationManager = new NavigationManager(untrack(() => navigationKeyConfig));
+	navigationManager = new NavigationManager(
+		untrack(() => navigationKeyConfig),
+		untrack(() => elementInteraction)
+	);
 
 	setNavigationManager(navigationManager);
 
