@@ -3,16 +3,14 @@
 
 	import '@fontsource-variable/jetbrains-mono';
 	import '@fontsource/audiowide';
-	import '$lib/ui/style/reset.css';
-	import '$lib/ui/style/theme/theme.scss';
+	import '$lib/packages/ui/style/reset.css';
+	import '$lib/packages/ui/style/theme/theme.scss';
 
 	import AppInit from '$lib/app/AppInit.svelte';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onNavigate } from '$app/navigation';
-	import KeyboardNavigationManager from '$lib/packages/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
 
-	import '$lib/ui/style/effects.scss';
-	import EngineErrorHandler from '$lib/app/EngineErrorHandler.svelte';
+	import '$lib/packages/ui/style/effects.scss';
 
 	let { children } = $props();
 	onNavigate(() => {

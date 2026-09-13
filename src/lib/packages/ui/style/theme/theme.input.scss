@@ -1,7 +1,7 @@
-@use '$lib/ui/style/effects.scss' as *;
-@use '$lib/ui/style/utility.color.scss' as *;
-@import '$lib/ui/style/tokens.color.css';
-@import '$lib/ui/style/tokens.color.css';
+@use '../effects' as *;
+@use '../utility.color' as *;
+@import '../tokens.color.css';
+@import '../tokens.color.css';
 
 /* Remove the spinners in Firefox */
 input[type='number'] {

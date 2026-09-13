@@ -1,0 +1,45 @@
+@use '../effects' as * with (
+	$emit-default: true
+);
+@use '../utility.color' as *;
+@use 'theme.button' as tButton;
+@use 'theme.box' as tBox;
+@use 'theme.app-tooltip' as tTooltip;
+@use 'theme.input' as tInput;
+@use 'theme.lists' as tLists;
+@use 'theme.href' as tHref;
+@use 'theme.scrollbar' as tScrollbar;
+@use 'theme.headlines' as headline;
+@use '../utility/utility' with (
+	$emit-default: true
+);
+@use 'theme.caret';
+@use 'theme.content-surface' as tContentSurface;
+@import '$lib/engine/elements-3d/three-d.css';
+@import '../tokens.color.css';
+@import '../tokens.typography.css';
+@import '../tokens.misc.css';
+@import '../tokens.style.semantic.css';
+
+body,
+input {
+	font-family: var(--font-1);
+	font-size: var(--font-size-body);
+}
+
+body {
+	background-color: var(--cl-background);
+	color: var(--cl-on-background);
+
+	&::selection {
+		background-color: var(--cl-primary);
+	}
+}
+
+.ul-highlight {
+	@include ul-highlight;
+}
+
+.ul-txt-primary {
+	@include ul-txt-primary;
+}

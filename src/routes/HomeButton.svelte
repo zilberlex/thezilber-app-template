@@ -1,8 +1,8 @@
 <script lang="ts">
 	import '@fontsource-variable/jetbrains-mono';
 	import '@fontsource/audiowide';
-	import '$lib/ui/style/reset.css';
-	import '$lib/ui/style/theme/theme.scss';
+	import '$lib/packages/ui/style/reset.css';
+	import '$lib/packages/ui/style/theme/theme.scss';
 	import { resolve } from '$app/paths';
 	import { createHotKeyTriggerFocusAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
