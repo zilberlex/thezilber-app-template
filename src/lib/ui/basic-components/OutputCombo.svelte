@@ -16,8 +16,6 @@
 </output-combo>
 
 <style lang="scss">
-	@use '$lib/ui/style/effects.scss' as *;
-
 	output {
 		@include pulse-text(var(--color-1), var(--color-1-bright));
 	}

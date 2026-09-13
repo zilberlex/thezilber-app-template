@@ -10,7 +10,7 @@
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onNavigate } from '$app/navigation';
 
-	import '$lib/packages/ui/style/effects/effects.scss';
+	import '$lib/packages/ui/style/effects/_index.scss';
 
 	let { children } = $props();
 	onNavigate(() => {

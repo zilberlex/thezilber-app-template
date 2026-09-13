@@ -3,9 +3,9 @@
 	--_cl-layer-3: oklch(from var(--cl-primary) calc(l - 0.35) c h);
 	--_cl-layer-4: oklch(from var(--cl-primary) calc(l - 0.45) c h);
 
-	--_cl-layer-2-invis: oklch(from var(--cl-layer-2) l c h / 0);
-	--_cl-layer-3-invis: oklch(from var(--cl-layer-3) l c h / 0);
-	--_cl-layer-4-invis: oklch(from var(--cl-layer-4) l c h / 0);
+	--_cl-layer-2-invis: oklch(from var(--_cl-layer-2) l c h / 0);
+	--_cl-layer-3-invis: oklch(from var(--_cl-layer-3) l c h / 0);
+	--_cl-layer-4-invis: oklch(from var(--_cl-layer-4) l c h / 0);
 
 	--ring1: 0 0 0 1.5px var(--cl-background);
 	--ring2: 0 0 0 3px var(--_cl-layer-2);
@@ -66,24 +66,24 @@
 			inset var(--ring4),
 			inset var(--ring5),
 			inset var(--ring6);
-
-		// No background works better with 3d Effects.
-		//background: var(--rings-end-bg);
 	}
 }
 
 button,
 a.link-button {
+	--_hover-offset: -4px;
+
+	--_button-translate-y: 0px;
+	--_button-content-translate-y: 0px;
+	--_button-transition-time: 0.25s;
+
 	cursor: pointer;
 
 	position: relative;
-
-	--_hover-offset: -4px;
+	z-index: 0;
 
 	color: var(--cl-on-primary);
 	background-color: var(--cl-background);
-
-	z-index: 0;
 
 	border: var(--border-thick) solid var(--cl-primary);
 	border-radius: var(--border-radius);
@@ -96,22 +96,31 @@ a.link-button {
 		0 0 4px var(--color-1-transparent),
 		0 0 8px transparent;
 
-	&,
-	&::before,
-	&::after,
-	& span {
-		transition: all 0.25s linear;
-	}
+	translate: 0 var(--_button-translate-y);
+
+	transition:
+		translate var(--_button-transition-time) linear,
+		border-color var(--_button-transition-time) linear,
+		box-shadow var(--_button-transition-time) linear;
 
 	span {
 		display: inline-block;
+
 		background-color: transparent;
 		padding-inline: 2px;
+
+		translate: 0 var(--_button-content-translate-y);
+
+		transition: translate var(--_button-transition-time) linear;
 	}
 
 	&:is(:focus-visible, :hover),
 	&.btn-pressed {
+		--_button-translate-y: var(--_hover-offset);
+		--_button-content-translate-y: 0.5px;
+
 		border-color: var(--color-1-brightest);
+
 		box-shadow:
 			0 0 4px var(--color-1),
 			0 0 8px color-mix(in srgb, var(--color-1) 60%, transparent);
@@ -128,47 +137,22 @@ a.link-button {
 			border-radius: inherit;
 			box-shadow: none;
 		}
-
-		&:not(.td-surface) {
-			transform: translateY(var(--_hover-offset));
-		}
-
-		&.td-surface {
-			--td-translate-y: var(--_hover-offset);
-		}
-
-		& span {
-			transform: translateY(0.5px);
-		}
 	}
 
 	&:active,
 	&.btn-start-work {
-		&,
-		& *:not(.td-face) {
-			transition: all 0s;
-		}
+		--_button-transition-time: 0ms;
 	}
 
 	&:active,
 	&.btn-pressed {
-		&:not(.td-surface) {
-			transform: translateY(0);
-
-			& span {
-				transform: translateY(0);
-			}
-		}
-
-		&.td-surface {
-			--td-translate-y: 0px;
-			--td-depth: 0px;
-			--td-depth-transition-time: 0ms;
-		}
+		--_button-translate-y: 0px;
+		--_button-content-translate-y: 0px;
 	}
 
 	&.btn-pressed {
 		border-color: var(--cl-primary-brightest);
+
 		box-shadow:
 			0 0 8px var(--cl-primary),
 			0 0 16px color-mix(in srgb, var(--cl-primary) 70%, transparent);

@@ -1,0 +1,20 @@
+button.td-surface,
+a.link-button.td-surface {
+	// 3D buttons opt out of the normal button movement.
+	translate: none;
+
+	--td-translate-y: -4px;
+
+	&:is(:hover, :focus, :focus-visible) {
+		--td-rotate-x: 15deg;
+	}
+
+	&:active,
+	&.btn-pressed {
+		--td-translate-y: 0px;
+		--td-depth: 0px;
+		--td-depth-transition-time: 0ms;
+
+		--td-transform-time: 0ms;
+	}
+}

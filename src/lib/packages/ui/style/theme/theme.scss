@@ -1,4 +1,4 @@
-@use '../effects/effects' as * with (
+@use '../effects' as * with (
 	$emit-default: true
 );
 @use 'extra/utility.color' as *;
@@ -15,12 +15,13 @@
 );
 @use 'elements/caret';
 @use 'elements/content-surface' as tContentSurface;
+@use 'integrations/elements-3d/button' as tButton3d;
 
 @import '$lib/engine/elements-3d/three-d.css';
-@import 'tokens/color.palette.css';
+@import 'tokens/color.css';
 @import 'tokens/typography.css';
 @import 'tokens/misc.css';
-@import 'tokens/color.semantic.css';
+@import 'tokens/shape.css';
 
 body,
 input {

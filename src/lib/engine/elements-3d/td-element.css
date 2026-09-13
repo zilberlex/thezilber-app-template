@@ -28,6 +28,24 @@
 	initial-value: 0deg;
 }
 
+@property --td-rotate-x-offset {
+	syntax: '<angle>';
+	inherits: true;
+	initial-value: 0deg;
+}
+
+@property --td-rotate-y-offset {
+	syntax: '<angle>';
+	inherits: true;
+	initial-value: 0deg;
+}
+
+@property --td-rotate-z-offset {
+	syntax: '<angle>';
+	inherits: true;
+	initial-value: 0deg;
+}
+
 @property --td-translate-x {
 	syntax: '<length-percentage>';
 	inherits: true;
@@ -77,6 +95,10 @@
 	--td-rotate-x: 0deg;
 	--td-rotate-y: 0deg;
 	--td-rotate-z: 0deg;
+
+	--td-rotate-x-offset: 0deg;
+	--td-rotate-y-offset: 0deg;
+	--td-rotate-z-offset: 0deg;
 
 	--td-translate-x: 0px;
 	--td-translate-y: 0px;
