@@ -1,7 +1,7 @@
-@use '../effects' as * with (
+@use '../../effects/effects' as * with (
 	$emit-default: true
 );
-@use '../utility.color' as *;
+@use '../tokens/utility.color' as *;
 @use 'theme.button' as tButton;
 @use 'theme.box' as tBox;
 @use 'theme.app-tooltip' as tTooltip;
@@ -10,16 +10,16 @@
 @use 'theme.href' as tHref;
 @use 'theme.scrollbar' as tScrollbar;
 @use 'theme.headlines' as headline;
-@use '../utility/utility' with (
+@use '../../utility/utility' with (
 	$emit-default: true
 );
 @use 'theme.caret';
 @use 'theme.content-surface' as tContentSurface;
 @import '$lib/engine/elements-3d/three-d.css';
-@import '../tokens.color.css';
-@import '../tokens.typography.css';
-@import '../tokens.misc.css';
-@import '../tokens.style.semantic.css';
+@import '../tokens/tokens.color.css';
+@import '../tokens/tokens.typography.css';
+@import '../tokens/tokens.misc.css';
+@import '../tokens/tokens.style.semantic.css';
 
 body,
 input {
