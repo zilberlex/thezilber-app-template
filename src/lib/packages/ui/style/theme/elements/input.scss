@@ -1,11 +1,6 @@
 @use '../../effects' as *;
 @use '../extra/utility.color' as *;
 
-/* Remove the spinners in Firefox */
-input[type='number'] {
-	appearance: textfield;
-}
-
 input-combo {
 	margin-block: 1px;
 	display: inline-flex;
@@ -55,6 +50,8 @@ label {
 
 input {
 	@include ul-txt-primary;
+
+	outline: 0;
 
 	flex: 1 1 auto;
 	min-width: 0;

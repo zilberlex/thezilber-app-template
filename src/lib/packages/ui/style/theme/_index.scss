@@ -8,11 +8,8 @@
 
 @use 'extra' as *;
 @use 'elements';
-@use 'integrations/elements-3d';
 
 @import 'tokens/index.css';
-
-@import '$lib/engine/elements-3d/three-d.css';
 
 body,
 input {
