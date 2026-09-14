@@ -1,6 +1,4 @@
 :root {
-	--shape-element-width: var(--border-thick);
-
 	--radius-sm: 4px;
 	--radius-md: 8px;
 }

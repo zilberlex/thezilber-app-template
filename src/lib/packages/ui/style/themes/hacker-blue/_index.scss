@@ -1,8 +1,8 @@
-@use '../../../effects/index' as * with (
+@use '../../effects/index' as * with (
 	$emit-default: true
 );
 
-@use '../../../utility/index' as * with (
+@use '../../utility/index' as * with (
 	$emit-default: true
 );
 
