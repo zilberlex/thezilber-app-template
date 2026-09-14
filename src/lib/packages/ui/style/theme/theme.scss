@@ -1,7 +1,8 @@
 @use '../effects' as * with (
 	$emit-default: true
 );
-@use '../utility/utility' with (
+
+@use '../utility' as * with (
 	$emit-default: true
 );
 

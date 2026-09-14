@@ -9,7 +9,7 @@ input[type='number'] {
 input-combo {
 	margin-block: 1px;
 	display: inline-flex;
-  width: 100%;
+	width: 100%;
 	position: relative;
 
 	padding-left: var(--space-2);
@@ -24,11 +24,11 @@ input-combo {
 		border-left: var(--border-thick) solid var(--cl-primary);
 	}
 
-  & input {
-    &[disabled] {
-      filter: grayscale(0.8);
-    }
-  }
+	& input {
+		&[disabled] {
+			filter: grayscale(0.8);
+		}
+	}
 
 	&:has(input:required:invalid) {
 		& > label .suffix,
@@ -54,14 +54,12 @@ label {
 }
 
 input {
-  @include ul-txt-primary;
+	@include ul-txt-primary;
 
-	flex: 1 1 auto; 
+	flex: 1 1 auto;
 	min-width: 0;
 
-	border-color: var(--cl-primary);
-
-  padding-inline: var(--base-padding-hz);
+	padding-inline: var(--base-padding-hz);
 	border: none;
 
 	& {
@@ -78,7 +76,8 @@ input {
 		transition-timing-function: ease-out;
 	}
 
-	&:focus, &:hover {
+	&:focus,
+	&:hover {
 		--_animate-padding-delta: 0.25rem;
 
 		font-weight: 900;

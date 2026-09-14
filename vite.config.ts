@@ -6,7 +6,7 @@ export default defineConfig({
 	plugins: [
 		sveltekit(),
 		scssGlobals({
-			modules: ['src/lib/packages/ui/style/utility/utility', 'src/lib/packages/ui/style/effects'],
+			modules: ['src/lib/packages/ui/style/utility', 'src/lib/packages/ui/style/effects'],
 			exclude: ['/src/lib/packages/ui/style/']
 		})
 	]

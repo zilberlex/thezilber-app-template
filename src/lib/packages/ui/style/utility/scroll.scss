@@ -1,0 +1,12 @@
+@mixin bottom-scroll-anchor {
+	scroll-snap-type: y proximity;
+	align-content: end;
+
+	&::after {
+		content: '';
+		display: block;
+		height: 0;
+
+		scroll-snap-align: end;
+	}
+}

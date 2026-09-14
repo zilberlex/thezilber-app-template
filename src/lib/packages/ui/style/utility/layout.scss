@@ -1,11 +1,11 @@
-$emit-default: false !default;
+@use './config';
 
 @mixin ly-center {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-  min-height: 100%;
-  min-width: 100%;
+	min-height: 100%;
+	min-width: 100%;
 }
 
 @mixin ly-full-screen {
@@ -32,28 +32,26 @@ $emit-default: false !default;
 
 	& > .center {
 		box-sizing: border-box;
-
 		justify-self: center;
 	}
 
 	& > .right {
 		box-sizing: border-box;
-
 		justify-self: right;
 	}
 }
 
 @mixin flex-row {
-  display: flex;
-  flex-direction: row;
+	display: flex;
+	flex-direction: row;
 }
 
 @mixin flex-col {
-  display: flex;
-  flex-direction: column;
+	display: flex;
+	flex-direction: column;
 }
 
-@if $emit-default {
+@if config.$emit-default {
 	.ly-full-screen {
 		@include ly-full-screen;
 	}
@@ -62,11 +60,11 @@ $emit-default: false !default;
 		@include ly-center;
 	}
 
-  .flex-row {
-    @include flex-row;
-  }
+	.flex-row {
+		@include flex-row;
+	}
 
-.flex-col {
-  @include flex-col;
-}
+	.flex-col {
+		@include flex-col;
+	}
 }
