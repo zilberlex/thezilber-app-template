@@ -5,7 +5,7 @@
 		"./StatefulFace.svelte",
 
 		"../../../lib/engine/elements-3d/Element3D.svelte",
-		"../../../lib/engine/elements-3d/ElementSurface.svelte",
+      "../../../lib/engine/elements-3d/DefaultSurface.svelte",
 		"../../../lib/engine/elements-3d/types.ts",
 
 		"../../../lib/engine/ui-infra/composable-renderable/**/*.ts",

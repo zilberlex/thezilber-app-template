@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from 'svelte/elements';
 import type { Snippet } from 'svelte';
 
-import type { AnyRenderable, ChildCapableRenderable, PropsOf } from '$lib/engine/ui-infra/composable-renderable';
+import type { AnyRenderable, ChildCapableRenderable } from '$lib/engine/ui-infra/composable-renderable';
 import type { TrackingConfig } from '$lib/engine/math-utils/trackball-algorithms';
 import type { RenderableSlotProps } from '$lib/engine/ui-infra/composable-renderable/types';
 

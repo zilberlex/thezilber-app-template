@@ -16,10 +16,10 @@
 		type RenderableProps
 	} from '$lib/engine/ui-infra/composable-renderable';
 
-	import ElementSurface from './ElementSurface.svelte';
+	import DefaultSurface from './DefaultSurface.svelte';
 	import type { Element3DProps } from './types';
 
-	const defaultSurface = componentRenderable(ElementSurface);
+	const defaultSurface = componentRenderable(DefaultSurface);
 
 	let {
 		rotateX = 0,
