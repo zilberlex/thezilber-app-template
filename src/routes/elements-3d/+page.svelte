@@ -1,9 +1,12 @@
 <script lang="ts">
 	import FlippableElement3D from '$lib/engine/elements-3d/FlippableElement3D.svelte';
 	import TrackingElement3D from '$lib/engine/elements-3d/TrackingElement3D.svelte';
+	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { TRACKING_MODES } from '$lib/engine/math-utils/trackball-algorithms';
 	import { componentRenderable, snippetRenderable } from '$lib/engine/ui-infra/composable-renderable';
+	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 	import Button from '$lib/ui/basic-components/Button.svelte';
+	import { createAttachmentKey } from 'svelte/attachments';
 
 	let items = $state(['Apple', 'Bannana', 'Orange']);
 
@@ -50,15 +53,17 @@
 
 	<section>
 		<h3>Buttons</h3>
-		{#snippet trackingFace()}
-			Tracking Button Compensated
-		{/snippet}
 
 		<TrackingElement3D surface={componentRenderable(Button)} compensateFaceScale={false}>
 			Tracking Button Not Compensated
 		</TrackingElement3D>
+
+		{#snippet trackingFace()}
+			Tracking Button Compensated (With Hotkey Also)
+		{/snippet}
 		<TrackingElement3D
 			surface={componentRenderable(Button)}
+			surfaceProps={{ [createAttachmentKey()]: createHotKeyTriggerClickAttachment('Click', kbKey('l', 'alt')) }}
 			compensateFaceScale={true}
 			face={snippetRenderable(trackingFace)}
 			faceProps={{}}

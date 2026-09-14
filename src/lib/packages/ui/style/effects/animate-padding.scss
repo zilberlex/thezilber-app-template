@@ -1,0 +1,14 @@
+@use './config';
+
+@mixin animate-padding {
+	--_animate-padding-base: var(--space-2);
+
+	padding-left: calc(var(--_animate-padding-base) + var(--_animate-padding-delta));
+	padding-right: calc(var(--_animate-padding-base) - var(--_animate-padding-delta));
+}
+
+@if config.$emit-default {
+	.animate-padding {
+		@include animate-padding;
+	}
+}

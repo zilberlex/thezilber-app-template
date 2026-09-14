@@ -1,0 +1,35 @@
+@use '../../../effects/index' as * with (
+	$emit-default: true
+);
+
+@use '../../../utility/index' as * with (
+	$emit-default: true
+);
+
+@use 'extra/index' as *;
+@use 'elements/index';
+
+@import 'tokens/index.css';
+
+body,
+input {
+	font-family: var(--font-1);
+	font-size: var(--font-size-body);
+}
+
+body {
+	background-color: var(--cl-background);
+	color: var(--cl-on-background);
+
+	&::selection {
+		background-color: var(--cl-primary);
+	}
+}
+
+.ul-highlight {
+	@include ul-highlight;
+}
+
+.ul-txt-primary {
+	@include ul-txt-primary;
+}
