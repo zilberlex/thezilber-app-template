@@ -1,4 +1,4 @@
-import { lerp } from '$lib/engine/math-utils/math-utils';
+import { lerp } from '$lib/packages/core/math/math-utils';
 import { linear } from 'svelte/easing';
 import type { EasingFunction, TransitionConfig } from 'svelte/transition';
 

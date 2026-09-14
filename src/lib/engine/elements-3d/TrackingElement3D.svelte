@@ -6,15 +6,16 @@
 		TBackFace extends AnyRenderable = AnyRenderable
 	"
 >
-	import { untrack } from 'svelte';
+	import { createSmartHandler } from '$lib/packages/core/events/event-handling';
 
-	import { calculateTrackingRotation } from '$lib/engine/math-utils/trackball-algorithms';
-	import { appState } from '$lib/engine/state/application-state.svelte';
-	import { track } from '$lib/engine/svelte-helpers/track.svelte';
+	import { calculateTrackingRotation, type TrackingSample } from '$lib/packages/core/math/trackball-algorithms';
 	import type { AnyRenderable, ChildCapableRenderable } from '$lib/packages/svelte/composable-renderable';
+	import { untrack } from 'svelte';
 
 	import Element3D from './Element3D.svelte';
 	import type { TrackingElement3DProps } from './types';
+
+	const TRACKING_COOLDOWN_MS = 20;
 
 	let {
 		thisElement = $bindable(),
@@ -28,46 +29,55 @@
 	let rotateX = $state(0);
 	let rotateY = $state(0);
 
-	let shouldTrack = $state(false);
 	let trackingAreaElementDefault = $state<HTMLElement>();
 
+	function resetTracking() {
+		rotateX = 0;
+		rotateY = 0;
+	}
+
+	function createTrackingHandler(element: HTMLElement) {
+		return createSmartHandler(
+			(event: PointerEvent) => {
+				const rect = element.getBoundingClientRect();
+
+				const trackingSample: TrackingSample = {
+					localX: event.clientX - rect.left,
+					localY: event.clientY - rect.top,
+					planeWidth: rect.width,
+					planeHeight: rect.height
+				};
+
+				const rotation = calculateTrackingRotation(trackingSample, trackingConfig);
+
+				rotateX = rotation.rotateX;
+				rotateY = rotation.rotateY;
+			},
+			{
+				cooldownDelay: TRACKING_COOLDOWN_MS
+			}
+		);
+	}
+
+	// Change of tracking Area
 	$effect(() => {
-		track(trackingAreaElement, trackingAreaElementDefault);
+		const element = trackingAreaElement ?? trackingAreaElementDefault;
 
 		return untrack(() => {
-			if (!trackingAreaElement) {
-				trackingAreaElement = trackingAreaElementDefault;
+			resetTracking();
+
+			if (!element) {
+				return;
 			}
 
 			const abortController = new AbortController();
 			const { signal } = abortController;
 
-			trackingAreaElement?.addEventListener('pointerenter', () => (shouldTrack = true), { signal });
-
-			trackingAreaElement?.addEventListener('pointerleave', () => (shouldTrack = false), { signal });
+			element.addEventListener('pointermove', createTrackingHandler(element), { signal });
+			element.addEventListener('pointerleave', resetTracking, { signal });
+			element.addEventListener('pointercancel', resetTracking, { signal });
 
 			return () => abortController.abort();
-		});
-	});
-
-	$effect(() => {
-		const element = trackingAreaElement;
-		const active = shouldTrack;
-		const mousePosition = appState.mousePos;
-		const currentTracking = trackingConfig;
-
-		untrack(() => {
-			if (!element || !active) {
-				rotateX = 0;
-				rotateY = 0;
-				return;
-			}
-
-			const rect = element.getBoundingClientRect();
-			const rotation = calculateTrackingRotation(mousePosition, rect, currentTracking);
-
-			rotateX = rotation.rotateX;
-			rotateY = rotation.rotateY;
 		});
 	});
 </script>

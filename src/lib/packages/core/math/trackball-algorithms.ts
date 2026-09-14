@@ -1,5 +1,5 @@
-import type { MousePos } from '$lib/engine/types/types';
 import type { EasingFunction } from 'svelte/transition';
+
 import { clamp, smoothstep } from './math-utils';
 
 export const TRACKING_MODES = ['linear', 'plane', 'hemisphere', 'radial', 'sphere-hyperbolic'] as const;
@@ -41,6 +41,13 @@ export const TRACKING_MODE_DEFAULTS = {
 		radiusScaleY: 2
 	}
 } satisfies ResolvedModeOptionsByMode;
+
+export type TrackingSample = Readonly<{
+	localX: number;
+	localY: number;
+	planeWidth: number;
+	planeHeight: number;
+}>;
 
 export type TrackingRotation = Readonly<{
 	rotateX: number;
@@ -264,13 +271,13 @@ function positiveNonZero(value: number): number {
 	return Math.max(Math.abs(value), EPSILON);
 }
 
-function getPointerOffset(mousePosition: MousePos, rect: DOMRectReadOnly) {
-	const centerX = rect.left + rect.width / 2;
-	const centerY = rect.top + rect.height / 2;
+function getPointerOffset(trackingSample: TrackingSample) {
+	const centerX = trackingSample.planeWidth / 2;
+	const centerY = trackingSample.planeHeight / 2;
 
 	return {
-		dx: mousePosition.x - centerX,
-		dy: mousePosition.y - centerY
+		dx: trackingSample.localX - centerX,
+		dy: trackingSample.localY - centerY
 	};
 }
 
@@ -281,15 +288,14 @@ type EllipsePosition = Readonly<{
 }>;
 
 function getEllipsePosition(
-	mousePosition: MousePos,
-	rect: DOMRectReadOnly,
+	trackingSample: TrackingSample,
 	radiusScaleX: number,
 	radiusScaleY: number
 ): EllipsePosition {
-	const { dx, dy } = getPointerOffset(mousePosition, rect);
+	const { dx, dy } = getPointerOffset(trackingSample);
 
-	const radiusX = positiveNonZero((rect.width / 2) * radiusScaleX);
-	const radiusY = positiveNonZero((rect.height / 2) * radiusScaleY);
+	const radiusX = positiveNonZero((trackingSample.planeWidth / 2) * radiusScaleX);
+	const radiusY = positiveNonZero((trackingSample.planeHeight / 2) * radiusScaleY);
 
 	const x = dx / radiusX;
 	const y = dy / radiusY;
@@ -363,14 +369,10 @@ function normalToFinalRotation(
 /* Linear                                                                     */
 /* -------------------------------------------------------------------------- */
 
-export function trackModeLinear(
-	mousePosition: MousePos,
-	rect: DOMRectReadOnly,
-	options: LinearTrackingOptions = {}
-): TrackingRotation {
+export function trackModeLinear(trackingSample: TrackingSample, options: LinearTrackingOptions = {}): TrackingRotation {
 	const resolved = resolveTrackingOptions('linear', options);
 
-	const position = getEllipsePosition(mousePosition, rect, 1, 1);
+	const position = getEllipsePosition(trackingSample, 1, 1);
 
 	const normalizedX = clamp(position.x, -1, 1);
 	const normalizedY = clamp(position.y, -1, 1);
@@ -389,14 +391,10 @@ export function trackModeLinear(
 /* Plane                                                                      */
 /* -------------------------------------------------------------------------- */
 
-export function trackModePlane(
-	mousePosition: MousePos,
-	rect: DOMRectReadOnly,
-	options: PlaneTrackingOptions = {}
-): TrackingRotation {
+export function trackModePlane(trackingSample: TrackingSample, options: PlaneTrackingOptions = {}): TrackingRotation {
 	const resolved = resolveTrackingOptions('plane', options);
 
-	const { dx, dy } = getPointerOffset(mousePosition, rect);
+	const { dx, dy } = getPointerOffset(trackingSample);
 
 	return normalToFinalRotation(
 		dx * resolved.pointerScaleX,
@@ -411,8 +409,7 @@ export function trackModePlane(
 /* -------------------------------------------------------------------------- */
 
 export function trackModeHemisphere(
-	mousePosition: MousePos,
-	rect: DOMRectReadOnly,
+	trackingSample: TrackingSample,
 	options: HemisphereTrackingOptions = {}
 ): TrackingRotation {
 	const resolved = resolveTrackingOptions('hemisphere', options);
@@ -421,7 +418,7 @@ export function trackModeHemisphere(
 		x: normalX,
 		y: normalY,
 		distance
-	} = getEllipsePosition(mousePosition, rect, resolved.radiusScaleX, resolved.radiusScaleY);
+	} = getEllipsePosition(trackingSample, resolved.radiusScaleX, resolved.radiusScaleY);
 
 	/*
 	 * Clamp positions outside the ellipse onto its boundary.
@@ -440,14 +437,10 @@ export function trackModeHemisphere(
 /* Radial                                                                     */
 /* -------------------------------------------------------------------------- */
 
-export function trackModeRadial(
-	mousePosition: MousePos,
-	rect: DOMRectReadOnly,
-	options: RadialTrackingOptions = {}
-): TrackingRotation {
+export function trackModeRadial(trackingSample: TrackingSample, options: RadialTrackingOptions = {}): TrackingRotation {
 	const resolved = resolveTrackingOptions('radial', options);
 
-	const { x, y, distance } = getEllipsePosition(mousePosition, rect, resolved.radiusScaleX, resolved.radiusScaleY);
+	const { x, y, distance } = getEllipsePosition(trackingSample, resolved.radiusScaleX, resolved.radiusScaleY);
 
 	if (distance < EPSILON) {
 		return ZERO_ROTATION;
@@ -477,8 +470,7 @@ export function trackModeRadial(
 /* -------------------------------------------------------------------------- */
 
 export function trackModeSphereHyperbolic(
-	mousePosition: MousePos,
-	rect: DOMRectReadOnly,
+	trackingSample: TrackingSample,
 	options: VirtualTrackballTrackingOptions = {}
 ): TrackingRotation {
 	const resolved = resolveTrackingOptions('sphere-hyperbolic', options);
@@ -487,7 +479,7 @@ export function trackModeSphereHyperbolic(
 		x: normalX,
 		y: normalY,
 		distance
-	} = getEllipsePosition(mousePosition, rect, resolved.radiusScaleX, resolved.radiusScaleY);
+	} = getEllipsePosition(trackingSample, resolved.radiusScaleX, resolved.radiusScaleY);
 
 	const normalZ =
 		distance <= Math.SQRT1_2 ? Math.sqrt(Math.max(0, 1 - distance * distance)) : 1 / positiveNonZero(2 * distance);
@@ -499,25 +491,21 @@ export function trackModeSphereHyperbolic(
 /* Dispatcher                                                                 */
 /* -------------------------------------------------------------------------- */
 
-export function calculateTrackingRotation(
-	mousePosition: MousePos,
-	rect: DOMRectReadOnly,
-	config: TrackingConfig
-): TrackingRotation {
+export function calculateTrackingRotation(trackingSample: TrackingSample, config: TrackingConfig): TrackingRotation {
 	switch (config.mode) {
 		case 'linear':
-			return trackModeLinear(mousePosition, rect, config.options);
+			return trackModeLinear(trackingSample, config.options);
 
 		case 'plane':
-			return trackModePlane(mousePosition, rect, config.options);
+			return trackModePlane(trackingSample, config.options);
 
 		case 'hemisphere':
-			return trackModeHemisphere(mousePosition, rect, config.options);
+			return trackModeHemisphere(trackingSample, config.options);
 
 		case 'radial':
-			return trackModeRadial(mousePosition, rect, config.options);
+			return trackModeRadial(trackingSample, config.options);
 
 		case 'sphere-hyperbolic':
-			return trackModeSphereHyperbolic(mousePosition, rect, config.options);
+			return trackModeSphereHyperbolic(trackingSample, config.options);
 	}
 }

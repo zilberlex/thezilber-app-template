@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { CollectionAppEnvironment } from '$lib/app-infrastructure/collection-app/types';
 	import { appState } from '$lib/engine/state/application-state.svelte';
-	import { track } from '$lib/engine/svelte-helpers/track.svelte';
+	import { track } from '$lib/packages/core/svelte/track.svelte.js';
 
 	type Props = {
 		appEnv: CollectionAppEnvironment<any, any>;

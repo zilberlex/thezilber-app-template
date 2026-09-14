@@ -1,4 +1,4 @@
-import { floorTo } from '$lib/engine/math-utils/math-utils';
+import { floorTo } from '$lib/packages/core/math/math-utils';
 import {
 	createAnimationControlTween,
 	type TBasedAnimationParams,
