@@ -7,8 +7,7 @@
 		"../../../lib/engine/elements-3d/Element3D.svelte",
       "../../../lib/engine/elements-3d/DefaultSurface.svelte",
 		"../../../lib/engine/elements-3d/types.ts",
-
-		"../../../lib/engine/ui-infra/composable-renderable/**/*.ts",
-		"../../../lib/engine/ui-infra/composable-renderable/**/*.svelte"
+		"../../../lib/packages/svelte/composable-renderable/**/*.ts",
+		"../../../lib/packages/svelte/composable-renderable/**/*.svelte"
 	]
 }

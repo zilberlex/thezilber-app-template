@@ -1,9 +1,9 @@
 import type { HTMLAttributes } from 'svelte/elements';
 import type { Snippet } from 'svelte';
 
-import type { AnyRenderable, ChildCapableRenderable } from '$lib/engine/ui-infra/composable-renderable';
+import type { AnyRenderable, ChildCapableRenderable } from '$lib/packages/svelte/composable-renderable';
 import type { TrackingConfig } from '$lib/engine/math-utils/trackball-algorithms';
-import type { RenderableSlotProps } from '$lib/engine/ui-infra/composable-renderable/types';
+import type { RenderableSlotProps } from '$lib/packages/svelte/composable-renderable/types';
 
 export type Control3DProps = {
 	rotateX?: number;

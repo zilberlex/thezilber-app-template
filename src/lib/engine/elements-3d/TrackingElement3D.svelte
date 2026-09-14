@@ -11,7 +11,7 @@
 	import { calculateTrackingRotation } from '$lib/engine/math-utils/trackball-algorithms';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { track } from '$lib/engine/svelte-helpers/track.svelte';
-	import type { AnyRenderable, ChildCapableRenderable } from '$lib/engine/ui-infra/composable-renderable';
+	import type { AnyRenderable, ChildCapableRenderable } from '$lib/packages/svelte/composable-renderable';
 
 	import Element3D from './Element3D.svelte';
 	import type { TrackingElement3DProps } from './types';

@@ -3,7 +3,7 @@
 	import TrackingElement3D from '$lib/engine/elements-3d/TrackingElement3D.svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { TRACKING_MODES } from '$lib/engine/math-utils/trackball-algorithms';
-	import { componentRenderable, snippetRenderable } from '$lib/engine/ui-infra/composable-renderable';
+	import { componentRenderable, snippetRenderable } from '$lib/packages/svelte/composable-renderable';
 	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { createAttachmentKey } from 'svelte/attachments';

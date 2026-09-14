@@ -8,7 +8,7 @@
 >
 	import { mergeProps } from 'svelte-toolbelt';
 
-	import type { AnyRenderable, ChildCapableRenderable } from '$lib/engine/ui-infra/composable-renderable';
+	import type { AnyRenderable, ChildCapableRenderable } from '$lib/packages/svelte/composable-renderable';
 
 	import Element3D from './Element3D.svelte';
 	import type { Element3DProps, FlippableElement3DProps } from './types';

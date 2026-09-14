@@ -14,7 +14,7 @@
 		type AnyRenderable,
 		type ChildCapableRenderable,
 		type RenderableProps
-	} from '$lib/engine/ui-infra/composable-renderable';
+	} from '$lib/packages/svelte/composable-renderable';
 
 	import DefaultSurface from './DefaultSurface.svelte';
 	import type { Element3DProps } from './types';

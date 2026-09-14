@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { componentRenderable, htmlRenderable, snippetRenderable } from '$lib/engine/ui-infra/composable-renderable';
+	import { componentRenderable, htmlRenderable, snippetRenderable } from '$lib/packages/svelte/composable-renderable';
 
 	import Element3D from '$lib/engine/elements-3d/Element3D.svelte';
 
