@@ -12,6 +12,10 @@
 	import HotKeysInitialization from '$lib/packages/hotkey-module/svelt-components/HotKeysInitialization.svelte';
 	import KeyboardNavigationManager from '$lib/packages/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
 	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
+	import StyleLoader from '$lib/packages/ui/svelte/StyleLoader.svelte';
+	import HackerBlueTheme from '$lib/packages/ui/style/themes/hacker-blue/theme/svelte/HackerBlueTheme.svelte';
+	import Elements3DLoadStyles from '$lib/engine/elements-3d/Elements3DLoadStyles.svelte';
+	import HackerBlueElements3DStyles from '$lib/packages/ui/style/themes/hacker-blue/theme/integrations/elements-3d/svelte/HackerBlueElements3DStyles.svelte';
 
 	let { children } = $props();
 
@@ -44,7 +48,9 @@
 
 <EngineHotKeysInit />
 
-<KeyboardNavigationManager elementInteraction={engineElementInteraction}>
-	<EngineErrorHandler />
-	{@render children()}
-</KeyboardNavigationManager>
+<StyleLoader theme={HackerBlueTheme} extensions={[Elements3DLoadStyles, HackerBlueElements3DStyles]}>
+	<KeyboardNavigationManager elementInteraction={engineElementInteraction}>
+		<EngineErrorHandler />
+		{@render children()}
+	</KeyboardNavigationManager>
+</StyleLoader>

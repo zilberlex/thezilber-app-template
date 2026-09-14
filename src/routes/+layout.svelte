@@ -4,9 +4,6 @@
 	import '@fontsource-variable/jetbrains-mono';
 	import '@fontsource/audiowide';
 
-	import '$lib/packages/ui/style/base.css';
-	import '$lib/ui/style/app-theme.scss';
-
 	import AppInit from '$lib/app/AppInit.svelte';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onNavigate } from '$app/navigation';
