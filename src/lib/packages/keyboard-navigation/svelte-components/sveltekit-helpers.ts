@@ -1,4 +1,4 @@
-import type { HotKey } from '$lib/packages/hotkey-module/hotkey-class';
+import type { HotKey } from '$lib/packages/hotkey-module';
 import { getNavigationManager } from './navigation-manager-provider.svelte.js';
 
 export function assignNavigationManagerKeys(nextKey: HotKey, prevKey: HotKey) {

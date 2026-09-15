@@ -8,7 +8,7 @@
 	import Debug from './Debug.svelte';
 	import type { CbAppEnv } from './command-builder-types';
 	import { appState } from '$lib/engine/state/application-state.svelte';
-	import PreventBrowserHotkeys from '$lib/packages/hotkey-module/svelte/PreventBrowserHotkeys.svelte';
+	import { PreventBrowserHotkeys } from '$lib/packages/hotkey-module/svelte';
 	import {
 		createHotKeyTriggerClickAttachment,
 		createHotKeyTriggerFocusAttachment

@@ -8,5 +8,3 @@ export {
 } from './hotkey-handlers';
 
 export type { HotKeyToTriggerOptions, HotKeyToTriggerClickOptions } from './types';
-
-export * from './svelte';

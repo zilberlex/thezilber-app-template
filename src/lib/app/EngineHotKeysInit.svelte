@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { createHotKeyHandler } from '$lib/packages/hotkey-module/hotkey-handlers';
-	import { hotKeysModule } from '$lib/packages/hotkey-module/hotkey-manager';
+	import { createHotKeyHandler } from '$lib/packages/hotkey-module';
+	import { hotKeysModule } from '$lib/packages/hotkey-module';
 	import { kbKey } from '$lib/packages/core';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onDestroy, onMount } from 'svelte';
