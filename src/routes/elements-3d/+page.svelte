@@ -1,6 +1,5 @@
 <script lang="ts">
-	import FlippableElement3D from '$lib/packages/ui/elements-3d/FlippableElement3D.svelte';
-	import TrackingElement3D from '$lib/packages/ui/elements-3d/TrackingElement3D.svelte';
+	import { FlippableElement3D, TrackingElement3D } from '$lib/packages/ui/elements-3d';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { TRACKING_MODES } from '$lib/packages/core/math/trackball-algorithms';
 	import { componentRenderable, snippetRenderable } from '$lib/packages/svelte/composable-renderable';

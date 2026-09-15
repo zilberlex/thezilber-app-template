@@ -2,12 +2,11 @@
 	import { removeFromArrayPredicate } from '$lib/packages/core/general-js-ts/array-remove-by-item';
 	import { composeTransitions } from '$lib/engine/transitions/transition-tools/transition-composition/compose-transitions';
 	import { typewriter } from '$lib/engine/transitions/typewriter';
-	import { cubicIn, cubicOut, linear, sineIn, sineInOut, sineOut } from 'svelte/easing';
+	import { cubicIn, cubicOut, linear, sineOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 	import ScrollIndicator from '../ui-tricks/ScrollIndicator.svelte';
 	import type { EngineLogger, LogContext, LogEvent, LogSeverity } from '$lib/engine/logging/engine-logger';
 	import { ActionQueue } from '$lib/packages/core/patterns/action-queue';
-	import TrackingElement3D from '$lib/packages/ui/elements-3d/TrackingElement3D.svelte';
 
 	type LogLine = {
 		severity: LogSeverity;
