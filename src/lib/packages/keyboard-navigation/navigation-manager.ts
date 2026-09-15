@@ -1,10 +1,10 @@
 import { hotKeysModule } from '$lib/packages/hotkey-module/hotkey-manager';
-import { OneToManyDictionary } from '$lib/packages/core/patterns/one-to-many-dictionary';
+import { OneToManyDictionary } from '$lib/packages/core';
 import { engineAssert } from '$lib/engine/error/engine-assert';
 import { type NavigationKeysConfig, type NavigationTargetRestorationPoint, type ScopeInfra } from './types';
-import { KbKey } from '$lib/packages/core/input/keyboard-key/kb-key';
-import { kbKeys } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
-import { PriorityMapList } from '$lib/packages/core/patterns/lists-and-maps-advanced/priority-map-list';
+import { KbKey } from '$lib/packages/core';
+import { kbKeys } from '$lib/packages/core';
+import { PriorityMapList } from '$lib/packages/core';
 import type { ElementInteraction } from '$lib/packages/interactions/types';
 import { nativeElementInteraction } from '$lib/packages/interactions/triggers/elements/element-interactions';
 import { NavigationKeyConsts } from './consts';

@@ -1,7 +1,7 @@
 import { linear } from 'svelte/easing';
 import { pulse, type FilterEffectTransitionParams } from './transitions-common';
 import type { TransitionConfig } from 'svelte/transition';
-import { lerp } from '$lib/packages/core/math/math-utils';
+import { lerp } from '$lib/packages/core';
 
 function makeFilter(filterName: string, filterVal: number, units: string) {
 	return `${filterName}(${filterVal}${units})`;

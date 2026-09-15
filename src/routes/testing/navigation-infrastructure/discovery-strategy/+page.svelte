@@ -9,7 +9,7 @@
 	import { assignNavigationManagerKeys } from '$lib/packages/keyboard-navigation/svelte-components/sveltekit-helpers';
 	import { markForNavigation } from '$lib/packages/keyboard-navigation/svelte-components/attachments';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
+	import { kbKey } from '$lib/packages/core';
 
 	onMount(() => {
 		if (browser) {

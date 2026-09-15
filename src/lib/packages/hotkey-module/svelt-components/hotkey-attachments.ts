@@ -2,7 +2,7 @@ import type { Attachment } from 'svelte/attachments';
 import { hotKeysModule } from '../hotkey-manager';
 import type { ElementInteraction } from '$lib/packages/interactions/types';
 import { createHotKeyTriggerClickHandler, createHotKeyTriggerFocusHandler } from '../hotkey-handlers';
-import type { KbKey } from '$lib/packages/core/input/keyboard-key/kb-key';
+import type { KbKey } from '$lib/packages/core';
 
 export function assignHotkeyToClick(
 	hotKey: KbKey,

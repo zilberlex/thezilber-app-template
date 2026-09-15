@@ -1,4 +1,4 @@
-import { sleep } from '$lib/packages/core/general-js-ts/common';
+import { sleep } from '$lib/packages/core';
 
 export function temporaryAnimationClass(classTimeMs: number) {
 	let active = $state(false);

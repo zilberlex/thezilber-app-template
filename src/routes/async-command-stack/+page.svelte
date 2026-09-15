@@ -14,7 +14,7 @@
 	import { beforeNavigate } from '$app/navigation';
 	import { NavigationKeysConfigSets } from '$lib/packages/keyboard-navigation/configurations';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
+	import { kbKey } from '$lib/packages/core';
 
 	let inputKey = $state('');
 	let inputValue = $state('');

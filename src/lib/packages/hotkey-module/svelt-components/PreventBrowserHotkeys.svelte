@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { hotKeysModule } from '$lib/packages/hotkey-module/hotkey-manager';
-	import type { KbKey } from '$lib/packages/core/input/keyboard-key/kb-key';
+	import type { KbKey } from '$lib/packages/core';
 
 	type Props = {
 		preventedKeys: KbKey[];

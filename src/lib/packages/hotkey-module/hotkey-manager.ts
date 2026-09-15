@@ -1,5 +1,5 @@
-import { OneToManyDictionary } from '$lib/packages/core/patterns/one-to-many-dictionary';
-import { KbKey } from '$lib/packages/core/input/keyboard-key/kb-key';
+import { OneToManyDictionary } from '$lib/packages/core';
+import { KbKey } from '$lib/packages/core';
 
 type EventHandler<E extends Event> = (event: E) => void;
 

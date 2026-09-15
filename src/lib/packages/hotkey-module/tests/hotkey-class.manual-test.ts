@@ -1,4 +1,4 @@
-import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
+import { kbKey } from '$lib/packages/core';
 
 const keys = [
 	kbKey('s', 'ctrl|meta'),

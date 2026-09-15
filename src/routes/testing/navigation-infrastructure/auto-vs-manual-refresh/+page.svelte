@@ -6,7 +6,7 @@
 	import NavigatableAndUnnavigatableSwitcher from '../NavigatableAndUnnavigatableSwitcher.svelte';
 	import { browser } from '$app/environment';
 	import { assignNavigationManagerKeys } from '$lib/packages/keyboard-navigation/svelte-components/sveltekit-helpers';
-	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
+	import { kbKey } from '$lib/packages/core';
 
 	let scopeManual = $state<ScopeInfra>();
 

@@ -1,5 +1,5 @@
 import type { AnimationTween } from '../animation.types';
-import { cmpDigitAtPos, indexOfMsdDiff, segmentedRemap, type RangeMaps } from '$lib/packages/core/math/math-utils';
+import { cmpDigitAtPos, indexOfMsdDiff, segmentedRemap, type RangeMaps } from '$lib/packages/core';
 
 export const __test__ = { makeMapRangesTicksBased };
 

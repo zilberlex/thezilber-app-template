@@ -1,5 +1,5 @@
-import { createSmartHandler } from '$lib/packages/core/events/event-handling';
-import { DispatcherImpl } from '$lib/packages/core/patterns/observer';
+import { createSmartHandler } from '$lib/packages/core';
+import { DispatcherImpl } from '$lib/packages/core';
 import {
 	type NavigationKeysConfig,
 	type NextNodeInfo,
@@ -29,7 +29,7 @@ import {
 	type NavigationDiscoveryStrategy
 } from './discovery-strategies/navigation-discovery-strategy';
 import { NavigationRefreshController } from './navigation-refresh-controller';
-import { MapList } from '$lib/packages/core/patterns/lists-and-maps-advanced/map-list';
+import { MapList } from '$lib/packages/core';
 import type { ElementInteraction } from '$lib/packages/interactions/types';
 import { nativeElementInteraction } from '$lib/packages/interactions/triggers/elements/element-interactions';
 

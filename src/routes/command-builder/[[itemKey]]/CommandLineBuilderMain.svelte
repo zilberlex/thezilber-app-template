@@ -13,7 +13,7 @@
 		createHotKeyTriggerClickAttachment,
 		createHotKeyTriggerFocusAttachment
 	} from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey, kbKeys } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
+	import { kbKey, kbKeys } from '$lib/packages/core';
 
 	let { cbAppEnv = $bindable(), ...rest }: { cbAppEnv: CbAppEnv } = $props();
 

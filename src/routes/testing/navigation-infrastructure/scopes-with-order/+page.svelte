@@ -8,7 +8,7 @@
 	import ToggleOnOff from '../ToggleOnOff.svelte';
 	import KeyboardNavigationManager from '$lib/packages/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
+	import { kbKey } from '$lib/packages/core';
 
 	let showScopeA = $state(true);
 	let showScopeB = $state(true);

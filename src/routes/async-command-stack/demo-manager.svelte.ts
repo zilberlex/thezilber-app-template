@@ -1,4 +1,4 @@
-import { type CommandRegistry } from '$lib/packages/core/patterns/command/persistancy/command-registry';
+import { type CommandRegistry } from '$lib/packages/core';
 import { SvelteMap } from 'svelte/reactivity';
 import { DemoCommandFactory } from './app-actions/piplines/demo-command-factory';
 import { appState } from '$lib/engine/state/application-state.svelte';

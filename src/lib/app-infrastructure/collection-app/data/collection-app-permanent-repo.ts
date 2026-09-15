@@ -15,7 +15,7 @@ import type {
 } from './types';
 import type { ActionResult, CollectionAppContext, CollectionAppError } from '../types';
 import { getNextSlug, slugify } from './slugify';
-import { getErrorMessage } from '$lib/packages/core/general-js-ts/extract-error-message';
+import { getErrorMessage } from '$lib/packages/core';
 
 class CollectionAppDexieRepo<TData extends Omit<object, 'recordId'>, TProjection extends DataProjection> extends Dexie {
 	data!: EntityTable<DbItem<TData>, 'recordId'>;

@@ -1,4 +1,4 @@
-import { track } from '$lib/packages/core/svelte/track.svelte.js';
+import { track } from '$lib/packages/core/svelte';
 import { AutoResetValue } from '$lib/ui/reactive-classes/autoResetValue.svelte';
 
 class TemporaryMessageState {

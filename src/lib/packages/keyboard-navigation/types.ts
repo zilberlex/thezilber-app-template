@@ -1,4 +1,4 @@
-import type { DispatchHandler } from '$lib/packages/core/patterns/observer';
+import type { DispatchHandler } from '$lib/packages/core';
 import type { ElementInteraction } from '$lib/packages/interactions/types';
 
 export type NavType = {

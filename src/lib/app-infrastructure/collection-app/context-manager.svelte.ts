@@ -1,7 +1,7 @@
 import { goto } from '$app/navigation';
 import { page } from '$app/state';
 import { getBasePath, getContextPath } from '$lib/engine/routing/routing-helps';
-import { track } from '$lib/packages/core/svelte/track.svelte.js';
+import { track } from '$lib/packages/core/svelte';
 import { untrack } from 'svelte';
 import type {
 	CollectionAppContext,

@@ -5,7 +5,7 @@
 	import { assignNavigationManagerKeys } from '$lib/packages/keyboard-navigation/svelte-components/sveltekit-helpers';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { onMount } from 'svelte';
-	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
+	import { kbKey } from '$lib/packages/core';
 
 	function focusImmediately(node: HTMLElement) {
 		node.focus();
