@@ -63,7 +63,8 @@
 		--td-translate-x var(--td-transform-time) var(--td-transform-easing),
 		--td-translate-y var(--td-transform-time) var(--td-transform-easing),
 		--td-translate-z var(--td-transform-time) var(--td-transform-easing),
-		--td-scale var(--td-transform-time) var(--td-transform-easing);
+		--td-scale var(--td-transform-time) var(--td-transform-easing),
+		var(--td-extra-transitions, --td-transition-noop 0s);
 }
 
 .td-element--negative-depth .td-surface {
