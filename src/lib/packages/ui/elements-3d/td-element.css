@@ -145,8 +145,6 @@
 
 	backface-visibility: hidden;
 	-webkit-backface-visibility: hidden;
-
-	transition: transform var(--td-depth-transition-time) var(--td-depth-transition-easing);
 }
 
 .td-face--front {

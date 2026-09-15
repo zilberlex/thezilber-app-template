@@ -14,7 +14,7 @@
 	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
 	import StyleLoader from '$lib/packages/ui/svelte/StyleLoader.svelte';
 	import HackerBlueTheme from '$lib/packages/ui/style/themes/hacker-blue/svelte/HackerBlueTheme.svelte';
-	import Elements3DLoadStyles from '$lib/engine/elements-3d/Elements3DLoadStyles.svelte';
+	import Elements3DLoadStyles from '$lib/packages/ui/elements-3d/Elements3DLoadStyles.svelte';
 	import HackerBlueElements3DStyles from '$lib/packages/ui/style/themes/hacker-blue/integrations/elements-3d/svelte/HackerBlueElements3DStyles.svelte';
 
 	let { children } = $props();

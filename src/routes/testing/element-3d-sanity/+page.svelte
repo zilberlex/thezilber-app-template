@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { componentRenderable, htmlRenderable, snippetRenderable } from '$lib/packages/svelte/composable-renderable';
 
-	import Element3D from '$lib/engine/elements-3d/Element3D.svelte';
+	import Element3D from '$lib/packages/ui/elements-3d/Element3D.svelte';
 
 	import StatefulFace from './StatefulFace.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';

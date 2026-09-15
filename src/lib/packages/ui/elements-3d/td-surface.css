@@ -1,0 +1,71 @@
+.td-surface {
+	--_td-rotate-x: calc(var(--td-rotate-x) + var(--td-rotate-x-offset));
+	--_td-rotate-y: calc(var(--td-rotate-y) + var(--td-rotate-y-offset));
+	--_td-rotate-z: calc(var(--td-rotate-z) + var(--td-rotate-z-offset));
+
+	--_td-facing-factor: calc(cos(var(--_td-rotate-x)) * cos(var(--_td-rotate-y)));
+
+	/* prettier-ignore */
+	--_td-front-face-camera-depth-ratio: calc(
+		var(--td-depth) *
+		var(--_td-facing-factor) /
+		var(--td-perspective)
+	);
+
+	/* prettier-ignore */
+	--_td-front-face-scale: calc(
+		1 -
+		var(--td-face-scale-compensation) *
+		var(--_td-front-face-camera-depth-ratio)
+	);
+
+	/* prettier-ignore */
+	--_td-back-face-scale: calc(
+		1 +
+		var(--td-face-scale-compensation) *
+		var(--_td-front-face-camera-depth-ratio)
+	);
+
+	display: inline-grid;
+
+	inline-size: 100%;
+	min-inline-size: 0;
+	min-block-size: 0;
+
+	box-sizing: border-box;
+
+	transform-origin: center;
+	transform-style: preserve-3d;
+
+	pointer-events: auto;
+
+	/* prettier-ignore */
+	transform:
+		translate3d(
+			var(--td-translate-x),
+			var(--td-translate-y),
+			var(--td-translate-z)
+		)
+		perspective(var(--td-perspective))
+		rotateZ(var(--_td-rotate-z))
+		rotateY(var(--_td-rotate-y))
+		rotateX(var(--_td-rotate-x))
+		scale(var(--td-scale));
+
+	transition:
+		--td-depth var(--td-depth-transition-time) var(--td-depth-transition-easing),
+		--td-rotate-x var(--td-transform-time) var(--td-transform-easing),
+		--td-rotate-y var(--td-transform-time) var(--td-transform-easing),
+		--td-rotate-z var(--td-transform-time) var(--td-transform-easing),
+		--td-rotate-x-offset var(--td-transform-time) var(--td-transform-easing),
+		--td-rotate-y-offset var(--td-transform-time) var(--td-transform-easing),
+		--td-rotate-z-offset var(--td-transform-time) var(--td-transform-easing),
+		--td-translate-x var(--td-transform-time) var(--td-transform-easing),
+		--td-translate-y var(--td-transform-time) var(--td-transform-easing),
+		--td-translate-z var(--td-transform-time) var(--td-transform-easing),
+		--td-scale var(--td-transform-time) var(--td-transform-easing);
+}
+
+.td-element--negative-depth .td-surface {
+	background-color: transparent;
+}
