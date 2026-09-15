@@ -1,7 +1,8 @@
 button.td-surface,
 a.link-button.td-surface {
 	// 3D buttons opt out of the normal button movement.
-	translate: none;
+	--td-extra-transitions:
+		border-color var(--_button-transition-time) linear, box-shadow var(--_button-transition-time) linear;
 
 	&:is(:hover, :focus-visible) {
 		--td-translate-y: -4px;
