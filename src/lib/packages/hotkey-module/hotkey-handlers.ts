@@ -1,8 +1,8 @@
 import type { KeyboardEventHandler } from 'svelte/elements';
-import { createSmartHandler } from '$lib/packages/core';
+import { createSmartHandler, KbKey } from '$lib/packages/core';
 import type { ElementInteraction } from '$lib/packages/interactions/types';
 import { NodesWhichTakePriorityOverSoftHotKeys } from './consts';
-import { KbKey } from '$lib/packages/core';
+import type { HotKeyToTriggerClickOptions, HotKeyToTriggerOptions } from './types';
 
 const BUTTON_RAPID_FIRE_COOLDOWN_DEFAULT = 20;
 

@@ -1,5 +1,4 @@
-import { OneToManyDictionary } from '$lib/packages/core';
-import { KbKey } from '$lib/packages/core';
+import { OneToManyDictionary, KbKey } from '$lib/packages/core';
 
 type EventHandler<E extends Event> = (event: E) => void;
 
@@ -12,7 +11,7 @@ export class HotkeyManager {
 	#onKeydownBound: (event: KeyboardEvent) => void = this.#onKeydown.bind(this);
 
 	assignHotKey(key: KbKey, handler: EventHandler<KeyboardEvent>, isCapture = false) {
-		console.debug('HotkeysModule assigning key:', key, 'to handler:', handler.name ?? '<annonymous>');
+		console.debug('HotkeysModule assigning key:', key, 'to handler:', handler.name ?? '<anonymous>');
 
 		if (!this.#isInitialized) {
 			throw new Error(`${HotkeyManager.name} Need to initialize Class before assigning hotkeys`);
@@ -26,13 +25,13 @@ export class HotkeyManager {
 	}
 
 	removeHotKey(key: KbKey, handler: EventHandler<KeyboardEvent>) {
-		console.debug('HotkeysModule removing key:', key, 'to handler:', handler.name ?? '<annonymous>');
+		console.debug('HotkeysModule removing key:', key, 'to handler:', handler.name ?? '<anonymous>');
 		this.#hotKeysHandlers.remove(key, handler);
 		this.#hotKeysCaptureHandlers.remove(key, handler);
 	}
 
-	assignHotKeys(keys: KbKey[], handler: EventHandler<KeyboardEvent>, isCaptrue = false) {
-		keys.forEach((key) => this.assignHotKey(key, handler, isCaptrue));
+	assignHotKeys(keys: KbKey[], handler: EventHandler<KeyboardEvent>, isCapture = false) {
+		keys.forEach((key) => this.assignHotKey(key, handler, isCapture));
 	}
 
 	removeHotKeys(keys: KbKey[], handler: EventHandler<KeyboardEvent>) {
@@ -43,7 +42,6 @@ export class HotkeyManager {
 		return this.#isInitialized;
 	}
 
-	count = 0;
 	#onKeydown(event: KeyboardEvent) {
 		let hotKeyedHandlers = this.#hotKeysHandlers;
 
@@ -84,14 +82,15 @@ export class HotkeyManager {
 	}
 
 	destroy() {
-		console.log('Destory HotkeyManager', {
+		console.log('Destroy HotkeyManager', {
 			manager: this
 		});
 
 		document.removeEventListener('keydown', this.#onKeydownBound);
 		document.removeEventListener('keydown', this.#onKeydownBound, { capture: true });
 
-		this.#hotKeysHandlers = new OneToManyDictionary();
+		this.#hotKeysHandlers = new OneToManyDictionary(true);
+		this.#hotKeysCaptureHandlers = new OneToManyDictionary(true);
 		this.#isInitialized = false;
 	}
 }
