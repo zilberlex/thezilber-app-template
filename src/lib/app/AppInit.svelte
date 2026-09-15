@@ -39,17 +39,18 @@
 
 <svelte:window onmousemove={handleMouseMove} />
 
+<StyleLoader theme={HackerBlueTheme} extensions={[HackerBlueElements3DStyles]} />
+
 <HotKeysInitialization />
 <NavigationStateManager />
 <TooltipTracker />
 
-<ForegroundLayer />
+<KeyboardNavigationManager elementInteraction={engineElementInteraction}>
+	<EngineHotKeysInit />
 
-<EngineHotKeysInit />
+	<EngineErrorHandler />
 
-<StyleLoader theme={HackerBlueTheme} extensions={[HackerBlueElements3DStyles]}>
-	<KeyboardNavigationManager elementInteraction={engineElementInteraction}>
-		<EngineErrorHandler />
-		{@render children()}
-	</KeyboardNavigationManager>
-</StyleLoader>
+	<ForegroundLayer />
+
+	{@render children()}
+</KeyboardNavigationManager>

@@ -70,6 +70,7 @@
 				errored = true;
 				scope.destroy();
 				console.error(error);
+				throw error;
 			}
 		}
 	});

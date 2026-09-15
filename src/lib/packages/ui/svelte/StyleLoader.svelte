@@ -5,12 +5,10 @@
 
 	let {
 		theme: Theme,
-		extensions = [],
-		children
+		extensions = []
 	}: {
 		theme: Component;
 		extensions?: Component[];
-		children?: Snippet;
 	} = $props();
 </script>
 
@@ -19,5 +17,3 @@
 {#each extensions as Extension}
 	<Extension />
 {/each}
-
-{@render children?.()}

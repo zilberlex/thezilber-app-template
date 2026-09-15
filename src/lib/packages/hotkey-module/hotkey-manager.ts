@@ -4,7 +4,7 @@ import { KbKey } from '$lib/packages/core';
 type EventHandler<E extends Event> = (event: E) => void;
 
 export class HotkeyManager {
-	#wasInitialized = false;
+	#isInitialized = false;
 
 	#hotKeysHandlers = new OneToManyDictionary<KbKey, EventHandler<KeyboardEvent>>(true);
 	#hotKeysCaptureHandlers = new OneToManyDictionary<KbKey, EventHandler<KeyboardEvent>>(true);
@@ -14,7 +14,7 @@ export class HotkeyManager {
 	assignHotKey(key: KbKey, handler: EventHandler<KeyboardEvent>, isCapture = false) {
 		console.debug('HotkeysModule assigning key:', key, 'to handler:', handler.name ?? '<annonymous>');
 
-		if (!this.#wasInitialized) {
+		if (!this.#isInitialized) {
 			throw new Error(`${HotkeyManager.name} Need to initialize Class before assigning hotkeys`);
 		}
 
@@ -37,6 +37,10 @@ export class HotkeyManager {
 
 	removeHotKeys(keys: KbKey[], handler: EventHandler<KeyboardEvent>) {
 		keys.forEach((key) => this.removeHotKey(key, handler));
+	}
+
+	get isInitialized() {
+		return this.#isInitialized;
 	}
 
 	count = 0;
@@ -66,21 +70,29 @@ export class HotkeyManager {
 	}
 
 	init() {
-		if (this.#wasInitialized) {
+		console.log('Initialize HotkeyManager', {
+			manager: this
+		});
+
+		if (this.#isInitialized) {
 			throw new Error(`${HotkeyManager.name} Was already initialized`);
 		}
 
 		document.addEventListener('keydown', this.#onKeydownBound);
 		document.addEventListener('keydown', this.#onKeydownBound, { capture: true });
-		this.#wasInitialized = true;
+		this.#isInitialized = true;
 	}
 
 	destroy() {
+		console.log('Destory HotkeyManager', {
+			manager: this
+		});
+
 		document.removeEventListener('keydown', this.#onKeydownBound);
 		document.removeEventListener('keydown', this.#onKeydownBound, { capture: true });
 
 		this.#hotKeysHandlers = new OneToManyDictionary();
-		this.#wasInitialized = false;
+		this.#isInitialized = false;
 	}
 }
 

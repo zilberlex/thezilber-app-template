@@ -21,7 +21,7 @@
 	<div class="cases">
 		<div class="case">
 			<h3>Auto</h3>
-			<NavigationScope scopeId="scope-auto" refreshOptions={{ mode: 'automatic' }}>
+			<NavigationScope scopeId="scope-1" refreshOptions={{ mode: 'automatic' }}>
 				<div class="list">
 					<NavigatableAndUnnavigatableSwitcher startingState="button">A</NavigatableAndUnnavigatableSwitcher>
 					<NavigatableAndUnnavigatableSwitcher startingState="button">B</NavigatableAndUnnavigatableSwitcher>
@@ -30,7 +30,7 @@
 		</div>
 		<div class="case">
 			<h3>Manual</h3>
-			<NavigationScope scopeId="scope-auto" refreshOptions={{ mode: 'manual' }} bind:scopeRet={scopeManual}>
+			<NavigationScope scopeId="scope-2" refreshOptions={{ mode: 'manual' }} bind:scopeRet={scopeManual}>
 				<div class="list">
 					<NavigatableAndUnnavigatableSwitcher startingState="button">A</NavigatableAndUnnavigatableSwitcher>
 					<NavigatableAndUnnavigatableSwitcher startingState="div">B</NavigatableAndUnnavigatableSwitcher>
