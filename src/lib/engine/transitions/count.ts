@@ -1,4 +1,4 @@
-import { lerp } from '$lib/my-packages/custom-svelte-transitions/math-utils';
+import { lerp } from '$lib/my-packages/custom-svelte-transitions/math';
 
 export function count(
 	node: Element,

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { untrack, type Snippet } from 'svelte';
-	import { track } from '$lib/engine/svelte-helpers/track.svelte';
+	import { track } from '$lib/packages/core/svelte/track.svelte.js';
 	import type { DialogController } from './dialog-contoller.svelte';
 
 	type DialogProps = {

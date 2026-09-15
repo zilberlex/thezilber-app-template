@@ -1,6 +1,6 @@
 import type { Snippet } from 'svelte';
 
-import type { AnyRenderable, ChildCapableRenderable } from '$lib/engine/ui-infra/composable-renderable';
+import type { AnyRenderable, ChildCapableRenderable } from '$lib/packages/svelte/composable-renderable';
 
 import type { Element3DProps, FlippableElement3DProps, TrackingElement3DProps } from '../types';
 

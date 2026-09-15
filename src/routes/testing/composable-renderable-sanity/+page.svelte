@@ -4,7 +4,7 @@
 		componentRenderable,
 		htmlRenderable,
 		snippetRenderable
-	} from '$lib/engine/ui-infra/composable-renderable';
+	} from '$lib/packages/svelte/composable-renderable';
 
 	import TestComponent from './TestComponent.svelte';
 

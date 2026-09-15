@@ -13,6 +13,7 @@ export type {
 	HTMLTag,
 	PropsOf,
 	RenderableProps,
+	RenderableSlotProps,
 	SnippetRenderable,
 	VoidHTMLRenderable,
 	VoidHTMLTag

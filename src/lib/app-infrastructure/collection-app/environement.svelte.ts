@@ -2,7 +2,7 @@ import { getErrorMessage } from '$lib/packages/core/general-js-ts/extract-error-
 import { untrack } from 'svelte';
 import { createCollectionAppContextManager, ctxEquals } from './context-manager.svelte';
 import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';
-import { track } from '$lib/engine/svelte-helpers/track.svelte';
+import { track } from '$lib/packages/core/svelte/track.svelte.js';
 import { DataStateManager } from './data-state-manager.svelte';
 import type { CollectionAppBlankResult, CollectionAppContext, CollectionAppEnvironment } from './types';
 import type {
