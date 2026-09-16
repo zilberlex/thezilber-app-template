@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { markForNavigation } from '$lib/packages/keyboard-navigation/svelte';
-	import {NavigationScope} from '$lib/packages/keyboard-navigation/svelte';
-	import { assignNavigationManagerKeys } from '$lib/packages/keyboard-navigation/svelte';
+	import {
+		assignNavigationManagerKeys,
+		markForNavigation,
+		NavigationScope
+	} from '$lib/packages/keyboard-navigation/svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { onMount } from 'svelte';
 	import { kbKey } from '$lib/packages/core';
