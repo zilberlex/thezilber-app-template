@@ -51,6 +51,7 @@ export interface ScopeInfra {
 	focusCurrent(): void;
 	focusFirst(): void;
 	focusLast(): void;
+	hasFocus(): boolean;
 
 	getNavigationTargetRestorationPoint(): NavigationTargetRestorationPoint | undefined;
 	restoreNavigationTarget(restorationPoint: NavigationTargetRestorationPoint): boolean;

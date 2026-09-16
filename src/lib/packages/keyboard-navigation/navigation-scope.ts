@@ -232,6 +232,10 @@ export default class NavigationScopeInfraImpl implements ScopeInfra {
 		}
 	}
 
+	hasFocus(): boolean {
+		return this.scopeContainer.contains(document.activeElement);
+	}
+
 	getNavigationTargetRestorationPoint(): NavigationTargetRestorationPoint | undefined {
 		return this.#currentNavigationTargetData ? { ...this.#currentNavigationTargetData } : undefined;
 	}
