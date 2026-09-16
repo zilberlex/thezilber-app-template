@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { KbKey } from '$lib/packages/core/input/keyboard-key/kb-key';
-	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
-	import { track } from '$lib/packages/core/svelte/track.svelte.js';
+	import { KbKey } from '$lib/packages/core';
+	import { kbKey } from '$lib/packages/core';
+	import { track } from '$lib/packages/core/svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 
 	let { content = $bindable<string>(), ...rest } = $props();

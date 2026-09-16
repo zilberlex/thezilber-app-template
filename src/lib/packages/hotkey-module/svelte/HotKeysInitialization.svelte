@@ -1,6 +1,6 @@
 <script>
 	import { onDestroy } from 'svelte';
-	import { hotKeysModule } from '../hotkey-manager.ts';
+	import { hotKeysModule } from '../hotkey-manager';
 	import { browser } from '$app/environment';
 
 	if (browser) {

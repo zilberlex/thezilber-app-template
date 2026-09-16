@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
-	import type { NavigationManager } from '$lib/packages/keyboard-navigation/navigation-manager';
-	import { getNavigationManager } from '$lib/packages/keyboard-navigation/svelte-components/navigation-manager-provider.svelte';
+	import { kbKey } from '$lib/packages/core';
+	import type { NavigationManager } from '$lib/packages/keyboard-navigation';
+	import { getNavigationManager } from '$lib/packages/keyboard-navigation/svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import ObjectViewer from '$lib/ui/components/ObjectViewer.svelte';
 

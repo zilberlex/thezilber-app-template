@@ -1,4 +1,4 @@
-import type { MaybePromise } from '$lib/packages/core/general-js-ts/typescript/type-helpers';
+import type { MaybePromise } from '$lib/packages/core';
 import { successResult } from '../../result/common';
 import type { ErrorResult, ResultLike, SuccessResult } from '../../result/types';
 import type { PipelineStep } from './types';

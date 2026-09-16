@@ -1,16 +1,14 @@
 <script lang="ts">
-	import type { Component, Snippet } from 'svelte';
+	import type { Component } from 'svelte';
 
 	import '../style/base.css';
 
 	let {
 		theme: Theme,
-		extensions = [],
-		children
+		extensions = []
 	}: {
 		theme: Component;
 		extensions?: Component[];
-		children?: Snippet;
 	} = $props();
 </script>
 
@@ -19,5 +17,3 @@
 {#each extensions as Extension}
 	<Extension />
 {/each}
-
-{@render children?.()}

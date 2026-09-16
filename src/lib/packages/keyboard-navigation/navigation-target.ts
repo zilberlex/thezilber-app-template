@@ -1,4 +1,4 @@
-import { getFocusable, isFocusable } from '$lib/packages/interactions/inspection/elements/focusability';
+import { getFocusable, isFocusable } from '$lib/packages/interactions';
 import type { KeyboardNavigationTarget, NavigationTargetId } from './types';
 
 export class KeyboardNavigationTargetImpl implements KeyboardNavigationTarget {

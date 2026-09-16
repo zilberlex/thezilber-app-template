@@ -26,13 +26,15 @@ export function getFocusable(node: HTMLElement): HTMLElement[] {
 }
 
 export function getFirstFocusable(node: HTMLElement): HTMLElement | null {
-	if (node.matches(focusableCandidateSelector) && isCandidateFocusable(node)) {
+	if (isFocusable(node)) {
 		return node;
 	}
 
-	let candidate = node.querySelector(focusableCandidateSelector) as HTMLElement;
-	if (candidate && isCandidateFocusable(candidate)) {
-		return candidate;
+	for (const candidate of node.querySelectorAll<HTMLElement>(focusableCandidateSelector)) {
+		if (isCandidateFocusable(candidate)) {
+			return candidate;
+		}
 	}
+
 	return null;
 }

@@ -1,7 +1,7 @@
-import { sleep } from '$lib/packages/core/general-js-ts/common';
-import type { PipelineSteps } from '$lib/packages/core/patterns/command/pipeline/types';
-import { errorResult } from '$lib/packages/core/patterns/result/common';
-import { pipelineStep } from '$lib/packages/core/patterns/command/pipeline/pipeline-step';
+import { sleep } from '$lib/packages/core';
+import type { PipelineSteps } from '$lib/packages/core';
+import { errorResult } from '$lib/packages/core';
+import { pipelineStep } from '$lib/packages/core';
 import type { DeleteCtx, DemoCommandDeps } from './types';
 
 const startingStep = pipelineStep<DemoCommandDeps, DeleteCtx>(

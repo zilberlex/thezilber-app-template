@@ -9,13 +9,12 @@
 	import EngineHotKeysInit from './EngineHotKeysInit.svelte';
 	import NavigationStateManager from './NavigationStateManager.svelte';
 	import EngineErrorHandler from './EngineErrorHandler.svelte';
-	import HotKeysInitialization from '$lib/packages/hotkey-module/svelt-components/HotKeysInitialization.svelte';
-	import KeyboardNavigationManager from '$lib/packages/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
+	import { HotKeysInitialization } from '$lib/packages/hotkey-module/svelte';
 	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
-	import StyleLoader from '$lib/packages/ui/svelte/StyleLoader.svelte';
-	import HackerBlueTheme from '$lib/packages/ui/style/themes/hacker-blue/svelte/HackerBlueTheme.svelte';
-	import Elements3DLoadStyles from '$lib/packages/ui/elements-3d/Elements3DLoadStyles.svelte';
-	import HackerBlueElements3DStyles from '$lib/packages/ui/style/themes/hacker-blue/integrations/elements-3d/svelte/HackerBlueElements3DStyles.svelte';
+	import { StyleLoader } from '$lib/packages/ui/svelte';
+	import { KeyboardNavigationManager } from '$lib/packages/keyboard-navigation/svelte';
+	import { HackerBlueTheme } from '$lib/packages/ui/style/themes/hacker-blue/svelte';
+	import { HackerBlueElements3DStyles } from '$lib/packages/ui/style/themes/hacker-blue/integrations/elements-3d/svelte';
 
 	let { children } = $props();
 
@@ -40,17 +39,18 @@
 
 <svelte:window onmousemove={handleMouseMove} />
 
+<StyleLoader theme={HackerBlueTheme} extensions={[HackerBlueElements3DStyles]} />
+
 <HotKeysInitialization />
 <NavigationStateManager />
 <TooltipTracker />
 
-<ForegroundLayer />
+<KeyboardNavigationManager elementInteraction={engineElementInteraction}>
+	<EngineHotKeysInit />
 
-<EngineHotKeysInit />
+	<EngineErrorHandler />
 
-<StyleLoader theme={HackerBlueTheme} extensions={[Elements3DLoadStyles, HackerBlueElements3DStyles]}>
-	<KeyboardNavigationManager elementInteraction={engineElementInteraction}>
-		<EngineErrorHandler />
-		{@render children()}
-	</KeyboardNavigationManager>
-</StyleLoader>
+	<ForegroundLayer />
+
+	{@render children()}
+</KeyboardNavigationManager>

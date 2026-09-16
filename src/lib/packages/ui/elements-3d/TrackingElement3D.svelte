@@ -6,10 +6,7 @@
 		TBackFace extends AnyRenderable = AnyRenderable
 	"
 >
-	import { createSmartHandler } from '$lib/packages/core/events/event-handling';
-
-	import { calculateTrackingRotation, type TrackingSample } from '$lib/packages/core/math/trackball-algorithms';
-	import type { AnyRenderable, ChildCapableRenderable } from '$lib/packages/svelte/composable-renderable';
+	import { calculateTrackingRotation, createSmartHandler, type TrackingSample } from '$lib/packages/core';
 	import { untrack } from 'svelte';
 
 	import Element3D from './Element3D.svelte';

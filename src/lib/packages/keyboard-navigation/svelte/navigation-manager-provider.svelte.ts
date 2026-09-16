@@ -1,4 +1,4 @@
-import { createContext, getContext, setContext } from 'svelte';
+import { createContext } from 'svelte';
 import type { NavigationManager } from '../navigation-manager';
 import type { NavigationScopeContext } from './types';
 

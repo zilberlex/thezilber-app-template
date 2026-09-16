@@ -2,7 +2,7 @@
 	import type { CollectionAppEnvironment } from '$lib/app-infrastructure/collection-app/types';
 	import { temporaryMessageState } from '$lib/engine/application/temp-messages/temporary-message-state.svelte';
 	import { appState } from '$lib/engine/state/application-state.svelte';
-	import { track } from '$lib/packages/core/svelte/track.svelte.js';
+	import { track } from '$lib/packages/core/svelte';
 	import { untrack } from 'svelte';
 
 	let { appEnv }: { appEnv: CollectionAppEnvironment<any, any> } = $props();

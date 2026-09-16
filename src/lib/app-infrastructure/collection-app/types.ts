@@ -9,8 +9,8 @@ import type {
 import type { SvelteMap } from 'svelte/reactivity';
 import type { SmartStore } from './smart-store.svelte';
 import type { SvelteTouchMap } from './touch-map.svelte';
-import type { Command } from '$lib/packages/core/patterns/command/command';
-import type { DispatcherImpl } from '$lib/packages/core/patterns/observer';
+import type { Command } from '$lib/packages/core';
+import type { DispatcherImpl } from '$lib/packages/core';
 
 export type EditMode = 'permanent' | 'draft';
 export type ItemKey = '_draft_' | string;

@@ -1,7 +1,4 @@
-import { createSmartHandler } from '$lib/packages/core/events/event-handling';
-import { toArray } from '$lib/packages/core/general-js-ts/to-array';
-import { KbKey } from '$lib/packages/core/input/keyboard-key/kb-key';
-import { kbKeys } from '$lib/packages/core/input/keyboard-key/kb-key-factories';
+import { createSmartHandler, KbKey, kbKeys, toArray } from '$lib/packages/core';
 import type { ElementInteraction } from '../../types';
 
 export function keyTriggerClick(

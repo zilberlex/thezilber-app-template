@@ -1,5 +1,5 @@
-import { createSmartHandler } from '$lib/packages/core/events/event-handling';
-import { track } from '$lib/packages/core/svelte/track.svelte.js';
+import { createSmartHandler } from '$lib/packages/core';
+import { track } from '$lib/packages/core/svelte';
 import { untrack } from 'svelte';
 
 type AutoSaverOptions = {

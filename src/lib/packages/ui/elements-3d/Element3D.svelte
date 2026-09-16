@@ -1,18 +1,17 @@
 <script
 	lang="ts"
 	generics="
-		TSurface extends ChildCapableRenderable,
-		TFace extends AnyRenderable,
-		TBackFace extends AnyRenderable
+		TSurface extends ChildCapableRenderable = ChildCapableRenderable,
+		TFace extends AnyRenderable = AnyRenderable,
+		TBackFace extends AnyRenderable = AnyRenderable
 	"
 >
+	import './elements-3d.scss';
 	import { mergeProps } from 'svelte-toolbelt';
 
 	import {
-		ComposedComponent,
 		componentRenderable,
-		type AnyRenderable,
-		type ChildCapableRenderable,
+		ComposedComponent,
 		type RenderableProps
 	} from '$lib/packages/svelte/composable-renderable';
 

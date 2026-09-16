@@ -1,5 +1,5 @@
-import { errorResult } from '$lib/packages/core/patterns/result/common';
-import { pipelineStep } from '$lib/packages/core/patterns/command/pipeline/pipeline-step';
+import { errorResult } from '$lib/packages/core';
+import { pipelineStep } from '$lib/packages/core';
 import type { CollectionAppContext, CollectionAppError, StoreSaveActionResult } from '../types';
 import type { CollectionAppCommandDeps, InsertCtx } from './types';
 
