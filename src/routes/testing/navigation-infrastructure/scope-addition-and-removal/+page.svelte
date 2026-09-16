@@ -1,6 +1,6 @@
 <script lang="ts">
-	import NavigationScope from '$lib/packages/keyboard-navigation/svelte-components/NavigationScope.svelte';
-	import KeyboardNavigationManager from '$lib/packages/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
+	import NavigationScope from '$lib/packages/keyboard-navigation/svelte/NavigationScope.svelte';
+	import KeyboardNavigationManager from '$lib/packages/keyboard-navigation/svelte/KeyboardNavigationManager.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { NavigationManager } from '$lib/packages/keyboard-navigation/navigation-manager';
 	import NavigationManagerDebugScreen from '$lib/app/debug-screens/NavigationManagerDebugScreen.svelte';

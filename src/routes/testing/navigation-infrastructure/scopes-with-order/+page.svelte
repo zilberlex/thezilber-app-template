@@ -1,12 +1,12 @@
 <script lang="ts">
-	import NavigationScope from '$lib/packages/keyboard-navigation/svelte-components/NavigationScope.svelte';
+	import NavigationScope from '$lib/packages/keyboard-navigation/svelte/NavigationScope.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { NavigationManager } from '$lib/packages/keyboard-navigation/navigation-manager';
 	import NavigationManagerDebugScreen from '$lib/app/debug-screens/NavigationManagerDebugScreen.svelte';
 	import { debugState } from '$lib/engine/state/debug-state.svelte';
 	import { NavigationKeysConfigSets } from '$lib/packages/keyboard-navigation/configurations';
 	import ToggleOnOff from '../ToggleOnOff.svelte';
-	import KeyboardNavigationManager from '$lib/packages/keyboard-navigation/svelte-components/KeyboardNavigationManager.svelte';
+	import KeyboardNavigationManager from '$lib/packages/keyboard-navigation/svelte/KeyboardNavigationManager.svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { kbKey } from '$lib/packages/core';
 

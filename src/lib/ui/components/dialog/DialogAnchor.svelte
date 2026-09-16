@@ -8,7 +8,7 @@
 	import type { FocusableElement } from '$lib/packages/keyboard-navigation/types';
 	import { safeInstanceOf } from '$lib/engine/types/type-utils';
 	import { track } from '$lib/packages/core/svelte';
-	import NavigationScope from '$lib/packages/keyboard-navigation/svelte-components/NavigationScope.svelte';
+	import NavigationScope from '$lib/packages/keyboard-navigation/svelte/NavigationScope.svelte';
 	import type { DialogController } from './dialog-contoller.svelte';
 	import { getFocusable } from '$lib/packages/interactions';
 	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';

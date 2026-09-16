@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { NavigationKeysConfigSets } from '$lib/packages/keyboard-navigation/configurations';
-	import NavigationScope from '$lib/packages/keyboard-navigation/svelte-components/NavigationScope.svelte';
+	import NavigationScope from '$lib/packages/keyboard-navigation/svelte/NavigationScope.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import ObjectViewer from '$lib/ui/components/ObjectViewer.svelte';
 
