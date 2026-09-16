@@ -30,8 +30,7 @@ import {
 } from './discovery-strategies/navigation-discovery-strategy';
 import { NavigationRefreshController } from './navigation-refresh-controller';
 import { MapList } from '$lib/packages/core';
-import type { ElementInteraction } from '$lib/packages/interactions/types';
-import { nativeElementInteraction } from '$lib/packages/interactions/triggers/elements/element-interactions';
+import { type ElementInteraction, nativeElementInteraction } from '$lib/packages/interactions';
 
 const NAVIGATION_INDEX_ATTRIBUTE = 'data-debug-navigation-index';
 

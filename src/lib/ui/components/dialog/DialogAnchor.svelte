@@ -10,7 +10,7 @@
 	import { track } from '$lib/packages/core/svelte';
 	import NavigationScope from '$lib/packages/keyboard-navigation/svelte-components/NavigationScope.svelte';
 	import type { DialogController } from './dialog-contoller.svelte';
-	import { getFocusable } from '$lib/packages/interactions/inspection/elements/focusability';
+	import { getFocusable } from '$lib/packages/interactions';
 	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
 	import { kbKey } from '$lib/packages/core';
 

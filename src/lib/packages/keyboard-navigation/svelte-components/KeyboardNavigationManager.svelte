@@ -4,8 +4,7 @@
 	import type { NavigationKeysConfig } from '../types';
 	import { browser } from '$app/environment';
 	import { setNavigationManager } from './navigation-manager-provider.svelte.js';
-	import type { ElementInteraction } from '$lib/packages/interactions/types';
-	import { nativeElementInteraction } from '$lib/packages/interactions/triggers/elements/element-interactions';
+	import { type ElementInteraction, nativeElementInteraction } from '$lib/packages/interactions';
 
 	interface Props {
 		navigationManager?: NavigationManager;

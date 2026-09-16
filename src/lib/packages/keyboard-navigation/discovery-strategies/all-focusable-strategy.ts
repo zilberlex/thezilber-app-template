@@ -1,4 +1,4 @@
-import { getFocusable } from '$lib/packages/interactions/inspection/elements/focusability';
+import { getFocusable } from '$lib/packages/interactions';
 import type { NavigationDiscoveryStrategy } from './navigation-discovery-strategy';
 
 export const allFocusableDiscoveryStrategy: NavigationDiscoveryStrategy = {

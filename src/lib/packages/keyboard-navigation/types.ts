@@ -1,5 +1,5 @@
 import type { DispatchHandler } from '$lib/packages/core';
-import type { ElementInteraction } from '$lib/packages/interactions/types';
+import type { ElementInteraction } from '$lib/packages/interactions';
 
 export type NavType = {
 	direction: 'hor-prev' | 'hor-next' | 'ver-prev' | 'ver-next' | undefined;
