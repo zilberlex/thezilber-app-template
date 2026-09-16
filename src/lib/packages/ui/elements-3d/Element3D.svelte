@@ -10,10 +10,8 @@
 	import { mergeProps } from 'svelte-toolbelt';
 
 	import {
-		ComposedComponent,
 		componentRenderable,
-		type AnyRenderable,
-		type ChildCapableRenderable,
+		ComposedComponent,
 		type RenderableProps
 	} from '$lib/packages/svelte/composable-renderable';
 

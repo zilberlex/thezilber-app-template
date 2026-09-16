@@ -1,17 +1,16 @@
-import { createSmartHandler } from '$lib/packages/core';
-import { DispatcherImpl } from '$lib/packages/core';
+import { createSmartHandler, DispatcherImpl, MapList } from '$lib/packages/core';
 import {
-	type NavigationKeysConfig,
-	type NextNodeInfo,
-	type ScopeInfra,
-	type ScopeFocusEvent,
-	type ScopeEscapeMode,
 	type KeyboardNavigationTarget,
-	type NavigationTargetId,
-	type ResolvedKeyboardNavigationTarget,
-	type NavigationScopeOptions,
 	type NavigationDiscoveryMode,
-	type NavigationTargetRestorationPoint
+	type NavigationKeysConfig,
+	type NavigationScopeOptions,
+	type NavigationTargetId,
+	type NavigationTargetRestorationPoint,
+	type NextNodeInfo,
+	type ResolvedKeyboardNavigationTarget,
+	type ScopeEscapeMode,
+	type ScopeFocusEvent,
+	type ScopeInfra
 } from './types';
 import { keyboardNavigationTarget } from './navigation-target';
 import {
@@ -29,7 +28,6 @@ import {
 	type NavigationDiscoveryStrategy
 } from './discovery-strategies/navigation-discovery-strategy';
 import { NavigationRefreshController } from './navigation-refresh-controller';
-import { MapList } from '$lib/packages/core';
 import { type ElementInteraction, nativeElementInteraction } from '$lib/packages/interactions';
 
 const NAVIGATION_INDEX_ATTRIBUTE = 'data-debug-navigation-index';

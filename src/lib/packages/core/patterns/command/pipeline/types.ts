@@ -1,5 +1,4 @@
-import type { MaybePromise, NonEmptyArray } from '$lib/packages/core';
-import type { ErrorResult, SuccessResult } from '$lib/packages/core';
+import type { ErrorResult, MaybePromise, NonEmptyArray, SuccessResult } from '$lib/packages/core';
 import type { PersistedCommand } from '../persistancy/persistent-command';
 import type { PipelineCommandFactory } from './pipeline-command-factory';
 

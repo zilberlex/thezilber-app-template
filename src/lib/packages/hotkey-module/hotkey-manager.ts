@@ -1,4 +1,4 @@
-import { OneToManyDictionary, KbKey } from '$lib/packages/core';
+import { KbKey, OneToManyDictionary } from '$lib/packages/core';
 
 type EventHandler<E extends Event> = (event: E) => void;
 

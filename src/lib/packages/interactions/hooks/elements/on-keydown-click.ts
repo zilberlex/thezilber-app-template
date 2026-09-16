@@ -1,7 +1,4 @@
-import { createSmartHandler } from '$lib/packages/core';
-import { toArray } from '$lib/packages/core';
-import { KbKey } from '$lib/packages/core';
-import { kbKeys } from '$lib/packages/core';
+import { createSmartHandler, KbKey, kbKeys, toArray } from '$lib/packages/core';
 import type { ElementInteraction } from '../../types';
 
 export function keyTriggerClick(

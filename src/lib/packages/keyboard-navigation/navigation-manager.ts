@@ -1,9 +1,7 @@
 import { hotKeysModule } from '$lib/packages/hotkey-module';
-import { OneToManyDictionary } from '$lib/packages/core';
+import { KbKey, kbKeys, OneToManyDictionary, PriorityMapList } from '$lib/packages/core';
 import { engineAssert } from '$lib/engine/error/engine-assert';
 import { type NavigationKeysConfig, type NavigationTargetRestorationPoint, type ScopeInfra } from './types';
-import { KbKey, kbKeys } from '$lib/packages/core';
-import { PriorityMapList } from '$lib/packages/core';
 import { type ElementInteraction, nativeElementInteraction } from '$lib/packages/interactions';
 import { NavigationKeyConsts } from './consts';
 import { createKeyabordNavigationEventHandler } from './handlers';
