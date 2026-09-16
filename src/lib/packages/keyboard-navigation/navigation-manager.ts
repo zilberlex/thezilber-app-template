@@ -352,6 +352,10 @@ export class NavigationManager {
 
 		let index = scopeIndex;
 
+		if (!scope.hasFocus() && scope.currentNavigationTarget) {
+			return scope;
+		}
+
 		do {
 			if (direction === 'forward') {
 				index = (index + 1) % this.#scopeEntries.size;
