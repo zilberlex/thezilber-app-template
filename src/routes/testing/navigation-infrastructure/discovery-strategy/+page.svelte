@@ -1,13 +1,13 @@
 <script lang="ts">
-	import NavigationScope from '$lib/packages/keyboard-navigation/svelte/NavigationScope.svelte';
+	import {NavigationScope} from '$lib/packages/keyboard-navigation/svelte';
 	import { onMount } from 'svelte';
 
 	import { browser } from '$app/environment';
 	import NavigatableAndUnnavigatableSwitcher from '../NavigatableAndUnnavigatableSwitcher.svelte';
-	import type { ScopeInfra } from '$lib/packages/keyboard-navigation/types';
+	import type { ScopeInfra } from '$lib/packages/keyboard-navigation';
 	import Button from '$lib/ui/basic-components/Button.svelte';
-	import { assignNavigationManagerKeys } from '$lib/packages/keyboard-navigation/svelte/sveltekit-helpers';
-	import { markForNavigation } from '$lib/packages/keyboard-navigation/svelte/attachments';
+	import { assignNavigationManagerKeys } from '$lib/packages/keyboard-navigation/svelte';
+	import { markForNavigation } from '$lib/packages/keyboard-navigation/svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { kbKey } from '$lib/packages/core';
 

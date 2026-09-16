@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { markForNavigation } from '$lib/packages/keyboard-navigation/svelte/attachments';
-	import NavigationScope from '$lib/packages/keyboard-navigation/svelte/NavigationScope.svelte';
-	import type { ScopeInfra } from '$lib/packages/keyboard-navigation/types';
+	import { markForNavigation } from '$lib/packages/keyboard-navigation/svelte';
+	import {NavigationScope} from '$lib/packages/keyboard-navigation/svelte';
+	import type { ScopeInfra } from '$lib/packages/keyboard-navigation';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 
 	let scope = $state<ScopeInfra>();

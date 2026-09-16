@@ -7,7 +7,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { tick } from 'svelte';
 	import { fadeAndSlide } from '$lib/engine/transitions/fade-and-slide';
-	import { markForNavigation } from '$lib/packages/keyboard-navigation/svelte/attachments';
+	import { markForNavigation } from '$lib/packages/keyboard-navigation/svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { kbKey } from '$lib/packages/core';
 

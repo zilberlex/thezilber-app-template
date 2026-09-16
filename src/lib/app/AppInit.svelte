@@ -10,11 +10,11 @@
 	import NavigationStateManager from './NavigationStateManager.svelte';
 	import EngineErrorHandler from './EngineErrorHandler.svelte';
 	import { HotKeysInitialization } from '$lib/packages/hotkey-module/svelte';
-	import KeyboardNavigationManager from '$lib/packages/keyboard-navigation/svelte/KeyboardNavigationManager.svelte';
 	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
 	import StyleLoader from '$lib/packages/ui/svelte/StyleLoader.svelte';
 	import HackerBlueTheme from '$lib/packages/ui/style/themes/hacker-blue/svelte/HackerBlueTheme.svelte';
 	import HackerBlueElements3DStyles from '$lib/packages/ui/style/themes/hacker-blue/integrations/elements-3d/svelte/HackerBlueElements3DStyles.svelte';
+	import { KeyboardNavigationManager } from '$lib/packages/keyboard-navigation/svelte';
 
 	let { children } = $props();
 

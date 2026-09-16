@@ -4,7 +4,7 @@
 	import { copyState } from '$lib/engine/svelte-helpers/copy-state';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
-	import NavigationScope from '$lib/packages/keyboard-navigation/svelte/NavigationScope.svelte';
+	import {NavigationScope} from '$lib/packages/keyboard-navigation/svelte';
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
 	import ItemSlot from './ItemSlot.svelte';
 	import Portal from '$lib/ui/components/portal/Portal.svelte';
@@ -12,7 +12,7 @@
 	import AnchoredRegion from '$lib/ui/components/layout/AnchoredRegion.svelte';
 	import { DemoManager } from './demo-manager.svelte';
 	import { beforeNavigate } from '$app/navigation';
-	import { NavigationKeysConfigSets } from '$lib/packages/keyboard-navigation/configurations';
+	import { NavigationKeysConfigSets } from '$lib/packages/keyboard-navigation';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { kbKey } from '$lib/packages/core';
 

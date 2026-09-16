@@ -1,6 +1,6 @@
 import { navigationStateManager } from '../state/navigation-state.svelte';
 import { safeInstanceOf } from '../types/type-utils';
-import type { FocusableElement } from '$lib/packages/keyboard-navigation/types';
+import type { FocusableElement } from '$lib/packages/keyboard-navigation';
 import { type ElementInteraction, nativeElementInteraction } from '$lib/packages/interactions';
 import { createAddTempCssClassCommand } from '$lib/packages/core';
 import type { Command } from '$lib/packages/core';
