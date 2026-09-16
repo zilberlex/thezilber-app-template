@@ -499,7 +499,7 @@ function assertNotNestedScope(scopeElement: HTMLElement): void {
 	const foundChildScope = scopeElement.querySelector(`[${NAVIGATION_SCOPE_ATTRIBUTE}]`);
 
 	engineAssert(
-		!isSelfAlreadyInitialized && !foundParentScope && !foundChildScope,
+		!(isSelfAlreadyInitialized || foundParentScope || foundChildScope),
 		'NavigationScope cannot overlap another NavigationScope or be initialized twice.',
 		{
 			scopeElement,
