@@ -4,7 +4,7 @@
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onNavigate } from '$app/navigation';
 	import { createSmartHandler } from '@svelte-ascend/core';
-	import { hotKeysModule } from '$lib/packages/hotkey-module';
+	import { hotKeysModule } from '../../../../../packages/hotkey-module/src/lib';
 	import type { FocusableElement } from '@svelte-ascend/interactions';
 	import { safeInstanceOf } from '$lib/engine/types/type-utils';
 	import { track } from '@svelte-ascend/core/svelte';

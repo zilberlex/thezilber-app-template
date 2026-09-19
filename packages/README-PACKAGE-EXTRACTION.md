@@ -2,9 +2,9 @@
 
 ## Basic Flow
 
-1. Move package to root/packages (Webstorm)
+1. Move package code to root/packages/src/lib (Webstorm)
 
-2. Update imports to "@package-name"
+2. Update imports to "@package-name" (COMMIT FIRST!)
 
 - regex for general package:
   ['"].*packages/[package-name]/src(?!.*svelte)['"]
@@ -93,17 +93,12 @@ make sure to add internal dependencies
 ### package.json MIXED SVELTE package (and pure ts)
 
 ```json
-
-package.json:
-"
 {
-	"name": "@svelte-ascend/core",
+	"name": "@svelte-ascend/hotkey-module",
 	"version": "0.1.0-alpha.0",
 	"private": true,
 	"type": "module",
-	"files": [
-		"dist"
-	],
+	"files": ["dist"],
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
@@ -111,14 +106,16 @@ package.json:
 		},
 		"./svelte": {
 			"types": "./dist/svelte/index.d.ts",
-			"svelte": "./dist/svelte/index.js",
-			"default": "./dist/svelte/index.js"
+			"svelte": "./dist/svelte/index.js"
 		}
 	},
 	"scripts": {
 		"clean": "rm -rf dist",
 		"package": "pnpm clean && svelte-package",
 		"package:watch": "svelte-package --watch"
+	},
+	"dependencies": {
+		"@svelte-ascend/core": "workspace:*"
 	},
 	"peerDependencies": {
 		"svelte": "^5.0.0"
@@ -129,15 +126,14 @@ package.json:
 		}
 	},
 	"devDependencies": {
-		"@sveltejs/package": "^2.0.0",
-		"svelte": "^5.0.0",
-		"typescript": "^5.9.0"
+		"@sveltejs/package": "^2.5.8",
+		"svelte": "^5.56.1",
+		"typescript": "^6.0.3"
 	},
 	"publishConfig": {
 		"access": "public"
 	}
 }
-"
 ```
 
 ### PACKAGE JSON PURE SVELTE

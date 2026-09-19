@@ -1,7 +1,7 @@
 import { HotkeyTooltipAttribute } from '../hotkey-tooltip/tooltip-consts';
 import type { Attachment } from 'svelte/attachments';
 import { engineElementInteraction } from './engine-interactions';
-import { assignHotkeyToClick, assignHotkeyToFocus } from '$lib/packages/hotkey-module/svelte';
+import { assignHotkeyToClick, assignHotkeyToFocus } from '../../../../packages/hotkey-module/src/lib/svelte';
 import type { KbKey } from '@svelte-ascend/core';
 
 type ButtonHotKeyOptions = {
