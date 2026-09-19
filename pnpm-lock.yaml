@@ -23,6 +23,9 @@ importers:
       '@svelte-ascend/core':
         specifier: link:../svelte-ascend/packages/core
         version: link:../svelte-ascend/packages/core
+      '@svelte-ascend/interactions':
+        specifier: link:../svelte-ascend/packages/interactions
+        version: link:../svelte-ascend/packages/interactions
       devalue:
         specifier: ^5.8.1
         version: 5.8.1

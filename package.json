@@ -54,6 +54,7 @@
 		"@fontsource-variable/jetbrains-mono": "^5.2.8",
 		"@fontsource/audiowide": "^5.2.7",
 		"@svelte-ascend/core": "link:../svelte-ascend/packages/core",
+		"@svelte-ascend/interactions": "link:../svelte-ascend/packages/interactions",
 		"devalue": "^5.8.1",
 		"dexie": "^4.4.2",
 		"runed": "^0.37.1",

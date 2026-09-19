@@ -6,6 +6,7 @@ import { createAddTempCssClassCommand } from '@svelte-ascend/core';
 import type { Command } from '@svelte-ascend/core';
 import { TTLMap } from '@svelte-ascend/core';
 import { engineHotkeysConfig } from './hotkey-config';
+
 const allClickTempCssCommands = new TTLMap<HTMLElement, Command[]>(1000 * 60 * 5);
 const BUTTON_PRESSED_DURATION = engineHotkeysConfig.buttonClickPressedCssDurationMs;
 const BUTTON_RAPID_FIRE_COOLDOWN = engineHotkeysConfig.buttonRapidFireCooldownMs;
