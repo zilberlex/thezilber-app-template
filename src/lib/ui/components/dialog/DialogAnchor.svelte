@@ -7,7 +7,7 @@
 	import { hotKeysModule } from '$lib/packages/hotkey-module';
 	import type { FocusableElement } from '$lib/packages/interactions';
 	import { safeInstanceOf } from '$lib/engine/types/type-utils';
-	import { track } from '$lib/packages/core/svelte';
+	import { track } from '@svelte-ascend/core/svelte';
 	import { NavigationScope } from '$lib/packages/keyboard-navigation/svelte';
 	import type { DialogController } from './dialog-contoller.svelte';
 	import { getFocusable } from '$lib/packages/interactions';

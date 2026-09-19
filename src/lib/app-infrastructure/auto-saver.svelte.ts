@@ -1,5 +1,5 @@
 import { createSmartHandler } from '@svelte-ascend/core';
-import { track } from '$lib/packages/core/svelte';
+import { track } from '@svelte-ascend/core/svelte';
 import { untrack } from 'svelte';
 
 type AutoSaverOptions = {

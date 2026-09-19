@@ -5,7 +5,7 @@
 
 	import { untrack, type Component } from 'svelte';
 	import type { AnyNonVoid, DynamicForm, DynamicFormField, DynamicFormSchema } from './dynamic-form-types';
-	import { track } from '$lib/packages/core/svelte';
+	import { track } from '@svelte-ascend/core/svelte';
 	import { formFromSchema, mergeForms, resolveFieldValue } from './dynamic-form';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { kbKey } from '@svelte-ascend/core';

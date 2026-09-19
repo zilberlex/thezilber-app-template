@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { track } from '$lib/packages/core/svelte';
+	import { track } from '@svelte-ascend/core/svelte';
 	import { flip, shift, type FloatingElement, type VirtualElement } from '@floating-ui/dom';
 	import { offset } from '@floating-ui/dom';
 	import { computePosition } from '@floating-ui/dom';
