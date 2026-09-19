@@ -1,0 +1,31 @@
+{
+	"name": "@svelte-ascend/interactions",
+	"version": "0.1.0-alpha.0",
+	"private": true,
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"clean": "rm -rf dist",
+		"package": "pnpm clean && svelte-package",
+		"package:watch": "svelte-package --watch"
+	},
+	"dependencies": {
+		"@svelte-ascend/core": "workspace:*"
+	},
+	"devDependencies": {
+		"@sveltejs/package": "^2.5.8",
+		"svelte": "^5.56.1",
+		"typescript": "^6.0.3"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}
