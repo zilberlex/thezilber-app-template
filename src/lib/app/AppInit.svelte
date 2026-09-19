@@ -9,7 +9,7 @@
 	import EngineHotKeysInit from './EngineHotKeysInit.svelte';
 	import NavigationStateManager from './NavigationStateManager.svelte';
 	import EngineErrorHandler from './EngineErrorHandler.svelte';
-	import { HotKeysInitialization } from '../../../packages/hotkey-module/src/lib/svelte';
+	import { HotKeysInitialization } from '@svelte-ascend/hotkey-module';
 	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
 	import { StyleLoader } from '$lib/packages/ui/svelte';
 	import { KeyboardNavigationManager } from '$lib/packages/keyboard-navigation/svelte';

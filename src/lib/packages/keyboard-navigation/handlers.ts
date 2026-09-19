@@ -1,7 +1,7 @@
 import type { KeyboardEventHandler } from 'svelte/elements';
 import { ArrowKeysArray, NavigationKeyConsts } from './consts';
 import type { NavType } from './types';
-import { createHotKeyHandler } from '../../../../packages/hotkey-module/src/lib';
+import { createHotKeyHandler } from '@svelte-ascend/hotkey-module';
 
 export function createKeyabordNavigationEventHandler(handler: KeyboardEventHandler<any>) {
 	return createHotKeyHandler(handler);
