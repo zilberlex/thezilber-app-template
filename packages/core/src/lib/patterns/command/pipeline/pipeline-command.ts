@@ -1,4 +1,4 @@
-import type { PersistableItem } from 'packages/core/src/lib/index';
+import type { PersistableItem } from '../persistancy/persistent-item';
 import { RecentItemsCache } from '../../recent-items-cache';
 import { successResult } from '../../result/common';
 import type { ErrorResult, SuccessResult } from '../../result/types';

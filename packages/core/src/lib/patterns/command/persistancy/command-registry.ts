@@ -1,4 +1,4 @@
-import type { PersistableCommand, PersistedCommand } from 'packages/core/src/lib/index';
+import type { PersistableCommand, PersistedCommand } from './persistent-command';
 import { Registry } from '../../registry';
 
 export type CommandRegistry = Registry<PersistedCommand<any>, PersistableCommand<any>>;

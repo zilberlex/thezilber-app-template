@@ -1,4 +1,4 @@
-import type { KeyLike } from 'packages/core/src/lib/index';
+import type { KeyLike } from '../../patterns/key';
 import type { KbKeyModifier } from './types';
 
 export const MODIFIER_INDEX: Record<KbKeyModifier, number> = {

@@ -1,4 +1,5 @@
-import type { ErrorResult, MaybePromise, NonEmptyArray, SuccessResult } from 'packages/core/src/lib/index';
+import type { MaybePromise, NonEmptyArray } from '../../../general-js-ts/typescript/type-helpers';
+import type { ErrorResult, SuccessResult } from '../../result/types';
 import type { PersistedCommand } from '../persistancy/persistent-command';
 import type { PipelineCommandFactory } from './pipeline-command-factory';
 

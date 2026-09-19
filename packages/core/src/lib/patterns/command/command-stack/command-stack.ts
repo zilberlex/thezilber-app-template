@@ -1,5 +1,7 @@
-import type { MaybePromise, MaybeResult } from 'packages/core/src/lib/index';
-import { isErrorResult, removeFromArrayLast } from 'packages/core/src/lib/index';
+import type { MaybePromise } from '../../../general-js-ts/typescript/type-helpers';
+import type { MaybeResult } from '../../result/types';
+import { removeFromArrayLast } from '../../../general-js-ts/array-remove-by-item';
+import { isErrorResult } from '../../result/common';
 import type { Command } from '../command';
 import type { CommandRegistry } from '../persistancy/command-registry';
 import type { PersistedCommand } from '../persistancy/persistent-command';
