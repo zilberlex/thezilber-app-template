@@ -29,6 +29,7 @@ vite.config.ts.timestamp-*
 # Package creation
 /packages/*/.svelte-kit/
 /packages/*/dist/
+/packages/*/*.tgz
 
 
 # webstorm bs
