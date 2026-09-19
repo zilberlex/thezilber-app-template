@@ -1,0 +1,26 @@
+{
+	"name": "@svelte-ascend/core",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"package": "svelte-package"
+	},
+	"peerDependencies": {
+		"svelte": "^5.0.0"
+	},
+	"devDependencies": {
+		"@sveltejs/package": "^2.0.0",
+		"svelte": "^5.0.0",
+		"typescript": "^5.9.0"
+	}
+}

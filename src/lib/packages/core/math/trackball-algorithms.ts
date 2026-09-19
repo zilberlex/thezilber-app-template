@@ -1,4 +1,4 @@
-import type { EasingFunction } from 'svelte/transition';
+export type RadialEasingFunction = (t: number) => number;
 
 import { clamp, smoothstep } from './math-utils';
 
@@ -116,7 +116,7 @@ export type RadialModeOptions = Readonly<{
 	/**
 	 * Maps normalized pointer distance from 0..1 to tilt strength 0..1.
 	 */
-	easing?: EasingFunction;
+	easing?: RadialEasingFunction;
 }>;
 
 export type VirtualTrackballModeOptions = Readonly<{
@@ -184,7 +184,7 @@ type ResolvedModeOptionsByMode = {
 		radiusScaleX: number;
 		radiusScaleY: number;
 		maxTilt: number;
-		easing: EasingFunction;
+		easing: RadialEasingFunction;
 	}>;
 
 	'sphere-hyperbolic': Readonly<{
