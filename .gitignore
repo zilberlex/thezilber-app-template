@@ -26,6 +26,10 @@ vite.config.ts.timestamp-*
 # Need to use force publish
 /docs
 
+# Package creation
+/packages/*/.svelte-kit/
+/packages/*/dist/
+
 
 # webstorm bs
 .idea/
