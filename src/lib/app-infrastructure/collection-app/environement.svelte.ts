@@ -1,4 +1,4 @@
-import { getErrorMessage } from '$lib/packages/core';
+import { getErrorMessage } from '@svelte-ascend/core';
 import { untrack } from 'svelte';
 import { createCollectionAppContextManager, ctxEquals } from './context-manager.svelte';
 import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';

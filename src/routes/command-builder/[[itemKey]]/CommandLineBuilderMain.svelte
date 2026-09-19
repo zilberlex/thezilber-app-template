@@ -13,7 +13,7 @@
 		createHotKeyTriggerClickAttachment,
 		createHotKeyTriggerFocusAttachment
 	} from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey, kbKeys } from '$lib/packages/core';
+	import { kbKey, kbKeys } from '@svelte-ascend/core';
 
 	let { cbAppEnv = $bindable(), ...rest }: { cbAppEnv: CbAppEnv } = $props();
 

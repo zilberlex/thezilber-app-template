@@ -1,4 +1,4 @@
-import type { DispatchHandler } from '$lib/packages/core';
+import type { DispatchHandler } from '@svelte-ascend/core';
 import type { ElementInteraction } from '$lib/packages/interactions';
 
 export type NavType = {

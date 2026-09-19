@@ -1,4 +1,4 @@
-import { kbKey } from '$lib/packages/core';
+import { kbKey } from '@svelte-ascend/core';
 
 const keys = [
 	kbKey('s', 'ctrl|meta'),

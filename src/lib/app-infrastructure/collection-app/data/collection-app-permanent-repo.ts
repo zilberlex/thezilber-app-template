@@ -15,7 +15,7 @@ import type {
 } from './types';
 import type { ActionResult, CollectionAppContext, CollectionAppError } from '../types';
 import { getNextSlug, slugify } from './slugify';
-import { getErrorMessage } from '$lib/packages/core';
+import { getErrorMessage } from '@svelte-ascend/core';
 
 class CollectionAppDexieRepo<TData extends Omit<object, 'recordId'>, TProjection extends DataProjection> extends Dexie {
 	data!: EntityTable<DbItem<TData>, 'recordId'>;

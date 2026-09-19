@@ -14,7 +14,7 @@
 	import { beforeNavigate } from '$app/navigation';
 	import { NavigationKeysConfigSets } from '$lib/packages/keyboard-navigation';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey } from '$lib/packages/core';
+	import { kbKey } from '@svelte-ascend/core';
 
 	let inputKey = $state('');
 	let inputValue = $state('');

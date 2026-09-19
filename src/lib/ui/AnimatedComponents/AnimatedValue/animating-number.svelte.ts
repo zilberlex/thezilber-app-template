@@ -1,4 +1,4 @@
-import { floorTo } from '$lib/packages/core';
+import { floorTo } from '@svelte-ascend/core';
 import {
 	createAnimationControlTween,
 	type TBasedAnimationParams,

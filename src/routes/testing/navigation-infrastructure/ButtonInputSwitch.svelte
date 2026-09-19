@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { KbKey } from '$lib/packages/core';
-	import { kbKey } from '$lib/packages/core';
+	import { KbKey } from '@svelte-ascend/core';
+	import { kbKey } from '@svelte-ascend/core';
 	import { track } from '$lib/packages/core/svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 

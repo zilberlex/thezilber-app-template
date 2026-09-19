@@ -1,5 +1,5 @@
 import type { AnimationTween } from '../animation.types';
-import { cmpDigitAtPos, indexOfMsdDiff, segmentedRemap, type RangeMaps } from '$lib/packages/core';
+import { cmpDigitAtPos, indexOfMsdDiff, segmentedRemap, type RangeMaps } from '@svelte-ascend/core';
 
 export const __test__ = { makeMapRangesTicksBased };
 

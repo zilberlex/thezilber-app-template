@@ -5,7 +5,7 @@
 	import NavigatableAndUnnavigatableSwitcher from '../NavigatableAndUnnavigatableSwitcher.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey } from '$lib/packages/core';
+	import { kbKey } from '@svelte-ascend/core';
 
 	import type { ScopeInfra } from '$lib/packages/keyboard-navigation';
 	import {

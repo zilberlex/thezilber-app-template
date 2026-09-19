@@ -11,4 +11,4 @@ export { nextFrame } from './next-frame';
 
 export { toArray } from './to-array';
 
-export type { NonEmptyArray, MaybePromise } from './typescript/';
+export type { NonEmptyArray, MaybePromise } from './typescript';

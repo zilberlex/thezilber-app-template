@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import NavigatableAndUnnavigatableSwitcher from '../NavigatableAndUnnavigatableSwitcher.svelte';
 	import { browser } from '$app/environment';
-	import { kbKey } from '$lib/packages/core';
+	import { kbKey } from '@svelte-ascend/core';
 	import type { ScopeInfra } from '$lib/packages/keyboard-navigation';
 	import { assignNavigationManagerKeys, NavigationScope } from '$lib/packages/keyboard-navigation/svelte';
 

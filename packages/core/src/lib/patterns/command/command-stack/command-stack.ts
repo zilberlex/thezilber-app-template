@@ -1,5 +1,5 @@
-import type { MaybePromise, MaybeResult } from '$lib/packages/core';
-import { isErrorResult, removeFromArrayLast } from '$lib/packages/core';
+import type { MaybePromise, MaybeResult } from 'packages/core/src/lib/index';
+import { isErrorResult, removeFromArrayLast } from 'packages/core/src/lib/index';
 import type { Command } from '../command';
 import type { CommandRegistry } from '../persistancy/command-registry';
 import type { PersistedCommand } from '../persistancy/persistent-command';

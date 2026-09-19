@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { hotKeysModule } from '../hotkey-manager';
-	import type { KbKey } from '$lib/packages/core';
+	import type { KbKey } from '@svelte-ascend/core';
 
 	type Props = {
 		preventedKeys: KbKey[];

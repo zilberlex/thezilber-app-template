@@ -1,4 +1,4 @@
-import { KbKey, OneToManyDictionary } from '$lib/packages/core';
+import { KbKey, OneToManyDictionary } from '@svelte-ascend/core';
 
 type EventHandler<E extends Event> = (event: E) => void;
 

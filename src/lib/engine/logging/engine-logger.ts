@@ -1,4 +1,4 @@
-import { DispatcherImpl, type Dispatcher, type DispatchHandler } from '$lib/packages/core';
+import { DispatcherImpl, type Dispatcher, type DispatchHandler } from '@svelte-ascend/core';
 
 export type LogSeverity = 'debug' | 'info' | 'warn' | 'error';
 export type LogContext = Record<string, unknown> & { scope: string };

@@ -1,4 +1,4 @@
-import type { Dispatcher } from '$lib/packages/core';
+import type { Dispatcher } from '@svelte-ascend/core';
 import { SvelteMap } from 'svelte/reactivity';
 import type { CollectionAppDataState, CollectionAppContextManager, WithOpId } from './types';
 

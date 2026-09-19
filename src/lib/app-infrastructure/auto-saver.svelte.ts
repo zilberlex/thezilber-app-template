@@ -1,4 +1,4 @@
-import { createSmartHandler } from '$lib/packages/core';
+import { createSmartHandler } from '@svelte-ascend/core';
 import { track } from '$lib/packages/core/svelte';
 import { untrack } from 'svelte';
 

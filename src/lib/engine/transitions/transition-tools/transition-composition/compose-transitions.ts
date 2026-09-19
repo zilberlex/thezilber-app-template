@@ -2,7 +2,7 @@ import { linear } from 'svelte/easing';
 import { type EasingFunction, type TransitionConfig } from 'svelte/transition';
 import type { ComposedTransitionParams } from './compose-transitions-common';
 import type { Transition, TransitionParamsCommon } from '../transitions-common';
-import { inverseLerp } from '$lib/packages/core';
+import { inverseLerp } from '@svelte-ascend/core';
 
 type TransitionParamsOf<T> = T extends Transition<infer P> ? P : never;
 

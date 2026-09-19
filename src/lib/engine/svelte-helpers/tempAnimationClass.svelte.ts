@@ -1,4 +1,4 @@
-import { sleep } from '$lib/packages/core';
+import { sleep } from '@svelte-ascend/core';
 
 export function temporaryAnimationClass(classTimeMs: number) {
 	let active = $state(false);

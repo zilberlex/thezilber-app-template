@@ -1,5 +1,5 @@
 import type { KeyboardEventHandler } from 'svelte/elements';
-import { createSmartHandler, KbKey } from '$lib/packages/core';
+import { createSmartHandler, KbKey } from '@svelte-ascend/core';
 import type { ElementInteraction } from '$lib/packages/interactions';
 import { NodesWhichTakePriorityOverSoftHotKeys } from './consts';
 import type { HotKeyToTriggerClickOptions, HotKeyToTriggerOptions } from './types';

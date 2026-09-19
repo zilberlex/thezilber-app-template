@@ -4,7 +4,7 @@
 	import { debugState } from '$lib/engine/state/debug-state.svelte';
 	import ToggleOnOff from '../ToggleOnOff.svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey } from '$lib/packages/core';
+	import { kbKey } from '@svelte-ascend/core';
 
 	import { NavigationKeysConfigSets, NavigationManager } from '$lib/packages/keyboard-navigation';
 	import { KeyboardNavigationManager, NavigationScope } from '$lib/packages/keyboard-navigation/svelte';

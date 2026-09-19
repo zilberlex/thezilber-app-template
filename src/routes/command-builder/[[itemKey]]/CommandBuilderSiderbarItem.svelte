@@ -9,7 +9,7 @@
 	import { fadeAndSlide } from '$lib/engine/transitions/fade-and-slide';
 	import { markForNavigation } from '$lib/packages/keyboard-navigation/svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey } from '$lib/packages/core';
+	import { kbKey } from '@svelte-ascend/core';
 
 	type Props = HTMLAttributes<HTMLDivElement> & {
 		cbAppEnv: CbAppEnv;

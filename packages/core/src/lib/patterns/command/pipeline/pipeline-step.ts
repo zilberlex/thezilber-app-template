@@ -1,4 +1,4 @@
-import type { MaybePromise } from '$lib/packages/core';
+import type { MaybePromise } from 'packages/core/src/lib/index';
 import { successResult } from '../../result/common';
 import type { ErrorResult, ResultLike, SuccessResult } from '../../result/types';
 import type { PipelineStep } from './types';

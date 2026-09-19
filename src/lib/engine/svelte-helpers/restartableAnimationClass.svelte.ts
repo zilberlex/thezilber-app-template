@@ -1,5 +1,5 @@
 // restartClassAnimation.svelte.ts
-import { nextFrame } from '$lib/packages/core';
+import { nextFrame } from '@svelte-ascend/core';
 
 export function restartableAnimationClass() {
 	let active = $state(false);

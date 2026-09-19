@@ -1,4 +1,4 @@
-import { createSmartHandler, DispatcherImpl, MapList } from '$lib/packages/core';
+import { createSmartHandler, DispatcherImpl, MapList } from '@svelte-ascend/core';
 import {
 	type KeyboardNavigationTarget,
 	type NavigationDiscoveryMode,

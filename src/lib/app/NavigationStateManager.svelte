@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createSmartHandler } from '$lib/packages/core';
+	import { createSmartHandler } from '@svelte-ascend/core';
 	import { navigationStateManager } from '$lib/engine/state/navigation-state.svelte';
 
 	let onmousemove = createSmartHandler(

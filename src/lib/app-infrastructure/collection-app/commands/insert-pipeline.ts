@@ -1,5 +1,5 @@
-import { errorResult } from '$lib/packages/core';
-import { pipelineStep } from '$lib/packages/core';
+import { errorResult } from '@svelte-ascend/core';
+import { pipelineStep } from '@svelte-ascend/core';
 import type { CollectionAppContext, CollectionAppError, StoreSaveActionResult } from '../types';
 import type { CollectionAppCommandDeps, InsertCtx } from './types';
 

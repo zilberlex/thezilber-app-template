@@ -57,6 +57,7 @@
 		"dexie": "^4.4.2",
 		"runed": "^0.37.1",
 		"sass": "^1.99.0",
-		"svelte-toolbelt": "^0.10.6"
+		"svelte-toolbelt": "^0.10.6",
+		"@svelte-ascend/core": "workspace:*"
 	}
 }

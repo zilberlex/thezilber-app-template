@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { removeFromArrayPredicate } from '$lib/packages/core';
+	import { removeFromArrayPredicate } from '@svelte-ascend/core';
 	import { composeTransitions } from '$lib/engine/transitions/transition-tools/transition-composition/compose-transitions';
 	import { typewriter } from '$lib/engine/transitions/typewriter';
 	import { cubicIn, cubicOut, linear, sineOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 	import ScrollIndicator from '../ui-tricks/ScrollIndicator.svelte';
 	import type { EngineLogger, LogContext, LogEvent, LogSeverity } from '$lib/engine/logging/engine-logger';
-	import { ActionQueue } from '$lib/packages/core';
+	import { ActionQueue } from '@svelte-ascend/core';
 
 	type LogLine = {
 		severity: LogSeverity;
