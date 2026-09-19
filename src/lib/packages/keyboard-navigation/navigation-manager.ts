@@ -2,7 +2,7 @@ import { hotKeysModule } from '$lib/packages/hotkey-module';
 import { KbKey, kbKeys, OneToManyDictionary, PriorityMapList } from '@svelte-ascend/core';
 import { engineAssert } from '$lib/engine/error/engine-assert';
 import { type NavigationKeysConfig, type NavigationTargetRestorationPoint, type ScopeInfra } from './types';
-import { type ElementInteraction, nativeElementInteraction } from '$lib/packages/interactions';
+import { type ElementInteraction, nativeElementInteraction } from '@svelte-ascend/interactions';
 import { NavigationKeyConsts } from './consts';
 import { createKeyabordNavigationEventHandler } from './handlers';
 

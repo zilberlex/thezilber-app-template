@@ -1,6 +1,6 @@
 import type { Attachment } from 'svelte/attachments';
 import { hotKeysModule } from '../hotkey-manager';
-import type { ElementInteraction } from '$lib/packages/interactions';
+import type { ElementInteraction } from '@svelte-ascend/interactions';
 import { createHotKeyTriggerClickHandler, createHotKeyTriggerFocusHandler } from '../hotkey-handlers';
 import type { KbKey } from '@svelte-ascend/core';
 import type { HotKeyToTriggerClickOptions, HotKeyToTriggerOptions } from '../types';

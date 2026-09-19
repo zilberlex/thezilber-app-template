@@ -1,4 +1,4 @@
-import { getFocusable, isFocusable } from '$lib/packages/interactions';
+import { getFocusable, isFocusable } from '@svelte-ascend/interactions';
 import type { KeyboardNavigationTarget, NavigationTargetId } from './types';
 
 export class KeyboardNavigationTargetImpl implements KeyboardNavigationTarget {

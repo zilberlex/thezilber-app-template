@@ -1,5 +1,5 @@
 import type { DispatchHandler } from '@svelte-ascend/core';
-import type { ElementInteraction } from '$lib/packages/interactions';
+import type { ElementInteraction } from '@svelte-ascend/interactions';
 
 export type NavType = {
 	direction: 'hor-prev' | 'hor-next' | 'ver-prev' | 'ver-next' | undefined;

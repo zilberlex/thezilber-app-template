@@ -1,7 +1,7 @@
 import { navigationStateManager } from '../state/navigation-state.svelte';
 import { safeInstanceOf } from '../types/type-utils';
-import type { FocusableElement } from '$lib/packages/interactions';
-import { type ElementInteraction, nativeElementInteraction } from '$lib/packages/interactions';
+import type { FocusableElement } from '@svelte-ascend/interactions';
+import { type ElementInteraction, nativeElementInteraction } from '@svelte-ascend/interactions';
 import { createAddTempCssClassCommand } from '@svelte-ascend/core';
 import type { Command } from '@svelte-ascend/core';
 import { TTLMap } from '@svelte-ascend/core';

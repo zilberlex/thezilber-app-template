@@ -28,7 +28,7 @@ import {
 	type NavigationDiscoveryStrategy
 } from './discovery-strategies/navigation-discovery-strategy';
 import { NavigationRefreshController } from './navigation-refresh-controller';
-import { type ElementInteraction, nativeElementInteraction } from '$lib/packages/interactions';
+import { type ElementInteraction, nativeElementInteraction } from '@svelte-ascend/interactions';
 
 const NAVIGATION_INDEX_ATTRIBUTE = 'data-debug-navigation-index';
 
