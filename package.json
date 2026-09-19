@@ -53,11 +53,11 @@
 		"@floating-ui/dom": "^1.7.6",
 		"@fontsource-variable/jetbrains-mono": "^5.2.8",
 		"@fontsource/audiowide": "^5.2.7",
+		"@svelte-ascend/core": "file:packages/core/svelte-ascend-core-0.1.0-alpha.0.tgz",
 		"devalue": "^5.8.1",
 		"dexie": "^4.4.2",
 		"runed": "^0.37.1",
 		"sass": "^1.99.0",
-		"svelte-toolbelt": "^0.10.6",
-		"@svelte-ascend/core": "workspace:*"
+		"svelte-toolbelt": "^0.10.6"
 	}
 }
