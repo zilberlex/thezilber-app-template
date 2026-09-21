@@ -56,6 +56,7 @@
 		"@svelte-ascend/core": "link:../svelte-ascend/packages/core",
 		"@svelte-ascend/interactions": "link:../svelte-ascend/packages/interactions",
 		"@svelte-ascend/hotkey-module": "link:../svelte-ascend/packages/hotkey-module",
+		"@svelte-ascend/keyboard-navigation": "link:../svelte-ascend/packages/keyboard-navigation",
 		"devalue": "^5.8.1",
 		"dexie": "^4.4.2",
 		"runed": "^0.37.1",

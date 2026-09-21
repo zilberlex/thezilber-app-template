@@ -2,8 +2,8 @@
 	import HamburgerIcon from '$lib/assets/icons/HamburgerIcon.svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { kbKey } from '@svelte-ascend/core';
-	import { NavigationKeysConfigSets } from '$lib/packages/keyboard-navigation';
-	import {NavigationScope} from '$lib/packages/keyboard-navigation/svelte';
+	import { NavigationKeysConfigSets } from '../../../../../packages/keyboard-navigation';
+	import {NavigationScope} from '../../../../../packages/keyboard-navigation/svelte';
 	import IconButton from '$lib/ui/basic-components/IconButton.svelte';
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';

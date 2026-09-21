@@ -5,12 +5,12 @@
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { kbKey } from '@svelte-ascend/core';
 
-	import { NavigationKeysConfigSets, NavigationManager } from '$lib/packages/keyboard-navigation';
+	import { NavigationKeysConfigSets, NavigationManager } from '../../../../../packages/keyboard-navigation';
 	import {
 		KeyboardNavigationManager,
 		markForNavigation,
 		NavigationScope
-	} from '$lib/packages/keyboard-navigation/svelte';
+	} from '../../../../../packages/keyboard-navigation/svelte';
 	import NavigationManagerDebugScreen from '$lib/app/debug-screens/NavigationManagerDebugScreen.svelte';
 
 	let showScopeA = $state(true);

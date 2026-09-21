@@ -1,6 +1,6 @@
 <script lang="ts">
 	import NavigatableAndUnnavigatableSwitcher from '../NavigatableAndUnnavigatableSwitcher.svelte';
-	import { markForNavigation, NavigationScope } from '$lib/packages/keyboard-navigation/svelte';
+	import { markForNavigation, NavigationScope } from '../../../../../packages/keyboard-navigation/svelte';
 </script>
 
 <main class="ly-center">

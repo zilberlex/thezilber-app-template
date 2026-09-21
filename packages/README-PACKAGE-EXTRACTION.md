@@ -83,16 +83,21 @@ make sure to add internal dependencies
 	},
 	"scripts": {
 		"clean": "rm -rf dist",
-		"package": "pnpm clean && svelte-package",
-		"package:watch": "svelte-package --watch"
+		"check:ts": "tsc --noEmit -p ./tsconfig.json",
+		"check:svelte": "svelte-check --tsconfig ./tsconfig.json --incremental --diagnostic-sources \"svelte,css\"",
+		"check": "pnpm check:ts && pnpm check:svelte",
+		"package": "pnpm clean && svelte-package --tsconfig ./tsconfig.json",
+		"package:watch": "svelte-package --tsconfig ./tsconfig.json --watch",
+		"prepack": "pnpm check && pnpm package"
 	},
 	"dependencies": {
 		"@svelte-ascend/core": "workspace:*"
 	},
 	"devDependencies": {
-		"@sveltejs/package": "^2.5.8",
-		"svelte": "^5.56.1",
-		"typescript": "^6.0.3"
+		"@sveltejs/package": "catalog:",
+		"svelte": "catalog:",
+		"svelte-check": "catalog:",
+		"typescript": "catalog:"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -116,19 +121,26 @@ make sure to add internal dependencies
 		},
 		"./svelte": {
 			"types": "./dist/svelte/index.d.ts",
-			"svelte": "./dist/svelte/index.js"
+			"svelte": "./dist/svelte/index.js",
+			"default": "./dist/svelte/index.js"
 		}
 	},
 	"scripts": {
 		"clean": "rm -rf dist",
-		"package": "pnpm clean && svelte-package",
-		"package:watch": "svelte-package --watch"
+		"check:ts": "tsc --noEmit -p ./tsconfig.json",
+		"check:svelte": "svelte-check --tsconfig ./tsconfig.json --incremental --diagnostic-sources \"svelte,css\"",
+		"check": "pnpm check:ts && pnpm check:svelte",
+		"package": "pnpm clean && svelte-package --tsconfig ./tsconfig.json",
+		"package:watch": "svelte-package --tsconfig ./tsconfig.json --watch",
+		"prepack": "pnpm check && pnpm package"
 	},
 	"dependencies": {
-		"@svelte-ascend/core": "workspace:*"
+		"@svelte-ascend/core": "workspace:*",
+		"@svelte-ascend/interactions": "workspace:*",
+		"esm-env": "^1.2.2"
 	},
 	"peerDependencies": {
-		"svelte": "^5.0.0"
+		"svelte": "catalog:"
 	},
 	"peerDependenciesMeta": {
 		"svelte": {
@@ -136,9 +148,10 @@ make sure to add internal dependencies
 		}
 	},
 	"devDependencies": {
-		"@sveltejs/package": "^2.5.8",
-		"svelte": "^5.56.1",
-		"typescript": "^6.0.3"
+		"@sveltejs/package": "catalog:",
+		"svelte": "catalog:",
+		"svelte-check": "catalog:",
+		"typescript": "catalog:"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -168,8 +181,12 @@ make sure to add internal dependencies
 	},
 	"scripts": {
 		"clean": "rm -rf dist",
-		"package": "pnpm clean && svelte-package",
-		"package:watch": "svelte-package --watch"
+		"check:ts": "tsc --noEmit -p ./tsconfig.json",
+		"check:svelte": "svelte-check --tsconfig ./tsconfig.json --incremental --diagnostic-sources \"svelte,css\"",
+		"check": "pnpm check:ts && pnpm check:svelte",
+		"package": "pnpm clean && svelte-package --tsconfig ./tsconfig.json",
+		"package:watch": "svelte-package --tsconfig ./tsconfig.json --watch",
+		"prepack": "pnpm check && pnpm package"
 	},
 	"dependencies": {
 		"@svelte-ascend/core": "workspace:*"
@@ -183,9 +200,10 @@ make sure to add internal dependencies
 		}
 	},
 	"devDependencies": {
-		"@sveltejs/package": "^2.5.8",
-		"svelte": "^5.56.1",
-		"typescript": "^6.0.3"
+		"@sveltejs/package": "catalog:",
+		"svelte": "catalog:",
+		"svelte-check": "catalog:",
+		"typescript": "catalog:"
 	},
 	"publishConfig": {
 		"access": "public"

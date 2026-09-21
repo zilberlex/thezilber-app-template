@@ -6,8 +6,8 @@
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { kbKey } from '@svelte-ascend/core';
 
-	import { NavigationKeysConfigSets, NavigationManager } from '$lib/packages/keyboard-navigation';
-	import { KeyboardNavigationManager, NavigationScope } from '$lib/packages/keyboard-navigation/svelte';
+	import { NavigationKeysConfigSets, NavigationManager } from '../../../../../packages/keyboard-navigation';
+	import { KeyboardNavigationManager, NavigationScope } from '../../../../../packages/keyboard-navigation/svelte';
 
 	let showScopeA = $state(true);
 	let showScopeB = $state(true);

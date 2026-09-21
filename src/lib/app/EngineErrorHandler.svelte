@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { on } from 'svelte/events';
 
-	import { EngineError, reportEngineError } from '$lib/engine/error/engine-error';
+	import { EngineError, reportEngineError } from '@svelte-ascend/core';
 
 	function handleError(event: ErrorEvent) {
 		if (event.error instanceof EngineError) {

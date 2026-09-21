@@ -7,12 +7,12 @@
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { kbKey } from '@svelte-ascend/core';
 
-	import type { ScopeInfra } from '$lib/packages/keyboard-navigation';
+	import type { ScopeInfra } from '../../../../../packages/keyboard-navigation';
 	import {
 		assignNavigationManagerKeys,
 		markForNavigation,
 		NavigationScope
-	} from '$lib/packages/keyboard-navigation/svelte';
+	} from '../../../../../packages/keyboard-navigation/svelte';
 
 	onMount(() => {
 		if (browser) {
