@@ -15,7 +15,17 @@
   - '@svelte-ascend/[package-name]/svelte'
 
 3. add package.json
-4. make sure internal package imports are relational.
+4. fixing package imports
+
+- make sure internal package imports are relational.
+- make sure package imports use .js in the end, for folders use /index.js (js, not ts, esm standard for modern packages).
+- regexes for help:
+  - (import._ )'([^@]._(?<!\.js)(?<!\.svelte))';
+  - with the above regex you can do the replacement -
+    - $1'$2.js';
+  - works only on direct file imports.
+  - internal package imports addressing whole folders need to address manually
+
 5. from svelte-ascend root:
 
 - pnpm install
