@@ -1,0 +1,21 @@
+.keyboard-navigation .navigation-scope {
+	position: relative;
+
+	.outline {
+		position: absolute;
+		z-index: 500;
+		inset: 0;
+
+		pointer-events: none;
+	}
+
+	&:focus-within .outline {
+		animation: focus-ring-in 500ms ease-out 0ms 1 forwards;
+	}
+}
+
+.navigation-scope {
+	&.error {
+		background-color: var(--cl-error, red);
+	}
+}

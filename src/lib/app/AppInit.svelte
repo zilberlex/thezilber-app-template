@@ -15,6 +15,7 @@
 	import { KeyboardNavigationManager } from '@svelte-ascend/keyboard-navigation/svelte';
 	import { HackerBlueTheme } from '$lib/packages/ui/style/themes/hacker-blue/svelte';
 	import { HackerBlueElements3DStyles } from '$lib/packages/ui/style/themes/hacker-blue/integrations/elements-3d/svelte';
+	import { HackerBlueKeyboardNavigationStyles } from '$lib/packages/ui/style/themes/hacker-blue/integrations/keyboard-navigation/svelte';
 
 	let { children } = $props();
 
@@ -39,7 +40,7 @@
 
 <svelte:window onmousemove={handleMouseMove} />
 
-<StyleLoader theme={HackerBlueTheme} extensions={[HackerBlueElements3DStyles]} />
+<StyleLoader theme={HackerBlueTheme} extensions={[HackerBlueElements3DStyles, HackerBlueKeyboardNavigationStyles]} />
 
 <HotKeysInitialization />
 <NavigationStateManager />
