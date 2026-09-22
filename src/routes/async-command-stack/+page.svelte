@@ -4,7 +4,7 @@
 	import { copyState } from '$lib/engine/svelte-helpers/copy-state';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
-	import {NavigationScope} from '../../../packages/keyboard-navigation/svelte';
+	import {KeyboardNavigationScope} from '@svelte-ascend/keyboard-navigation/svelte';
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
 	import ItemSlot from './ItemSlot.svelte';
 	import Portal from '$lib/ui/components/portal/Portal.svelte';
@@ -12,7 +12,7 @@
 	import AnchoredRegion from '$lib/ui/components/layout/AnchoredRegion.svelte';
 	import { DemoManager } from './demo-manager.svelte';
 	import { beforeNavigate } from '$app/navigation';
-	import { NavigationKeysConfigSets } from '../../../packages/keyboard-navigation';
+	import { NavigationKeysConfigSets } from '@svelte-ascend/keyboard-navigation';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { kbKey } from '@svelte-ascend/core';
 
@@ -81,7 +81,7 @@
 </script>
 
 <div class="demo ly-center">
-	<NavigationScope scopeId="asyncApp" navigationKeys={NavigationKeysConfigSets.Vertical}>
+	<KeyboardNavigationScope scopeId="asyncApp" navigationKeys={NavigationKeysConfigSets.Vertical}>
 		<div class="main">
 			<div class="remote storage-display content-surface">
 				{#each demoAppManager.farAwayStorage.entries() as [key, value] (key)}
@@ -137,7 +137,7 @@
 				</Button>
 			</form>
 		</div>
-	</NavigationScope>
+	</KeyboardNavigationScope>
 </div>
 
 <Portal targetLayer="application-layer">

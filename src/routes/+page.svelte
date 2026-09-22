@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { NavigationKeysConfigSets } from '../../packages/keyboard-navigation';
-	import {NavigationScope} from '../../packages/keyboard-navigation/svelte';
+	import { NavigationKeysConfigSets } from '@svelte-ascend/keyboard-navigation';
+	import {KeyboardNavigationScope} from '@svelte-ascend/keyboard-navigation/svelte';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { getRoutes } from '$lib/scripts/get-routes';
 	import LinkTree from '$lib/ui/components/misc/LinkTree.svelte';
@@ -9,6 +9,6 @@
 	appState.pageContext.title = 'Application-List';
 </script>
 
-<NavigationScope navigationKeys={NavigationKeysConfigSets.Vertical} scopeId="link-tree">
+<KeyboardNavigationScope navigationKeys={NavigationKeysConfigSets.Vertical} scopeId="link-tree">
 	<LinkTree urls={m} />
-</NavigationScope>
+</KeyboardNavigationScope>

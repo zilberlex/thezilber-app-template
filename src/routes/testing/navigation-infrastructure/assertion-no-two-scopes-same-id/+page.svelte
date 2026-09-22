@@ -1,19 +1,19 @@
 <script>
-	import {NavigationScope} from '../../../../../packages/keyboard-navigation/svelte';
+	import {KeyboardNavigationScope} from '@svelte-ascend/keyboard-navigation/svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 </script>
 
 <main class="ly-center">
 	<div>
-		<NavigationScope scopeId="same">
+		<KeyboardNavigationScope scopeId="same">
 			1
 			<Button>1</Button>
 			<Button>2</Button>
-		</NavigationScope>
-		<NavigationScope scopeId="same">
+		</KeyboardNavigationScope>
+		<KeyboardNavigationScope scopeId="same">
 			2
 			<Button>1</Button>
 			<Button>2</Button>
-		</NavigationScope>
+		</KeyboardNavigationScope>
 	</div>
 </main>

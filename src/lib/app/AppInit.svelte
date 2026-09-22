@@ -12,7 +12,7 @@
 	import { HotKeysInitialization } from '@svelte-ascend/hotkey-module/svelte';
 	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
 	import { StyleLoader } from '$lib/packages/ui/svelte';
-	import { KeyboardNavigationManager } from '../../../packages/keyboard-navigation/svelte';
+	import { KeyboardNavigationManager } from '@svelte-ascend/keyboard-navigation/svelte';
 	import { HackerBlueTheme } from '$lib/packages/ui/style/themes/hacker-blue/svelte';
 	import { HackerBlueElements3DStyles } from '$lib/packages/ui/style/themes/hacker-blue/integrations/elements-3d/svelte';
 

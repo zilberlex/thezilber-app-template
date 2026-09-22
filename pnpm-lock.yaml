@@ -29,6 +29,9 @@ importers:
       '@svelte-ascend/interactions':
         specifier: link:../svelte-ascend/packages/interactions
         version: link:../svelte-ascend/packages/interactions
+      '@svelte-ascend/keyboard-navigation':
+        specifier: link:../svelte-ascend/packages/keyboard-navigation
+        version: link:../svelte-ascend/packages/keyboard-navigation
       devalue:
         specifier: ^5.8.1
         version: 5.8.1

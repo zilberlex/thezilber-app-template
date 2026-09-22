@@ -2,8 +2,8 @@
 	import HamburgerIcon from '$lib/assets/icons/HamburgerIcon.svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { kbKey } from '@svelte-ascend/core';
-	import { NavigationKeysConfigSets } from '../../../../../packages/keyboard-navigation';
-	import {NavigationScope} from '../../../../../packages/keyboard-navigation/svelte';
+	import { NavigationKeysConfigSets } from '@svelte-ascend/keyboard-navigation';
+	import {KeyboardNavigationScope} from '@svelte-ascend/keyboard-navigation/svelte';
 	import IconButton from '$lib/ui/basic-components/IconButton.svelte';
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
@@ -100,7 +100,7 @@
 	style:--sidebar-width={sidebarWidth}
 	style:--collapsed-width={collapsedWidth}
 >
-	<NavigationScope
+	<KeyboardNavigationScope
 		scopeId={'sidebar-navigation-scope'}
 		class="sidebar"
 		navigationKeys={NavigationKeysConfigSets.Vertical}
@@ -150,9 +150,9 @@
 				</div>
 			{/if}
 		</aside>
-	</NavigationScope>
+	</KeyboardNavigationScope>
 
-	<NavigationScope
+	<KeyboardNavigationScope
 		class="main-content"
 		scopeId="main-navigation-scope"
 		navigationKeys={NavigationKeysConfigSets.Vertical}
@@ -160,7 +160,7 @@
 		<div>
 			{@render main()}
 		</div>
-	</NavigationScope>
+	</KeyboardNavigationScope>
 </div>
 
 <style>

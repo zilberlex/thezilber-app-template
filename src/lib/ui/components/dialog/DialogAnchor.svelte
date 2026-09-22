@@ -8,7 +8,7 @@
 	import type { FocusableElement } from '@svelte-ascend/interactions';
 	import { safeInstanceOf } from '$lib/engine/types/type-utils';
 	import { track } from '@svelte-ascend/core/svelte';
-	import { NavigationScope } from '../../../../../packages/keyboard-navigation/svelte';
+	import { KeyboardNavigationScope } from '@svelte-ascend/keyboard-navigation/svelte';
 	import type { DialogController } from './dialog-contoller.svelte';
 	import { getFocusable } from '@svelte-ascend/interactions';
 	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
@@ -98,7 +98,7 @@
 </script>
 
 {#if dialogController.activeDialog}
-	<NavigationScope scopeId={dialogAnchorId}>
+	<KeyboardNavigationScope scopeId={dialogAnchorId}>
 		<div
 			class="dialog-anchor"
 			onpointerdown={(e) => {
@@ -110,7 +110,7 @@
 				{@render dialogController.activeDialog?.renderSnippet()}
 			</div>
 		</div>
-	</NavigationScope>
+	</KeyboardNavigationScope>
 {/if}
 
 <style>

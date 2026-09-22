@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { NavigationKeysConfigSets } from '../../../packages/keyboard-navigation';
-	import {NavigationScope} from '../../../packages/keyboard-navigation/svelte';
+	import { NavigationKeysConfigSets } from '@svelte-ascend/keyboard-navigation';
+	import {KeyboardNavigationScope} from '@svelte-ascend/keyboard-navigation/svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import ObjectViewer from '$lib/ui/components/ObjectViewer.svelte';
 
@@ -84,7 +84,7 @@
 			</div>
 		{/if}
 	</div>
-	<NavigationScope
+	<KeyboardNavigationScope
 		scopeId="Sync Simulation Controls"
 		scopeOptions={{
 			navigationKeys: NavigationKeysConfigSets.Vertical
@@ -108,7 +108,7 @@
 				}}>Sync Device 2</Button
 			>
 		</div>
-	</NavigationScope>
+	</KeyboardNavigationScope>
 </div>
 
 <style>

@@ -7,12 +7,12 @@
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
 	import { kbKey } from '@svelte-ascend/core';
 
-	import type { ScopeInfra } from '../../../../../packages/keyboard-navigation';
+	import type { ScopeInfra } from '@svelte-ascend/keyboard-navigation';
 	import {
 		assignNavigationManagerKeys,
 		markForNavigation,
-		NavigationScope
-	} from '../../../../../packages/keyboard-navigation/svelte';
+		KeyboardNavigationScope
+	} from '@svelte-ascend/keyboard-navigation/svelte';
 
 	onMount(() => {
 		if (browser) {
@@ -34,7 +34,7 @@
 <main class="ly-center">
 	<div>
 		<div class="container">
-			<NavigationScope scopeId="scope-all-focusable" discoveryMode="all-focusable" bind:scopeRet={scopeAllFocusable}>
+			<KeyboardNavigationScope scopeId="scope-all-focusable" discoveryMode="all-focusable" bind:scopeRet={scopeAllFocusable}>
 				<div class="list">
 					<div>
 						All-Focusable Discovery - Refresh Count <span class="emp">[{refreshAllFocusableCount}]</span>
@@ -43,8 +43,8 @@
 					<NavigatableAndUnnavigatableSwitcher>B</NavigatableAndUnnavigatableSwitcher>
 					<NavigatableAndUnnavigatableSwitcher>C</NavigatableAndUnnavigatableSwitcher>
 				</div>
-			</NavigationScope>
-			<NavigationScope scopeId="scope-marked-stable" discoveryMode="marked" bind:scopeRet={scopeMarkedStable}>
+			</KeyboardNavigationScope>
+			<KeyboardNavigationScope scopeId="scope-marked-stable" discoveryMode="marked" bind:scopeRet={scopeMarkedStable}>
 				<div class="list">
 					<div>
 						Marked Discovery (Marked Element is Not Touched)- Refresh Count <span class="emp"
@@ -55,8 +55,8 @@
 					<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>B</NavigatableAndUnnavigatableSwitcher>
 					<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>C</NavigatableAndUnnavigatableSwitcher>
 				</div>
-			</NavigationScope>
-			<NavigationScope scopeId="scope-marked-unstable" discoveryMode="marked" bind:scopeRet={scopeMarkedNonStable}>
+			</KeyboardNavigationScope>
+			<KeyboardNavigationScope scopeId="scope-marked-unstable" discoveryMode="marked" bind:scopeRet={scopeMarkedNonStable}>
 				<div class="list">
 					<div>
 						Marked Discovery (NonStable)- Refresh Count <span class="emp">[{refreshMarkedNonStableCount}]</span>
@@ -70,7 +70,7 @@
 					</Button>
 					<Button onclick={() => nonStableElements.pop()}>Remove Element</Button>
 				</div>
-			</NavigationScope>
+			</KeyboardNavigationScope>
 		</div>
 		<div class="controls">
 			<Button
