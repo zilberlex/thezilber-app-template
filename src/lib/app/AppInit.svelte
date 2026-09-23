@@ -9,12 +9,13 @@
 	import EngineHotKeysInit from './EngineHotKeysInit.svelte';
 	import NavigationStateManager from './NavigationStateManager.svelte';
 	import EngineErrorHandler from './EngineErrorHandler.svelte';
-	import { HotKeysInitialization } from '$lib/packages/hotkey-module/svelte';
+	import { HotKeysInitialization } from '@svelte-ascend/hotkey-module/svelte';
 	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
 	import { StyleLoader } from '$lib/packages/ui/svelte';
-	import { KeyboardNavigationManager } from '$lib/packages/keyboard-navigation/svelte';
+	import { KeyboardNavigationManager } from '@svelte-ascend/keyboard-navigation/svelte';
 	import { HackerBlueTheme } from '$lib/packages/ui/style/themes/hacker-blue/svelte';
 	import { HackerBlueElements3DStyles } from '$lib/packages/ui/style/themes/hacker-blue/integrations/elements-3d/svelte';
+	import { HackerBlueKeyboardNavigationStyles } from '$lib/packages/ui/style/themes/hacker-blue/integrations/keyboard-navigation/svelte';
 
 	let { children } = $props();
 
@@ -39,7 +40,7 @@
 
 <svelte:window onmousemove={handleMouseMove} />
 
-<StyleLoader theme={HackerBlueTheme} extensions={[HackerBlueElements3DStyles]} />
+<StyleLoader theme={HackerBlueTheme} extensions={[HackerBlueElements3DStyles, HackerBlueKeyboardNavigationStyles]} />
 
 <HotKeysInitialization />
 <NavigationStateManager />

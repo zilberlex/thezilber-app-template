@@ -6,7 +6,7 @@ import type {
 	ChildCapableRenderable,
 	RenderableSlotProps
 } from '$lib/packages/svelte/composable-renderable';
-import type { TrackingConfig } from '$lib/packages/core';
+import type { TrackingConfig } from '@svelte-ascend/core';
 
 export type Control3DProps = {
 	rotateX?: number;

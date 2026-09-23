@@ -3,14 +3,14 @@
 	import { debugState } from '$lib/engine/state/debug-state.svelte';
 	import ToggleOnOff from '../ToggleOnOff.svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey } from '$lib/packages/core';
+	import { kbKey } from '@svelte-ascend/core';
 
-	import { NavigationKeysConfigSets, NavigationManager } from '$lib/packages/keyboard-navigation';
+	import { NavigationKeysConfigSets, NavigationManager } from '@svelte-ascend/keyboard-navigation';
 	import {
 		KeyboardNavigationManager,
 		markForNavigation,
-		NavigationScope
-	} from '$lib/packages/keyboard-navigation/svelte';
+		KeyboardNavigationScope
+	} from '@svelte-ascend/keyboard-navigation/svelte';
 	import NavigationManagerDebugScreen from '$lib/app/debug-screens/NavigationManagerDebugScreen.svelte';
 
 	let showScopeA = $state(true);
@@ -31,7 +31,7 @@
 <KeyboardNavigationManager bind:navigationManager>
 	<main class="ly-center">
 		<div class="container">
-			<NavigationScope scopeId="controlsScope" navigationKeys={NavigationKeysConfigSets.Horizontal}>
+			<KeyboardNavigationScope scopeId="controlsScope" navigationKeys={NavigationKeysConfigSets.Horizontal}>
 				<ToggleOnOff bind:toggle={showScopeA} {@attach createHotKeyTriggerClickAttachment('Toggle A', kbKey('1'))}>
 					Scope A
 				</ToggleOnOff>
@@ -48,33 +48,33 @@
 				>
 					Toggle C-2 + Add Random
 				</ToggleOnOff>
-			</NavigationScope>
+			</KeyboardNavigationScope>
 
 			<div class="scopes">
 				<div class="scope-container">
-					<NavigationScope scopeId="scopeA" class="scope" escapeMode="escape" discoveryMode="all-focusable">
+					<KeyboardNavigationScope scopeId="scopeA" class="scope" escapeMode="escape" discoveryMode="all-focusable">
 						<div>Scope A - Discovery All-Focusable</div>
 						{#if showScopeA}
 							<Button }>A</Button>
 							<Button>B</Button>
 							<Button>C</Button>
 						{/if}
-					</NavigationScope>
+					</KeyboardNavigationScope>
 				</div>
 
 				<div class="scope-container">
-					<NavigationScope scopeId="scopeB" class="scope" escapeMode="escape" discoveryMode="marked">
+					<KeyboardNavigationScope scopeId="scopeB" class="scope" escapeMode="escape" discoveryMode="marked">
 						<div>Scope B - Discovery Marked, Auto Id</div>
 						{#if showScopeB}
 							<Button {@attach markForNavigation()}>A</Button>
 							<Button {@attach markForNavigation()}>B</Button>
 							<Button {@attach markForNavigation()}>C</Button>
 						{/if}
-					</NavigationScope>
+					</KeyboardNavigationScope>
 				</div>
 
 				<div class="scope-container">
-					<NavigationScope scopeId="scopeC" class="scope" escapeMode="escape" discoveryMode={'marked'}>
+					<KeyboardNavigationScope scopeId="scopeC" class="scope" escapeMode="escape" discoveryMode={'marked'}>
 						<div>Scope C - Discovery Marked, Explicit Id</div>
 						{#if showScopeC}
 							<Button {@attach markForNavigation('3-a')}>A</Button>
@@ -87,7 +87,7 @@
 							{/if}
 							<Button {@attach markForNavigation('3-c')}>C</Button>
 						{/if}
-					</NavigationScope>
+					</KeyboardNavigationScope>
 				</div>
 			</div>
 		</div>

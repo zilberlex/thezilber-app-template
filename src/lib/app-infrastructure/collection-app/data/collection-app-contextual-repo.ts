@@ -1,4 +1,4 @@
-import { getErrorMessage } from '$lib/packages/core';
+import { getErrorMessage } from '@svelte-ascend/core';
 import { getDeviceId } from '$lib/engine/storage/local/client-info-repository';
 import {
 	loadLocalStorage,

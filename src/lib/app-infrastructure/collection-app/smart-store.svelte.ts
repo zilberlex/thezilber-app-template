@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { DispatcherImpl, type Dispatcher, type DispatchHandler } from '$lib/packages/core';
+import { DispatcherImpl, type Dispatcher, type DispatchHandler } from '@svelte-ascend/core';
 import type {
 	AppRecordRepo,
 	DataProjection,

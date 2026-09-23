@@ -4,10 +4,10 @@
 	import { debugState } from '$lib/engine/state/debug-state.svelte';
 	import ToggleOnOff from '../ToggleOnOff.svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey } from '$lib/packages/core';
+	import { kbKey } from '@svelte-ascend/core';
 
-	import { NavigationKeysConfigSets, NavigationManager } from '$lib/packages/keyboard-navigation';
-	import { KeyboardNavigationManager, NavigationScope } from '$lib/packages/keyboard-navigation/svelte';
+	import { NavigationKeysConfigSets, NavigationManager } from '@svelte-ascend/keyboard-navigation';
+	import { KeyboardNavigationManager, KeyboardNavigationScope } from '@svelte-ascend/keyboard-navigation/svelte';
 
 	let showScopeA = $state(true);
 	let showScopeB = $state(true);
@@ -27,7 +27,7 @@
 <KeyboardNavigationManager bind:navigationManager>
 	<main class="ly-center">
 		<div class="container">
-			<NavigationScope scopeId="controlsScope" navigationKeys={NavigationKeysConfigSets.Horizontal}>
+			<KeyboardNavigationScope scopeId="controlsScope" navigationKeys={NavigationKeysConfigSets.Horizontal}>
 				<ToggleOnOff bind:toggle={showScopeA} {@attach createHotKeyTriggerClickAttachment('Toggle A', kbKey('1'))}>
 					Scope Order 2 (Hotkey 1)
 				</ToggleOnOff>
@@ -43,59 +43,59 @@
 				<ToggleOnOff bind:toggle={showScopeE} {@attach createHotKeyTriggerClickAttachment('Toggle E', kbKey('5'))}>
 					Scope Order 4 (Hotkey 5)
 				</ToggleOnOff>
-			</NavigationScope>
+			</KeyboardNavigationScope>
 
 			<div class="scopes">
 				<div class="scope-container" class:hidden={!showScopeA}>
 					{#if showScopeA}
 						<div>Scope Order 2</div>
-						<NavigationScope scopeId="scopeA" class="scope" escapeMode="escape" scopeOrder={2}>
+						<KeyboardNavigationScope scopeId="scopeA" class="scope" escapeMode="escape" scopeOrder={2}>
 							<Button>A</Button>
 							<Button>B</Button>
 							<Button>C</Button>
-						</NavigationScope>
+						</KeyboardNavigationScope>
 					{/if}
 				</div>
 
 				<div class="scope-container" class:hidden={!showScopeB}>
 					{#if showScopeB}
 						<div>Scope Order 1</div>
-						<NavigationScope scopeId="scopeB" class="scope" escapeMode="escape" scopeOrder={1}>
+						<KeyboardNavigationScope scopeId="scopeB" class="scope" escapeMode="escape" scopeOrder={1}>
 							<Button>A</Button>
 							<Button>B</Button>
 							<Button>C</Button>
-						</NavigationScope>
+						</KeyboardNavigationScope>
 					{/if}
 				</div>
 
 				<div class="scope-container" class:hidden={!showScopeC}>
 					{#if showScopeC}
 						<div>Scope Order 3</div>
-						<NavigationScope scopeId="scopeC" class="scope" escapeMode="escape" scopeOrder={3}>
+						<KeyboardNavigationScope scopeId="scopeC" class="scope" escapeMode="escape" scopeOrder={3}>
 							<Button>A</Button>
 							<Button>B</Button>
 							<Button>C</Button>
-						</NavigationScope>
+						</KeyboardNavigationScope>
 					{/if}
 				</div>
 				<div class="scope-container" class:hidden={!showScopeD}>
 					{#if showScopeD}
 						<div>Scope Order 5</div>
-						<NavigationScope scopeId="scopeD" class="scope" escapeMode="escape" scopeOrder={5}>
+						<KeyboardNavigationScope scopeId="scopeD" class="scope" escapeMode="escape" scopeOrder={5}>
 							<Button>A</Button>
 							<Button>B</Button>
 							<Button>C</Button>
-						</NavigationScope>
+						</KeyboardNavigationScope>
 					{/if}
 				</div>
 				<div class="scope-container" class:hidden={!showScopeE}>
 					{#if showScopeE}
 						<div>Scope Order 4</div>
-						<NavigationScope scopeId="scopeE" class="scope" escapeMode="escape" scopeOrder={4}>
+						<KeyboardNavigationScope scopeId="scopeE" class="scope" escapeMode="escape" scopeOrder={4}>
 							<Button>A</Button>
 							<Button>B</Button>
 							<Button>C</Button>
-						</NavigationScope>
+						</KeyboardNavigationScope>
 					{/if}
 				</div>
 			</div>

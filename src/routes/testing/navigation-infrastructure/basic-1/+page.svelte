@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { markForNavigation, NavigationScope } from '$lib/packages/keyboard-navigation/svelte';
-	import type { ScopeInfra } from '$lib/packages/keyboard-navigation';
+	import { markForNavigation, KeyboardNavigationScope } from '@svelte-ascend/keyboard-navigation/svelte';
+	import type { ScopeInfra } from '@svelte-ascend/keyboard-navigation';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import ButtonInputSwitch from '../ButtonInputSwitch.svelte';
 
@@ -15,15 +15,15 @@
 </script>
 
 <div class="demo-container ly-center">
-	<NavigationScope scopeId="nav-scope-1" bind:scopeRet={scope1} discoveryMode="marked">
+	<KeyboardNavigationScope scopeId="nav-scope-1" bind:scopeRet={scope1} discoveryMode="marked">
 		<div class="list list-1 content-surface">
 			<h3>Scope Direct Mark Elements:</h3>
 			{#each buttonsInfo1 as btn (btn.id)}
 				<ButtonInputSwitch content={btn.label} {@attach markForNavigation()} />
 			{/each}
 		</div>
-	</NavigationScope>
-	<NavigationScope scopeId="nav-scope-2" discoveryMode="marked">
+	</KeyboardNavigationScope>
+	<KeyboardNavigationScope scopeId="nav-scope-2" discoveryMode="marked">
 		<div class="list list-2 content-surface">
 			<h3>Scope Mark Container:</h3>
 			{#each buttonsInfo1 as btn (btn.id)}
@@ -32,18 +32,18 @@
 				</div>
 			{/each}
 		</div>
-	</NavigationScope>
-	<NavigationScope scopeId="nav-scope-3" discoveryMode="all-focusable">
+	</KeyboardNavigationScope>
+	<KeyboardNavigationScope scopeId="nav-scope-3" discoveryMode="all-focusable">
 		<div class="list list-3 content-surface">
 			<h3>Scope AutoMark:</h3>
 			{#each buttonsInfo1 as btn (btn.id)}
 				<ButtonInputSwitch content={btn.label} />
 			{/each}
 		</div>
-	</NavigationScope>
+	</KeyboardNavigationScope>
 	<div class="controls">
 		<h3>Controls:</h3>
-		<NavigationScope scopeId="nav-scope-controls">
+		<KeyboardNavigationScope scopeId="nav-scope-controls">
 			<div class="list">
 				<Button
 					onclick={() => {
@@ -64,7 +64,7 @@
 					Add Element
 				</Button>
 			</div>
-		</NavigationScope>
+		</KeyboardNavigationScope>
 	</div>
 </div>
 

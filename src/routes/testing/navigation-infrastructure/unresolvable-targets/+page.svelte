@@ -1,11 +1,11 @@
 <script lang="ts">
 	import NavigatableAndUnnavigatableSwitcher from '../NavigatableAndUnnavigatableSwitcher.svelte';
-	import { markForNavigation, NavigationScope } from '$lib/packages/keyboard-navigation/svelte';
+	import { markForNavigation, KeyboardNavigationScope } from '@svelte-ascend/keyboard-navigation/svelte';
 </script>
 
 <main class="ly-center">
 	<div class="container">
-		<NavigationScope scopeId="unresolved-test" discoveryMode="marked" escapeMode="escape">
+		<KeyboardNavigationScope scopeId="unresolved-test" discoveryMode="marked" escapeMode="escape">
 			<div class="list">
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>A</NavigatableAndUnnavigatableSwitcher>
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>B</NavigatableAndUnnavigatableSwitcher>
@@ -13,8 +13,8 @@
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>D</NavigatableAndUnnavigatableSwitcher>
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>F</NavigatableAndUnnavigatableSwitcher>
 			</div>
-		</NavigationScope>
-		<NavigationScope scopeId="unresolved-test-2" discoveryMode="marked" escapeMode="escape">
+		</KeyboardNavigationScope>
+		<KeyboardNavigationScope scopeId="unresolved-test-2" discoveryMode="marked" escapeMode="escape">
 			<div class="list">
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>A</NavigatableAndUnnavigatableSwitcher>
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>B</NavigatableAndUnnavigatableSwitcher>
@@ -22,7 +22,7 @@
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>D</NavigatableAndUnnavigatableSwitcher>
 				<NavigatableAndUnnavigatableSwitcher {@attach markForNavigation()}>F</NavigatableAndUnnavigatableSwitcher>
 			</div>
-		</NavigationScope>
+		</KeyboardNavigationScope>
 	</div>
 </main>
 

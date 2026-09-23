@@ -3,9 +3,9 @@
 	import { onMount } from 'svelte';
 	import NavigatableAndUnnavigatableSwitcher from '../NavigatableAndUnnavigatableSwitcher.svelte';
 	import { browser } from '$app/environment';
-	import { kbKey } from '$lib/packages/core';
-	import type { ScopeInfra } from '$lib/packages/keyboard-navigation';
-	import { assignNavigationManagerKeys, NavigationScope } from '$lib/packages/keyboard-navigation/svelte';
+	import { kbKey } from '@svelte-ascend/core';
+	import type { ScopeInfra } from '@svelte-ascend/keyboard-navigation';
+	import { assignNavigationManagerKeys, KeyboardNavigationScope } from '@svelte-ascend/keyboard-navigation/svelte';
 
 	let scopeManual = $state<ScopeInfra>();
 
@@ -20,22 +20,22 @@
 	<div class="cases">
 		<div class="case">
 			<h3>Auto</h3>
-			<NavigationScope scopeId="scope-1" refreshOptions={{ mode: 'automatic' }}>
+			<KeyboardNavigationScope scopeId="scope-1" refreshOptions={{ mode: 'automatic' }}>
 				<div class="list">
 					<NavigatableAndUnnavigatableSwitcher startingState="button">A</NavigatableAndUnnavigatableSwitcher>
 					<NavigatableAndUnnavigatableSwitcher startingState="button">B</NavigatableAndUnnavigatableSwitcher>
 				</div>
-			</NavigationScope>
+			</KeyboardNavigationScope>
 		</div>
 		<div class="case">
 			<h3>Manual</h3>
-			<NavigationScope scopeId="scope-2" refreshOptions={{ mode: 'manual' }} bind:scopeRet={scopeManual}>
+			<KeyboardNavigationScope scopeId="scope-2" refreshOptions={{ mode: 'manual' }} bind:scopeRet={scopeManual}>
 				<div class="list">
 					<NavigatableAndUnnavigatableSwitcher startingState="button">A</NavigatableAndUnnavigatableSwitcher>
 					<NavigatableAndUnnavigatableSwitcher startingState="div">B</NavigatableAndUnnavigatableSwitcher>
 				</div>
 				<Button onclick={() => scopeManual?.refreshNavigationTargets()}>Refresh</Button>
-			</NavigationScope>
+			</KeyboardNavigationScope>
 		</div>
 	</div>
 </main>

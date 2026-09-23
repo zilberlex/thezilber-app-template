@@ -1,21 +1,21 @@
 <script>
-	import {NavigationScope} from '$lib/packages/keyboard-navigation/svelte';
+	import {KeyboardNavigationScope} from '@svelte-ascend/keyboard-navigation/svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 </script>
 
 <main class="ly-center">
-	<NavigationScope scopeId="parent-scope">
+	<KeyboardNavigationScope scopeId="parent-scope">
 		<div>
 			<Button>A</Button>
 			<Button>B</Button>
-			<NavigationScope scopeId="child-scope">
+			<KeyboardNavigationScope scopeId="child-scope">
 				<div>
 					<Button>A-2</Button>
 					<Button>B-2</Button>
 				</div>
-			</NavigationScope>
+			</KeyboardNavigationScope>
 		</div>
-	</NavigationScope>
+	</KeyboardNavigationScope>
 </main>
 
 <style>

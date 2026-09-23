@@ -1,4 +1,4 @@
-import { lerp } from '$lib/packages/core';
+import { lerp } from '@svelte-ascend/core';
 import { linear } from 'svelte/easing';
 import type { EasingFunction, TransitionConfig } from 'svelte/transition';
 

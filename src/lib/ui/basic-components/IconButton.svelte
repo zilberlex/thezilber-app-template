@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
-	import { keyTriggerClick } from '$lib/packages/interactions';
+	import { keyTriggerClick } from '@svelte-ascend/interactions';
 	import type { Snippet } from 'svelte';
 	import { mergeProps } from 'svelte-toolbelt';
 	import type { HTMLButtonAttributes } from 'svelte/elements';

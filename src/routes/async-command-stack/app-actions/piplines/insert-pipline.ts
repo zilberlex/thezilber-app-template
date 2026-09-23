@@ -1,7 +1,7 @@
-import { sleep } from '$lib/packages/core';
-import type { PipelineSteps } from '$lib/packages/core';
-import { errorResult } from '$lib/packages/core';
-import { pipelineStep } from '$lib/packages/core';
+import { sleep } from '@svelte-ascend/core';
+import type { PipelineSteps } from '@svelte-ascend/core';
+import { errorResult } from '@svelte-ascend/core';
+import { pipelineStep } from '@svelte-ascend/core';
 import type { DemoCommandDeps, InsertCtx } from './types';
 
 const startingStep = pipelineStep<DemoCommandDeps, InsertCtx>(

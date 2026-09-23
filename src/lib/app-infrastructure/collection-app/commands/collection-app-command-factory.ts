@@ -1,9 +1,9 @@
-import { AsyncSerialQueue } from '$lib/packages/core';
-import type { CommandRegistry } from '$lib/packages/core';
+import { AsyncSerialQueue } from '@svelte-ascend/core';
+import type { CommandRegistry } from '@svelte-ascend/core';
 import {
 	definePipelineSpecs,
 	PipelineCommandFactory
-} from '$lib/packages/core';
+} from '@svelte-ascend/core';
 import type { CollectionAppCache } from '../collectionAppCache.svelte';
 import type { DataProjection } from '../data/types';
 import type {

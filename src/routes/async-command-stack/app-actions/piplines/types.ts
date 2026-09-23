@@ -1,4 +1,4 @@
-import type { AsyncSerialQueue } from '$lib/packages/core';
+import type { AsyncSerialQueue } from '@svelte-ascend/core';
 
 export type InsertCtx = {
 	insertValue: string;

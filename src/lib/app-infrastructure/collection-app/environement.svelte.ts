@@ -1,8 +1,8 @@
-import { getErrorMessage } from '$lib/packages/core';
+import { getErrorMessage } from '@svelte-ascend/core';
 import { untrack } from 'svelte';
 import { createCollectionAppContextManager, ctxEquals } from './context-manager.svelte';
 import { SmartStore, type SmartStoreOptions } from './smart-store.svelte';
-import { track } from '$lib/packages/core/svelte';
+import { track } from '@svelte-ascend/core/svelte';
 import { DataStateManager } from './data-state-manager.svelte';
 import type { CollectionAppBlankResult, CollectionAppContext, CollectionAppEnvironment } from './types';
 import type {

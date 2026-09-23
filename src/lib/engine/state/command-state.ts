@@ -1,4 +1,4 @@
-import type { PersistedCommandStack } from '$lib/packages/core';
+import type { PersistedCommandStack } from '@svelte-ascend/core';
 import { loadLocalState, saveLocalState } from '../storage/local/simple-state-persistance.svelte';
 import type { AppState } from './application-state.svelte';
 

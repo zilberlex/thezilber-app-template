@@ -4,10 +4,10 @@
 	import { debugState } from '$lib/engine/state/debug-state.svelte';
 	import ToggleOnOff from '../ToggleOnOff.svelte';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey } from '$lib/packages/core';
+	import { kbKey } from '@svelte-ascend/core';
 
-	import { NavigationKeysConfigSets, NavigationManager } from '$lib/packages/keyboard-navigation';
-	import { KeyboardNavigationManager, NavigationScope } from '$lib/packages/keyboard-navigation/svelte';
+	import { NavigationKeysConfigSets, NavigationManager } from '@svelte-ascend/keyboard-navigation';
+	import { KeyboardNavigationManager, KeyboardNavigationScope } from '@svelte-ascend/keyboard-navigation/svelte';
 
 	let showScopeA = $state(true);
 	let showScopeB = $state(true);
@@ -25,7 +25,7 @@
 <KeyboardNavigationManager bind:navigationManager>
 	<main class="ly-center">
 		<div class="container">
-			<NavigationScope scopeId="controlsScope" navigationKeys={NavigationKeysConfigSets.Horizontal}>
+			<KeyboardNavigationScope scopeId="controlsScope" navigationKeys={NavigationKeysConfigSets.Horizontal}>
 				<ToggleOnOff bind:toggle={showScopeA} {@attach createHotKeyTriggerClickAttachment('Toggle A', kbKey('1'))}>
 					Scope A
 				</ToggleOnOff>
@@ -35,39 +35,39 @@
 				<ToggleOnOff bind:toggle={showScopeC} {@attach createHotKeyTriggerClickAttachment('Toggle C', kbKey('3'))}>
 					Scope C
 				</ToggleOnOff>
-			</NavigationScope>
+			</KeyboardNavigationScope>
 
 			<div class="scopes">
 				<div class="scope-container" class:hidden={!showScopeA}>
 					{#if showScopeA}
 						<div>Scope A</div>
-						<NavigationScope scopeId="scopeA" class="scope" escapeMode="escape">
+						<KeyboardNavigationScope scopeId="scopeA" class="scope" escapeMode="escape">
 							<Button>A</Button>
 							<Button>B</Button>
 							<Button>C</Button>
-						</NavigationScope>
+						</KeyboardNavigationScope>
 					{/if}
 				</div>
 
 				<div class="scope-container" class:hidden={!showScopeB}>
 					{#if showScopeB}
 						<div>Scope B</div>
-						<NavigationScope scopeId="scopeB" class="scope" escapeMode="escape">
+						<KeyboardNavigationScope scopeId="scopeB" class="scope" escapeMode="escape">
 							<Button>A</Button>
 							<Button>B</Button>
 							<Button>C</Button>
-						</NavigationScope>
+						</KeyboardNavigationScope>
 					{/if}
 				</div>
 
 				<div class="scope-container" class:hidden={!showScopeC}>
 					{#if showScopeC}
 						<div>Scope C</div>
-						<NavigationScope scopeId="scopeC" class="scope" escapeMode="escape">
+						<KeyboardNavigationScope scopeId="scopeC" class="scope" escapeMode="escape">
 							<Button>A</Button>
 							<Button>B</Button>
 							<Button>C</Button>
-						</NavigationScope>
+						</KeyboardNavigationScope>
 					{/if}
 				</div>
 			</div>
