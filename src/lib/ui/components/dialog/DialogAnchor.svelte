@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
-	import { onDestroy, onMount, tick, untrack } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import { appState } from '$lib/engine/state/application-state.svelte';
 	import { onNavigate } from '$app/navigation';
-	import { createSmartHandler } from '@svelte-ascend/core';
-	import { hotKeysModule } from '@svelte-ascend/hotkey-module';
+	import { hotkeyManager } from '@svelte-ascend/hotkey-module';
 	import type { FocusableElement } from '@svelte-ascend/interactions';
 	import { safeInstanceOf } from '$lib/engine/types/type-utils';
 	import { track } from '@svelte-ascend/core/svelte';
@@ -26,28 +25,13 @@
 
 	let focusOpenDialogJobCounter = 0;
 
-	onDestroy(() => {
-		cleanupComponent();
-		hotKeysModule.removeHotKey(kbKey('Escape'), closeDialogHandler);
-	});
-
 	onNavigate(() => {
-		cleanupComponent();
+		dialogController.closeAllDialogs();
 	});
 
-	onMount(() => {});
-
-	const closeDialogHandler = createSmartHandler(
-		() => {
-			dialogController.closeAllDialogs();
-		},
-		{ cooldownDelay: 20 }
-	);
-
-	function cleanupComponent() {
+	const closeDialogHandler = () => {
 		dialogController.closeAllDialogs();
-		dialogCloseCleanup();
-	}
+	};
 
 	function dialogCloseCleanup() {
 		focusOpenDialogJobCounter++;
@@ -62,37 +46,32 @@
 		track(dialogController);
 
 		return untrack(() => {
-			if (dialogController.activeDialog) {
-				hotKeysModule.assignHotKey(kbKey('Escape'), closeDialogHandler, true);
+			if (!dialogController.activeDialog) return;
 
-				if (dialogController.activeDialog) {
-					const thisJob = ++focusOpenDialogJobCounter;
-					const activeElement = document.activeElement;
-					lastFocusedElement = safeInstanceOf(activeElement);
+			const cleanupHotkey = hotkeyManager.assignHotKey(kbKey('Escape'), closeDialogHandler, { isCapture: true });
 
-					tick().then(() => {
-						// This is async so the dialog box get mounted before an element inside receives focus
-						if (thisJob !== focusOpenDialogJobCounter) return;
+			const thisJob = ++focusOpenDialogJobCounter;
+			const activeElement = document.activeElement;
+			lastFocusedElement = safeInstanceOf(activeElement);
 
-						untrack(() => {
-							if (dialogBoxNode) {
-								const focableNodes = getFocusable(dialogBoxNode);
+			tick().then(() => {
+				if (thisJob !== focusOpenDialogJobCounter) return;
 
-								let focusTarget = dialogBoxNode;
-								if (focableNodes.length > 0) {
-									focusTarget = focableNodes[0];
-								}
+				untrack(() => {
+					if (!dialogBoxNode) return;
 
-								engineElementInteraction.focus(focusTarget);
-							}
-						});
-					});
-				}
-				return () => {
-					hotKeysModule.removeHotKey(kbKey('Escape'), closeDialogHandler);
-					dialogCloseCleanup();
-				};
-			}
+					const focusableNodes = getFocusable(dialogBoxNode);
+
+					const focusTarget = focusableNodes.length > 0 ? focusableNodes[0] : dialogBoxNode;
+
+					engineElementInteraction.focus(focusTarget);
+				});
+			});
+
+			return () => {
+				cleanupHotkey();
+				dialogCloseCleanup();
+			};
 		});
 	});
 </script>
