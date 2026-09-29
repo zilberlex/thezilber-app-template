@@ -1,4 +1,4 @@
-@use './config';
+@use 'config';
 
 @mixin glow-text() {
 	--_animation-glow-color: var(--animation-glow-color, var(--accent, red));

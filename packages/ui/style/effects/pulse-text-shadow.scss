@@ -1,4 +1,4 @@
-@use './config';
+@use 'config';
 
 @if config.$emit-default {
 	@keyframes pulse-text-shadow {

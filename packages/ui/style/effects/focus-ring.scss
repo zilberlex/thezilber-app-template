@@ -1,4 +1,4 @@
-@use './config';
+@use 'config';
 
 @if config.$emit-default {
 	:root {

@@ -1,4 +1,4 @@
-@use './config';
+@use 'config';
 
 @mixin pulse-text($from-color, $to-color, $duration: null) {
 	--ef_change-colors_col1: #{$from-color};
