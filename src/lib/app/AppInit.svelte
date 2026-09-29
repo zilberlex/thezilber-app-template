@@ -16,6 +16,7 @@
 	import { HackerBlueTheme } from '$lib/packages/ui/style/themes/hacker-blue/svelte';
 	import { HackerBlueElements3DStyles } from '$lib/packages/ui/style/themes/hacker-blue/integrations/elements-3d/svelte';
 	import { HackerBlueKeyboardNavigationStyles } from '$lib/packages/ui/style/themes/hacker-blue/integrations/keyboard-navigation/svelte';
+	import { CleanupUnloadCheck, UnloadChecks } from '@svelte-ascend/core/svelte';
 
 	let { children } = $props();
 
@@ -39,19 +40,24 @@
 </script>
 
 <svelte:window onmousemove={handleMouseMove} />
-
 <StyleLoader theme={HackerBlueTheme} extensions={[HackerBlueElements3DStyles, HackerBlueKeyboardNavigationStyles]} />
 
-<HotKeysInitialization />
-<NavigationStateManager />
-<TooltipTracker />
+<UnloadChecks>
+	{#snippet checks()}
+		<CleanupUnloadCheck />
+	{/snippet}
 
-<KeyboardNavigationManager elementInteraction={engineElementInteraction}>
-	<EngineHotKeysInit />
+	<HotKeysInitialization />
+	<NavigationStateManager />
+	<TooltipTracker />
 
-	<EngineErrorHandler />
+	<KeyboardNavigationManager elementInteraction={engineElementInteraction}>
+		<EngineHotKeysInit />
 
-	<ForegroundLayer />
+		<EngineErrorHandler />
 
-	{@render children()}
-</KeyboardNavigationManager>
+		<ForegroundLayer />
+
+		{@render children()}
+	</KeyboardNavigationManager>
+</UnloadChecks>

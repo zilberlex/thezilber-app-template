@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { createHotKeyHandler } from '@svelte-ascend/hotkey-module';
-	import { hotKeysModule } from '@svelte-ascend/hotkey-module';
-	import { kbKey } from '@svelte-ascend/core';
+	import { hotkeyManager } from '@svelte-ascend/hotkey-module';
+	import { combineCleanups, kbKey } from '@svelte-ascend/core';
 	import { appState } from '$lib/engine/state/application-state.svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 
 	let debugHotKey = kbKey('F12', 'alt');
 	let debugToggleMenuHotKey = kbKey('F11', 'alt');
@@ -14,13 +12,13 @@
 	let undoHotKey = kbKey('z', 'ctrl|meta');
 	let redoHotKey = kbKey('z', 'ctrl|meta', 'shift');
 
-	let globalUndo = createHotKeyHandler((e) => {
+	let globalUndo = () => {
 		appState.commandStack?.undo();
-	});
+	};
 
-	let globalRedo = createHotKeyHandler(() => {
+	let globalRedo = () => {
 		appState.commandStack?.redo();
-	});
+	};
 
 	let debug = appState.debug;
 
@@ -43,26 +41,15 @@
 	}
 
 	onMount(() => {
-		if (browser) {
-			hotKeysModule.assignHotKey(debugHotKey, toggleDebug);
-			hotKeysModule.assignHotKey(clearDebugObjectsHotKey, clearDebugObjects);
-			hotKeysModule.assignHotKey(debugToggleMenuHotKey, toggleDebugToggleMenu);
-			hotKeysModule.assignHotKey(showCustomizableDebugScreenHotKey, toggleCustomDebugScreen);
+		const cleanupAll = combineCleanups([
+			hotkeyManager.assignHotKey(debugHotKey, toggleDebug),
+			hotkeyManager.assignHotKey(clearDebugObjectsHotKey, clearDebugObjects),
+			hotkeyManager.assignHotKey(debugToggleMenuHotKey, toggleDebugToggleMenu),
+			hotkeyManager.assignHotKey(showCustomizableDebugScreenHotKey, toggleCustomDebugScreen),
+			hotkeyManager.assignHotKey(undoHotKey, globalUndo),
+			hotkeyManager.assignHotKey(redoHotKey, globalRedo)
+		]);
 
-			hotKeysModule.assignHotKey(undoHotKey, globalUndo);
-			hotKeysModule.assignHotKey(redoHotKey, globalRedo);
-		}
-	});
-
-	onDestroy(() => {
-		if (browser) {
-			hotKeysModule.removeHotKey(debugHotKey, toggleDebug);
-			hotKeysModule.removeHotKey(clearDebugObjectsHotKey, clearDebugObjects);
-			hotKeysModule.removeHotKey(debugToggleMenuHotKey, toggleDebugToggleMenu);
-			hotKeysModule.removeHotKey(showCustomizableDebugScreenHotKey, toggleCustomDebugScreen);
-
-			hotKeysModule.removeHotKey(undoHotKey, globalUndo);
-			hotKeysModule.removeHotKey(redoHotKey, globalRedo);
-		}
+		return cleanupAll;
 	});
 </script>
