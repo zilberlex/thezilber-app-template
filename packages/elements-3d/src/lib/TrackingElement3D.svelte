@@ -6,7 +6,7 @@
 		TBackFace extends AnyRenderable = AnyRenderable
 	"
 >
-	import { calculateTrackingRotation, createSmartHandler, type TrackingSample } from '@svelte-ascend/core';
+	import { calculateTrackingRotation, createSmartHandler, type TrackingSample } from '../svelte-ascend/packages/core/dist';
 	import { untrack } from 'svelte';
 
 	import Element3D from './Element3D.svelte';

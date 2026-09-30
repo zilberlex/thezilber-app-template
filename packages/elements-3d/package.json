@@ -1,0 +1,44 @@
+{
+	"name": "@svelte-ascend/elements-3d",
+	"version": "0.1.0-alpha.0",
+	"type": "module",
+	"license": "UNLICENSED",
+	"files": [
+		"dist"
+	],
+	"svelte": "./dist/index.js",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js",
+			"default": "./dist/index.js"
+		}
+	},
+	"sideEffects": [
+		"**/*.css"
+	],
+	"scripts": {
+		"clean": "rm -rf dist",
+		"package": "svelte-package",
+		"package:watch": "svelte-package --watch",
+		"check": "svelte-check --tsconfig ./tsconfig.json",
+		"prepack": "pnpm run package"
+	},
+	"dependencies": {
+		"@svelte-ascend/core": "workspace:*",
+		"@svelte-ascend/composable-renderable": "workspace:*",
+		"svelte-toolbelt": "^0.10.6"
+	},
+	"peerDependencies": {
+		"svelte": "^5.30.2"
+	},
+	"devDependencies": {
+		"@sveltejs/package": "^2.0.0",
+		"svelte": "^5.57.1",
+		"svelte-check": "^4.0.0",
+		"typescript": "^5.9.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

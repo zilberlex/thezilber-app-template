@@ -2,7 +2,7 @@ import type { Snippet } from 'svelte';
 
 import type { AnyRenderable, ChildCapableRenderable } from '$lib/packages/svelte/composable-renderable';
 
-import type { Element3DProps, FlippableElement3DProps, TrackingElement3DProps } from '../types';
+import type { Element3DProps, FlippableElement3DProps, TrackingElement3DProps } from '../src/lib/types';
 
 declare const content: Snippet;
 declare const plainFace: Snippet;

@@ -6,14 +6,14 @@
 		TBackFace extends AnyRenderable = AnyRenderable
 	"
 >
-	import './elements-3d.scss';
+	import './elements-3d.css';
 	import { mergeProps } from 'svelte-toolbelt';
 
 	import {
 		componentRenderable,
 		ComposedComponent,
 		type RenderableProps
-	} from 'src/lib/packages/svelte/composable-renderable';
+	} from '$lib/packages/svelte/composable-renderable';
 
 	import DefaultSurface from './DefaultSurface.svelte';
 	import type { Element3DProps } from './types';
