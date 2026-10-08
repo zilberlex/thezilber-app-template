@@ -12,10 +12,10 @@
 	import {
 		componentRenderable,
 		ComposedComponent,
-		type RenderableProps
-	} from '$lib/packages/advanced-svelte/composable-renderable';
+		type RenderableProps,
+		DefaultSurface
+	} from '@svelte-ascend/advanced-svelte/composable-renderable';
 
-	import DefaultSurface from './DefaultSurface.svelte';
 	import type { Element3DProps } from './types';
 
 	const defaultSurface = componentRenderable(DefaultSurface);

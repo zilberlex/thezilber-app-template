@@ -1,6 +1,6 @@
 import type { Snippet } from 'svelte';
 
-import type { AnyRenderable, ChildCapableRenderable } from '$lib/packages/advanced-svelte/composable-renderable';
+import type { AnyRenderable, ChildCapableRenderable } from '@svelte-ascend/advanced-svelte/composable-renderable';
 
 import type { Element3DProps, FlippableElement3DProps, TrackingElement3DProps } from '../src/lib/types';
 
