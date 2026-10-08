@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { FlippableElement3D, TrackingElement3D } from '$lib/packages/elements-3d';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { componentRenderable, snippetRenderable } from '$lib/packages/svelte/composable-renderable';
+	import { componentRenderable, snippetRenderable } from '../../../packages/advanced-svelte/composable-renderable/src/lib';
 	import { kbKey, TRACKING_MODES } from '@svelte-ascend/core';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import { createAttachmentKey } from 'svelte/attachments';

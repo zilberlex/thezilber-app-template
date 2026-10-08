@@ -35,8 +35,8 @@
 
 ```json
 "dependencies": {
-"@svelte-ascend/core": "link:../svelte-ascend/packages/core",
-"@svelte-ascend/interactions": "link:../svelte-ascend/packages/interactions"
+"@svelte-ascend/core": "link:../advanced-svelte-ascend/packages/core",
+"@svelte-ascend/interactions": "link:../advanced-svelte-ascend/packages/interactions"
 }
 ```
 
@@ -70,7 +70,7 @@ make sure to add internal dependencies
 
 ```json
 {
-	"name": "@svelte-ascend/interactions",
+	"name": "@advanced-svelte-ascend/interactions",
 	"version": "0.1.0-alpha.0",
 	"private": true,
 	"type": "module",
@@ -84,10 +84,10 @@ make sure to add internal dependencies
 	"scripts": {
 		"clean": "rm -rf dist",
 		"check:ts": "tsc --noEmit -p ./tsconfig.json",
-		"check:svelte": "svelte-check --tsconfig ./tsconfig.json --incremental --diagnostic-sources \"svelte,css\"",
-		"check": "pnpm check:ts && pnpm check:svelte",
-		"package": "pnpm clean && svelte-package --tsconfig ./tsconfig.json",
-		"package:watch": "svelte-package --tsconfig ./tsconfig.json --watch",
+		"check:svelte": "advanced-svelte-check --tsconfig ./tsconfig.json --incremental --diagnostic-sources \"advanced-svelte,css\"",
+		"check": "pnpm check:ts && pnpm check:advanced-svelte",
+		"package": "pnpm clean && advanced-svelte-package --tsconfig ./tsconfig.json",
+		"package:watch": "advanced-svelte-package --tsconfig ./tsconfig.json --watch",
 		"prepack": "pnpm check && pnpm package"
 	},
 	"dependencies": {
@@ -109,7 +109,7 @@ make sure to add internal dependencies
 
 ```json
 {
-	"name": "@svelte-ascend/hotkey-module",
+	"name": "@advanced-svelte-ascend/hotkey-module",
 	"version": "0.1.0-alpha.0",
 	"private": true,
 	"type": "module",
@@ -120,18 +120,18 @@ make sure to add internal dependencies
 			"default": "./dist/index.js"
 		},
 		"./svelte": {
-			"types": "./dist/svelte/index.d.ts",
-			"svelte": "./dist/svelte/index.js",
-			"default": "./dist/svelte/index.js"
+			"types": "./dist/advanced-svelte/index.d.ts",
+			"svelte": "./dist/advanced-svelte/index.js",
+			"default": "./dist/advanced-svelte/index.js"
 		}
 	},
 	"scripts": {
 		"clean": "rm -rf dist",
 		"check:ts": "tsc --noEmit -p ./tsconfig.json",
-		"check:svelte": "svelte-check --tsconfig ./tsconfig.json --incremental --diagnostic-sources \"svelte,css\"",
-		"check": "pnpm check:ts && pnpm check:svelte",
-		"package": "pnpm clean && svelte-package --tsconfig ./tsconfig.json",
-		"package:watch": "svelte-package --tsconfig ./tsconfig.json --watch",
+		"check:svelte": "advanced-svelte-check --tsconfig ./tsconfig.json --incremental --diagnostic-sources \"advanced-svelte,css\"",
+		"check": "pnpm check:ts && pnpm check:advanced-svelte",
+		"package": "pnpm clean && advanced-svelte-package --tsconfig ./tsconfig.json",
+		"package:watch": "advanced-svelte-package --tsconfig ./tsconfig.json --watch",
 		"prepack": "pnpm check && pnpm package"
 	},
 	"dependencies": {
@@ -163,7 +163,7 @@ make sure to add internal dependencies
 
 ```json
 {
-	"name": "@svelte-ascend/hotkeys",
+	"name": "@advanced-svelte-ascend/hotkeys",
 	"version": "0.1.0-alpha.0",
 	"private": true,
 	"type": "module",
@@ -174,18 +174,18 @@ make sure to add internal dependencies
 			"default": "./dist/index.js"
 		},
 		"./svelte": {
-			"types": "./dist/svelte/index.d.ts",
-			"svelte": "./dist/svelte/index.js",
-			"default": "./dist/svelte/index.js"
+			"types": "./dist/advanced-svelte/index.d.ts",
+			"svelte": "./dist/advanced-svelte/index.js",
+			"default": "./dist/advanced-svelte/index.js"
 		}
 	},
 	"scripts": {
 		"clean": "rm -rf dist",
 		"check:ts": "tsc --noEmit -p ./tsconfig.json",
-		"check:svelte": "svelte-check --tsconfig ./tsconfig.json --incremental --diagnostic-sources \"svelte,css\"",
-		"check": "pnpm check:ts && pnpm check:svelte",
-		"package": "pnpm clean && svelte-package --tsconfig ./tsconfig.json",
-		"package:watch": "svelte-package --tsconfig ./tsconfig.json --watch",
+		"check:svelte": "advanced-svelte-check --tsconfig ./tsconfig.json --incremental --diagnostic-sources \"advanced-svelte,css\"",
+		"check": "pnpm check:ts && pnpm check:advanced-svelte",
+		"package": "pnpm clean && advanced-svelte-package --tsconfig ./tsconfig.json",
+		"package:watch": "advanced-svelte-package --tsconfig ./tsconfig.json --watch",
 		"prepack": "pnpm check && pnpm package"
 	},
 	"dependencies": {

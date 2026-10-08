@@ -31,7 +31,7 @@
 	}: Props = $props();
 
 	let isOverlay = $state(false);
-	// svelte-ignore state_referenced_locally
+	// advanced-svelte-ignore state_referenced_locally
 	let isSidebarOpen = $state(defaultOpen);
 
 	function readStoredDesktopState(): boolean {

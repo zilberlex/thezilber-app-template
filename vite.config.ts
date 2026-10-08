@@ -1,13 +1,7 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import { scssGlobals } from './vite-plugins/scss-globals.plugin';
+import { svelteAscendStyles } from '@svelte-ascend/ui/vite';
 
 export default defineConfig({
-	plugins: [
-		sveltekit(),
-		scssGlobals({
-			modules: ['packages/ui/style/utility', 'packages/ui/style/effects'],
-			exclude: ['packages/ui/style/', 'ui/style']
-		})
-	]
+	plugins: [sveltekit(), svelteAscendStyles()]
 });

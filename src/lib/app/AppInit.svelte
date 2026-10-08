@@ -11,11 +11,11 @@
 	import EngineErrorHandler from './EngineErrorHandler.svelte';
 	import { HotKeysInitialization } from '@svelte-ascend/hotkey-module/svelte';
 	import { engineElementInteraction } from '$lib/engine/engine-hotkeys/engine-interactions';
-	import { StyleLoader } from '../../../packages/ui/svelte';
+	import { StyleLoader } from '../../../packages/ui/src/lib/svelte';
 	import { KeyboardNavigationManager } from '@svelte-ascend/keyboard-navigation/svelte';
-	import { HackerBlueTheme } from '../../../packages/ui/style/themes/hacker-blue/svelte';
-	import { HackerBlueElements3DStyles } from '../../../packages/ui/style/themes/hacker-blue/integrations/elements-3d/svelte';
-	import { HackerBlueKeyboardNavigationStyles } from '../../../packages/ui/style/themes/hacker-blue/integrations/keyboard-navigation/svelte';
+	import { HackerBlueTheme } from '../../../packages/ui/src/lib/style/themes/hacker-blue/svelte';
+	import { HackerBlueElements3DStyles } from '../../../packages/ui/src/lib/style/themes/hacker-blue/integrations/elements-3d/svelte';
+	import { HackerBlueKeyboardNavigationStyles } from '../../../packages/ui/src/lib/style/themes/hacker-blue/integrations/keyboard-navigation/svelte';
 	import { CleanupUnloadCheck, UnloadChecks } from '@svelte-ascend/core/svelte';
 
 	let { children } = $props();

@@ -27,7 +27,7 @@ export default ts.config(
 		}
 	},
 	{
-		files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
+		files: ['**/*.advanced-svelte', '**/*.advanced-svelte.ts', '**/*.advanced-svelte.js'],
 		languageOptions: {
 			parserOptions: {
 				projectService: true,

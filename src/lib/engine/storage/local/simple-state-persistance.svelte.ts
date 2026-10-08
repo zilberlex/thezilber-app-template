@@ -1,4 +1,4 @@
-// simple-state-persistance.svelte.ts
+// simple-state-persistance.advanced-svelte.ts
 import * as devalue from 'devalue';
 import { loadLocalStorage, saveLocalStorage } from './local-storage-repository';
 

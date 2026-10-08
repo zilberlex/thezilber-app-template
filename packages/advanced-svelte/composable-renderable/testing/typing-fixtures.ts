@@ -1,7 +1,7 @@
 import type { Component, Snippet } from 'svelte';
 
-import { componentRenderable } from '../renderable-factories';
-import type { AnyRenderable, ComposedComponentProps, RenderableSlotProps } from '../types';
+import { componentRenderable } from '../src/lib/renderable-factories';
+import type { AnyRenderable, ComposedComponentProps, RenderableSlotProps } from '../src/lib/types';
 
 declare const content: Snippet;
 

@@ -1,6 +1,6 @@
 export { default as ComposedComponent } from './ComposedComponent.svelte';
 
-export { componentRenderable, htmlRenderable, snippetRenderable } from './renderable-factories';
+export { componentRenderable, htmlRenderable, snippetRenderable } from './renderable-factories.js';
 
 export type {
 	AnyHTMLRenderable,
@@ -17,4 +17,4 @@ export type {
 	SnippetRenderable,
 	VoidHTMLRenderable,
 	VoidHTMLTag
-} from './types';
+} from './types.js';
