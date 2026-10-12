@@ -48,7 +48,10 @@
 		return untrack(() => {
 			if (!dialogController.activeDialog) return;
 
-			const cleanupHotkey = hotkeyManager.assignHotKey(kbKey('Escape'), closeDialogHandler, { isCapture: true });
+			const cleanupHotkey = hotkeyManager.assignHotKey(kbKey('Escape'), closeDialogHandler, {
+				isCapture: true,
+				prioritizeInputFieldDefaults: false
+			});
 
 			const thisJob = ++focusOpenDialogJobCounter;
 			const activeElement = document.activeElement;

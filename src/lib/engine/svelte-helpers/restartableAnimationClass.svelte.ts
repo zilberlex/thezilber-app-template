@@ -1,4 +1,4 @@
-// restartClassAnimation.svelte.ts
+// restartClassAnimation.advanced-svelte.ts
 import { nextFrame } from '@svelte-ascend/core';
 
 export function restartableAnimationClass() {

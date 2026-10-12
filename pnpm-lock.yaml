@@ -20,9 +20,15 @@ importers:
       '@fontsource/audiowide':
         specifier: ^5.2.7
         version: 5.2.7
+      '@svelte-ascend/advanced-svelte':
+        specifier: link:../svelte-ascend/packages/advanced-svelte
+        version: link:../svelte-ascend/packages/advanced-svelte
       '@svelte-ascend/core':
         specifier: link:../svelte-ascend/packages/core
         version: link:../svelte-ascend/packages/core
+      '@svelte-ascend/elements-3d':
+        specifier: link:../svelte-ascend/packages/elements-3d
+        version: link:../svelte-ascend/packages/elements-3d
       '@svelte-ascend/hotkey-module':
         specifier: link:../svelte-ascend/packages/hotkey-module
         version: link:../svelte-ascend/packages/hotkey-module
@@ -32,6 +38,9 @@ importers:
       '@svelte-ascend/keyboard-navigation':
         specifier: link:../svelte-ascend/packages/keyboard-navigation
         version: link:../svelte-ascend/packages/keyboard-navigation
+      '@svelte-ascend/ui':
+        specifier: link:../svelte-ascend/packages/ui
+        version: link:../svelte-ascend/packages/ui
       devalue:
         specifier: ^5.8.1
         version: 5.8.1
@@ -1988,6 +1997,10 @@ snapshots:
     dependencies:
       acorn: 8.16.0
 
+  '@sveltejs/acorn-typescript@1.0.9(acorn@8.18.0)':
+    dependencies:
+      acorn: 8.18.0
+
   '@sveltejs/adapter-auto@6.1.1(@sveltejs/kit@2.59.0(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.5(@typescript-eslint/types@8.59.1))(vite@7.3.2(@types/node@25.6.0)(sass@1.99.0)))(svelte@5.55.5(@typescript-eslint/types@8.59.1))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(sass@1.99.0)))':
     dependencies:
       '@sveltejs/kit': 2.59.0(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.5(@typescript-eslint/types@8.59.1))(vite@7.3.2(@types/node@25.6.0)(sass@1.99.0)))(svelte@5.55.5(@typescript-eslint/types@8.59.1))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(sass@1.99.0))
@@ -1999,10 +2012,10 @@ snapshots:
   '@sveltejs/kit@2.59.0(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.5(@typescript-eslint/types@8.59.1))(vite@7.3.2(@types/node@25.6.0)(sass@1.99.0)))(svelte@5.55.5(@typescript-eslint/types@8.59.1))(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(sass@1.99.0))':
     dependencies:
       '@standard-schema/spec': 1.1.0
-      '@sveltejs/acorn-typescript': 1.0.9(acorn@8.16.0)
+      '@sveltejs/acorn-typescript': 1.0.9(acorn@8.18.0)
       '@sveltejs/vite-plugin-svelte': 6.2.4(svelte@5.55.5(@typescript-eslint/types@8.59.1))(vite@7.3.2(@types/node@25.6.0)(sass@1.99.0))
       '@types/cookie': 0.6.0
-      acorn: 8.16.0
+      acorn: 8.18.0
       cookie: 1.1.1
       devalue: 5.8.1
       esm-env: 1.2.2
@@ -2330,7 +2343,7 @@ snapshots:
       postcss: 8.5.13
       postcss-load-config: 3.1.4(postcss@8.5.13)
       postcss-safe-parser: 7.0.1(postcss@8.5.13)
-      semver: 7.7.4
+      semver: 7.8.5
       svelte-eslint-parser: 1.6.0(svelte@5.55.5(@typescript-eslint/types@8.59.1))
     optionalDependencies:
       svelte: 5.55.5(@typescript-eslint/types@8.59.1)
@@ -2893,7 +2906,7 @@ snapshots:
       postcss: 8.5.13
       postcss-scss: 4.0.9(postcss@8.5.13)
       postcss-selector-parser: 7.1.1
-      semver: 7.7.4
+      semver: 7.8.5
     optionalDependencies:
       svelte: 5.55.5(@typescript-eslint/types@8.59.1)
 

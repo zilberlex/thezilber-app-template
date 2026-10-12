@@ -67,7 +67,7 @@
 			isNonInertElement
 		);
 
-		// Gets the closest element. in svelte indexing via attribute is instant change -> if you index by attribute - the list is updated straight away, but the original item also maintains its original index
+		// Gets the closest element. in advanced-svelte indexing via attribute is instant change -> if you index by attribute - the list is updated straight away, but the original item also maintains its original index
 		const nextElem =
 			itemElements.find((el) => getItemIndex(el) >= index) ?? itemElements.findLast((el) => getItemIndex(el) < index);
 
