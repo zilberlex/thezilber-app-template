@@ -1,7 +1,11 @@
 <script lang="ts">
-	import { componentRenderable, htmlRenderable, snippetRenderable } from '../../../../packages/advanced-svelte/composable-renderable/src/lib';
+	import {
+		componentRenderable,
+		htmlRenderable,
+		snippetRenderable
+	} from '@svelte-ascend/advanced-svelte/composable-renderable';
 
-	import Element3D from '../../../../packages/elements-3d/src/lib/Element3D.svelte';
+	import Element3D from '@svelte-ascend/elements-3d';
 
 	import StatefulFace from './StatefulFace.svelte';
 	import Button from '$lib/ui/basic-components/Button.svelte';
