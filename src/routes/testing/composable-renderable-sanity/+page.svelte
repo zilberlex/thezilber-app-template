@@ -4,7 +4,7 @@
 		componentRenderable,
 		htmlRenderable,
 		snippetRenderable
-	} from '../../../../packages/advanced-svelte/composable-renderable/src/lib';
+	} from '@svelte-ascend/advanced-svelte/composable-renderable';
 
 	import TestComponent from './TestComponent.svelte';
 
