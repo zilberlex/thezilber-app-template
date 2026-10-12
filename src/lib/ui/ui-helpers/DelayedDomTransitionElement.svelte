@@ -4,7 +4,7 @@
 	const { delayMs = 0, isVisible = true, children } = $props();
 	// This element delays the freeze of elements when they leave the DOM - useful for application of animations.
 
-	// advanced-svelte-ignore state_referenced_locally
+	// svelte-ignore state_referenced_locally
 	let isVisibleInternal = $state(isVisible);
 
 	let lastTimeout: number | undefined = undefined;

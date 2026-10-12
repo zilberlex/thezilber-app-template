@@ -1,5 +1,5 @@
 export function getRoutes() {
-	const modules = import.meta.glob('/src/routes/**/+page.advanced-svelte');
+	const modules = import.meta.glob('/src/routes/**/+page.svelte');
 	const ret = [];
 
 	for (const path in modules) {

@@ -8,10 +8,10 @@
 
 	let { navigationManager }: { navigationManager?: NavigationManager } = $props();
 
-	// advanced-svelte-ignore state_referenced_locally
+	// svelte-ignore state_referenced_locally
 	const navigationManagerDerived = $derived(navigationManager ?? getNavigationManager());
 
-	// advanced-svelte-ignore state_referenced_locally
+	// svelte-ignore state_referenced_locally
 	let debugInfo = $state(navigationManagerDerived._debugInfo());
 
 	let debugInfoDisplay = $derived({
