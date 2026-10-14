@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { loadLocalState, saveLocalState } from '$lib/engine/storage/local/simple-state-persistance.svelte';
+	import { loadLocalState, saveLocalState } from '$lib/engine/storage/local/simple-state-persistance.svelte.js';
 	import { copyState } from '$lib/engine/svelte-helpers/copy-state';
-	import { appState } from '$lib/engine/state/application-state.svelte';
+	import { appState } from '$lib/engine/state/application-state.svelte.js';
 	import Button from '$lib/ui/basic-components/Button.svelte';
-	import {KeyboardNavigationScope} from '@svelte-ascend/keyboard-navigation/svelte';
+	import {KeyboardNavigationScope} from '../../../../../svelte-ascend/packages/keyboard-navigation/dist/svelte';
 	import InputCombo from '$lib/ui/basic-components/InputCombo.svelte';
 	import ItemSlot from './ItemSlot.svelte';
 	import Portal from '$lib/ui/components/portal/Portal.svelte';
 	import LogViewer from '$lib/ui/components/logging/LogViewer.svelte';
 	import AnchoredRegion from '$lib/ui/components/layout/AnchoredRegion.svelte';
-	import { DemoManager } from './demo-manager.svelte';
+	import { DemoManager } from './demo-manager.svelte.js';
 	import { beforeNavigate } from '$app/navigation';
-	import { NavigationKeysConfigSets } from '@svelte-ascend/keyboard-navigation';
+	import { NavigationKeysConfigSets } from '../../../../../svelte-ascend/packages/keyboard-navigation/dist';
 	import { createHotKeyTriggerClickAttachment } from '$lib/engine/engine-hotkeys/hotkey-actions';
-	import { kbKey } from '@svelte-ascend/core';
+	import { kbKey } from '../../../../../svelte-ascend/packages/core/dist';
 
 	let inputKey = $state('');
 	let inputValue = $state('');

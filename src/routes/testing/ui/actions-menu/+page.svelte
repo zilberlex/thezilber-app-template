@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { ActionWithCleanup } from '@svelte-ascend/core';
-	import { appState } from '$lib/engine/state/application-state.svelte';
-	import { externalBinding } from '$lib/engine/svelte-helpers/binding.svelte';
-	import { actionsMenuEntry, type ActionsMenuEntry } from '$lib/ui/components/actions-menu/action-menu-entry.svelte';
+	import type { ActionWithCleanup } from '../../../../../../svelte-ascend/packages/core/dist';
+	import { appState } from '$lib/engine/state/application-state.svelte.js';
+	import { externalBinding } from '$lib/engine/svelte-helpers/binding.svelte.js';
+	import { actionsMenuEntry, type ActionsMenuEntry } from '$lib/ui/components/actions-menu/action-menu-entry.svelte.js';
 	import ActionsMenu from '$lib/ui/components/actions-menu/ActionsMenu.svelte';
 
 	function createToggleRule(action: ActionWithCleanup) {

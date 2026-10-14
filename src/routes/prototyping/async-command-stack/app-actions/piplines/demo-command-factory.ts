@@ -1,9 +1,9 @@
-import { AsyncSerialQueue } from '@svelte-ascend/core';
-import type { CommandRegistry } from '@svelte-ascend/core';
+import { AsyncSerialQueue } from '../../../../../../../svelte-ascend/packages/core/dist';
+import type { CommandRegistry } from '../../../../../../../svelte-ascend/packages/core/dist';
 import {
 	definePipelineSpecs,
 	PipelineCommandFactory
-} from '@svelte-ascend/core';
+} from '../../../../../../../svelte-ascend/packages/core/dist';
 import { clearSteps } from './clear-pipeline';
 import { deleteSteps } from './delete-pipeline';
 import { insertSteps } from './insert-pipline';

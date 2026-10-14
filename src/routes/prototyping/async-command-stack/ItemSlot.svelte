@@ -2,7 +2,7 @@
 	import { fadeAndSlide } from '$lib/engine/transitions/fade-and-slide';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import { untrack } from 'svelte';
-	import { restartableAnimationClass } from '$lib/engine/svelte-helpers/restartableAnimationClass.svelte';
+	import { restartableAnimationClass } from '$lib/engine/svelte-helpers/restartableAnimationClass.svelte.js';
 
 	let {
 		key,
