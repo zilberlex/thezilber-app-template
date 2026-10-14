@@ -1,5 +1,5 @@
 <script>
-	import { appState } from '$lib/engine/state/application-state.svelte';
+	import { appState } from '$lib/engine/state/application-state.svelte.ts';
 	import Button from '$lib/ui/basic-components/Button.svelte';
 	import Dialog from '$lib/ui/components/dialog/Dialog.svelte';
 

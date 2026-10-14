@@ -1,7 +1,7 @@
-import { sleep } from '@svelte-ascend/core';
-import type { PipelineSteps } from '@svelte-ascend/core';
-import { errorResult } from '@svelte-ascend/core';
-import { pipelineStep } from '@svelte-ascend/core';
+import { sleep } from '../../../../../../../svelte-ascend/packages/core/dist';
+import type { PipelineSteps } from '../../../../../../../svelte-ascend/packages/core/dist';
+import { errorResult } from '../../../../../../../svelte-ascend/packages/core/dist';
+import { pipelineStep } from '../../../../../../../svelte-ascend/packages/core/dist';
 import type { DemoCommandDeps, UpdateCtx } from './types';
 
 const startingStep = pipelineStep(

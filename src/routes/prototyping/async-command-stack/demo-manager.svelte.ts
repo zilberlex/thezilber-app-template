@@ -1,7 +1,7 @@
-import { type CommandRegistry } from '@svelte-ascend/core';
+import { type CommandRegistry } from '../../../../../svelte-ascend/packages/core/dist';
 import { SvelteMap } from 'svelte/reactivity';
 import { DemoCommandFactory } from './app-actions/piplines/demo-command-factory';
-import { appState } from '$lib/engine/state/application-state.svelte';
+import { appState } from '$lib/engine/state/application-state.svelte.js';
 import type { ClearCtx, DeleteCtx, InsertCtx, UpdateCtx } from './app-actions/piplines/types';
 import type { EngineLogger } from '$lib/engine/logging/engine-logger';
 
