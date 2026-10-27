@@ -8,13 +8,13 @@
 
 <div class="cv-panel">
 	<Tabs>
-		<Tab name="About" color="#02b6f2">
+		<Tab name="About" color="#02b6f2" href="about">
 			<AboutPageRevised />
 		</Tab>
-		<Tab name="Svelte" color="#ff3e00">
+		<Tab name="Svelte" color="#ff3e00" href="svelte">
 			<SveltePageRefined />
 		</Tab>
-		<Tab name="C#" color="#9b7bff">
+		<Tab name="C#" color="#9b7bff" href="c-sharp">
 			<CSharpPage />
 		</Tab>
 	</Tabs>

@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { untrack, type Snippet } from 'svelte';
 	import { setTabsContext, type TabDefinition } from './tabs-context';
+	import { page } from '$app/state';
+	import { getBasePath, getContextPath } from '$lib/engine/routing/routing-helps';
 
 	let { children }: { children: Snippet } = $props();
 
 	let tabs = $state<TabDefinition[]>([]);
-	let activeId = $state<symbol | null>(null);
+	const tabUrl = (key: string) => getContextPath(getBasePath('[[tab]]'), key).pathname;
+	let activeId = $derived(tabs.find((tab) => tabUrl(tab.href) === page.url.pathname)?.id ?? tabs[0]?.id ?? null);
 
 	let activeTab1 = $state<TabDefinition>();
 	let activeTab2 = $state<TabDefinition>();
@@ -38,11 +41,9 @@
 	setTabsContext({
 		register(tab) {
 			tabs.push(tab);
-			if (activeId === null) activeId = tab.id;
 
 			return () => {
 				tabs = tabs.filter((item) => item.id !== tab.id);
-				if (activeId === tab.id) activeId = tabs[0]?.id ?? null;
 			};
 		}
 	});
@@ -51,18 +52,16 @@
 <div class="tabs" style:--color={currentTab?.color}>
 	<div class="tab-list" role="tablist">
 		{#each tabs as tab, i (tab.id)}
-			<button
-				role="tab"
-				id="{uid}-tab-{i}"
-				aria-controls="{uid}-panel"
-				aria-selected={activeId === tab.id}
-				tabindex={activeId === tab.id ? 0 : -1}
-				onclick={() => (activeId = tab.id)}
+			<a
+				href={tabUrl(tab.href)}
+				aria-current={activeId === tab.id ? 'page' : undefined}
 				style:--color={tab.color}
+				style:--ef_change-colors_col1={tab.color}
+				style:--ef_change-colors_col2={'var(--cl-on-surface)'}
 				data-active={currentTab?.id === tab.id ? '' : null}
 			>
 				{tab.name}
-			</button>
+			</a>
 		{/each}
 	</div>
 
@@ -114,12 +113,16 @@
 		z-index: 1;
 	}
 
-	.tab-list button {
+	.tab-list a {
 		--_color: var(--color, var(--cl-primary));
 		&,
 		&::before,
 		&::after {
 			all: unset;
+		}
+
+		&:is(:hover) {
+			text-decoration: none;
 		}
 
 		position: relative;

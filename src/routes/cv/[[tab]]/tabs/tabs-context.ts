@@ -4,6 +4,7 @@ export type TabDefinition = {
 	id: symbol;
 	name: string;
 	color?: string;
+	href: string;
 	content: Snippet;
 };
 

@@ -1,8 +1,8 @@
 <script>
-	import { Element3D, TrackingElement3D } from '@svelte-ascend/elements-3d';
+	import { Element3D, TrackingElement3D } from '../../../../../../../svelte-ascend/packages/elements-3d/dist/index.d.ts';
 	import SvelteIcon from '../SvelteIcon.svelte';
 	import IconSurface3D from '../IconSurface3D.svelte';
-	import { componentRenderable } from '@svelte-ascend/advanced-svelte/composable-renderable';
+	import { componentRenderable } from '../../../../../../../svelte-ascend/packages/advanced-svelte/dist/composable-renderable/index.d.ts';
 	import '../../styles/index.css';
 
 	let mainArea = $state();
