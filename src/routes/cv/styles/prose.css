@@ -1,0 +1,76 @@
+/*
+ * Long-form reading container: line length, text color hierarchy and
+ * heading rhythm. Element rules are wrapped in :where() so any single-class
+ * element style (.list, .note, ...) can override them.
+ */
+
+.prose {
+	--_accent: var(--color, var(--cl-primary));
+
+	max-width: var(--measure);
+	margin-inline: auto;
+
+	color: var(--cl-on-surface-dim);
+	line-height: var(--leading-relaxed);
+}
+
+.prose :where(h2) {
+	display: flex;
+	align-items: baseline;
+	gap: var(--space-3);
+
+	margin-block: var(--space-12) var(--space-2);
+
+	color: var(--cl-on-surface);
+	font-size: var(--font-size-6);
+	font-weight: var(--font-weight-semibold);
+	line-height: var(--leading-snug);
+}
+
+.prose :where(h3) {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2) var(--space-3);
+
+	margin-block: var(--space-8) var(--space-3);
+
+	color: var(--cl-on-surface);
+	font-size: var(--font-size-3);
+	font-weight: var(--font-weight-semibold);
+}
+
+.prose :where(h4) {
+	margin-block: var(--space-6) var(--space-3);
+
+	color: var(--cl-on-surface-dimmer);
+	font-size: var(--font-size-1);
+	font-weight: var(--font-weight-medium);
+	letter-spacing: var(--tracking-widest);
+	text-transform: uppercase;
+}
+
+.prose :where(p) {
+	margin-block-end: var(--space-3);
+}
+
+.prose :where(strong) {
+	color: var(--cl-on-surface);
+	font-weight: var(--font-weight-semibold);
+}
+
+/* Small "01" style counter placed before a heading's text */
+.heading-index {
+	color: var(--_accent, var(--cl-primary));
+	font-size: var(--font-size-2);
+	font-weight: var(--font-weight-regular);
+	letter-spacing: var(--tracking-wider);
+}
+
+/* Secondary text: footnotes, asides */
+.note {
+	margin-block: var(--space-2) 0;
+
+	color: var(--cl-on-surface-dimmer);
+	font-size: var(--font-size-2);
+}

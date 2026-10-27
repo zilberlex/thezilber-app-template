@@ -1,0 +1,150 @@
+/*
+ * Disclosure panel for <details class="disclosure">.
+ * Picks up the local accent through --color, falls back to the theme primary.
+ * Optional right-aligned hint: <summary>Title <span class="disclosure-hint">…</span></summary>
+ */
+
+.disclosure {
+	--_accent: var(--color, var(--cl-primary));
+	--_border: color-mix(in oklch, var(--_accent) var(--mix-border), transparent);
+	--_radius: var(--radius-md);
+	--_pad-inline: var(--space-5);
+
+	margin-block: var(--space-6);
+
+	background: color-mix(in oklch, var(--_accent) var(--mix-tint-faint), var(--cl-surface));
+	border: var(--border-thin) solid var(--_border);
+	border-radius: var(--_radius);
+
+	transition:
+		border-color var(--duration-fast) var(--easing-out),
+		box-shadow var(--duration-fast) var(--easing-out);
+
+	&:hover,
+	&:has(> summary:focus-visible),
+	&[open] {
+		border-color: var(--_accent);
+	}
+
+	&[open] {
+		box-shadow: 0 0 24px -10px color-mix(in oklch, var(--_accent) var(--mix-glow), transparent);
+	}
+
+	/* Anything inside other than the summary gets the same side gutter */
+	& > :not(summary) {
+		margin-inline: var(--_pad-inline);
+	}
+
+	& > summary + * {
+		margin-block-start: var(--space-5);
+	}
+
+	& > :last-child:not(summary) {
+		margin-block-end: var(--space-5);
+	}
+}
+
+.disclosure > summary {
+	list-style: none;
+
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+
+	padding: var(--space-3) var(--_pad-inline);
+
+	color: var(--cl-on-surface);
+	font-weight: var(--font-weight-semibold);
+
+	border-radius: calc(var(--_radius) - var(--border-thin));
+	cursor: pointer;
+	user-select: none;
+
+	transition: background-color var(--duration-fast) var(--easing-out);
+
+	&::-webkit-details-marker {
+		display: none;
+	}
+
+	/* Chevron: points right when closed, down when open */
+	&::before {
+		content: '';
+		flex: none;
+
+		inline-size: 0.45em;
+		block-size: 0.45em;
+		margin-inline-end: var(--space-1);
+
+		border-right: var(--border-thick) solid var(--_accent);
+		border-bottom: var(--border-thick) solid var(--_accent);
+
+		transform: rotate(-45deg);
+		transition: transform var(--duration-base) var(--easing-out);
+	}
+
+	&:hover {
+		background-color: color-mix(in oklch, var(--_accent) var(--mix-tint), transparent);
+	}
+
+	&:focus-visible {
+		outline: var(--border-thick) solid var(--_accent);
+		outline-offset: 3px;
+	}
+}
+
+.disclosure[open] > summary {
+	border-bottom: var(--border-thin) solid var(--_border);
+	border-end-start-radius: 0;
+	border-end-end-radius: 0;
+
+	&::before {
+		transform: rotate(45deg);
+	}
+}
+
+.disclosure-hint {
+	margin-inline-start: auto;
+
+	color: var(--cl-on-surface-dimmer);
+	font-size: var(--font-size-1);
+	font-weight: var(--font-weight-regular);
+	letter-spacing: var(--tracking-wide);
+	text-transform: uppercase;
+	text-align: end;
+
+	@media (width < 640px) {
+		display: none;
+	}
+}
+
+/* Animate the height where the browser supports it (Chromium 131+) */
+@supports selector(::details-content) {
+	.disclosure {
+		interpolate-size: allow-keywords;
+	}
+
+	.disclosure::details-content {
+		block-size: 0;
+		overflow: clip;
+		opacity: 0;
+
+		transition:
+			block-size var(--duration-slow) var(--easing-out),
+			opacity var(--duration-base) var(--easing-out),
+			content-visibility var(--duration-slow) allow-discrete;
+	}
+
+	.disclosure[open]::details-content {
+		block-size: auto;
+		opacity: 1;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.disclosure,
+	.disclosure > summary,
+	.disclosure > summary::before,
+	.disclosure::details-content {
+		transition: none;
+	}
+}

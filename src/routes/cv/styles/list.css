@@ -1,0 +1,44 @@
+/*
+ * Bulleted list with an accent arrow marker.
+ * Modifiers: .list-nested (indented, guide line, muted dash), .list-compact (tighter gap).
+ */
+
+.list {
+	--_accent: var(--color, var(--cl-primary));
+
+	display: grid;
+	gap: var(--space-2);
+
+	margin: 0;
+	padding: 0;
+
+	list-style: none;
+
+	& > li {
+		position: relative;
+		padding-inline-start: 1.6em;
+
+		&::before {
+			content: '▸';
+			position: absolute;
+			inset-inline-start: 0.2em;
+			color: var(--_accent);
+		}
+	}
+}
+
+.list-nested {
+	margin-block: var(--space-2) var(--space-1);
+	padding-inline-start: var(--space-2);
+	border-inline-start: var(--border-thin) solid
+		color-mix(in oklch, var(--_accent) var(--mix-border-subtle), transparent);
+
+	& > li::before {
+		content: '–';
+		color: var(--cl-on-surface-dimmer);
+	}
+}
+
+.list-compact {
+	gap: var(--space-1);
+}

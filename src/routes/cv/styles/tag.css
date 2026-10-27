@@ -1,0 +1,38 @@
+.tag {
+	--_accent: var(--color, var(--cl-primary));
+
+	padding: 0 var(--space-2);
+
+	color: var(--_accent);
+	font-size: var(--font-size-1);
+	font-weight: var(--font-weight-regular);
+	letter-spacing: var(--tracking-wide);
+
+	border: var(--border-thin) solid color-mix(in oklch, var(--_accent) var(--mix-border-subtle), transparent);
+	border-radius: var(--radius-sm);
+}
+
+.tag-list {
+	--_accent: var(--color, var(--cl-primary));
+
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+
+	margin: 0;
+	padding: 0;
+
+	list-style: none;
+
+	& > li {
+		padding: var(--space-1) var(--space-2);
+
+		color: var(--cl-on-surface);
+		font-size: var(--font-size-2);
+		line-height: var(--leading-snug);
+
+		background: color-mix(in oklch, var(--_accent) var(--mix-tint-strong), transparent);
+		border: var(--border-thin) solid color-mix(in oklch, var(--_accent) var(--mix-border-subtle), transparent);
+		border-radius: var(--radius-sm);
+	}
+}

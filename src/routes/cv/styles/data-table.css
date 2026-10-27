@@ -1,0 +1,45 @@
+/*
+ * Compact data table with hairline rows. Row headers (<th scope="row">)
+ * take the accent; the last column is right-aligned for numbers.
+ * Wrap in .data-table-wrap to scroll horizontally on narrow screens.
+ */
+
+.data-table-wrap {
+	overflow-x: auto;
+}
+
+.data-table {
+	--_accent: var(--color, var(--cl-primary));
+	--_hairline: color-mix(in oklch, var(--_accent) var(--mix-border-subtle), transparent);
+
+	inline-size: 100%;
+	border-collapse: collapse;
+	font-size: var(--font-size-2);
+
+	& th,
+	& td {
+		padding: var(--space-2) var(--space-3);
+		text-align: start;
+		vertical-align: top;
+		border-bottom: var(--border-thin) solid var(--_hairline);
+	}
+
+	& thead th {
+		color: var(--cl-on-surface-dimmer);
+		font-size: var(--font-size-1);
+		font-weight: var(--font-weight-medium);
+		letter-spacing: var(--tracking-wider);
+		text-transform: uppercase;
+	}
+
+	& tbody th {
+		color: var(--_accent);
+		font-weight: var(--font-weight-semibold);
+	}
+
+	& td:last-child,
+	& thead th:last-child {
+		text-align: end;
+		white-space: nowrap;
+	}
+}

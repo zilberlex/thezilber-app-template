@@ -1,0 +1,46 @@
+/*
+ * Page header: small accent label, title, lead sentence.
+ *
+ * <header class="page-header">
+ *   <p class="eyebrow">Section · Topic</p>
+ *   <h1 class="page-title">Title</h1>
+ *   <p class="lead">One-sentence summary.</p>
+ * </header>
+ */
+
+.page-header {
+	--_accent: var(--color, var(--cl-primary));
+	--_hairline: color-mix(in oklch, var(--_accent) var(--mix-border-subtle), transparent);
+
+	padding-block-end: var(--space-8);
+	border-bottom: var(--border-thin) solid var(--_hairline);
+}
+
+.eyebrow {
+	--_accent: var(--color, var(--cl-primary));
+
+	color: var(--_accent);
+	font-size: var(--font-size-1);
+	letter-spacing: var(--tracking-widest);
+	text-transform: uppercase;
+}
+
+/* Overrides the theme's h1 size (--font-size-xl), which is smaller than an h2 */
+.page-title {
+	margin-block: var(--space-2) var(--space-4);
+
+	color: var(--cl-on-surface);
+	font-family: var(--font-body);
+	font-size: var(--font-size-7);
+	font-weight: var(--font-weight-semibold);
+	line-height: var(--leading-tight);
+	letter-spacing: var(--tracking-tight);
+}
+
+.lead {
+	max-width: var(--measure-narrow);
+
+	color: var(--cl-on-surface);
+	font-size: var(--font-size-lg);
+	line-height: var(--leading-normal);
+}

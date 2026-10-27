@@ -1,0 +1,45 @@
+/*
+ * <dl class="definition-grid">: label/value pairs. Stacks on narrow
+ * containers, two columns (label left) once the container is wide enough.
+ * Needs a size container ancestor (container-type: inline-size) for the
+ * two-column layout; without one it stays stacked.
+ */
+
+.definition-grid {
+	--_accent: var(--color, var(--cl-primary));
+
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: var(--space-1) var(--space-6);
+
+	margin: 0;
+
+	& > dt {
+		margin-block-start: var(--space-4);
+
+		color: var(--_accent);
+		font-size: var(--font-size-1);
+		letter-spacing: var(--tracking-widest);
+		text-transform: uppercase;
+	}
+
+	& > dd {
+		margin: 0;
+		min-width: 0;
+
+		& > p:first-child {
+			margin-block-end: var(--space-2);
+		}
+	}
+}
+
+@container (width > 560px) {
+	.definition-grid {
+		grid-template-columns: 11ch 1fr;
+		row-gap: var(--space-5);
+
+		& > dt {
+			margin-block-start: 0.35em;
+		}
+	}
+}

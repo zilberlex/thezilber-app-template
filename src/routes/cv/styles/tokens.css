@@ -1,0 +1,45 @@
+:root {
+	/* Spacing: the theme scale stops at --space-8 (2rem) */
+	--space-10: 2.5rem;
+	--space-12: 3rem;
+	--space-16: 4rem;
+
+	/* Line height: the theme only has --sp-line-height (1.4) */
+	--leading-tight: 1.15;
+	--leading-snug: 1.3;
+	--leading-normal: 1.55;
+	--leading-relaxed: 1.65;
+
+	/* Letter spacing */
+	--tracking-tight: -0.01em;
+	--tracking-wide: 0.06em;
+	--tracking-wider: 0.1em;
+	--tracking-widest: 0.16em;
+
+	/* Font weight */
+	--font-weight-regular: 400;
+	--font-weight-medium: 500;
+	--font-weight-semibold: 600;
+	--font-weight-bold: 700;
+
+	/* Readable line lengths */
+	--measure-narrow: 52ch;
+	--measure: 72ch;
+
+	/* Motion */
+	--duration-fast: 200ms;
+	--duration-base: 250ms;
+	--duration-slow: 300ms;
+	--easing-out: ease-out;
+
+	/*
+	 * Accent mix amounts. The accent itself is resolved per element
+	 * (see --_accent in each file), so only the percentages can live here.
+	 */
+	--mix-tint-faint: 4%;
+	--mix-tint: 8%;
+	--mix-tint-strong: 10%;
+	--mix-border-subtle: 25%;
+	--mix-border: 40%;
+	--mix-glow: 60%;
+}
