@@ -14,8 +14,21 @@
 		children: Snippet;
 	} = $props();
 
-	const context = getTabsContext();
-	const id = Symbol();
+	const unregister = getTabsContext().register({
+		id: Symbol(),
+		get name() {
+			return name;
+		},
+		get color() {
+			return color;
+		},
+		get href() {
+			return href;
+		},
+		get content() {
+			return children;
+		}
+	});
 
-	onMount(() => context.register({ id, name, color, href, content: children }));
+	onMount(() => unregister);
 </script>
