@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import type { Snippet } from 'svelte';
 	import { setTabsContext, type TabDefinition } from './tabs-context';
+	import { onNavigate } from '$app/navigation';
 
 	let { children }: { children: Snippet } = $props();
 
@@ -19,29 +20,44 @@
 			};
 		}
 	});
+
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) return;
+
+		return new Promise<void>((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 </script>
 
 <div class="tabs" style:--color={current?.color}>
 	{@render children()}
 
-	<nav class="tab-list" aria-label="Sections" data-sveltekit-reload>
+	<nav class="tab-list" aria-label="Sections">
 		{#each tabs as tab (tab.id)}
-			<a href={tab.href} aria-current={tab.href === active ? 'page' : undefined} style:--color={tab.color}>
+			<a
+				href={tab.href}
+				aria-current={tab.href === active ? 'page' : undefined}
+				style:--color={tab.color}
+				style:--ef_change-colors_col1={tab.color}
+				style:--ef_change-colors_col2={'var(--cl-on-surface)'}
+			>
 				{tab.name}
 			</a>
 		{/each}
 	</nav>
 
 	<div class="tab-content">
-		{@render current?.content()}
+		<div class="tab-content-inner">
+			{@render current?.content()}
+		</div>
 	</div>
 </div>
 
 <style>
-	@view-transition {
-		navigation: auto;
-	}
-
 	.tabs {
 		--_color: var(--color, var(--cl-primary));
 		--_border-radius: 0.5rem;
@@ -57,13 +73,11 @@
 		display: flex;
 		position: relative;
 		z-index: 1;
-		flex: none;
-
-		view-transition-name: tabs-navigation;
 	}
 
 	.tab-list a {
 		--_color: var(--color, var(--cl-primary));
+		z-index: 1;
 
 		position: relative;
 		display: block;
@@ -85,26 +99,30 @@
 		transition:
 			color 400ms,
 			border-color 400ms;
+
+		&[aria-current='page'] {
+			background: var(--_panel-bg);
+			color: inherit;
+			border-color: var(--_color);
+			transition: none;
+
+			&::after {
+				content: '';
+				position: absolute;
+
+				left: 0;
+				right: 0;
+				bottom: calc(-1 * var(--border-thick) - 2px);
+				height: calc(var(--border-thick) + 4px);
+
+				background: var(--_panel-bg);
+				pointer-events: none;
+			}
+		}
 	}
 
 	.tab-list a:hover {
 		text-decoration: none;
-	}
-
-	.tab-list a[aria-current='page'] {
-		color: inherit;
-		border-color: var(--_color);
-		transition: none;
-	}
-
-	.tab-list a[aria-current='page']::after {
-		content: '';
-		position: absolute;
-		left: 0;
-		right: 0;
-		bottom: calc(-1 * var(--border-thick));
-		height: var(--border-thick);
-		background: var(--_panel-bg);
 	}
 
 	.tab-list a:focus-visible {
@@ -115,31 +133,52 @@
 
 	.tab-content {
 		position: relative;
+		display: flex;
 		flex: 1;
+		min-height: 0;
+
+		overflow: hidden;
+		padding: var(--space-2);
+
+		border: var(--border-thick) solid var(--_color);
+		border-radius: 0 var(--_border-radius) var(--_border-radius) var(--_border-radius);
+		background: var(--_panel-bg);
+	}
+
+	.tab-content-inner {
+		flex: 1;
+		min-width: 0;
 		min-height: 0;
 
 		overflow: auto;
 		scrollbar-gutter: stable;
 
-		padding: var(--space-2);
-		border: var(--border-thick) solid var(--_color);
-		border-radius: 0 var(--_border-radius) var(--_border-radius) var(--_border-radius);
-		background: var(--_panel-bg);
-
 		view-transition-name: tabs-content;
 	}
 
-	:global(::view-transition-old(root)),
+	:global(::view-transition-group(root)),
+	:global(::view-transition-group(tabs-content)) {
+		animation: none;
+	}
+
+	:global(::view-transition-old(root)) {
+		display: none;
+	}
+
 	:global(::view-transition-new(root)) {
 		animation: none;
 	}
 
+	:global(::view-transition-image-pair(tabs-content)) {
+		overflow: clip;
+	}
+
 	:global(::view-transition-old(tabs-content)) {
-		animation: 250ms ease-out both tabs-fade-out;
+		animation: tabs-fade-out 300ms ease-out both;
 	}
 
 	:global(::view-transition-new(tabs-content)) {
-		animation: 300ms 150ms ease-in both tabs-fade-in;
+		animation: tabs-fade-in 300ms ease-out 250ms both;
 	}
 
 	@keyframes -global-tabs-fade-out {

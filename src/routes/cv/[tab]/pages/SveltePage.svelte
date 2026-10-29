@@ -1,10 +1,9 @@
 <script>
-	import { TrackingElement3D } from '../../../../../../svelte-ascend/packages/elements-3d/dist/index.d.ts';
 	import SvelteIcon from './SvelteIcon.svelte';
 	import IconSurface3D from './IconSurface3D.svelte';
-	import { componentRenderable } from '../../../../../../svelte-ascend/packages/advanced-svelte/dist/composable-renderable/index.d.ts';
 	import '../styles/tokens.css';
 	import '../styles/disclosure.css';
+	import { TrackingElement3D } from '@svelte-ascend/elements-3d';
 </script>
 
 <main>
