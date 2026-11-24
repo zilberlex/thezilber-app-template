@@ -1,4 +1,3 @@
-// Checked by svelte-check: each @ts-expect-error fails the check if its line stops being an error.
 import { fade, slide, type TransitionConfig } from 'svelte/transition';
 import { cubicOut, sineOut } from 'svelte/easing';
 import { typewriter } from '../../../typewriter';
