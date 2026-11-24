@@ -3,7 +3,7 @@ import type { Transition, TransitionOptions, TransitionParamsCommon } from '../t
 
 export type TransitionsByName = Record<string, Transition<any>>;
 
-export type TransitionParamsOf<T extends Transition<any>> = NonNullable<Parameters<T>[1]>;
+export type TransitionParamsOf<T extends Transition<any>> = Parameters<T>[1];
 
 export type SubtransitionParams<T extends Transition<any>> = TransitionParamsOf<T> & TransitionParamsCommon;
 
