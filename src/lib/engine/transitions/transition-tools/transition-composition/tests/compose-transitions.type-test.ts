@@ -21,15 +21,15 @@ logLineIn(node);
 logLineIn(node, { delay: 100, composedParams: { fade: { duration: 600 }, typewriter: { speed: 8 } } });
 logLineIn(node, { duration: 900, composedParams: { slide: { reverse: true } } }, { direction: 'in' });
 
-// @ts-expect-error: there is no subtransition named blur
+// @ts-expect-error
 logLineIn(node, { composedParams: { blur: { duration: 100 } } });
-// @ts-expect-error: slide's axis is 'x' or 'y'
+// @ts-expect-error
 logLineIn(node, { composedParams: { slide: { axis: 'z' } } });
-// @ts-expect-error: typewriter's speed is a number
+// @ts-expect-error
 logLineIn(node, { composedParams: { typewriter: { speed: 'fast' } } });
 
 composeTransitions({
-	// @ts-expect-error: fade has no axis
+	// @ts-expect-error
 	fade: { transition: fade, params: { axis: 'y' } }
 });
 
@@ -44,9 +44,9 @@ twoFades(node, { composedParams: { secondFade: { delay: 400 } } });
 const highlighted = composeTransitions({ highlight: { transition: highlight, params: { color: 'gold' } } });
 highlighted(node, { composedParams: { highlight: { duration: 300 } } });
 
-// @ts-expect-error: color is required when composing
+// @ts-expect-error
 composeTransitions({ highlight: { transition: highlight } });
-// @ts-expect-error: color is required when composing
+// @ts-expect-error
 composeTransitions({ highlight: { transition: highlight, params: { delay: 10 } } });
 
 const highlightedLogLine = composeTransitions({
@@ -55,5 +55,5 @@ const highlightedLogLine = composeTransitions({
 });
 highlightedLogLine(node, { composedParams: { logLine: { delay: 50, composedParams: { typewriter: { speed: 2 } } } } });
 
-// @ts-expect-error: the inner composition has no subtransition named blur
+// @ts-expect-error
 highlightedLogLine(node, { composedParams: { logLine: { composedParams: { blur: {} } } } });

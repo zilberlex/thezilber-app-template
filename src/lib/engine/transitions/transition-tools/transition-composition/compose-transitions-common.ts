@@ -17,11 +17,9 @@ export type SubtransitionDefinitions<Transitions extends Record<string, AnyTrans
 	[Name in keyof Transitions]: SubtransitionDefinition<Transitions[Name]>;
 };
 
-/** `duration` scales the whole timeline. */
 export type ComposedTransitionParams<
 	Transitions extends Record<string, AnyTransition> = Record<string, AnyTransition>
 > = TransitionParamsCommon & {
-	/** Leaves out the css of subtransitions outside their time. Breaks when two of them set the same property. */
 	optimizeCss?: boolean;
 	composedParams?: { [Name in keyof Transitions]?: Partial<SubtransitionParams<Transitions[Name]>> };
 };
