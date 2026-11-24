@@ -1,11 +1,11 @@
 import { fade, slide, type TransitionConfig } from 'svelte/transition';
 import { cubicOut, sineOut } from 'svelte/easing';
 import { typewriter } from '../../../typewriter';
-import type { AnyTransition, ComposedTransition, SubtransitionDefinitions } from '../compose-transitions-common';
+import type { ComposedTransition, SubtransitionDefinitions, TransitionsByName } from '../compose-transitions-common';
 
-declare function composeTransitions<Transitions extends Record<string, AnyTransition>>(
-	definitions: SubtransitionDefinitions<Transitions>
-): ComposedTransition<Transitions>;
+declare function composeTransitions<TTransitions extends TransitionsByName>(
+	definitions: SubtransitionDefinitions<TTransitions>
+): ComposedTransition<TTransitions>;
 
 declare function highlight(node: Element, params: { color: string }): TransitionConfig;
 
