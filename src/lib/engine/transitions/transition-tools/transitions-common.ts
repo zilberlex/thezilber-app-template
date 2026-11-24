@@ -2,13 +2,19 @@ import { lerp } from '@svelte-ascend/core';
 import { linear } from 'svelte/easing';
 import type { EasingFunction, TransitionConfig } from 'svelte/transition';
 
-export type TransitionParamsCommon = Pick<TransitionConfig, 'delay' | 'duration' | 'easing'> & {
+export type TransitionParamsCommon = {
+	delay?: number;
+	duration?: number;
+	easing?: EasingFunction;
 	reverse?: boolean;
 };
 
+export type TransitionOptions = { direction: 'in' | 'out' | 'both' };
+
 export type Transition<P extends TransitionParamsCommon = TransitionParamsCommon> = (
 	node: Element,
-	params?: P
+	params?: P,
+	options?: TransitionOptions
 ) => TransitionConfig;
 
 export type FilterEffectTransitionParams = TransitionParamsCommon & {

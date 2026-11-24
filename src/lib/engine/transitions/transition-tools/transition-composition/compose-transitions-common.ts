@@ -1,17 +1,13 @@
 import type { TransitionConfig } from 'svelte/transition';
-import type { TransitionParamsCommon } from '../transitions-common';
+import type { Transition, TransitionOptions, TransitionParamsCommon } from '../transitions-common';
 
-export type TransitionOptions = { direction: 'in' | 'out' | 'both' };
+export type TransitionsByName = Record<string, Transition<any>>;
 
-export type AnyTransition = (node: Element, params?: any, options?: TransitionOptions) => TransitionConfig;
+export type TransitionParamsOf<T extends Transition<any>> = NonNullable<Parameters<T>[1]>;
 
-export type TransitionsByName = Record<string, AnyTransition>;
+export type SubtransitionParams<T extends Transition<any>> = TransitionParamsOf<T> & TransitionParamsCommon;
 
-export type TransitionParamsOf<T extends AnyTransition> = NonNullable<Parameters<T>[1]>;
-
-export type SubtransitionParams<T extends AnyTransition> = TransitionParamsOf<T> & TransitionParamsCommon;
-
-export type SubtransitionDefinition<T extends AnyTransition> = { transition: T } & ({} extends TransitionParamsOf<T>
+export type SubtransitionDefinition<T extends Transition<any>> = { transition: T } & ({} extends TransitionParamsOf<T>
 	? { params?: NoInfer<SubtransitionParams<T>> }
 	: { params: NoInfer<SubtransitionParams<T>> });
 
