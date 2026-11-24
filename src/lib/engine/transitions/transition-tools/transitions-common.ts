@@ -2,10 +2,7 @@ import { lerp } from '@svelte-ascend/core';
 import { linear } from 'svelte/easing';
 import type { EasingFunction, TransitionConfig } from 'svelte/transition';
 
-export type TransitionParamsCommon = {
-	delay?: number;
-	duration?: number;
-	easing?: (t: number) => number;
+export type TransitionParamsCommon = Pick<TransitionConfig, 'delay' | 'duration' | 'easing'> & {
 	reverse?: boolean;
 };
 

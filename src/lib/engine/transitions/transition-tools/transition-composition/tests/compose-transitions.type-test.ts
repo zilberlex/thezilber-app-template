@@ -8,10 +8,7 @@ declare function composeTransitions<Transitions extends Record<string, AnyTransi
 	definitions: SubtransitionDefinitions<Transitions>
 ): ComposedTransition<Transitions>;
 
-declare function highlight(
-	node: Element,
-	params: { color: string; delay?: number; duration?: number }
-): TransitionConfig;
+declare function highlight(node: Element, params: { color: string }): TransitionConfig;
 
 declare const node: Element;
 

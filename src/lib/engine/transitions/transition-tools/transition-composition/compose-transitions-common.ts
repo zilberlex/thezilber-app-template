@@ -1,4 +1,4 @@
-import type { EasingFunction, TransitionConfig } from 'svelte/transition';
+import type { TransitionConfig } from 'svelte/transition';
 import type { TransitionParamsCommon } from '../transitions-common';
 
 /** The third argument Svelte passes to a transition. */
@@ -20,16 +20,13 @@ export type SubtransitionDefinitions<Transitions extends Record<string, AnyTrans
 	[Name in keyof Transitions]: SubtransitionDefinition<Transitions[Name]>;
 };
 
+/**
+ * `delay` is added to every subtransition's delay. `duration` scales the whole timeline; without it,
+ * the timeline ends when the last subtransition ends. `reverse` plays the timeline backwards.
+ */
 export type ComposedTransitionParams<
 	Transitions extends Record<string, AnyTransition> = Record<string, AnyTransition>
-> = {
-	/** Added to every subtransition's delay. */
-	delay?: number;
-	/** Scales the whole timeline to this length. Without it, the timeline ends when the last subtransition ends. */
-	duration?: number;
-	easing?: EasingFunction;
-	/** Plays the timeline backwards, so an out transition can be composed as it looks going in. */
-	reverse?: boolean;
+> = TransitionParamsCommon & {
 	/** Leaves out the css of subtransitions outside their time. Breaks when two of them set the same property. */
 	optimizeCss?: boolean;
 	/** Merged, one subtransition at a time, over the params given when composing. */
